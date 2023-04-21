@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(lightning_simulators LANGUAGES CXX)
+
+###############################################################################
+# Determine simulator and include its directory
+###############################################################################
+# Support macros to process simulators
+include("${CMAKE_SOURCE_DIR}/cmake/support_simulators.cmake")
+
+set(PL_BACKEND "lightning_qubit" CACHE STRING "PennyLane Lightning backend")
+
+FIND_AND_ADD_SIMULATOR()
+
+if (BUILD_TESTS)
+    enable_testing()
+endif()

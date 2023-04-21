@@ -86,9 +86,7 @@ template <class T, class Derived> class StateVectorBase {
      *
      * @return The size of the statevector
      */
-    [[nodiscard]] size_t getLength() const {
-        return Util::exp2(num_qubits_);
-    }
+    [[nodiscard]] size_t getLength() const { return Util::exp2(num_qubits_); }
 };
 
 } // namespace Pennylane
