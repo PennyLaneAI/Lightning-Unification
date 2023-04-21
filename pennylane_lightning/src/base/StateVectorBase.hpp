@@ -29,6 +29,8 @@
 #include <complex>
 #include <iostream>
 
+#include "Util.hpp"
+
 namespace Pennylane {
 /**
  * @brief State-vector base class.
@@ -85,7 +87,7 @@ template <class T, class Derived> class StateVectorBase {
      * @return The size of the statevector
      */
     [[nodiscard]] size_t getLength() const {
-        return static_cast<size_t>(1) << num_qubits_;
+        return Util::exp2(num_qubits_);
     }
 };
 

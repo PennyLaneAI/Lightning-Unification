@@ -1,4 +1,4 @@
-// Copyright 2021 Xanadu Quantum Technologies Inc.
+// Copyright 2023 Xanadu Quantum Technologies Inc.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -121,9 +121,9 @@ class LightningException : public std::exception {
  * or `PL_ABORT()` macros, which provide the source location at compile time.
  *
  * @param message string literal describing the error
- * @param file_name source file where error occured
+ * @param file_name source file where error occurred
  * @param line line of source file
- * @param function_name function in which error occured
+ * @param function_name function in which error occurred
  */
 [[noreturn]] inline void Abort(const std::string &message,
                                const char *file_name, int line,
