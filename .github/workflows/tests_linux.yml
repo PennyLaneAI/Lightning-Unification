@@ -44,18 +44,7 @@ jobs:
             cmake --build ./Build --target utils_test_runner
             cd ./Build
             mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
-            echo "ls:"
-            ls
-            echo "ls tests:"
-            ls tests
-            echo "ls tests/results_${{ github.job }}_${{ matrix.pl_backend }}:"
-            ls tests/results_${{ github.job }}_${{ matrix.pl_backend }}
-            echo "for echo:"
-            for file in *runner ; do echo $file; done;
-            echo "for echo 2:"
-            for file in *runner ; do echo /tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
-            echo "ls"
-            for file in *runner ; do ./$file --order lex --reporter junit --out /tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
+            for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
