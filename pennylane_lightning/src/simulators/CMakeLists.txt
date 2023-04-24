@@ -8,8 +8,6 @@ project(lightning_simulators LANGUAGES CXX)
 # Support macros to process simulators
 include("${CMAKE_SOURCE_DIR}/cmake/support_simulators.cmake")
 
-set(PL_BACKEND "lightning_qubit" CACHE STRING "PennyLane Lightning backend")
-
 FIND_AND_ADD_SIMULATOR()
 
 if (BUILD_TESTS)

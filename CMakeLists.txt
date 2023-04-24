@@ -52,6 +52,9 @@ option(ENABLE_PYTHON "Enable compilation of the Python module" ON)
 option(BUILD_TESTS "Build cpp tests" OFF)
 option(BUILD_BENCHMARKS "Enable cpp benchmarks" OFF)
 
+# Backend
+set(PL_BACKEND "lightning_qubit" CACHE STRING "PennyLane Lightning backend")
+
 # Process compile options
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/process_options.cmake")
 
