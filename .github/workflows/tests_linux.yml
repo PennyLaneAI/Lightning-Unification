@@ -16,7 +16,7 @@ jobs:
         os: [ubuntu-22.04]
         pl_backend: ["lightning_qubit"]
 
-    name: C++ tests (Linux) - ${{ pl_backend }}
+    name: C++ tests (Linux) - ${{ matrix.pl_backend }}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -53,18 +53,18 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ PL_BACKEND }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
             cmake --build ./Build
             cd ./Build
-            mkdir -p ./tests/results_${{ github.job }}_${{ PL_BACKEND }}
-            for file in *runner ; do ./$file --order lex --reporter junit --out /tests/results_${{ github.job }}_${{ PL_BACKEND }}/report_$file.xml; done;
+            mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
+            for file in *runner ; do ./$file --order lex --reporter junit --out /tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: ubuntu-tests-reports
-          path: ./Build/tests/results_${{ github.job }}_${{ PL_BACKEND }}/
+          path: ./Build/tests/results_${{ github.job }}_${{ matrix.pl_backend }}/
 
   build_and_cache_Kokkos:
     name: "Build and cache Kokkos and Kokkos Kernels"
@@ -117,18 +117,18 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ PL_BACKEND }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
             cmake --build ./Build
             cd ./Build
-            mkdir -p ./tests/results_${{ github.job }}_${{ PL_BACKEND }}
-            for file in *runner ; do ./$file --order lex --reporter junit --out /tests/results_${{ github.job }}_${{ PL_BACKEND }}/report_$file.xml; done;
+            mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
+            for file in *runner ; do ./$file --order lex --reporter junit --out /tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: ubuntu-tests-reports
-          path: ./Build/tests/results_${{ github.job }}_${{ PL_BACKEND }}
+          path: ./Build/tests/results_${{ github.job }}_${{ matrix.pl_backend }}
 
   # cpptestswithOpenBLAS:
   #   strategy:
