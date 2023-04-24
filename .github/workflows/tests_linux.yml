@@ -41,11 +41,14 @@ jobs:
       - name: Build and run unit tests
         run: |
             cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
-            cmake --build ./Build
+            cmake --build ./Build --target utils_test_runner
             cd ./Build
             mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
+            echo "ls:"
             ls
+            echo "ls tests:"
             ls tests
+            echo "for:"
             for file in *runner ; do ./$file --order lex --reporter junit --out /tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
 
       - name: Upload test results
