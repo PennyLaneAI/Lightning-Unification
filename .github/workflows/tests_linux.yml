@@ -50,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: ubuntu-tests-reports/${{ github.job }}_${{ matrix.pl_backend }}
+          name: ubuntu-tests-reports-${{ github.job }}_${{ matrix.pl_backend }}
           path: ./Build/tests/results_${{ github.job }}_${{ matrix.pl_backend }}/
 
   build_and_cache_Kokkos:
@@ -114,7 +114,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: ubuntu-tests-reports/${{ github.job }}_${{ matrix.pl_backend }}
+          name: ubuntu-tests-reports-${{ github.job }}_${{ matrix.pl_backend }}
           path: ./Build/tests/results_${{ github.job }}_${{ matrix.pl_backend }}
 
   # # cpptestswithOpenBLAS:
