@@ -51,7 +51,8 @@ jobs:
             echo "ls tests/results_${{ github.job }}_${{ matrix.pl_backend }}:"
             ls tests/results_${{ github.job }}_${{ matrix.pl_backend }}
             echo "for:"
-            for file in *runner ; do ./$file --order lex --reporter junit --out /tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
+            for file in *runner ; do echo $file; done;
+            # for file in *runner ; do ./$file --order lex --reporter junit --out /tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
