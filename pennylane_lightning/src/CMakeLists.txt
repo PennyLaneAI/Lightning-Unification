@@ -5,11 +5,12 @@ project(lightning_components LANGUAGES CXX)
 ###############################################################################
 # Include all nested sources directories
 ###############################################################################
-set(COMPONENT_SUBDIRS      base
-                           executor
-                           measurements
-                           simulators
-                           utils
+set(COMPONENT_SUBDIRS   algorithms
+                        base
+                        executor
+                        measurements
+                        simulators
+                        utils
 )
 foreach(COMP ${COMPONENT_SUBDIRS})
     add_subdirectory(${COMP})
