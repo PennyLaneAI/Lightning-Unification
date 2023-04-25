@@ -142,7 +142,7 @@ class StateVectorLKokkos
 
     StateVectorLKokkos() = delete;
     StateVectorLKokkos(size_t num_qubits,
-                       const Kokkos::InitArguments &kokkos_args = {})
+                       const Kokkos::InitializationSettings &kokkos_args = {})
         : BaseType{num_qubits}, length_(Util::exp2(num_qubits)) {
         {
             const std::lock_guard<std::mutex> lock(init_mutex_);
@@ -164,7 +164,7 @@ class StateVectorLKokkos
      * @param num_qubits Number of qubits
      */
     StateVectorLKokkos(std::complex<PrecisionT> *hostdata_, size_t length,
-                       const Kokkos::InitArguments &kokkos_args = {})
+                       const Kokkos::InitializationSettings &kokkos_args = {})
         : StateVectorLKokkos(Util::log2PerfectPower(length), kokkos_args) {
         // check if length is a power of 2.
         if (!Util::isPerfectPowerOf2(length)) {
@@ -183,7 +183,7 @@ class StateVectorLKokkos
      * @param other Another Kokkos state vector
      */
     StateVectorLKokkos(const StateVectorLKokkos &other,
-                       const Kokkos::InitArguments &kokkos_args = {})
+                       const Kokkos::InitializationSettings &kokkos_args = {})
         : StateVectorLKokkos(other.getNumQubits(), kokkos_args) {
         this->DeviceToDevice(other.getData());
     }
