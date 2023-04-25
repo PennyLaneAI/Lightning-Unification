@@ -17,11 +17,9 @@ Test something.
 
 import numpy as np
 
+
 class TestSomething:
-    """ --- """
+    """---"""
 
-    def test_one_qubit_circuit(
-        self
-    ):
-
+    def test_one_qubit_circuit(self):
         assert 1 == 1
