@@ -1,0 +1,7 @@
+ninja
+flaky
+pybind11
+pytest
+pytest-cov
+pytest-mock
+black>=21
