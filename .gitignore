@@ -1,4 +1,6 @@
 venv/
+kokkos/
+kokkosKernels/
 prototypes/
 doc/_build/
 # PennyLane_Lightning.egg-info/
