@@ -30,6 +30,11 @@ clean:
 	rm -rf Build BuildTests BuildTidy BuildGBench
 	rm -rf pennylane_lightning/lightning_qubit_ops*
 
+test-builtin:
+	$(PYTHON) -I $(TESTRUNNER)
+
+test-python: test-builtin
+
 build:
 	rm -rf ./Build
 	cmake -BBuild -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
