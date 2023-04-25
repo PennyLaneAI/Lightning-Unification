@@ -141,13 +141,12 @@ class StateVectorLKokkos
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
     StateVectorLKokkos() = delete;
-    StateVectorLKokkos(size_t num_qubits,
-                       const Kokkos::InitArguments &kokkos_args = {})
+    StateVectorLKokkos(size_t num_qubits)
         : BaseType{num_qubits}, length_(Util::exp2(num_qubits)) {
         {
             const std::lock_guard<std::mutex> lock(init_mutex_);
             if (!Kokkos::is_initialized()) {
-                Kokkos::initialize(kokkos_args);
+                Kokkos::initialize();
             }
         }
 
@@ -163,9 +162,8 @@ class StateVectorLKokkos
      *
      * @param num_qubits Number of qubits
      */
-    StateVectorLKokkos(std::complex<PrecisionT> *hostdata_, size_t length,
-                       const Kokkos::InitArguments &kokkos_args = {})
-        : StateVectorLKokkos(Util::log2PerfectPower(length), kokkos_args) {
+    StateVectorLKokkos(std::complex<PrecisionT> *hostdata_, size_t length)
+        : StateVectorLKokkos(Util::log2PerfectPower(length)) {
         // check if length is a power of 2.
         if (!Util::isPerfectPowerOf2(length)) {
             PL_ABORT(
@@ -182,9 +180,8 @@ class StateVectorLKokkos
      *
      * @param other Another Kokkos state vector
      */
-    StateVectorLKokkos(const StateVectorLKokkos &other,
-                       const Kokkos::InitArguments &kokkos_args = {})
-        : StateVectorLKokkos(other.getNumQubits(), kokkos_args) {
+    StateVectorLKokkos(const StateVectorLKokkos &other)
+        : StateVectorLKokkos(other.getNumQubits()) {
         this->DeviceToDevice(other.getData());
     }
 
