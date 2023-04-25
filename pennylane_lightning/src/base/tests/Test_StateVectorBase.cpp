@@ -23,8 +23,8 @@ using namespace Pennylane;
 
 TEMPLATE_PRODUCT_TEST_CASE("Base::StateVectorBase", "[StateVectorBase]",
                            (StateVectorBackend), (float, double)) {
-    using StateVectorT = TestType::StateVector;
-    using PrecisionT = TestType::Precision;
+    using StateVectorT = typename TestType::StateVector;
+    using PrecisionT = typename TestType::Precision;
     using ComplexType = std::complex<PrecisionT>;
 
     SECTION("Testing StateVectorBase methods") {
