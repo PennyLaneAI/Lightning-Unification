@@ -20,7 +20,7 @@
 #include <complex>
 
 #include "BitUtil.hpp" // log2PerfectPower, isPerfectPowerOf2
-#include "Error.hpp" // PL_ABORT
+#include "Error.hpp"   // PL_ABORT
 #include "StateVectorBase.hpp"
 
 namespace Pennylane {

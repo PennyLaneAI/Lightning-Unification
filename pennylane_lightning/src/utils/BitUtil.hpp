@@ -17,7 +17,7 @@
  * Defines utility functions for Bitwise operations.
  */
 #pragma once
-#include <bit> // countr_zero, popcount, has_single_bit
+#include <bit>     // countr_zero, popcount, has_single_bit
 #include <cstddef> // size_t
 
 namespace Pennylane::Util {
