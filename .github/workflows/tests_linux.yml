@@ -16,7 +16,7 @@ jobs:
         os: [ubuntu-22.04]
         pl_backend: ["lightning_qubit"]
 
-    name: C++ tests (Linux) - ${{ matrix.pl_backend }}
+    name: C++ tests
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -59,7 +59,7 @@ jobs:
         os: [ubuntu-22.04]
         pl_backend: ["lightning_qubit"]
 
-    name: C++ tests (Linux, OpenBLAS)
+    name: C++ tests (OpenBLAS)
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -111,7 +111,7 @@ jobs:
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
         PL_BACKEND: ["lightning_qubit", "lightning_kokkos"]
 
-    name: C++ tests (Linux and Kokkos)
+    name: C++ tests (Kokkos)
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -169,7 +169,7 @@ jobs:
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
         pl_backend: ["lightning_qubit"]
 
-    name: C++ tests (Linux, OpenBLAS, Kokkos and Kokkos Kernels)
+    name: C++ tests (OpenBLAS, Kokkos and Kokkos Kernels)
     runs-on: ${{ matrix.os }}
 
     steps:
