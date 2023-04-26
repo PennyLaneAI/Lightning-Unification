@@ -18,10 +18,9 @@
 
 #pragma once
 #include <complex>
-#include <iostream>
 
 #include "BitUtil.hpp" // log2PerfectPower, isPerfectPowerOf2
-#include "Error.hpp"
+#include "Error.hpp" // PL_ABORT
 #include "StateVectorBase.hpp"
 
 namespace Pennylane {

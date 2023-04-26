@@ -18,8 +18,11 @@
  */
 #pragma once
 
-#include <cstddef>
-#include <type_traits>
+#include <type_traits> // is_same_v
+
+#if __cpp_lib_math_constants >= 201907L
+#include <numbers> // sqrt2_v
+#endif
 
 namespace Pennylane::Util {
 

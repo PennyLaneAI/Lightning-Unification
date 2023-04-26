@@ -27,9 +27,8 @@
 /// @endcond
 
 #include <complex>
-#include <iostream>
 
-#include "Util.hpp"
+#include "Util.hpp" // exp2
 
 namespace Pennylane {
 /**
