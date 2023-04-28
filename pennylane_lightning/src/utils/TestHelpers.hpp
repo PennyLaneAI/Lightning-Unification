@@ -22,15 +22,10 @@
 namespace Pennylane {
 
 #define PL_REQUIRE_THROWS_MATCHES(expr, type, message_match)                   \
-    do {                                                                       \
-        REQUIRE_THROWS_AS(expr, type);                                         \
-        REQUIRE_THROWS_WITH(expr, Catch::Matchers::Contains(message_match));   \
-    } while (false);
-
+    REQUIRE_THROWS_AS(expr, type);                                             \
+    REQUIRE_THROWS_WITH(expr, Catch::Matchers::Contains(message_match));
 #define PL_CHECK_THROWS_MATCHES(expr, type, message_match)                     \
-    do {                                                                       \
-        CHECK_THROWS_AS(expr, type);                                           \
-        CHECK_THROWS_WITH(expr, Catch::Matchers::Contains(message_match));     \
-    } while (false);
+    CHECK_THROWS_AS(expr, type);                                               \
+    CHECK_THROWS_WITH(expr, Catch::Matchers::Contains(message_match));
 
 } // namespace Pennylane

@@ -39,10 +39,6 @@ inline auto constexpr log2PerfectPower(size_t val) -> size_t {
  * @return false
  */
 inline auto constexpr isPerfectPowerOf2(size_t value) -> bool {
-#if __cpp_lib_int_pow2 >= 202002L
     return std::has_single_bit(value);
-#else
-    return std::popcount(value) == 1;
-#endif
 }
 } // namespace Pennylane::Util

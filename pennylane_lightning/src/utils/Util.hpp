@@ -18,11 +18,8 @@
  */
 #pragma once
 
+#include <numbers>     // sqrt2_v
 #include <type_traits> // is_same_v
-
-#if __cpp_lib_math_constants >= 201907L
-#include <numbers> // sqrt2_v
-#endif
 
 namespace Pennylane::Util {
 
@@ -33,15 +30,7 @@ namespace Pennylane::Util {
  * @return constexpr T sqrt(2)
  */
 template <class T> inline static constexpr auto SQRT2() -> T {
-#if __cpp_lib_math_constants >= 201907L
     return std::numbers::sqrt2_v<T>;
-#else
-    if constexpr (std::is_same_v<T, float>) {
-        return 0x1.6a09e6p+0F; // NOLINT: To be replaced in C++20
-    } else {
-        return 0x1.6a09e667f3bcdp+0; // NOLINT: To be replaced in C++20
-    }
-#endif
 }
 
 /**
