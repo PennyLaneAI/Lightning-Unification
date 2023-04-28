@@ -1,32 +1,34 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
+venv/
+kokkos/
+kokkosKernels/
+prototypes/
+doc/_build/
+PennyLane_Lightning.egg-info/
+build/
+Build/
+BuildCov/
+BuildGBench/
+BuildTests/
+BuildTidy/
+dist/
+tests/__pycache__/
+.idea
+*.ipynp
+*.ipynb_checkpoints
+__pycache__
+.pytest_cache/
+coverage_html_report/
+.coverage
+doc/code/
 *.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+cpptests
+*.o
+.DS_Store
+.cache/*
+.vscode/
+.ycm_extra_conf.py
+/.vs
+/pennylane_lightning/.vs
+/pennylane_lightning/*.pyd
+/pennylane_lightning/src/Kokkos/
+/pennylane_lightning/src/GBenchmarks/
