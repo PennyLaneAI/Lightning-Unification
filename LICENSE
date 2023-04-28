@@ -208,5 +208,3 @@ licenses. This section summarizes those components and their licenses.
 The MIT License (MIT)
 ---------------------
 
-.github/workflows/benchmarks/run_bench.py
-.github/workflows/benchmarks/plot_results.py
