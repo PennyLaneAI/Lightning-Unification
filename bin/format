@@ -3,10 +3,9 @@
 import argparse
 import json
 import re
-# import shutil
 import subprocess
 import sys
-from utils import get_cpp_files
+from cpp_files import get_cpp_files
 
 CLANG_FMT_BIN = "clang-format"
 CLANG_FMT_STYLE_CFG = {
