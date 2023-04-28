@@ -11,7 +11,7 @@ template <typename T> struct StateVectorBackend {
     using StateVector = Pennylane::StateVectorLQubit<T>;
     using Precision = T;
 };
-#elif true //_ENABLE_PLKOKKOS
+#elif defined(_ENABLE_PLKOKKOS)
 #include "StateVectorLKokkos.hpp"
 template <typename T> struct StateVectorBackend {
     using StateVector = Pennylane::StateVectorLKokkos<T>;
