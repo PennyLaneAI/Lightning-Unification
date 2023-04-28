@@ -7,7 +7,7 @@ set(LOGO [=[
 ]=])
 message(${LOGO})
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "11" CACHE STRING "Minimum OS X deployment version")
 
 set(CMAKE_CXX_STANDARD 20) # At least C++20 is required
 
