@@ -62,6 +62,17 @@ target_link_libraries(lightning_qubit PRIVATE   lightning_compile_options
 target_include_directories(lightning_qubit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_property(TARGET lightning_qubit PROPERTY POSITION_INDEPENDENT_CODE ON)
 
+###############################################################################
+# Include subdirectories
+###############################################################################
+set(COMPONENT_SUBDIRS   gates;
+                        utils;
+                        )
+
+foreach(COMP ${COMPONENT_SUBDIRS})
+    add_subdirectory(${COMP})
+endforeach()
+
 if (BUILD_TESTS)
     enable_testing()
     add_subdirectory("tests")
