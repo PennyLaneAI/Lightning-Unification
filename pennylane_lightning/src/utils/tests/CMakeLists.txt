@@ -26,8 +26,10 @@ target_sources(utils_tests INTERFACE runner_utils.cpp)
 ################################################################################
 # Define targets
 ################################################################################
-set(TEST_SOURCES    Test_Utils.cpp
-                    Test_BitUtils.cpp
+set(TEST_SOURCES    Test_Util.cpp
+                    Test_BitUtil.cpp
+                    Test_Error.cpp
+                    Test_TypeTraits.cpp
                     )
 
 add_executable(utils_test_runner ${TEST_SOURCES})

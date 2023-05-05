@@ -18,6 +18,7 @@
  */
 #pragma once
 #include <bit>     // countr_zero, popcount, has_single_bit
+#include <climits> // CHAR_BIT
 #include <cstddef> // size_t
 
 namespace Pennylane::Util {
@@ -41,4 +42,45 @@ inline auto constexpr log2PerfectPower(size_t val) -> size_t {
 inline auto constexpr isPerfectPowerOf2(size_t value) -> bool {
     return std::has_single_bit(value);
 }
+
+/**
+ * @brief Fill ones from LSB to nbits. Runnable in a compile-time and for any
+ * integer type.
+ *
+ * @tparam IntegerType Integer type to use
+ * @param nbits Number of bits to fill
+ */
+template <class IntegerType = size_t>
+inline auto constexpr fillTrailingOnes(size_t nbits) -> IntegerType {
+    static_assert(std::is_integral_v<IntegerType> &&
+                  std::is_unsigned_v<IntegerType>);
+
+    return (nbits == 0) ? 0
+                        : static_cast<IntegerType>(~IntegerType(0)) >>
+                              static_cast<IntegerType>(
+                                  CHAR_BIT * sizeof(IntegerType) - nbits);
+}
+/**
+ * @brief Fill ones from MSB to pos
+ *
+ * @tparam IntegerType Integer type to use
+ * @param pos Position up to which bit one is filled.
+ */
+template <class IntegerType = size_t>
+inline auto constexpr fillLeadingOnes(size_t pos) -> size_t {
+    static_assert(std::is_integral_v<IntegerType> &&
+                  std::is_unsigned_v<IntegerType>);
+
+    return (~IntegerType{0}) << pos;
+}
+
+/**
+ * @brief Swap bits in i-th and j-th position in place
+ */
+inline auto constexpr bitswap(size_t bits, const size_t i, const size_t j)
+    -> size_t {
+    size_t x = ((bits >> i) ^ (bits >> j)) & 1U;
+    return bits ^ ((x << i) | (x << j));
+}
+
 } // namespace Pennylane::Util
