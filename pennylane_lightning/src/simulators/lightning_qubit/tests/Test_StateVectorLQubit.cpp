@@ -14,21 +14,21 @@ TEMPLATE_TEST_CASE("LightningQubit::StateVectorLQubit::changeDataPtr",
     using ComplexType = std::complex<TestType>;
 
     SECTION("changeDataPtr correctly update data") {
-        std::vector<ComplexType> st_data(1 << 4);
+        std::vector<ComplexType> st_data(1U << 4U);
         std::iota(st_data.begin(), st_data.end(), 0);
         StateVectorLQubit<PrecisionT> sv(st_data.data(), st_data.size());
 
-        std::vector<ComplexType> st_data2(1 << 8);
+        std::vector<ComplexType> st_data2(1U << 8U);
         std::iota(st_data2.begin(), st_data2.end(), 1);
         sv.changeDataPtr(st_data2.data(), st_data2.size());
 
-        REQUIRE(sv.getNumQubits() == 8);
+        REQUIRE(sv.getNumQubits() == 8U);
         REQUIRE(sv.getData() == st_data2.data());
         REQUIRE(sv.getLength() == (1U << 8U));
     }
 
     SECTION("changeDataPtr throws an exception when the data is incorrect") {
-        std::vector<ComplexType> st_data(1 << 4);
+        std::vector<ComplexType> st_data(1U << 4U);
         std::iota(st_data.begin(), st_data.end(), 0);
         StateVectorLQubit<PrecisionT> sv(st_data.data(), st_data.size());
 
@@ -46,10 +46,10 @@ TEMPLATE_TEST_CASE("LightningQubit::StateVectorLQubit::setDataFrom",
     using ComplexType = std::complex<TestType>;
 
     SECTION("setDataFrom correctly update data") {
-        std::vector<ComplexType> st_data1(1 << 4);
+        std::vector<ComplexType> st_data1(1U << 4U);
         std::iota(st_data1.begin(), st_data1.end(), 0);
 
-        std::vector<ComplexType> st_data2(1 << 4);
+        std::vector<ComplexType> st_data2(1U << 4U);
         std::iota(st_data2.begin(), st_data2.end(), 10);
 
         StateVectorLQubit<PrecisionT> sv(st_data1.data(), st_data1.size());
@@ -60,10 +60,10 @@ TEMPLATE_TEST_CASE("LightningQubit::StateVectorLQubit::setDataFrom",
     }
 
     SECTION("setDataFrom throws an exception when the data is incorrect") {
-        std::vector<ComplexType> st_data1(1 << 4);
+        std::vector<ComplexType> st_data1(1U << 4U);
         std::iota(st_data1.begin(), st_data1.end(), 0);
 
-        std::vector<ComplexType> st_data2(1 << 8);
+        std::vector<ComplexType> st_data2(1U << 8U);
         std::iota(st_data2.begin(), st_data2.end(), 10);
 
         StateVectorLQubit<PrecisionT> sv(st_data1.data(), st_data1.size());

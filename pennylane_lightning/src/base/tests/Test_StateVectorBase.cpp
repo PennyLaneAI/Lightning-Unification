@@ -28,13 +28,13 @@ TEMPLATE_PRODUCT_TEST_CASE("Base::StateVectorBase", "[StateVectorBase]",
     using ComplexType = std::complex<PrecisionT>;
 
     SECTION("Testing StateVectorBase methods") {
-        const size_t num_qubits = 4;
+        const size_t size_vector = 1U << 4U;
 
-        std::vector<ComplexType> st_data1(1 << num_qubits);
+        std::vector<ComplexType> st_data1(size_vector);
         std::iota(st_data1.begin(), st_data1.end(), 0);
         StateVectorT sv1(st_data1.data(), st_data1.size());
 
-        std::vector<ComplexType> st_data2(1 << num_qubits);
+        std::vector<ComplexType> st_data2(size_vector);
         std::iota(st_data2.begin(), st_data2.end(), 0);
         StateVectorT sv2(st_data2.data(), st_data2.size());
 
