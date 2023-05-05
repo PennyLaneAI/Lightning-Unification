@@ -27,6 +27,8 @@
 /// @endcond
 
 #include <complex>
+#include <string>
+#include <vector>
 
 #include "Util.hpp" // exp2
 
@@ -43,18 +45,16 @@ namespace Pennylane {
  * @tparam T Floating point precision of underlying statevector data.
  * @tparam Derived Type of a derived class
  */
-template <class T, class Derived> class StateVectorBase {
-  public:
-    /**
-     * @brief StateVector complex precision type.
-     */
-    using PrecisionT = T;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
-
+template <class PrecisionT, class Derived> class StateVectorBase {
   private:
     size_t num_qubits_{0};
 
   public:
+    /**
+     * @brief StateVector complex precision type.
+     */
+    using ComplexPrecisionT = std::complex<PrecisionT>;
+
     /**
      * @brief Constructor used by derived classes.
      *
@@ -70,7 +70,6 @@ template <class T, class Derived> class StateVectorBase {
      */
     void setNumQubits(size_t qubits) { num_qubits_ = qubits; }
 
-  public:
     /**
      * @brief Get the number of qubits represented by the statevector data.
      *
@@ -79,13 +78,6 @@ template <class T, class Derived> class StateVectorBase {
     [[nodiscard]] auto getNumQubits() const -> std::size_t {
         return num_qubits_;
     }
-
-    /**
-     * @brief Get the size of the statevector
-     *
-     * @return The size of the statevector
-     */
-    [[nodiscard]] size_t getLength() const { return Util::exp2(num_qubits_); }
 };
 
 } // namespace Pennylane
