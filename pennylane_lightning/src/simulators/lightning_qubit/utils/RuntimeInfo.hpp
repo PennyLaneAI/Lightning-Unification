@@ -18,7 +18,7 @@
 #pragma once
 #include <bitset>
 
-namespace Pennylane::Util {
+namespace Pennylane::Lightning_Qubit::Util {
 /**
  * @brief This class is only usable in x86 or x86_64 architecture.
  */
@@ -64,4 +64,4 @@ class RuntimeInfo {
     }
     static const std::string &brand() { return getInternalRuntimeInfo().brand; }
 };
-} // namespace Pennylane::Util
+} // namespace Pennylane::Lightning_Qubit::Util

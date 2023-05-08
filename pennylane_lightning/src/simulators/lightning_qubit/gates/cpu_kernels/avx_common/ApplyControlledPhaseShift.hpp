@@ -24,7 +24,7 @@
 
 #include <complex>
 
-namespace Pennylane::Gates::AVXCommon {
+namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
 
 template <typename PrecisionT, size_t packed_size>
 struct ApplyControlledPhaseShift {
@@ -230,4 +230,4 @@ struct ApplyControlledPhaseShift {
         }
     }
 };
-} // namespace Pennylane::Gates::AVXCommon
+} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon

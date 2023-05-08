@@ -24,7 +24,7 @@
 #include <memory>
 
 // LCOV_EXCL_START
-namespace Pennylane {
+namespace Pennylane::Lightning_Qubit::Util {
 
 /**
  * @brief Enum class for defining CPU memory alignments
@@ -62,7 +62,6 @@ inline auto getMemoryModel(const void *ptr) -> CPUMemoryModel {
  * @return CPUMemoryModel
  */
 inline auto bestCPUMemoryModel() -> CPUMemoryModel {
-    using namespace Util::Constant;
     constexpr static bool is_unix =
         (operating_system == OperatingSystem::MacOS) ||
         (operating_system == OperatingSystem::Linux);
@@ -111,5 +110,5 @@ template <class T>
 constexpr auto getBestAllocator() -> Util::AlignedAllocator<T> {
     return getAllocator<T>(bestCPUMemoryModel());
 }
-} // namespace Pennylane
+} // namespace Pennylane::Lightning_Qubit::Util
 // LCOV_EXCL_STOP

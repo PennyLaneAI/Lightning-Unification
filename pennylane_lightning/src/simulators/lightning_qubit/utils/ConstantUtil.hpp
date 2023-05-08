@@ -31,7 +31,7 @@
 #include <version>
 #endif
 
-namespace Pennylane::Util {
+namespace Pennylane::Lightning_Qubit::Util {
 /**
  * @brief Lookup key in array of pairs. For a constexpr map-like behavior.
  *
@@ -148,4 +148,4 @@ constexpr auto reverse_pairs(const std::array<std::pair<T, U>, size> &arr)
                                           std::make_index_sequence<size>{});
 }
 
-} // namespace Pennylane::Util
+} // namespace Pennylane::Lightning_Qubit::Util

@@ -1,3 +1,4 @@
+#include "ConstantUtil.hpp"      // array_has_elt
 #include "LQubitTestHelpers.hpp" // PrecisionToName
 #include "LinearAlgebra.hpp"     // randomUnitary
 #include "TestHelpers.hpp"
@@ -5,8 +6,8 @@
 
 #include <catch2/catch.hpp>
 
-using namespace Pennylane;
-using Pennylane::Util::randomUnitary;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Util;
 
 template <typename PrecisionT, class GateImplementation>
 void testApplySingleQubitOp() {
@@ -757,19 +758,16 @@ void testApplyMatrixForKernels() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using GateImplementation = typename TypeList::Type;
 
-        if constexpr (Util::array_has_elt(
-                          GateImplementation::implemented_matrices,
-                          MatrixOperation::SingleQubitOp)) {
+        if constexpr (array_has_elt(GateImplementation::implemented_matrices,
+                                    MatrixOperation::SingleQubitOp)) {
             testApplySingleQubitOp<PrecisionT, GateImplementation>();
         }
-        if constexpr (Util::array_has_elt(
-                          GateImplementation::implemented_matrices,
-                          MatrixOperation::TwoQubitOp)) {
+        if constexpr (array_has_elt(GateImplementation::implemented_matrices,
+                                    MatrixOperation::TwoQubitOp)) {
             testApplyTwoQubitOp<PrecisionT, GateImplementation>();
         }
-        if constexpr (Util::array_has_elt(
-                          GateImplementation::implemented_matrices,
-                          MatrixOperation::MultiQubitOp)) {
+        if constexpr (array_has_elt(GateImplementation::implemented_matrices,
+                                    MatrixOperation::MultiQubitOp)) {
             testApplyMultiQubitOp<PrecisionT, GateImplementation>();
         }
         testApplyMatrixForKernels<PrecisionT, typename TypeList::Next>();
@@ -962,19 +960,16 @@ void testApplyMatrixInverseForKernels() {
     using Gates::MatrixOperation;
     if constexpr (!std::is_same_v<TypeList, void>) {
         using GateImplementation = typename TypeList::Type;
-        if constexpr (Util::array_has_elt(
-                          GateImplementation::implemented_matrices,
-                          MatrixOperation::SingleQubitOp)) {
+        if constexpr (array_has_elt(GateImplementation::implemented_matrices,
+                                    MatrixOperation::SingleQubitOp)) {
             testApplySingleQubitOpInverse<PrecisionT, GateImplementation>();
         }
-        if constexpr (Util::array_has_elt(
-                          GateImplementation::implemented_matrices,
-                          MatrixOperation::TwoQubitOp)) {
+        if constexpr (array_has_elt(GateImplementation::implemented_matrices,
+                                    MatrixOperation::TwoQubitOp)) {
             testApplyTwoQubitOpInverse<PrecisionT, GateImplementation>();
         }
-        if constexpr (Util::array_has_elt(
-                          GateImplementation::implemented_matrices,
-                          MatrixOperation::MultiQubitOp)) {
+        if constexpr (array_has_elt(GateImplementation::implemented_matrices,
+                                    MatrixOperation::MultiQubitOp)) {
             testApplyMultiQubitOpInverse<PrecisionT, GateImplementation>();
         }
         testApplyMatrixInverseForKernels<PrecisionT, typename TypeList::Next>();

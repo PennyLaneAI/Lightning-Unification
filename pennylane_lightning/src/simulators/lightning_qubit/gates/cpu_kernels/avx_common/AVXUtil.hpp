@@ -16,19 +16,21 @@
  * Defines common utility functions for all AVX
  */
 #pragma once
-#include "BitUtil.hpp"
+#include "BitUtil.hpp" // fillTrailingOnes, fillLeadingOnes, log2PerfectPower
 #include "Error.hpp"
 #include "Macros.hpp"
-#include "Util.hpp"
+#include "Util.hpp" // exp2, INVSQRT2
 
 #include <immintrin.h>
 
 #include <cstdlib>
 
-namespace Pennylane::Gates::AVXCommon {
+namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
 using Pennylane::Util::exp2;
 using Pennylane::Util::fillLeadingOnes;
 using Pennylane::Util::fillTrailingOnes;
+using Pennylane::Util::INVSQRT2;
+using Pennylane::Util::log2PerfectPower;
 
 template <typename PrecisionT, size_t packed_size> struct AVXIntrinsic {
     static_assert((sizeof(PrecisionT) * packed_size == 32) ||
@@ -207,7 +209,7 @@ constexpr auto set1(PrecisionT val) {
 }
 
 template <size_t packed_size> struct InternalWires {
-    constexpr static auto value = Util::log2PerfectPower(packed_size / 2);
+    constexpr static auto value = log2PerfectPower(packed_size / 2);
 };
 template <size_t packed_size>
 constexpr auto internal_wires_v = InternalWires<packed_size>::value;
@@ -328,4 +330,4 @@ auto setValueOneTwo(Func &&func) -> AVXIntrinsicType<PrecisionT, packed_size> {
     }
     return setValue(data);
 }
-} // namespace Pennylane::Gates::AVXCommon
+} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon

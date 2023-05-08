@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+
 #include "CPUMemoryModel.hpp"
 
-namespace Pennylane::KernelMap::Internal {
+using namespace Pennylane::Lightning_Qubit::Util;
+
+namespace Pennylane::Lightning_Qubit::KernelMap::Internal {
 void assignKernelsForGateOp_AVX512(CPUMemoryModel);
 void assignKernelsForGeneratorOp_AVX512(CPUMemoryModel);
 void assignKernelsForMatrixOp_AVX512(CPUMemoryModel);
-} // namespace Pennylane::KernelMap::Internal
+} // namespace Pennylane::Lightning_Qubit::KernelMap::Internal

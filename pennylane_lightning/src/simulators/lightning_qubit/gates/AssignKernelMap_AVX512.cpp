@@ -16,8 +16,8 @@
 #include "GateOperation.hpp"
 #include "KernelType.hpp"
 
-using namespace Pennylane;
-using namespace Pennylane::KernelMap;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::KernelMap;
 
 using Gates::GateOperation;
 using Gates::GeneratorOperation;
@@ -30,7 +30,7 @@ using Util::larger_than_equal_to;
 using Util::less_than;
 using Util::less_than_equal_to;
 
-namespace Pennylane::KernelMap::Internal {
+namespace Pennylane::Lightning_Qubit::KernelMap::Internal {
 
 constexpr static auto leq_four = Util::larger_than_equal_to<size_t>(4);
 
@@ -99,4 +99,4 @@ void assignKernelsForMatrixOp_AVX512(CPUMemoryModel memory_model) {
     instance.assignKernelForOp(MatrixOperation::SingleQubitOp, all_threading,
                                memory_model, leq_four, KernelType::AVX512);
 }
-} // namespace Pennylane::KernelMap::Internal
+} // namespace Pennylane::Lightning_Qubit::KernelMap::Internal

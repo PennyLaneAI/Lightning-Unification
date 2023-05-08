@@ -22,10 +22,10 @@
 #include "cpu_kernels/GateImplementationsLM.hpp"
 #include "cpu_kernels/GateImplementationsPI.hpp"
 
-namespace Pennylane::Internal {
+namespace Pennylane::Lightning_Qubit::Internal {
 
 int registerAllAvailableKernels_Float() {
-    using Pennylane::Util::RuntimeInfo;
+    using Pennylane::Lightning_Qubit::Util::RuntimeInfo;
     registerKernel<float, float, Gates::GateImplementationsLM>();
     registerKernel<float, float, Gates::GateImplementationsPI>();
 
@@ -39,7 +39,7 @@ int registerAllAvailableKernels_Float() {
 }
 
 int registerAllAvailableKernels_Double() {
-    using Pennylane::Util::RuntimeInfo;
+    using Pennylane::Lightning_Qubit::Util::RuntimeInfo;
     registerKernel<double, double, Gates::GateImplementationsLM>();
     registerKernel<double, double, Gates::GateImplementationsPI>();
 
@@ -51,4 +51,4 @@ int registerAllAvailableKernels_Double() {
     }
     return 1;
 }
-} // namespace Pennylane::Internal
+} // namespace Pennylane::Lightning_Qubit::Internal

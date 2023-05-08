@@ -14,12 +14,12 @@
 
 /**
  * @file
- * Defines helper methods for PennyLane Lightning.
+ * Defines helper methods for PennyLane Lightning Simulator.
  */
 
 #include "CPUMemoryModel.hpp" // getBestAllocator
 #include "Constant.hpp"
-#include "ConstantUtil.hpp"
+#include "ConstantUtil.hpp" // array_has_elt, lookup
 #include "Error.hpp"
 #include "GateOperation.hpp"
 #include "LinearAlgebra.hpp"
@@ -38,7 +38,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace Pennylane {
+namespace Pennylane::Lightning_Qubit::Util {
 
 template <typename T>
 using TestVector = std::vector<T, Util::AlignedAllocator<T>>;
@@ -175,13 +175,12 @@ auto createProductState(std::string_view str)
 
 inline auto createWires(Gates::GateOperation op, size_t num_qubits)
     -> std::vector<size_t> {
-    if (Pennylane::Util::array_has_elt(Gates::Constant::multi_qubit_gates,
-                                       op)) {
+    if (array_has_elt(Gates::Constant::multi_qubit_gates, op)) {
         std::vector<size_t> wires(num_qubits);
         std::iota(wires.begin(), wires.end(), 0);
         return wires;
     }
-    switch (Pennylane::Util::lookup(Gates::Constant::gate_wires, op)) {
+    switch (lookup(Gates::Constant::gate_wires, op)) {
     case 1:
         return {0};
     case 2:
@@ -198,7 +197,7 @@ inline auto createWires(Gates::GateOperation op, size_t num_qubits)
 
 template <class PrecisionT>
 auto createParams(Gates::GateOperation op) -> std::vector<PrecisionT> {
-    switch (Pennylane::Util::lookup(Gates::Constant::gate_num_params, op)) {
+    switch (lookup(Gates::Constant::gate_num_params, op)) {
     case 0:
         return {};
     case 1:
@@ -278,4 +277,4 @@ template <> struct PrecisionToName<double> {
     constexpr static auto value = "double";
 };
 
-} // namespace Pennylane
+} // namespace Pennylane::Lightning_Qubit::Util

@@ -1,15 +1,20 @@
 #include "Constant.hpp"
 #include "ConstantUtil.hpp"
+#include "Error.hpp"           // LightningException
+#include "IntegerInterval.hpp" // IntegerInterval, full_domain
 #include "KernelMap.hpp"
 #include "TestHelpers.hpp"
-#include "Util.hpp"
+#include "Util.hpp" // for_each_enum
 
 #include <catch2/catch.hpp>
 
-using namespace Pennylane;
-using namespace Pennylane::KernelMap;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Util;
+using namespace Pennylane::Lightning_Qubit::KernelMap;
 
 using Catch::Matchers::Contains;
+using Pennylane::Util::for_each_enum;
+using Pennylane::Util::LightningException;
 
 TEST_CASE("Test PriorityDispatchSet", "[PriorityDispatchSet]") {
     auto pds = PriorityDispatchSet();
@@ -24,14 +29,14 @@ TEST_CASE("Test PriorityDispatchSet", "[PriorityDispatchSet]") {
 
     SECTION("Get Kernel") {
         REQUIRE(pds.getKernel(15) == Gates::KernelType::PI);
-        PL_CHECK_THROWS_MATCHES(pds.getKernel(30), Util::LightningException,
+        PL_CHECK_THROWS_MATCHES(pds.getKernel(30), LightningException,
                                 "Cannot find a kernel");
     }
 }
 
 TEST_CASE("Test default kernels for gates are well defined", "[KernelMap]") {
     auto &instance = OperationKernelMap<Gates::GateOperation>::getInstance();
-    Util::for_each_enum<Threading, CPUMemoryModel>(
+    for_each_enum<Threading, CPUMemoryModel>(
         [&instance](Threading threading, CPUMemoryModel memory_model) {
             for (size_t num_qubits = 1; num_qubits < 27; num_qubits++) {
                 REQUIRE_NOTHROW(
@@ -44,7 +49,7 @@ TEST_CASE("Test default kernels for generators are well defined",
           "[KernelMap]") {
     auto &instance =
         OperationKernelMap<Gates::GeneratorOperation>::getInstance();
-    Util::for_each_enum<Threading, CPUMemoryModel>(
+    for_each_enum<Threading, CPUMemoryModel>(
         [&instance](Threading threading, CPUMemoryModel memory_model) {
             for (size_t num_qubits = 1; num_qubits < 27; num_qubits++) {
                 REQUIRE_NOTHROW(
@@ -56,7 +61,7 @@ TEST_CASE("Test default kernels for generators are well defined",
 TEST_CASE("Test default kernels for matrix operation are well defined",
           "[KernelMap]") {
     auto &instance = OperationKernelMap<Gates::MatrixOperation>::getInstance();
-    Util::for_each_enum<Threading, CPUMemoryModel>(
+    for_each_enum<Threading, CPUMemoryModel>(
         [&instance](Threading threading, CPUMemoryModel memory_model) {
             for (size_t num_qubits = 1; num_qubits < 27; num_qubits++) {
                 REQUIRE_NOTHROW(
@@ -87,13 +92,12 @@ TEST_CASE("Test several limiting cases of default kernels", "[KernelMap]") {
         // gates. For k-qubit gates with k >= 3, we use PI.
         auto gate_map = instance.getKernelMap(28, Threading::SingleThread,
                                               CPUMemoryModel::Unaligned);
-        Util::for_each_enum<Gates::GateOperation>(
+        for_each_enum<Gates::GateOperation>(
             [&gate_map](Gates::GateOperation gate_op) {
-                INFO(Util::lookup(Gates::Constant::gate_names, gate_op));
+                INFO(lookup(Gates::Constant::gate_names, gate_op));
                 if (gate_op == Gates::GateOperation::MultiRZ) {
                     REQUIRE(gate_map[gate_op] == Gates::KernelType::LM);
-                } else if (Util::lookup(Gates::Constant::gate_wires, gate_op) <=
-                           2) {
+                } else if (lookup(Gates::Constant::gate_wires, gate_op) <= 2) {
                     REQUIRE(gate_map[gate_op] == Gates::KernelType::LM);
                 } else {
                     REQUIRE(gate_map[gate_op] == Gates::KernelType::PI);
@@ -134,7 +138,7 @@ TEST_CASE("Test KernelMap functionalities", "[KernelMap]") {
         PL_CHECK_THROWS_MATCHES(
             instance.removeKernelForOp(GateOperation::PauliX, Threading::END,
                                        CPUMemoryModel::Unaligned, 100),
-            Util::LightningException, "does not exist");
+            LightningException, "does not exist");
     }
 }
 

@@ -1,7 +1,7 @@
 #include "CPUMemoryModel.hpp"
 #include "LQubitTestHelpers.hpp" // PrecisionToName
 #include "TestHelpers.hpp"
-#include "Util.hpp"
+#include "Util.hpp" // INVSQRT2
 #include "cpu_kernels/GateImplementationsLM.hpp"
 #include "cpu_kernels/GateImplementationsPI.hpp"
 
@@ -24,7 +24,10 @@
  * [RX, RY, RZ, PhaseShift, Rot, ControlledPhaseShift, CRX, CRY, CRZ, CRot]
  */
 
-using namespace Pennylane;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Util;
+
+using Pennylane::Util::INVSQRT2;
 
 /**
  * @brief Run test suit only when the gate is defined
@@ -79,7 +82,7 @@ void testApplyPhaseShift() {
     const size_t num_qubits = 3;
 
     // Test using |+++> state
-    const auto isqrt2 = PrecisionT{Util::INVSQRT2<PrecisionT>()};
+    const auto isqrt2 = PrecisionT{INVSQRT2<PrecisionT>()};
     const std::vector<PrecisionT> angles{0.3, 0.8, 2.4};
     const ComplexPrecisionT coef{isqrt2 / PrecisionT{2.0}, PrecisionT{0.0}};
 
@@ -193,7 +196,7 @@ void testApplyRZ() {
     const size_t num_qubits = 3;
 
     // Test using |+++> state
-    const auto isqrt2 = PrecisionT{Util::INVSQRT2<PrecisionT>()};
+    const auto isqrt2 = PrecisionT{INVSQRT2<PrecisionT>()};
 
     const std::vector<PrecisionT> angles{0.2, 0.7, 2.9};
     const ComplexPrecisionT coef{isqrt2 / PrecisionT{2.0}, PrecisionT{0.0}};
@@ -877,7 +880,7 @@ void testApplyControlledPhaseShift() {
     // Test using |+++> state
     auto ini_st = createPlusState<PrecisionT>(num_qubits);
 
-    const auto isqrt2 = Util::INVSQRT2<PrecisionT>();
+    const auto isqrt2 = INVSQRT2<PrecisionT>();
 
     const std::vector<PrecisionT> angles{0.3, 2.4};
     const ComplexPrecisionT coef{isqrt2 / PrecisionT{2.0}, PrecisionT{0.0}};

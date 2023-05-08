@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 /**
  * @file
  * Defines the class representation for the Lightning qubit state vector.
@@ -23,7 +24,7 @@
 #include "Error.hpp"   // PL_ABORT
 #include "StateVectorBase.hpp"
 
-namespace Pennylane {
+namespace Pennylane::Lightning_Qubit {
 /**
  * @brief Lightning qubit state vector class.
  *
@@ -118,4 +119,4 @@ class StateVectorLQubit
      */
     [[nodiscard]] auto getLength() const -> std::size_t { return length_; }
 };
-} // namespace Pennylane
+} // namespace Pennylane::Lightning_Qubit

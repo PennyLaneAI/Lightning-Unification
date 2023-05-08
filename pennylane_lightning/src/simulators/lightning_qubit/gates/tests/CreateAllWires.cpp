@@ -2,10 +2,10 @@
 
 #include <bit>
 
-namespace Pennylane {
+namespace Pennylane::Lightning_Qubit::Util {
 auto createAllWires(size_t n_qubits, Gates::GateOperation gate_op, bool order)
     -> std::vector<std::vector<size_t>> {
-    if (Util::array_has_elt(Gates::Constant::multi_qubit_gates, gate_op)) {
+    if (array_has_elt(Gates::Constant::multi_qubit_gates, gate_op)) {
         // make all possible 2^N permutations
         std::vector<std::vector<size_t>> res;
         res.reserve((1U << n_qubits) - 1);
@@ -23,10 +23,10 @@ auto createAllWires(size_t n_qubits, Gates::GateOperation gate_op, bool order)
         }
         return res;
     } // else
-    const size_t n_wires = Util::lookup(Gates::Constant::gate_wires, gate_op);
+    const size_t n_wires = lookup(Gates::Constant::gate_wires, gate_op);
     if (order) {
         return PermutationGenerator(n_qubits, n_wires).all_perms();
     } // else
     return CombinationGenerator(n_qubits, n_wires).all_perms();
 }
-} // namespace Pennylane
+} // namespace Pennylane::Lightning_Qubit::Util

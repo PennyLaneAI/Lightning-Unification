@@ -13,7 +13,10 @@
 // limitations under the License.
 
 #include "GateImplementationsLM.hpp"
-namespace Pennylane::Gates {
+
+using Pennylane::Util::exp2;
+
+namespace Pennylane::Lightning_Qubit::Gates {
 
 template <class PrecisionT, class ParamT>
 void GateImplementationsLM::applySingleExcitation(
@@ -29,7 +32,7 @@ void GateImplementationsLM::applySingleExcitation(
     const auto [parity_high, parity_middle, parity_low] =
         revWireParity(rev_wire0, rev_wire1);
 
-    for (size_t k = 0; k < Util::exp2(num_qubits - 2); k++) {
+    for (size_t k = 0; k < exp2(num_qubits - 2); k++) {
         const size_t i00 = ((k << 2U) & parity_high) |
                            ((k << 1U) & parity_middle) | (k & parity_low);
         const size_t i10 = i00 | rev_wire1_shift;
@@ -60,7 +63,7 @@ void GateImplementationsLM::applySingleExcitationMinus(
     const auto [parity_high, parity_middle, parity_low] =
         revWireParity(rev_wire0, rev_wire1);
 
-    for (size_t k = 0; k < Util::exp2(num_qubits - 2); k++) {
+    for (size_t k = 0; k < exp2(num_qubits - 2); k++) {
         const size_t i00 = ((k << 2U) & parity_high) |
                            ((k << 1U) & parity_middle) | (k & parity_low);
         const size_t i10 = i00 | rev_wire1_shift;
@@ -94,7 +97,7 @@ void GateImplementationsLM::applySingleExcitationPlus(
     const auto [parity_high, parity_middle, parity_low] =
         revWireParity(rev_wire0, rev_wire1);
 
-    for (size_t k = 0; k < Util::exp2(num_qubits - 2); k++) {
+    for (size_t k = 0; k < exp2(num_qubits - 2); k++) {
         const size_t i00 = ((k << 2U) & parity_high) |
                            ((k << 1U) & parity_middle) | (k & parity_low);
         const size_t i10 = i00 | rev_wire1_shift;
@@ -121,7 +124,7 @@ auto GateImplementationsLM::applyGeneratorSingleExcitation(
     const auto [parity_high, parity_middle, parity_low] =
         revWireParity(rev_wire0, rev_wire1);
 
-    for (size_t k = 0; k < Util::exp2(num_qubits - 2); k++) {
+    for (size_t k = 0; k < exp2(num_qubits - 2); k++) {
         const size_t i00 = ((k << 2U) & parity_high) |
                            ((k << 1U) & parity_middle) | (k & parity_low);
         const size_t i01 = i00 | rev_wire0_shift;
@@ -129,8 +132,8 @@ auto GateImplementationsLM::applyGeneratorSingleExcitation(
         const size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
         arr[i00] = std::complex<PrecisionT>{};
-        arr[i01] *= Util::IMAG<PrecisionT>();
-        arr[i10] *= -Util::IMAG<PrecisionT>();
+        arr[i01] *= Pennylane::Util::IMAG<PrecisionT>();
+        arr[i10] *= -Pennylane::Util::IMAG<PrecisionT>();
         arr[i11] = std::complex<PrecisionT>{};
 
         std::swap(arr[i10], arr[i01]);
@@ -151,14 +154,14 @@ auto GateImplementationsLM::applyGeneratorSingleExcitationMinus(
     const auto [parity_high, parity_middle, parity_low] =
         revWireParity(rev_wire0, rev_wire1);
 
-    for (size_t k = 0; k < Util::exp2(num_qubits - 2); k++) {
+    for (size_t k = 0; k < exp2(num_qubits - 2); k++) {
         const size_t i00 = ((k << 2U) & parity_high) |
                            ((k << 1U) & parity_middle) | (k & parity_low);
         const size_t i01 = i00 | rev_wire0_shift;
         const size_t i10 = i00 | rev_wire1_shift;
 
-        arr[i01] *= Util::IMAG<PrecisionT>();
-        arr[i10] *= -Util::IMAG<PrecisionT>();
+        arr[i01] *= Pennylane::Util::IMAG<PrecisionT>();
+        arr[i10] *= -Pennylane::Util::IMAG<PrecisionT>();
 
         std::swap(arr[i10], arr[i01]);
     }
@@ -178,7 +181,7 @@ auto GateImplementationsLM::applyGeneratorSingleExcitationPlus(
     const auto [parity_high, parity_middle, parity_low] =
         revWireParity(rev_wire0, rev_wire1);
 
-    for (size_t k = 0; k < Util::exp2(num_qubits - 2); k++) {
+    for (size_t k = 0; k < exp2(num_qubits - 2); k++) {
         const size_t i00 = ((k << 2U) & parity_high) |
                            ((k << 1U) & parity_middle) | (k & parity_low);
         const size_t i01 = i00 | rev_wire0_shift;
@@ -186,8 +189,8 @@ auto GateImplementationsLM::applyGeneratorSingleExcitationPlus(
         const size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
         arr[i00] *= -1;
-        arr[i01] *= Util::IMAG<PrecisionT>();
-        arr[i10] *= -Util::IMAG<PrecisionT>();
+        arr[i01] *= Pennylane::Util::IMAG<PrecisionT>();
+        arr[i10] *= -Pennylane::Util::IMAG<PrecisionT>();
         arr[i11] *= -1;
 
         std::swap(arr[i10], arr[i01]);
@@ -566,4 +569,4 @@ template auto GateImplementationsLM::applyGeneratorSingleExcitationPlus<double>(
 
 // Explicit instantiations ends
 
-} // namespace Pennylane::Gates
+} // namespace Pennylane::Lightning_Qubit::Gates

@@ -9,7 +9,7 @@
 #include <numeric> // iota
 #include <vector>
 
-namespace Pennylane {
+namespace Pennylane::Lightning_Qubit::Util {
 
 class WiresGenerator {
   public:
@@ -111,4 +111,4 @@ class PermutationGenerator : public WiresGenerator {
  */
 auto createAllWires(size_t n_qubits, Gates::GateOperation gate_op, bool order)
     -> std::vector<std::vector<size_t>>;
-} // namespace Pennylane
+} // namespace Pennylane::Lightning_Qubit::Util

@@ -1,13 +1,14 @@
 #include "CreateAllWires.hpp"
+#include "LQubitTestHelpers.hpp" // PrecisionToName
 #include "TestHelpers.hpp"
 #include "TestKernels.hpp"
 
-#include "ConstantUtil.hpp"
+#include "ConstantUtil.hpp" // lookup, array_has_elt
 #include "DynamicDispatcher.hpp"
-#include "KernelMap.hpp" // for_each_enum
+#include "KernelMap.hpp"
 #include "KernelType.hpp"
 #include "OpToMemberFuncPtr.hpp"
-#include "Util.hpp"
+#include "Util.hpp" // for_each_enum
 
 #include <catch2/catch.hpp>
 
@@ -26,9 +27,9 @@
  * This file tests all gate operations (besides matrix) by comparing results
  * between different kernels (gate implementations).
  */
-using namespace Pennylane;
-using namespace Pennylane::Gates;
-using namespace Pennylane::Util;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Util;
+using namespace Pennylane::Lightning_Qubit::Gates;
 
 using std::vector;
 
@@ -88,7 +89,6 @@ void testApplyGate(RandomEngine &re, GateOperation gate_op, size_t num_qubits) {
     const auto ini = createRandomState<PrecisionT>(re, num_qubits);
 
     const auto params = createParams<PrecisionT>(gate_op);
-    // const auto gate_name = lookup(gate_names, gate_op);
     const auto all_wires = createAllWires(num_qubits, gate_op, true);
 
     for (const auto &wires : all_wires) {
@@ -144,13 +144,12 @@ TEMPLATE_TEST_CASE("Test all kernels give the same results for gates",
     /* We test all gate operations up to the number of qubits we give */
     constexpr size_t max_num_qubits = 5;
     std::mt19937 re{1337};
-    Util::for_each_enum<GateOperation>([&](GateOperation gate_op) {
+    for_each_enum<GateOperation>([&](GateOperation gate_op) {
         const size_t min_num_qubits = [=] {
-            if (Util::array_has_elt(Gates::Constant::multi_qubit_gates,
-                                    gate_op)) {
+            if (array_has_elt(Gates::Constant::multi_qubit_gates, gate_op)) {
                 return size_t{1};
             }
-            return Util::lookup(Gates::Constant::gate_wires, gate_op);
+            return lookup(Gates::Constant::gate_wires, gate_op);
         }();
         for (size_t num_qubits = min_num_qubits; num_qubits <= max_num_qubits;
              num_qubits++) {
@@ -179,7 +178,7 @@ void testMatrixOp(RandomEngine &re, size_t num_qubits, size_t num_wires,
     const auto implementing_kernels =
         kernelsImplementingMatrix<PrecisionT>(mat_op);
     const auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
-    const auto op_name = Util::lookup(matrix_names, mat_op);
+    const auto op_name = lookup(matrix_names, mat_op);
 
     std::ostringstream ss;
     ss << "Test " << op_name << " with kernels: ";

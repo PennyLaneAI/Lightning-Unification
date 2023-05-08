@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <vector>
 
-namespace Pennylane::Gates {
+namespace Pennylane::Lightning_Qubit::Gates {
 /**
  * @brief Define generators of RX, RY, RZ using the Pauli gates.
  * @rst
@@ -55,4 +55,4 @@ template <class GateImplementation> class PauliGenerator {
         return -static_cast<PrecisionT>(0.5);
     }
 };
-} // namespace Pennylane::Gates
+} // namespace Pennylane::Lightning_Qubit::Gates

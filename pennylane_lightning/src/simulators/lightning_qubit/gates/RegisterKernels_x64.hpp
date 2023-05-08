@@ -16,9 +16,9 @@
  */
 #pragma once
 
-namespace Pennylane::Internal {
+namespace Pennylane::Lightning_Qubit::Internal {
 void registerKernelsAVX2_Float();
 void registerKernelsAVX2_Double();
 void registerKernelsAVX512_Float();
 void registerKernelsAVX512_Double();
-} // namespace Pennylane::Internal
+} // namespace Pennylane::Lightning_Qubit::Internal

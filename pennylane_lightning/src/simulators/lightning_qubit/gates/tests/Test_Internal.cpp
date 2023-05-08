@@ -1,4 +1,5 @@
-#include "CreateAllWires.hpp"
+#include "CreateAllWires.hpp"    // CombinationGenerator, PermutationGenerator
+#include "LQubitTestHelpers.hpp" // createProductState, createZeroState
 #include "TestHelpers.hpp"
 #include "cpu_kernels/GateImplementationsPI.hpp"
 
@@ -15,8 +16,9 @@
  * We test internal functions for test suite.
  */
 
-using namespace Pennylane;
-using Pennylane::Gates::GateImplementationsPI;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Util;
+using Pennylane::Lightning_Qubit::Gates::GateImplementationsPI;
 
 TEMPLATE_TEST_CASE("Approx", "[Test_Internal]", float, double) {
     using PrecisionT = TestType;

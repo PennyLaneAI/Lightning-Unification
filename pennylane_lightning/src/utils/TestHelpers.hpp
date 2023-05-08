@@ -22,7 +22,7 @@
 
 #include <catch2/catch.hpp>
 
-namespace Pennylane {
+namespace Pennylane::Util {
 template <class T, class Alloc = std::allocator<T>> struct PLApprox {
     const std::vector<T, Alloc> &comp_;
 
@@ -197,4 +197,4 @@ isApproxEqual(const Data_t &data1, const Data_t &data2,
     CHECK_THROWS_AS(expr, type);                                               \
     CHECK_THROWS_WITH(expr, Catch::Matchers::Contains(message_match));
 
-} // namespace Pennylane
+} // namespace Pennylane::Util

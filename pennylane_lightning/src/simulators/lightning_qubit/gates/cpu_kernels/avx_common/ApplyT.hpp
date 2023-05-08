@@ -24,14 +24,14 @@
 
 #include <complex>
 
-namespace Pennylane::Gates::AVXCommon {
+namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
 
 template <typename PrecisionT, size_t packed_size> struct ApplyT {
     using Precision = PrecisionT;
     using PrecisionAVXConcept = AVXConceptType<PrecisionT, packed_size>;
 
     constexpr static size_t packed_size_ = packed_size;
-    constexpr static auto isqrt2 = Util::INVSQRT2<PrecisionT>();
+    constexpr static auto isqrt2 = INVSQRT2<PrecisionT>();
 
     /**
      * @brief Permutation for applying `i` if a bit is 1
@@ -130,4 +130,4 @@ template <typename PrecisionT, size_t packed_size> struct ApplyT {
         }
     }
 };
-} // namespace Pennylane::Gates::AVXCommon
+} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon

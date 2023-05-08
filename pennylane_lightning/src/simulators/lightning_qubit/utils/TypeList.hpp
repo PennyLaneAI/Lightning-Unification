@@ -22,7 +22,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace Pennylane::Util {
+namespace Pennylane::Lightning_Qubit::Util {
 template <typename T, typename... Ts> struct TypeNode {
     using Type = T;
     using Next = TypeNode<Ts...>;
@@ -95,4 +95,4 @@ template <typename T> struct PrependToTypeList<T, void> {
     using Type = TypeNode<T, void>;
 };
 /// @endcond
-} // namespace Pennylane::Util
+} // namespace Pennylane::Lightning_Qubit::Util

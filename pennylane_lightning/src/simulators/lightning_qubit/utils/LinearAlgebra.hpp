@@ -18,8 +18,8 @@
 #pragma once
 
 #include "Macros.hpp"
-#include "TypeTraits.hpp"
-#include "Util.hpp"
+#include "TypeTraits.hpp" // remove_complex_t
+#include "Util.hpp"       // ConstSum, ConstMult, ConstMultConj
 
 #include <algorithm>
 #include <complex>
@@ -53,7 +53,9 @@ using CBLAS_LAYOUT = enum CBLAS_LAYOUT {
 /// @endcond
 //
 
-namespace Pennylane::Util {
+using namespace Pennylane::Util;
+
+namespace Pennylane::Lightning_Qubit::Util {
 /**
  * @brief Transpose enum class
  */
@@ -944,4 +946,4 @@ void scaleAndAdd(std::complex<T> a, const std::vector<std::complex<T>> &x,
     }
     scaleAndAdd(x.size(), a, x.data(), y.data());
 }
-} // namespace Pennylane::Util
+} // namespace Pennylane::Lightning_Qubit::Util

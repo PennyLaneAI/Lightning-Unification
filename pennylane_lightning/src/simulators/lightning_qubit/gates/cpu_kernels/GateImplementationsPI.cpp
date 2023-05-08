@@ -13,7 +13,7 @@
 // limitations under the License.
 #include "GateImplementationsPI.hpp"
 
-namespace Pennylane::Gates {
+namespace Pennylane::Lightning_Qubit::Gates {
 template <class PrecisionT, class ParamT>
 void GateImplementationsPI::applyDoubleExcitation(
     std::complex<PrecisionT> *arr, size_t num_qubits,
@@ -145,8 +145,8 @@ auto GateImplementationsPI::applyGeneratorDoubleExcitation(
             shiftedState[i] = std::complex<PrecisionT>{};
         }
 
-        shiftedState[indices[i0]] = -v12 * Util::IMAG<PrecisionT>();
-        shiftedState[indices[i1]] = v3 * Util::IMAG<PrecisionT>();
+        shiftedState[indices[i0]] = -v12 * Pennylane::Util::IMAG<PrecisionT>();
+        shiftedState[indices[i1]] = v3 * Pennylane::Util::IMAG<PrecisionT>();
     }
     // NOLINTNEXTLINE(readability-magic-numbers)
     return -static_cast<PrecisionT>(0.5);
@@ -167,8 +167,8 @@ auto GateImplementationsPI::applyGeneratorDoubleExcitationMinus(
     for (const size_t &externalIndex : externalIndices) {
         std::complex<PrecisionT> *shiftedState = arr + externalIndex;
 
-        shiftedState[indices[i0]] *= Util::IMAG<PrecisionT>();
-        shiftedState[indices[i1]] *= -Util::IMAG<PrecisionT>();
+        shiftedState[indices[i0]] *= Pennylane::Util::IMAG<PrecisionT>();
+        shiftedState[indices[i1]] *= -Pennylane::Util::IMAG<PrecisionT>();
 
         std::swap(shiftedState[indices[i0]], shiftedState[indices[i1]]);
     }
@@ -194,8 +194,8 @@ auto GateImplementationsPI::applyGeneratorDoubleExcitationPlus(
             shiftedState[i] *= -1;
         }
 
-        shiftedState[indices[i0]] *= -Util::IMAG<PrecisionT>();
-        shiftedState[indices[i1]] *= Util::IMAG<PrecisionT>();
+        shiftedState[indices[i0]] *= -Pennylane::Util::IMAG<PrecisionT>();
+        shiftedState[indices[i1]] *= Pennylane::Util::IMAG<PrecisionT>();
 
         std::swap(shiftedState[indices[i0]], shiftedState[indices[i1]]);
     }
@@ -522,4 +522,4 @@ template auto GateImplementationsPI::applyGeneratorDoubleExcitationPlus<float>(
 template auto GateImplementationsPI::applyGeneratorDoubleExcitationPlus<double>(
     std::complex<double> *, size_t, const std::vector<size_t> &, bool)
     -> double;
-} // namespace Pennylane::Gates
+} // namespace Pennylane::Lightning_Qubit::Gates

@@ -26,7 +26,7 @@
 #include "KernelType.hpp"
 #include "Macros.hpp"
 #include "OpToMemberFuncPtr.hpp"
-#include "Util.hpp"
+#include "Util.hpp" // PairHash, exp2
 
 #include <cassert>
 #include <complex>
@@ -38,7 +38,11 @@
 #include <vector>
 
 /// @cond DEV
-namespace Pennylane::Internal {
+
+using Pennylane::Util::exp2;
+using Pennylane::Util::PairHash;
+
+namespace Pennylane::Lightning_Qubit::Internal {
 constexpr auto generatorNamesWithoutPrefix() {
     constexpr std::string_view prefix = "Generator";
     namespace GateConstant = Gates::Constant;
@@ -53,10 +57,10 @@ constexpr auto generatorNamesWithoutPrefix() {
     return res;
 }
 
-} // namespace Pennylane::Internal
+} // namespace Pennylane::Lightning_Qubit::Internal
 /// @endcond
 
-namespace Pennylane {
+namespace Pennylane::Lightning_Qubit {
 
 /**
  * @brief DynamicDispatcher class
@@ -86,15 +90,15 @@ template <typename PrecisionT> class DynamicDispatcher {
     std::unordered_map<std::string, Gates::GeneratorOperation> str_to_gntrs_;
 
     std::unordered_map<std::pair<Gates::GateOperation, Gates::KernelType>,
-                       GateFunc, Util::PairHash>
+                       GateFunc, PairHash>
         gate_kernels_;
 
     std::unordered_map<std::pair<Gates::GeneratorOperation, Gates::KernelType>,
-                       GeneratorFunc, Util::PairHash>
+                       GeneratorFunc, PairHash>
         generator_kernels_;
 
     std::unordered_map<std::pair<Gates::MatrixOperation, Gates::KernelType>,
-                       MatrixFunc, Util::PairHash>
+                       MatrixFunc, PairHash>
         matrix_kernels_;
 
     std::unordered_map<Gates::KernelType, std::string> kernel_names_;
@@ -458,7 +462,7 @@ template <typename PrecisionT> class DynamicDispatcher {
     void applyMatrix(Gates::KernelType kernel, CFP_t *data, size_t num_qubits,
                      const std::vector<std::complex<PrecisionT>> &matrix,
                      const std::vector<size_t> &wires, bool inverse) const {
-        if (matrix.size() != Util::exp2(2 * wires.size())) {
+        if (matrix.size() != exp2(2 * wires.size())) {
             throw std::invalid_argument(
                 "The size of matrix does not match with the given "
                 "number of wires");
@@ -516,10 +520,10 @@ template <typename PrecisionT> class DynamicDispatcher {
         return (iter->second)(data, num_qubits, wires, adj);
     }
 };
-} // namespace Pennylane
+} // namespace Pennylane::Lightning_Qubit
 
 /// @cond DEV
-namespace Pennylane::Internal {
+namespace Pennylane::Lightning_Qubit::Internal {
 int registerAllAvailableKernels_Float();
 int registerAllAvailableKernels_Double();
 
@@ -534,5 +538,5 @@ struct RegisterBeforeMain_Float {
 struct RegisterBeforeMain_Double {
     const static inline int dummy = registerAllAvailableKernels_Double();
 };
-} // namespace Pennylane::Internal
+} // namespace Pennylane::Lightning_Qubit::Internal
 /// @endcond

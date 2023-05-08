@@ -16,13 +16,14 @@
  * Define kernel map for statevector
  */
 #pragma once
+#include "CPUMemoryModel.hpp"
 #include "DynamicDispatcher.hpp"
 #include "Error.hpp"
 #include "GateOperation.hpp"
 #include "IntegerInterval.hpp"
 #include "KernelType.hpp"
 #include "Threading.hpp"
-#include "Util.hpp"
+#include "Util.hpp" // PairHash, for_each_enum
 
 #include <deque>
 #include <functional>
@@ -31,7 +32,13 @@
 #include <unordered_map>
 #include <utility>
 
-namespace Pennylane::KernelMap {
+using Pennylane::Util::for_each_enum;
+using Pennylane::Util::PairHash;
+
+using Pennylane::Lightning_Qubit::Util::CPUMemoryModel;
+using Pennylane::Lightning_Qubit::Util::Threading;
+
+namespace Pennylane::Lightning_Qubit::KernelMap {
 ///@cond DEV
 namespace Internal {
 
@@ -158,7 +165,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
   public:
     using EnumDispatchKernalMap =
         std::unordered_map<std::pair<Operation, uint32_t /* dispatch_key */>,
-                           PriorityDispatchSet, Util::PairHash>;
+                           PriorityDispatchSet, PairHash>;
     using EnumKernelMap = std::unordered_map<Operation, Gates::KernelType>;
 
   private:
@@ -202,7 +209,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
         -> std::unordered_map<Operation, Gates::KernelType> {
         std::unordered_map<Operation, Gates::KernelType> kernel_for_op;
 
-        Util::for_each_enum<Operation>([&](Operation op) {
+        for_each_enum<Operation>([&](Operation op) {
             const auto key = std::make_pair(op, dispatch_key);
             const auto &set = kernel_map_.at(key);
             kernel_for_op.emplace(op, set.getKernel(num_qubits));
@@ -286,7 +293,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
                            const Util::IntegerInterval<size_t> &interval,
                            Gates::KernelType kernel) {
         /* Priority for all threading is 1 */
-        Util::for_each_enum<Threading>([=, this](Threading threading) {
+        for_each_enum<Threading>([=, this](Threading threading) {
             assignKernelForOp(op, threading, memory_model, 1, interval, kernel);
         });
     }
@@ -300,8 +307,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
                            const Util::IntegerInterval<size_t> &interval,
                            Gates::KernelType kernel) {
         /* Priority for all memory model is 2 */
-        Util::for_each_enum<CPUMemoryModel>([=, this](
-                                                CPUMemoryModel memory_model) {
+        for_each_enum<CPUMemoryModel>([=, this](CPUMemoryModel memory_model) {
             assignKernelForOp(op, threading, memory_model, 2, interval, kernel);
         });
     }
@@ -315,7 +321,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
                            const Util::IntegerInterval<size_t> &interval,
                            Gates::KernelType kernel) {
         /* Priority is 0 */
-        Util::for_each_enum<Threading, CPUMemoryModel>(
+        for_each_enum<Threading, CPUMemoryModel>(
             [=, this](Threading threading, CPUMemoryModel memory_model) {
                 assignKernelForOp(op, threading, memory_model, 0, interval,
                                   kernel);
@@ -372,4 +378,4 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
         return std::get<2>(*cache_iter);
     }
 };
-} // namespace Pennylane::KernelMap
+} // namespace Pennylane::Lightning_Qubit::KernelMap

@@ -1,3 +1,4 @@
+#include "ConstantUtil.hpp"   // lookup
 #include "CreateAllWires.hpp" // createWires
 #include "DynamicDispatcher.hpp"
 #include "OpToMemberFuncPtr.hpp"
@@ -21,15 +22,16 @@
  * constexpr member variable implemented_generators.
  */
 
-using namespace Pennylane;
-using namespace Pennylane::Gates;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Util;
+using namespace Pennylane::Lightning_Qubit::Gates;
 
 template <typename PrecisionT, class RandomEngine>
 void testInverseGateKernel(RandomEngine &re, KernelType kernel,
                            GateOperation gate_op, size_t num_qubits) {
     const auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
 
-    const auto gate_name = Util::lookup(Constant::gate_names, gate_op);
+    const auto gate_name = lookup(Constant::gate_names, gate_op);
     const auto kernel_name = dispatcher.getKernelName(kernel);
 
     DYNAMIC_SECTION("Test inverse of " << gate_name << " for kernel "

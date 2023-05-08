@@ -23,7 +23,7 @@
  * in runtime.
  */
 #pragma once
-#include "BitUtil.hpp"
+#include "BitUtil.hpp" // log2PerfectPower
 #include "ConstantUtil.hpp"
 #include "Error.hpp"
 #include "TypeTraits.hpp"
@@ -31,10 +31,13 @@
 #include <cassert>
 #include <complex>
 #include <cstdlib>
-#include <type_traits>
+#include <type_traits> // FuncReturn
 #include <vector>
 
-namespace Pennylane::Gates::AVXCommon {
+namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+using Pennylane::Util::FuncReturn;
+using Pennylane::Util::log2PerfectPower;
+
 /// @cond DEV
 template <class T, class = void>
 struct HasInternalWithoutParam : std::false_type {};
@@ -103,7 +106,7 @@ InternalFunctions_Iter([[maybe_unused]] std::index_sequence<rev_wire...> dummy)
 template <SingleQubitGateWithoutParam AVXImpl>
 constexpr auto InternalFunctions() -> decltype(auto) {
     constexpr size_t internal_wires =
-        Util::log2PerfectPower(AVXImpl::packed_size_ / 2);
+        log2PerfectPower(AVXImpl::packed_size_ / 2);
     return InternalFunctions_Iter<AVXImpl>(
         std::make_index_sequence<internal_wires>());
 }
@@ -117,7 +120,7 @@ constexpr auto InternalFunctions() -> decltype(auto) {
 template <SingleQubitGateWithParam AVXImpl, typename ParamT>
 constexpr auto InternalFunctions() -> decltype(auto) {
     constexpr size_t internal_wires =
-        Util::log2PerfectPower(AVXImpl::packed_size_ / 2);
+        log2PerfectPower(AVXImpl::packed_size_ / 2);
     return InternalFunctions_Iter<AVXImpl, ParamT>(
         std::make_index_sequence<internal_wires>());
 }
@@ -132,7 +135,7 @@ class SingleQubitGateWithoutParamHelper {
   public:
     using Precision = typename AVXImpl::Precision;
     using ReturnType =
-        typename Util::FuncReturn<decltype(AVXImpl::applyExternal)>::Type;
+        typename FuncReturn<decltype(AVXImpl::applyExternal)>::Type;
     using FuncType = ReturnType (*)(std::complex<Precision> *, size_t,
                                     const std::vector<size_t> &, bool);
     constexpr static size_t packed_size = AVXImpl::packed_size_;
@@ -159,13 +162,13 @@ class SingleQubitGateWithoutParamHelper {
         PL_ASSERT(wires.size() == 1);
 
         constexpr static size_t internal_wires =
-            Util::log2PerfectPower(packed_size / 2);
+            log2PerfectPower(packed_size / 2);
         constexpr static auto internal_functions =
             Internal::InternalFunctions<AVXImpl>();
 
         const size_t rev_wire = num_qubits - wires[0] - 1;
 
-        if (Util::exp2(num_qubits) < packed_size / 2) {
+        if (exp2(num_qubits) < packed_size / 2) {
             return fallback_func_(arr, num_qubits, wires, inverse);
         }
 
@@ -185,7 +188,7 @@ template <SingleQubitGateWithParam AVXImpl, typename ParamT>
 class SingleQubitGateWithParamHelper {
   public:
     using Precision = typename AVXImpl::Precision;
-    using ReturnType = typename Util::FuncReturn<
+    using ReturnType = typename FuncReturn<
         decltype(AVXImpl::template applyExternal<ParamT>)>::Type;
     using FuncType = ReturnType (*)(std::complex<Precision> *, size_t,
                                     const std::vector<size_t> &, bool, ParamT);
@@ -214,14 +217,14 @@ class SingleQubitGateWithParamHelper {
         PL_ASSERT(wires.size() == 1);
 
         constexpr static size_t internal_wires =
-            Util::log2PerfectPower(packed_size / 2);
+            log2PerfectPower(packed_size / 2);
         constexpr static auto internal_functions =
             Internal::InternalFunctions<AVXImpl, ParamT>();
 
         const size_t rev_wire = num_qubits - wires[0] - 1;
 
         // When the size of an array is smaller than the AVX type
-        if (Util::exp2(num_qubits) < packed_size / 2) {
+        if (exp2(num_qubits) < packed_size / 2) {
             return fallback_func_(arr, num_qubits, wires, inverse, angle);
         }
 
@@ -234,4 +237,4 @@ class SingleQubitGateWithParamHelper {
                                       angle);
     }
 };
-} // namespace Pennylane::Gates::AVXCommon
+} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon

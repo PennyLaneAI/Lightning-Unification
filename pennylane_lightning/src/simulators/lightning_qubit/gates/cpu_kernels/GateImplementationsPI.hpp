@@ -31,12 +31,15 @@
 #include "KernelType.hpp"
 #include "LinearAlgebra.hpp"
 #include "PauliGenerator.hpp"
+#include "Util.hpp" // ZERO
 
 #include <bit>
 #include <complex>
 #include <vector>
 
-namespace Pennylane::Gates {
+using Pennylane::Util::ZERO;
+
+namespace Pennylane::Lightning_Qubit::Gates {
 /**
  * @brief Kernel functions for gate operations with precomputed indices
  *
@@ -348,8 +351,10 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
             const std::complex<PrecisionT> v0 = shiftedState[indices[0]];
             const std::complex<PrecisionT> v1 = shiftedState[indices[1]];
 
-            shiftedState[indices[0]] = Util::INVSQRT2<PrecisionT>() * (v0 + v1);
-            shiftedState[indices[1]] = Util::INVSQRT2<PrecisionT>() * (v0 - v1);
+            shiftedState[indices[0]] =
+                Pennylane::Util::INVSQRT2<PrecisionT>() * (v0 + v1);
+            shiftedState[indices[1]] =
+                Pennylane::Util::INVSQRT2<PrecisionT>() * (v0 - v1);
         }
     }
 
@@ -359,7 +364,8 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
         PL_ASSERT(wires.size() == 1);
         const auto [indices, externalIndices] = GateIndices(wires, num_qubits);
         const std::complex<PrecisionT> shift =
-            (inverse) ? -Util::IMAG<PrecisionT>() : Util::IMAG<PrecisionT>();
+            (inverse) ? -Pennylane::Util::IMAG<PrecisionT>()
+                      : Pennylane::Util::IMAG<PrecisionT>();
 
         for (const size_t &externalIndex : externalIndices) {
             std::complex<PrecisionT> *shiftedState = arr + externalIndex;
@@ -872,8 +878,8 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
 
         for (const size_t &externalIndex : externalIndices) {
             std::complex<PrecisionT> *shiftedState = arr + externalIndex;
-            shiftedState[indices[0]] = Util::ZERO<PrecisionT>();
-            shiftedState[indices[1]] = Util::ZERO<PrecisionT>();
+            shiftedState[indices[0]] = ZERO<PrecisionT>();
+            shiftedState[indices[1]] = ZERO<PrecisionT>();
 
             std::swap(shiftedState[indices[2]], shiftedState[indices[3]]);
         }
@@ -969,11 +975,11 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
         for (const size_t &externalIndex : externalIndices) {
             std::complex<PrecisionT> *shiftedState = arr + externalIndex;
             const auto v0 = shiftedState[indices[2]];
-            shiftedState[indices[0]] = Util::ZERO<PrecisionT>();
-            shiftedState[indices[1]] = Util::ZERO<PrecisionT>();
+            shiftedState[indices[0]] = ZERO<PrecisionT>();
+            shiftedState[indices[1]] = ZERO<PrecisionT>();
             shiftedState[indices[2]] =
-                -Util::IMAG<PrecisionT>() * shiftedState[indices[3]];
-            shiftedState[indices[3]] = Util::IMAG<PrecisionT>() * v0;
+                -Pennylane::Util::IMAG<PrecisionT>() * shiftedState[indices[3]];
+            shiftedState[indices[3]] = Pennylane::Util::IMAG<PrecisionT>() * v0;
         }
         // NOLINTNEXTLINE(readability-magic-numbers)
         return -static_cast<PrecisionT>(0.5);
@@ -989,8 +995,8 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
 
         for (const size_t &externalIndex : externalIndices) {
             std::complex<PrecisionT> *shiftedState = arr + externalIndex;
-            shiftedState[indices[0]] = Util::ZERO<PrecisionT>();
-            shiftedState[indices[1]] = Util::ZERO<PrecisionT>();
+            shiftedState[indices[0]] = ZERO<PrecisionT>();
+            shiftedState[indices[1]] = ZERO<PrecisionT>();
             shiftedState[indices[3]] *= -1;
         }
         // NOLINTNEXTLINE(readability-magic-numbers)
@@ -1316,4 +1322,4 @@ extern template auto GateImplementationsPI::applyGeneratorControlledPhaseShift(
 extern template auto GateImplementationsPI::applyGeneratorControlledPhaseShift(
     std::complex<double> *, size_t, const std::vector<size_t> &, bool)
     -> double;
-} // namespace Pennylane::Gates
+} // namespace Pennylane::Lightning_Qubit::Gates

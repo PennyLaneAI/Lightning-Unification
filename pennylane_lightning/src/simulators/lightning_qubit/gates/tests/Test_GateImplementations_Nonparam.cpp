@@ -2,7 +2,7 @@
 #include "LQubitTestHelpers.hpp" // PrecisionToName
 #include "TestHelpers.hpp"
 #include "TestKernels.hpp"
-#include "Util.hpp"
+#include "Util.hpp" // ConstMult, INVSQRT2, IMAG, ZERO
 
 #include <catch2/catch.hpp>
 
@@ -17,11 +17,12 @@
 /**
  * @file Test_GateImplementations_Nonparam.cpp
  *
- * This file contains tests for non-parameterized gates. List of such
- * gates are [PauliX, PauliY, PauliZ, Hadamard, S, T, CNOT, SWAP, CZ, Toffoli,
- * CSWAP].
+ * This file contains tests for non-parameterized gates. List of such gates are
+ * [PauliX, PauliY, PauliZ, Hadamard, S, T, CNOT, SWAP, CZ, Toffoli, CSWAP].
  */
-using namespace Pennylane;
+using namespace Pennylane::Util;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Util;
 
 /**
  * @brief Run test suit only when the gate is defined
@@ -117,10 +118,9 @@ void testApplyPauliY() {
     const size_t num_qubits = 3;
 
     constexpr ComplexPrecisionT p =
-        Util::ConstMult(static_cast<PrecisionT>(0.5),
-                        Util::ConstMult(Util::INVSQRT2<PrecisionT>(),
-                                        Util::IMAG<PrecisionT>()));
-    constexpr ComplexPrecisionT m = Util::ConstMult(-1, p);
+        ConstMult(static_cast<PrecisionT>(0.5),
+                  ConstMult(INVSQRT2<PrecisionT>(), IMAG<PrecisionT>()));
+    constexpr ComplexPrecisionT m = ConstMult(-1, p);
 
     const std::vector<std::vector<ComplexPrecisionT>> expected_results = {
         {m, m, m, m, p, p, p, p},
@@ -143,8 +143,8 @@ void testApplyPauliZ() {
     const size_t num_qubits = 3;
 
     constexpr ComplexPrecisionT p(static_cast<PrecisionT>(0.5) *
-                                  Util::INVSQRT2<PrecisionT>());
-    constexpr ComplexPrecisionT m(Util::ConstMult(-1, p));
+                                  INVSQRT2<PrecisionT>());
+    constexpr ComplexPrecisionT m(ConstMult(-1, p));
 
     const std::vector<std::vector<ComplexPrecisionT>> expected_results = {
         {p, p, p, p, m, m, m, m},
@@ -185,8 +185,8 @@ template <typename PrecisionT, class GateImplementation> void testApplyS() {
     const size_t num_qubits = 3;
 
     constexpr ComplexPrecisionT r(static_cast<PrecisionT>(0.5) *
-                                  Util::INVSQRT2<PrecisionT>());
-    constexpr ComplexPrecisionT i(Util::ConstMult(r, Util::IMAG<PrecisionT>()));
+                                  INVSQRT2<PrecisionT>());
+    constexpr ComplexPrecisionT i(ConstMult(r, IMAG<PrecisionT>()));
 
     const std::vector<std::vector<ComplexPrecisionT>> expected_results = {
         {r, r, r, r, i, i, i, i},
@@ -260,8 +260,8 @@ template <typename PrecisionT, class GateImplementation> void testApplyCNOT() {
             GateImplementation::applyCNOT(st.data(), num_qubits,
                                           {index - 1, index}, false);
         }
-        CHECK(st.front() == Util::INVSQRT2<PrecisionT>());
-        CHECK(st.back() == Util::INVSQRT2<PrecisionT>());
+        CHECK(st.front() == INVSQRT2<PrecisionT>());
+        CHECK(st.back() == INVSQRT2<PrecisionT>());
     }
 }
 PENNYLANE_RUN_TEST(CNOT);
@@ -273,26 +273,25 @@ template <typename PrecisionT, class GateImplementation> void testApplyCY() {
     auto ini_st =
         createProductState<PrecisionT>("+10"); // Test using |+10> state
 
-    CHECK(ini_st == std::vector<ComplexPrecisionT>{
-                        Util::ZERO<PrecisionT>(), Util::ZERO<PrecisionT>(),
-                        std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-                        Util::ZERO<PrecisionT>(), Util::ZERO<PrecisionT>(),
-                        Util::ZERO<PrecisionT>(),
-                        std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-                        Util::ZERO<PrecisionT>()});
+    CHECK(ini_st ==
+          std::vector<ComplexPrecisionT>{
+              ZERO<PrecisionT>(), ZERO<PrecisionT>(),
+              std::complex<PrecisionT>(1.0 / sqrt(2), 0), ZERO<PrecisionT>(),
+              ZERO<PrecisionT>(), ZERO<PrecisionT>(),
+              std::complex<PrecisionT>(1.0 / sqrt(2), 0), ZERO<PrecisionT>()});
 
     DYNAMIC_SECTION(GateImplementation::name
                     << ", CY 0,1 |+10> -> i|100> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(0, -1 / sqrt(2)),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>()};
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>()};
 
         auto sv01 = ini_st;
         GateImplementation::applyCY(sv01.data(), num_qubits, {0, 1}, false);
@@ -303,13 +302,13 @@ template <typename PrecisionT, class GateImplementation> void testApplyCY() {
                     << ", CY 0,2 |+10> -> |010> + i |111> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0.0),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(0.0, 1 / sqrt(2))};
 
         auto sv02 = ini_st;
@@ -321,14 +320,10 @@ template <typename PrecisionT, class GateImplementation> void testApplyCY() {
                     << ", CY 1,2 |+10> -> i|+11> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            std::complex<PrecisionT>(0.0, 1.0 / sqrt(2)),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            std::complex<PrecisionT>(0.0, 1 / sqrt(2))};
+            ZERO<PrecisionT>(), ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(), std::complex<PrecisionT>(0.0, 1.0 / sqrt(2)),
+            ZERO<PrecisionT>(), ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(), std::complex<PrecisionT>(0.0, 1 / sqrt(2))};
 
         auto sv12 = ini_st;
 
@@ -349,14 +344,14 @@ template <typename PrecisionT, class GateImplementation> void testApplyCZ() {
                     << ", CZ0,1 |+10> -> |-10> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(-1 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>()};
+            ZERO<PrecisionT>()};
 
         auto sv01 = ini_st;
         auto sv10 = ini_st;
@@ -408,24 +403,23 @@ template <typename PrecisionT, class GateImplementation> void testApplySWAP() {
     // Test using |+10> state
 
     CHECK(ini_st == std::vector<ComplexPrecisionT>{
-                        Util::ZERO<PrecisionT>(), Util::ZERO<PrecisionT>(),
-                        Util::INVSQRT2<PrecisionT>(), Util::ZERO<PrecisionT>(),
-                        Util::ZERO<PrecisionT>(), Util::ZERO<PrecisionT>(),
-                        Util::INVSQRT2<PrecisionT>(),
-                        Util::ZERO<PrecisionT>()});
+                        ZERO<PrecisionT>(), ZERO<PrecisionT>(),
+                        INVSQRT2<PrecisionT>(), ZERO<PrecisionT>(),
+                        ZERO<PrecisionT>(), ZERO<PrecisionT>(),
+                        INVSQRT2<PrecisionT>(), ZERO<PrecisionT>()});
 
     DYNAMIC_SECTION(GateImplementation::name
                     << ", SWAP0,1 |+10> -> |1+0> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>()};
+            ZERO<PrecisionT>()};
         auto sv01 = ini_st;
         auto sv10 = ini_st;
 
@@ -440,14 +434,14 @@ template <typename PrecisionT, class GateImplementation> void testApplySWAP() {
                     << ", SWAP0,2 |+10> -> |01+> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>()};
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>()};
 
         auto sv02 = ini_st;
         auto sv20 = ini_st;
@@ -462,14 +456,10 @@ template <typename PrecisionT, class GateImplementation> void testApplySWAP() {
                     << ", SWAP1,2 |+10> -> |+01> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>()};
+            ZERO<PrecisionT>(), std::complex<PrecisionT>(1.0 / sqrt(2), 0),
+            ZERO<PrecisionT>(), ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(), std::complex<PrecisionT>(1.0 / sqrt(2), 0),
+            ZERO<PrecisionT>(), ZERO<PrecisionT>()};
 
         auto sv12 = ini_st;
         auto sv21 = ini_st;
@@ -497,13 +487,13 @@ void testApplyToffoli() {
                     << ", Toffoli 0,1,2 |+10> -> |010> + |111> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0)};
 
         auto sv012 = ini_st;
@@ -518,13 +508,13 @@ void testApplyToffoli() {
                     << ", Toffoli 1,0,2 |+10> -> |010> + |111> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0)};
 
         auto sv102 = ini_st;
@@ -572,14 +562,14 @@ template <typename PrecisionT, class GateImplementation> void testApplyCSWAP() {
                     << ", CSWAP 0,1,2 |+10> -> |010> + |101> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>()};
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>()};
 
         auto sv012 = ini_st;
         GateImplementation::applyCSWAP(sv012.data(), num_qubits, {0, 1, 2},
@@ -591,14 +581,14 @@ template <typename PrecisionT, class GateImplementation> void testApplyCSWAP() {
                     << ", CSWAP 1,0,2 |+10> -> |01+> - "
                     << PrecisionToName<PrecisionT>::value) {
         std::vector<ComplexPrecisionT> expected{
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
             std::complex<PrecisionT>(1.0 / sqrt(2), 0),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>(),
-            Util::ZERO<PrecisionT>()};
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>(),
+            ZERO<PrecisionT>()};
 
         auto sv102 = ini_st;
         GateImplementation::applyCSWAP(sv102.data(), num_qubits, {1, 0, 2},

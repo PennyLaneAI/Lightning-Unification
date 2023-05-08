@@ -6,7 +6,8 @@
 
 #include <catch2/catch.hpp>
 
-using namespace Pennylane;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Util;
 
 TEMPLATE_TEST_CASE("LightningQubit::StateVectorLQubit::changeDataPtr",
                    "[StateVectorLQubit]", float, double) {
@@ -36,7 +37,7 @@ TEMPLATE_TEST_CASE("LightningQubit::StateVectorLQubit::changeDataPtr",
         std::iota(new_data.begin(), new_data.end(), 0);
 
         REQUIRE_THROWS_AS(sv.changeDataPtr(new_data.data(), new_data.size()),
-                          Util::LightningException);
+                          LightningException);
     }
 }
 
@@ -69,6 +70,6 @@ TEMPLATE_TEST_CASE("LightningQubit::StateVectorLQubit::setDataFrom",
         StateVectorLQubit<PrecisionT> sv(st_data1.data(), st_data1.size());
 
         REQUIRE_THROWS_AS(sv.setDataFrom(st_data2.data(), st_data2.size()),
-                          Util::LightningException);
+                          LightningException);
     }
 }

@@ -13,7 +13,8 @@
 #pragma warning(disable : 4305)
 #endif
 
-using namespace Pennylane;
+using namespace Pennylane::Util;
+using namespace Pennylane::Lightning_Qubit;
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 TEMPLATE_TEST_CASE("Inner product", "[Util][LinearAlgebra]", float, double) {

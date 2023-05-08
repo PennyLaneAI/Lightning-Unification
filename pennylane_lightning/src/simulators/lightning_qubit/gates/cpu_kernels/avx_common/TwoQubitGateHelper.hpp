@@ -25,7 +25,7 @@
  * in runtime.
  */
 #pragma once
-#include "BitUtil.hpp"
+#include "BitUtil.hpp" // log2PerfectPower
 #include "ConstantUtil.hpp"
 #include "Error.hpp"
 #include "TypeTraits.hpp"
@@ -34,10 +34,15 @@
 #include <complex>
 #include <cstdlib>
 #include <tuple>
-#include <type_traits>
+#include <type_traits> // FuncReturn
 #include <vector>
 
-namespace Pennylane::Gates::AVXCommon {
+using Pennylane::Util::FuncReturn;
+
+namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+using Pennylane::Util::FuncReturn;
+using Pennylane::Util::log2PerfectPower;
+
 /// @cond DEV
 template <class T, class = void>
 struct HasInternalInternalWithoutParam : std::false_type {};
@@ -156,7 +161,7 @@ template <TwoQubitGateWithParam AVXImpl, typename ParamT, size_t... control>
 constexpr auto InternalInternalFunctions_Iter(
     [[maybe_unused]] std::index_sequence<control...> dummy) {
     constexpr size_t internal_wires =
-        Util::log2PerfectPower(AVXImpl::packed_size_ / 2);
+        log2PerfectPower(AVXImpl::packed_size_ / 2);
     return Util::tuple_to_array(std::tuple{
         InternalInternalFunctions_IterTargets<AVXImpl, ParamT, control>(
             std::make_index_sequence<internal_wires>())...});
@@ -172,7 +177,7 @@ constexpr auto InternalInternalFunctions_Iter(
 template <TwoQubitGateWithParam AVXImpl, typename ParamT>
 constexpr auto InternalInternalFunctions() {
     constexpr size_t internal_wires =
-        Util::log2PerfectPower(AVXImpl::packed_size_ / 2);
+        log2PerfectPower(AVXImpl::packed_size_ / 2);
     return InternalInternalFunctions_Iter<AVXImpl, ParamT>(
         std::make_index_sequence<internal_wires>());
 }
@@ -199,7 +204,7 @@ template <TwoQubitGateWithoutParam AVXImpl, size_t... control>
 constexpr auto InternalInternalFunctions_Iter(
     [[maybe_unused]] std::index_sequence<control...> dummy) {
     constexpr size_t internal_wires =
-        Util::log2PerfectPower(AVXImpl::packed_size_ / 2);
+        log2PerfectPower(AVXImpl::packed_size_ / 2);
     return Util::tuple_to_array(
         std::tuple{InternalInternalFunctions_IterTargets<AVXImpl, control>(
             std::make_index_sequence<internal_wires>())...});
@@ -216,7 +221,7 @@ constexpr auto InternalInternalFunctions_Iter(
 template <TwoQubitGateWithoutParam AVXImpl>
 constexpr auto InternalInternalFunctions() -> decltype(auto) {
     constexpr size_t internal_wires =
-        Util::log2PerfectPower(AVXImpl::packed_size_ / 2);
+        log2PerfectPower(AVXImpl::packed_size_ / 2);
     return InternalInternalFunctions_Iter<AVXImpl>(
         std::make_index_sequence<internal_wires>());
 }
@@ -242,7 +247,7 @@ constexpr auto ExternalInternalFunctions_Iter(
 template <AsymmetricTwoQubitGateWithoutParam AVXImpl>
 constexpr auto ExternalInternalFunctions() -> decltype(auto) {
     constexpr size_t internal_wires =
-        Util::log2PerfectPower(AVXImpl::packed_size_ / 2);
+        log2PerfectPower(AVXImpl::packed_size_ / 2);
     return ExternalInternalFunctions_Iter<AVXImpl>(
         std::make_index_sequence<internal_wires>());
 }
@@ -269,7 +274,7 @@ constexpr auto ExternalInternalFunctions_Iter(
 template <AsymmetricTwoQubitGateWithParam AVXImpl, typename ParamT>
 constexpr auto ExternalInternalFunctions() -> decltype(auto) {
     constexpr size_t internal_wires =
-        Util::log2PerfectPower(AVXImpl::packed_size_ / 2);
+        log2PerfectPower(AVXImpl::packed_size_ / 2);
     return ExternalInternalFunctions_Iter<AVXImpl, ParamT>(
         std::make_index_sequence<internal_wires>());
 }
@@ -285,7 +290,7 @@ constexpr auto InternalExternalFunctions_Iter(
 template <TwoQubitGateWithoutParam AVXImpl>
 constexpr auto InternalExternalFunctions() -> decltype(auto) {
     constexpr size_t internal_wires =
-        Util::log2PerfectPower(AVXImpl::packed_size_ / 2);
+        log2PerfectPower(AVXImpl::packed_size_ / 2);
     return InternalExternalFunctions_Iter<AVXImpl>(
         std::make_index_sequence<internal_wires>());
 }
@@ -309,7 +314,7 @@ constexpr auto InternalExternalFunctions_Iter(
 template <TwoQubitGateWithParam AVXImpl, typename ParamT>
 constexpr auto InternalExternalFunctions() -> decltype(auto) {
     constexpr size_t internal_wires =
-        Util::log2PerfectPower(AVXImpl::packed_size_ / 2);
+        log2PerfectPower(AVXImpl::packed_size_ / 2);
     return InternalExternalFunctions_Iter<AVXImpl, ParamT>(
         std::make_index_sequence<internal_wires>());
 }
@@ -326,8 +331,8 @@ requires TwoQubitGateWithoutParam<AVXImpl>
 class TwoQubitGateWithoutParamHelper {
   public:
     using Precision = typename AVXImpl::Precision;
-    using ReturnType = typename Util::FuncReturn<
-        decltype(AVXImpl::applyExternalExternal)>::Type;
+    using ReturnType =
+        typename FuncReturn<decltype(AVXImpl::applyExternalExternal)>::Type;
     using FuncType = ReturnType (*)(std::complex<Precision> *, size_t,
                                     const std::vector<size_t> &, bool);
     constexpr static size_t packed_size = AVXImpl::packed_size_;
@@ -355,7 +360,7 @@ class TwoQubitGateWithoutParamHelper {
         PL_ASSERT(wires.size() == 2);
 
         constexpr static size_t internal_wires =
-            Util::log2PerfectPower(packed_size / 2);
+            log2PerfectPower(packed_size / 2);
         constexpr static auto internal_internal_functions =
             Internal::InternalInternalFunctions<AVXImpl>();
 
@@ -365,7 +370,7 @@ class TwoQubitGateWithoutParamHelper {
         const size_t rev_wire0 = num_qubits - wires[1] - 1;
         const size_t rev_wire1 = num_qubits - wires[0] - 1;
 
-        if (Util::exp2(num_qubits) < packed_size / 2) {
+        if (exp2(num_qubits) < packed_size / 2) {
             return fallback_func_(arr, num_qubits, wires, inverse);
         }
 
@@ -402,7 +407,7 @@ class TwoQubitGateWithoutParamHelper {
         PL_ASSERT(wires.size() == 2);
 
         constexpr static size_t internal_wires =
-            Util::log2PerfectPower(packed_size / 2);
+            log2PerfectPower(packed_size / 2);
         constexpr static auto internal_internal_functions =
             Internal::InternalInternalFunctions<AVXImpl>();
 
@@ -415,7 +420,7 @@ class TwoQubitGateWithoutParamHelper {
         const size_t target = num_qubits - wires[1] - 1;
         const size_t control = num_qubits - wires[0] - 1;
 
-        if (Util::exp2(num_qubits) < packed_size / 2) {
+        if (exp2(num_qubits) < packed_size / 2) {
             return fallback_func_(arr, num_qubits, wires, inverse);
         }
 
@@ -447,7 +452,7 @@ requires TwoQubitGateWithParam<AVXImpl>
 class TwoQubitGateWithParamHelper {
   public:
     using Precision = typename AVXImpl::Precision;
-    using ReturnType = typename Util::FuncReturn<
+    using ReturnType = typename FuncReturn<
         decltype(AVXImpl::template applyExternalExternal<Precision>)>::Type;
     using FuncType = ReturnType (*)(std::complex<Precision> *, size_t,
                                     const std::vector<size_t> &, bool, ParamT);
@@ -478,7 +483,7 @@ class TwoQubitGateWithParamHelper {
         PL_ASSERT(wires.size() == 2);
 
         constexpr static size_t internal_wires =
-            Util::log2PerfectPower(packed_size / 2);
+            log2PerfectPower(packed_size / 2);
         constexpr static auto internal_internal_functions =
             Internal::InternalInternalFunctions<AVXImpl, ParamT>();
 
@@ -488,7 +493,7 @@ class TwoQubitGateWithParamHelper {
         const size_t rev_wire0 = num_qubits - wires[1] - 1;
         const size_t rev_wire1 = num_qubits - wires[0] - 1;
 
-        if (Util::exp2(num_qubits) < packed_size / 2) {
+        if (exp2(num_qubits) < packed_size / 2) {
             return fallback_func_(arr, num_qubits, wires, inverse, angle);
         }
 
@@ -526,7 +531,7 @@ class TwoQubitGateWithParamHelper {
         PL_ASSERT(wires.size() == 2);
 
         constexpr static size_t internal_wires =
-            Util::log2PerfectPower(packed_size / 2);
+            log2PerfectPower(packed_size / 2);
         constexpr static auto internal_internal_functions =
             Internal::InternalInternalFunctions<AVXImpl, ParamT>();
 
@@ -539,7 +544,7 @@ class TwoQubitGateWithParamHelper {
         const size_t target = num_qubits - wires[1] - 1;
         const size_t control = num_qubits - wires[0] - 1;
 
-        if (Util::exp2(num_qubits) < packed_size / 2) {
+        if (exp2(num_qubits) < packed_size / 2) {
             return fallback_func_(arr, num_qubits, wires, inverse, angle);
         }
 
@@ -562,4 +567,4 @@ class TwoQubitGateWithParamHelper {
                                               inverse, angle);
     }
 };
-} // namespace Pennylane::Gates::AVXCommon
+} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon

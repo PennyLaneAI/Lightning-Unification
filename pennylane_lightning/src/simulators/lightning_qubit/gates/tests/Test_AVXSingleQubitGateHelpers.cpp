@@ -3,7 +3,7 @@
 #include <catch2/catch.hpp>
 #include <tuple>
 
-using namespace Pennylane::Gates::AVXCommon;
+using namespace Pennylane::Lightning_Qubit::Gates::AVXCommon;
 
 template <typename PrecisionT, size_t packed_size>
 struct MockSingleQubitGateWithoutParam {

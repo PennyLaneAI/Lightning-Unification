@@ -1,14 +1,14 @@
 #include "Constant.hpp"
-#include "ConstantTestHelpers.hpp"
-#include "ConstantUtil.hpp"
+#include "ConstantTestHelpers.hpp" // count_unique, first_elts_of, second_elts_of
+#include "ConstantUtil.hpp" // tuple_to_array, array_has_elt, prepend_to_tuple, lookup
 #include "OpToMemberFuncPtr.hpp"
 #include "Util.hpp"
 
 #include <catch2/catch.hpp>
 #include <tuple>
 
-using namespace Pennylane;
-using namespace Pennylane::Gates;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Gates;
 
 template <typename EnumClass, uint32_t... I>
 constexpr auto

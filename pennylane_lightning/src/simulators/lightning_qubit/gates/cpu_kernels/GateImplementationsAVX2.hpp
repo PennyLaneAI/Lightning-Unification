@@ -31,7 +31,7 @@
 #include <complex>
 #include <vector>
 
-namespace Pennylane::Gates {
+namespace Pennylane::Lightning_Qubit::Gates {
 class GateImplementationsAVX2
     : public GateImplementationsAVXCommon<GateImplementationsAVX2> {
   public:
@@ -93,4 +93,4 @@ class GateImplementationsAVX2
         }
     }
 };
-} // namespace Pennylane::Gates
+} // namespace Pennylane::Lightning_Qubit::Gates

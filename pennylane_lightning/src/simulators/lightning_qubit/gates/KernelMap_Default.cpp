@@ -20,7 +20,7 @@
 #include "AssignKernelMap_Default.hpp"
 #include "KernelMap.hpp"
 
-namespace Pennylane::KernelMap::Internal {
+namespace Pennylane::Lightning_Qubit::KernelMap::Internal {
 int assignKernelsForGateOp() {
     assignKernelsForGateOp_Default();
     return 1;
@@ -33,4 +33,4 @@ int assignKernelsForMatrixOp() {
     assignKernelsForMatrixOp_Default();
     return 1;
 }
-} // namespace Pennylane::KernelMap::Internal
+} // namespace Pennylane::Lightning_Qubit::KernelMap::Internal

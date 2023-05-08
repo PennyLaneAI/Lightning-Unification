@@ -24,7 +24,7 @@
 
 #include <complex>
 
-namespace Pennylane::Gates::AVXCommon {
+namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
 
 template <typename PrecisionT, size_t packed_size> struct ApplySingleQubitOp {
     using PrecisionAVXConcept =
@@ -164,4 +164,4 @@ template <typename PrecisionT, size_t packed_size> struct ApplySingleQubitOp {
     }
 };
 /// @endcond
-} // namespace Pennylane::Gates::AVXCommon
+} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon

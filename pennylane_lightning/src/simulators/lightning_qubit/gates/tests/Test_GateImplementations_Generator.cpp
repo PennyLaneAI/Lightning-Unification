@@ -1,3 +1,4 @@
+#include "ConstantUtil.hpp" // lookup, array_has_elt, prepend_to_tuple, tuple_to_array
 #include "CreateAllWires.hpp" // createWires
 #include "DynamicDispatcher.hpp"
 #include "TestHelpers.hpp"
@@ -24,8 +25,9 @@
  * :math:`I*G |\psi> = \partial{U(\theta)}/\partial{\theta}_{\theta=0} |\psi>`
  * @endrst
  */
-using namespace Pennylane;
-using namespace Pennylane::Gates;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Util;
+using namespace Pennylane::Lightning_Qubit::Gates;
 
 /**
  * @brief As clang does not support constexpr string_view::remove_prefix yet.
@@ -38,7 +40,7 @@ constexpr std::string_view remove_prefix(const std::string_view &str,
 template <GeneratorOperation gntr_op>
 constexpr auto findGateOpForGenerator() -> GateOperation {
     constexpr auto gntr_name =
-        remove_prefix(Util::lookup(Constant::generator_names, gntr_op), 9);
+        remove_prefix(lookup(Constant::generator_names, gntr_op), 9);
 
     for (const auto &[gate_op, gate_name] : Constant::gate_names) {
         if (gate_name == gntr_name) {
@@ -54,18 +56,18 @@ template <size_t gntr_idx> constexpr auto generatorGatePairsIter() {
             std::get<0>(Constant::generator_names[gntr_idx]);
         constexpr auto gate_op = findGateOpForGenerator<gntr_op>();
 
-        return Util::prepend_to_tuple(std::pair{gntr_op, gate_op},
-                                      generatorGatePairsIter<gntr_idx + 1>());
+        return prepend_to_tuple(std::pair{gntr_op, gate_op},
+                                generatorGatePairsIter<gntr_idx + 1>());
     } else {
         return std::tuple{};
     }
 }
 
 constexpr auto minNumQubitsFor(GeneratorOperation gntr_op) -> size_t {
-    if (Util::array_has_elt(Constant::multi_qubit_generators, gntr_op)) {
+    if (array_has_elt(Constant::multi_qubit_generators, gntr_op)) {
         return 1;
     }
-    return Util::lookup(Constant::generator_wires, gntr_op);
+    return lookup(Constant::generator_wires, gntr_op);
 }
 
 /**
@@ -73,19 +75,19 @@ constexpr auto minNumQubitsFor(GeneratorOperation gntr_op) -> size_t {
  * operations.
  */
 constexpr static auto generator_gate_pairs =
-    Util::tuple_to_array(generatorGatePairsIter<0>());
+    tuple_to_array(generatorGatePairsIter<0>());
 
 template <class PrecisionT, class RandomEngine>
 void testGeneratorEqualsGateDerivativeForKernel(
     RandomEngine &re, Gates::KernelType kernel,
     Gates::GeneratorOperation gntr_op, bool inverse) {
     using ComplexPrecisionT = std::complex<PrecisionT>;
-    constexpr static auto I = Util::IMAG<PrecisionT>();
+    constexpr static auto I = Pennylane::Util::IMAG<PrecisionT>();
 
     constexpr static auto eps = PrecisionT{1e-3}; // For finite difference
 
-    const auto gate_op = Util::lookup(generator_gate_pairs, gntr_op);
-    const auto gate_name = Util::lookup(Constant::gate_names, gate_op);
+    const auto gate_op = lookup(generator_gate_pairs, gntr_op);
+    const auto gate_name = lookup(Constant::gate_names, gate_op);
     const auto min_num_qubits = minNumQubitsFor(gntr_op);
     constexpr static size_t max_num_qubits = 6;
 

@@ -4,8 +4,8 @@
 
 #include <vector>
 
-using namespace Pennylane;
-using namespace Pennylane::Gates;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Gates;
 
 TEST_CASE("generateBitPatterns", "[GateUtil]") {
     const size_t num_qubits = 4;

@@ -19,15 +19,17 @@
 #include "cpu_kernels/GateImplementationsLM.hpp"
 #include "cpu_kernels/GateImplementationsPI.hpp"
 
-#include "LQubitTestHelpers.hpp"
+#include "LQubitTestHelpers.hpp" // createProductState, createRandomState
 #include "TestHelpers.hpp"
-// #include "ConstantTestHelpers.hpp"
 
-using namespace Pennylane;
-using namespace Pennylane::Gates;
-namespace Constant = Pennylane::Gates::Constant;
+using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::Lightning_Qubit::Gates;
+namespace Constant = Pennylane::Lightning_Qubit::Gates::Constant;
 
-using Pennylane::Gates::callGateOps;
+using Pennylane::Lightning_Qubit::Util::createProductState;
+using Pennylane::Lightning_Qubit::Util::createRandomState;
+
+using Pennylane::Lightning_Qubit::Gates::callGateOps;
 
 /**
  * @file This file contains tests for DynamicDispatcher class

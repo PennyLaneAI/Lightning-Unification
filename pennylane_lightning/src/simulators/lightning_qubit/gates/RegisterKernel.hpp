@@ -26,7 +26,7 @@
 #include "OpToMemberFuncPtr.hpp"
 
 /// @cond DEV
-namespace Pennylane {
+namespace Pennylane::Lightning_Qubit {
 /**
  * @brief return a lambda function for the given kernel and gate operation
  *
@@ -233,5 +233,5 @@ void registerKernel() {
     DynamicDispatcher<PrecisionT>::getInstance().registerKernelName(
         GateImplementation::kernel_id, std::string{GateImplementation::name});
 }
-} // namespace Pennylane
+} // namespace Pennylane::Lightning_Qubit
 /// @endcond

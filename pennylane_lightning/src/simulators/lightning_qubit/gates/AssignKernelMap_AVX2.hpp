@@ -15,8 +15,10 @@
 
 #include "CPUMemoryModel.hpp"
 
-namespace Pennylane::KernelMap::Internal {
+using namespace Pennylane::Lightning_Qubit::Util;
+
+namespace Pennylane::Lightning_Qubit::KernelMap::Internal {
 void assignKernelsForGateOp_AVX2(CPUMemoryModel);
 void assignKernelsForGeneratorOp_AVX2(CPUMemoryModel);
 void assignKernelsForMatrixOp_AVX2(CPUMemoryModel);
-} // namespace Pennylane::KernelMap::Internal
+} // namespace Pennylane::Lightning_Qubit::KernelMap::Internal

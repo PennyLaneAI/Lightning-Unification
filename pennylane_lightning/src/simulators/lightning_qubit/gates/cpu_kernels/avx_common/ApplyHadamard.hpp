@@ -23,7 +23,7 @@
 
 #include <complex>
 
-namespace Pennylane::Gates::AVXCommon {
+namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
 
 template <typename PrecisionT, size_t packed_size> struct ApplyHadamard {
     using Precision = PrecisionT;
@@ -36,7 +36,7 @@ template <typename PrecisionT, size_t packed_size> struct ApplyHadamard {
                               const size_t num_qubits,
                               [[maybe_unused]] bool inverse) {
         using namespace Permutation;
-        constexpr static auto isqrt2 = Pennylane::Util::INVSQRT2<PrecisionT>();
+        constexpr static auto isqrt2 = INVSQRT2<PrecisionT>();
 
         constexpr static auto mat_diag =
             internalParity<PrecisionT, packed_size>(rev_wire) * isqrt2;
@@ -60,7 +60,7 @@ template <typename PrecisionT, size_t packed_size> struct ApplyHadamard {
     static void applyExternal(std::complex<PrecisionT> *arr,
                               const size_t num_qubits, const size_t rev_wire,
                               [[maybe_unused]] bool inverse) {
-        constexpr auto isqrt2 = Pennylane::Util::INVSQRT2<PrecisionT>();
+        constexpr auto isqrt2 = INVSQRT2<PrecisionT>();
 
         const size_t rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
         const size_t wire_parity = fillTrailingOnes(rev_wire);
@@ -84,4 +84,4 @@ template <typename PrecisionT, size_t packed_size> struct ApplyHadamard {
         }
     }
 };
-} // namespace Pennylane::Gates::AVXCommon
+} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon

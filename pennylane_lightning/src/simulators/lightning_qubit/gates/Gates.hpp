@@ -6,7 +6,7 @@
 
 #include "Util.hpp"
 
-namespace Pennylane::Gates {
+namespace Pennylane::Lightning_Qubit::Gates {
 
 /**
  * @brief Create a matrix representation of the Identity gate data in row-major
@@ -18,7 +18,7 @@ namespace Pennylane::Gates {
  */
 template <class T>
 static constexpr auto getIdentity() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(), ZERO<T>(), ZERO<T>(), ONE<T>()};
 }
 
@@ -32,7 +32,7 @@ static constexpr auto getIdentity() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getPauliX() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ZERO<T>(), ONE<T>(), ONE<T>(), ZERO<T>()};
 }
 
@@ -46,7 +46,7 @@ static constexpr auto getPauliX() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getPauliY() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ZERO<T>(), -IMAG<T>(), IMAG<T>(), ZERO<T>()};
 }
 
@@ -60,7 +60,7 @@ static constexpr auto getPauliY() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getPauliZ() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(), ZERO<T>(), ZERO<T>(), -ONE<T>()};
 }
 
@@ -74,7 +74,7 @@ static constexpr auto getPauliZ() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getHadamard() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {INVSQRT2<T>(), INVSQRT2<T>(), INVSQRT2<T>(), -INVSQRT2<T>()};
 }
 
@@ -87,7 +87,7 @@ static constexpr auto getHadamard() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getS() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(), ZERO<T>(), ZERO<T>(), IMAG<T>()};
 }
 
@@ -100,7 +100,7 @@ static constexpr auto getS() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getT() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(), ZERO<T>(), ZERO<T>(),
             std::complex<T>{INVSQRT2<T>(), INVSQRT2<T>()}};
 }
@@ -115,7 +115,7 @@ static constexpr auto getT() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getCNOT() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(),  ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ONE<T>(),
             ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ONE<T>(),
             ZERO<T>(), ZERO<T>(), ONE<T>(),  ZERO<T>()};
@@ -131,7 +131,7 @@ static constexpr auto getCNOT() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getSWAP() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(),  ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(),
             ONE<T>(),  ZERO<T>(), ZERO<T>(), ONE<T>(),  ZERO<T>(), ZERO<T>(),
             ZERO<T>(), ZERO<T>(), ZERO<T>(), ONE<T>()};
@@ -147,7 +147,7 @@ static constexpr auto getSWAP() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getCZ() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(),  ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ONE<T>(),
             ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ONE<T>(),  ZERO<T>(),
             ZERO<T>(), ZERO<T>(), ZERO<T>(), -ONE<T>()};
@@ -163,7 +163,7 @@ static constexpr auto getCZ() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getCSWAP() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(),  ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(),
             ZERO<T>(), ZERO<T>(), ZERO<T>(), ONE<T>(),  ZERO<T>(), ZERO<T>(),
             ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(),
@@ -187,7 +187,7 @@ static constexpr auto getCSWAP() -> std::vector<std::complex<T>> {
  */
 template <class T>
 static constexpr auto getToffoli() -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(),  ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(),
             ZERO<T>(), ZERO<T>(), ZERO<T>(), ONE<T>(),  ZERO<T>(), ZERO<T>(),
             ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(),
@@ -213,7 +213,7 @@ static constexpr auto getToffoli() -> std::vector<std::complex<T>> {
  */
 template <class T, class U = T>
 static auto getPhaseShift(U angle) -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(), ZERO<T>(), ZERO<T>(), std::exp(IMAG<T>() * angle)};
 }
 
@@ -306,7 +306,7 @@ static auto getRY(const std::vector<U> &params)
  */
 template <class T, class U = T>
 static auto getRZ(U angle) -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {std::exp(-IMAG<T>() * (angle / 2)), ZERO<T>(), ZERO<T>(),
             std::exp(IMAG<T>() * (angle / 2))};
 }
@@ -345,7 +345,7 @@ e^{-i(\phi-\omega)/2}\sin(\theta/2) & e^{i(\phi+\omega)/2}\cos(\theta/2)
  */
 template <class T, class U = T>
 static auto getRot(U phi, U theta, U omega) -> std::array<std::complex<T>, 4> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     const T c = std::cos(theta / 2);
     const T s = std::sin(theta / 2);
     const U p{phi + omega};
@@ -390,7 +390,7 @@ static auto getRot(const std::vector<U> &params)
  */
 template <class T, class U = T>
 static auto getCRX(U angle) -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     const std::complex<T> rx{getRX<T>(angle)};
     return {ONE<T>(),  ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ONE<T>(),
             ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), rx[0],     rx[1],
@@ -423,7 +423,7 @@ static auto getCRX(const std::vector<U> &params)
  */
 template <class T, class U = T>
 static auto getCRY(U angle) -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     const std::complex<T> ry{getRY<T>(angle)};
     return {ONE<T>(),  ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ONE<T>(),
             ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ry[0],     ry[1],
@@ -456,7 +456,7 @@ static auto getCRY(const std::vector<U> &params)
  */
 template <class T, class U = T>
 static auto getCRZ(U angle) -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     const std::complex<T> first = std::exp(-IMAG<T>() * (angle / 2));
     const std::complex<T> second = std::exp(IMAG<T>() * (angle / 2));
     return {ONE<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(),
@@ -487,7 +487,7 @@ row-major format.
  */
 template <class T, class U = T>
 static auto getCRot(U phi, U theta, U omega) -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     const std::vector<std::complex<T>> rot{
         std::move(getRot<T>(phi, theta, omega))};
     return {ONE<T>(),  ZERO<T>(), ZERO<T>(), ZERO<T>(), ZERO<T>(), ONE<T>(),
@@ -515,7 +515,7 @@ in row-major format.
  */
 template <class T, class U = T>
 static auto getControlledPhaseShift(U angle) -> std::vector<std::complex<T>> {
-    using namespace Util;
+    using namespace Pennylane::Util;
     return {ONE<T>(),  ZERO<T>(), ZERO<T>(), ZERO<T>(),
             ZERO<T>(), ONE<T>(),  ZERO<T>(), ZERO<T>(),
             ZERO<T>(), ZERO<T>(), ONE<T>(),  ZERO<T>(),
@@ -534,4 +534,4 @@ static auto getControlledPhaseShift(const std::vector<U> &params)
     return getControlledPhaseShift<T>(params.front());
 }
 
-} // namespace Pennylane::Gates
+} // namespace Pennylane::Lightning_Qubit::Gates
