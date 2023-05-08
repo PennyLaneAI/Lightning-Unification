@@ -4,8 +4,8 @@
 #include "OpToMemberFuncPtr.hpp"
 #include "Util.hpp"
 
-#include <tuple>
 #include <catch2/catch.hpp>
+#include <tuple>
 
 using namespace Pennylane;
 using namespace Pennylane::Gates;

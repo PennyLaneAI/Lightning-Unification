@@ -27,8 +27,8 @@
 
 #include <bit>
 #include <complex>
-#include <vector>
 #include <tuple>
+#include <vector>
 
 namespace Pennylane::Gates {
 /**

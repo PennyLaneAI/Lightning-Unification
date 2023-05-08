@@ -1,7 +1,7 @@
 #include "cpu_kernels/avx_common/TwoQubitGateHelper.hpp"
 
-#include <tuple>
 #include <catch2/catch.hpp>
+#include <tuple>
 
 using namespace Pennylane::Gates::AVXCommon;
 
