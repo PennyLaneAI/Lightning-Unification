@@ -30,6 +30,7 @@
 #include "Error.hpp"
 #include "TypeTraits.hpp"
 
+#include <tuple>
 #include <cassert>
 #include <complex>
 #include <cstdlib>

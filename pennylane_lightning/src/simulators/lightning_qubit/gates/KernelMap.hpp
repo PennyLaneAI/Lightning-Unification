@@ -24,6 +24,7 @@
 #include "Threading.hpp"
 #include "Util.hpp"
 
+#include <tuple>
 #include <deque>
 #include <functional>
 #include <mutex>

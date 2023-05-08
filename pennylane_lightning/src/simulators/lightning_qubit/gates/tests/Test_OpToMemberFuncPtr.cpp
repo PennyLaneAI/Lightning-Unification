@@ -4,6 +4,7 @@
 #include "OpToMemberFuncPtr.hpp"
 #include "Util.hpp"
 
+#include <tuple>
 #include <catch2/catch.hpp>
 
 using namespace Pennylane;

@@ -15,6 +15,9 @@
  * @file RegisterKernel.hpp
  * Register all gate and generator implementations
  */
+
+#include <tuple>
+
 #include "Constant.hpp"
 #include "ConstantUtil.hpp"
 #include "DynamicDispatcher.hpp"

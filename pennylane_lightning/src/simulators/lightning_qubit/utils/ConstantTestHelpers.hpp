@@ -25,7 +25,6 @@
 #include <compare>
 #include <cstdlib>
 #include <stdexcept>
-#include <tuple>
 
 #if __has_include(<version>)
 #include <version>

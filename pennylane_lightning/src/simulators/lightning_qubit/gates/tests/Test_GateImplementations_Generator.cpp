@@ -5,6 +5,7 @@
 
 #include <catch2/catch.hpp>
 
+#include <tuple>
 #include <algorithm>
 #include <complex>
 #include <iostream>
