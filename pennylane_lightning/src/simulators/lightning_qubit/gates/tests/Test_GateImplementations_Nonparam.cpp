@@ -1,4 +1,3 @@
-#include "CompareVector.hpp"
 #include "LQubitTestHelpers.hpp" // PrecisionToName
 #include "TestHelpers.hpp"
 #include "TestKernels.hpp"

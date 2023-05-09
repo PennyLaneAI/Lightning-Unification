@@ -277,4 +277,30 @@ template <> struct PrecisionToName<double> {
     constexpr static auto value = "double";
 };
 
+/**
+ * @brief Compare std::vectors with same elements data type but different
+ * allocators.
+ *
+ * @tparam T Element data type.
+ * @tparam AllocA Allocator for the first vector.
+ * @tparam AllocB Allocator for the second vector.
+ * @param lhs First vector
+ * @param rhs Second vector
+ * @return true
+ * @return false
+ */
+template <class T, class AllocA, class AllocB>
+bool operator==(const std::vector<T, AllocA> &lhs,
+                const std::vector<T, AllocB> &rhs) {
+    if (lhs.size() != rhs.size()) {
+        return false;
+    }
+    for (size_t idx = 0; idx < lhs.size(); idx++) {
+        if (lhs[idx] != rhs[idx]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace Pennylane::Lightning_Qubit::Util

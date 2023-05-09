@@ -38,8 +38,7 @@ target_link_libraries(compile_time_tests    lightning_compile_options
                                             lightning_qubit
                                             )
 
-set(TEST_SOURCES    CreateAllWires.cpp
-                    Test_AVXSingleQubitGateHelpers.cpp
+set(TEST_SOURCES    Test_AVXSingleQubitGateHelpers.cpp
                     Test_AVXTwoQubitGateHelpers.cpp
                     Test_DynamicDispatcher.cpp
                     Test_GateImplementations_CompareKernels.cpp

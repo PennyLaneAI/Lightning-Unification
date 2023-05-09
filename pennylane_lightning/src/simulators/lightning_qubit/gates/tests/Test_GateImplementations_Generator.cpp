@@ -1,5 +1,5 @@
 #include "ConstantUtil.hpp" // lookup, array_has_elt, prepend_to_tuple, tuple_to_array
-#include "CreateAllWires.hpp" // createWires
+#include "CreateAllWires.hpp"
 #include "DynamicDispatcher.hpp"
 #include "TestHelpers.hpp"
 #include "Util.hpp"
