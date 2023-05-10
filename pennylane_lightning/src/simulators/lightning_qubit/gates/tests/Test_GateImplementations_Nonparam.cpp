@@ -19,9 +19,14 @@
  * This file contains tests for non-parameterized gates. List of such gates are
  * [PauliX, PauliY, PauliZ, Hadamard, S, T, CNOT, SWAP, CZ, Toffoli, CSWAP].
  */
+
+/// @cond DEV
+namespace {
 using namespace Pennylane::Util;
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Util;
+} // namespace
+/// @endcond
 
 /**
  * @brief Run test suit only when the gate is defined

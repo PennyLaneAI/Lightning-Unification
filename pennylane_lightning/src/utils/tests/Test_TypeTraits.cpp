@@ -6,7 +6,11 @@
 #include <type_traits>
 #include <utility>
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::Util;
+} // namespace
+/// @endcond
 
 TEST_CASE("Test remove_complex") {
     SECTION("remove_complex returns the floating point if the given type is "

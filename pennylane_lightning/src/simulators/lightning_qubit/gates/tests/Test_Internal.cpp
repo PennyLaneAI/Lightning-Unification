@@ -16,9 +16,13 @@
  * We test internal functions for test suite.
  */
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Util;
 using Pennylane::LightningQubit::Gates::GateImplementationsPI;
+} // namespace
+/// @endcond
 
 TEMPLATE_TEST_CASE("Approx", "[Test_Internal]", float, double) {
     using PrecisionT = TestType;

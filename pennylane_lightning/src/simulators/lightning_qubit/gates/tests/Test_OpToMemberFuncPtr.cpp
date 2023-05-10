@@ -7,8 +7,12 @@
 #include <catch2/catch.hpp>
 #include <tuple>
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Gates;
+} // namespace
+/// @endcond
 
 template <typename EnumClass, uint32_t... I>
 constexpr auto

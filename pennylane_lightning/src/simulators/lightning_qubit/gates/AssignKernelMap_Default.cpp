@@ -13,9 +13,12 @@
 // limitations under the License.
 #include "AssignKernelMap_Default.hpp"
 #include "GateOperation.hpp"
+#include "IntegerInterval.hpp" // full_domain, in_between_closed, larger_than, larger_than_equal_to, less_than, less_than_equal_to
 #include "KernelMap.hpp"
 #include "KernelType.hpp"
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::KernelMap;
 
@@ -29,9 +32,11 @@ using Util::larger_than;
 using Util::larger_than_equal_to;
 using Util::less_than;
 using Util::less_than_equal_to;
+} // namespace
+/// @endcond
 
 namespace Pennylane::LightningQubit::KernelMap::Internal {
-constexpr static auto all_qubit_numbers = Util::full_domain<size_t>();
+constexpr static auto all_qubit_numbers = full_domain<size_t>();
 
 void assignKernelsForGateOp_Default() {
     auto &instance = OperationKernelMap<GateOperation>::getInstance();

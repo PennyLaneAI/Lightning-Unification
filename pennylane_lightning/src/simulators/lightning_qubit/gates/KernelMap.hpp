@@ -32,11 +32,15 @@
 #include <unordered_map>
 #include <utility>
 
+/// @cond DEV
+namespace {
 using Pennylane::Util::for_each_enum;
 using Pennylane::Util::PairHash;
 
 using Pennylane::LightningQubit::Util::CPUMemoryModel;
 using Pennylane::LightningQubit::Util::Threading;
+} // namespace
+/// @endcond
 
 namespace Pennylane::LightningQubit::KernelMap {
 ///@cond DEV

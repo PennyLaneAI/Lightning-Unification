@@ -12,7 +12,7 @@
 #include "CPUMemoryModel.hpp"
 #include "DynamicDispatcher.hpp"
 #include "Macros.hpp"
-#include "OpToMemberFuncPtr.hpp"
+#include "OpToMemberFuncPtr.hpp" // callGateOps
 #include "Util.hpp"
 
 /* Kernels */
@@ -22,14 +22,17 @@
 #include "LQubitTestHelpers.hpp" // createProductState, createRandomState
 #include "TestHelpers.hpp"
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Gates;
-namespace Constant = Pennylane::LightningQubit::Gates::Constant;
 
 using Pennylane::LightningQubit::Util::createProductState;
 using Pennylane::LightningQubit::Util::createRandomState;
 
 using Pennylane::LightningQubit::Gates::callGateOps;
+} // namespace
+/// @endcond
 
 /**
  * @file This file contains tests for DynamicDispatcher class

@@ -14,8 +14,11 @@
 #include "KernelMap.hpp"
 
 #include "GateOperation.hpp"
+#include "IntegerInterval.hpp" // full_domain, in_between_closed, larger_than, larger_than_equal_to, less_than, less_than_equal_to
 #include "KernelType.hpp"
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::KernelMap;
 
@@ -29,10 +32,12 @@ using Util::larger_than;
 using Util::larger_than_equal_to;
 using Util::less_than;
 using Util::less_than_equal_to;
+} // namespace
+/// @endcond
 
 namespace Pennylane::LightningQubit::KernelMap::Internal {
 
-constexpr static auto leq_four = Util::larger_than_equal_to<size_t>(4);
+constexpr static auto leq_four = larger_than_equal_to<size_t>(4);
 
 void assignKernelsForGateOp_AVX512(CPUMemoryModel memory_model) {
     auto &instance = OperationKernelMap<GateOperation>::getInstance();

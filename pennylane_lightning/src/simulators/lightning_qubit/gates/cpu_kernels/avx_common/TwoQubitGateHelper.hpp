@@ -37,8 +37,6 @@
 #include <type_traits> // FuncReturn
 #include <vector>
 
-using Pennylane::Util::FuncReturn;
-
 namespace Pennylane::LightningQubit::Gates::AVXCommon {
 using Pennylane::Util::FuncReturn;
 using Pennylane::Util::log2PerfectPower;

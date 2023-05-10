@@ -31,8 +31,10 @@
 #include <tuple>
 #include <vector>
 
+namespace {
 using Pennylane::Util::exp2;
 using Pennylane::Util::INVSQRT2;
+} // namespace
 
 namespace Pennylane::LightningQubit::Gates {
 /**

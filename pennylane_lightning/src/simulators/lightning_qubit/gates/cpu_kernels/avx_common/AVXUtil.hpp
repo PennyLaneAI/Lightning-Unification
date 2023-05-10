@@ -19,14 +19,13 @@
 #include "BitUtil.hpp" // fillTrailingOnes, fillLeadingOnes, log2PerfectPower
 #include "Error.hpp"
 #include "Macros.hpp"
-#include "Util.hpp" // exp2, INVSQRT2
+#include "Util.hpp" // INVSQRT2
 
 #include <immintrin.h>
 
 #include <cstdlib>
 
 namespace Pennylane::LightningQubit::Gates::AVXCommon {
-using Pennylane::Util::exp2;
 using Pennylane::Util::fillLeadingOnes;
 using Pennylane::Util::fillTrailingOnes;
 using Pennylane::Util::INVSQRT2;

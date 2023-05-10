@@ -37,7 +37,11 @@
 #include <complex>
 #include <vector>
 
+/// @cond DEV
+namespace {
 using Pennylane::Util::ZERO;
+} // namespace
+/// @endcond
 
 namespace Pennylane::LightningQubit::Gates {
 /**

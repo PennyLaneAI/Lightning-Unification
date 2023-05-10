@@ -24,10 +24,14 @@
  * [RX, RY, RZ, PhaseShift, Rot, ControlledPhaseShift, CRX, CRY, CRZ, CRot]
  */
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Util;
 
 using Pennylane::Util::INVSQRT2;
+} // namespace
+/// @endcond
 
 /**
  * @brief Run test suit only when the gate is defined

@@ -3,7 +3,11 @@
 
 #include <catch2/catch.hpp>
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
+} // namespace
+/// @endcond
 
 TEST_CASE("Runtime information is correct", "[Test_RuntimeInfo]") {
     INFO("RuntimeInfo::AVX " << Util::RuntimeInfo::AVX());

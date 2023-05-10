@@ -20,7 +20,7 @@
 #pragma once
 
 #include "Constant.hpp"
-#include "ConstantUtil.hpp"
+#include "ConstantUtil.hpp" // lookup
 #include "Error.hpp"
 #include "GateIndices.hpp"
 #include "KernelType.hpp"
@@ -39,8 +39,11 @@
 
 /// @cond DEV
 
+namespace {
+using Pennylane::LightningQubit::Util::lookup;
 using Pennylane::Util::exp2;
 using Pennylane::Util::PairHash;
+} // namespace
 
 namespace Pennylane::LightningQubit::Internal {
 constexpr auto generatorNamesWithoutPrefix() {

@@ -3,8 +3,11 @@
 #include <catch2/catch.hpp>
 #include <cmath>
 
+/// @cond DEV
+namespace {
 using namespace Pennylane;
-// using namespace Pennylane::Util;
+} // namespace
+/// @endcond
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 TEST_CASE("Utility bit operations", "[Util][BitUtil]") {

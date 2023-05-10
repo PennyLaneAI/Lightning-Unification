@@ -6,8 +6,12 @@
 
 #include <catch2/catch.hpp>
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::Util;
+} // namespace
+/// @endcond
 
 TEMPLATE_TEST_CASE("LightningQubit::StateVectorLQubit::changeDataPtr",
                    "[StateVectorLQubit]", float, double) {

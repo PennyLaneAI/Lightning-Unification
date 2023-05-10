@@ -16,6 +16,8 @@
 #include "GateOperation.hpp"
 #include "KernelType.hpp"
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::KernelMap;
 
@@ -29,6 +31,8 @@ using Util::larger_than;
 using Util::larger_than_equal_to;
 using Util::less_than;
 using Util::less_than_equal_to;
+} // namespace
+/// @endcond
 
 namespace Pennylane::LightningQubit::KernelMap::Internal {
 

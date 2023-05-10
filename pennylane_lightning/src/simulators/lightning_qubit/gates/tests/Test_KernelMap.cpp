@@ -8,6 +8,8 @@
 
 #include <catch2/catch.hpp>
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Util;
 using namespace Pennylane::LightningQubit::KernelMap;
@@ -15,6 +17,8 @@ using namespace Pennylane::LightningQubit::KernelMap;
 using Catch::Matchers::Contains;
 using Pennylane::Util::for_each_enum;
 using Pennylane::Util::LightningException;
+} // namespace
+/// @endcond
 
 TEST_CASE("Test PriorityDispatchSet", "[PriorityDispatchSet]") {
     auto pds = PriorityDispatchSet();

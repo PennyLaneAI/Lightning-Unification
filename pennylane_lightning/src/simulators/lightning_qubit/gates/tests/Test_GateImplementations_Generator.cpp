@@ -25,9 +25,14 @@
  * :math:`I*G |\psi> = \partial{U(\theta)}/\partial{\theta}_{\theta=0} |\psi>`
  * @endrst
  */
+
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Util;
 using namespace Pennylane::LightningQubit::Gates;
+} // namespace
+/// @endcond
 
 /**
  * @brief As clang does not support constexpr string_view::remove_prefix yet.

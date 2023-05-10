@@ -23,7 +23,11 @@
 #include "KernelMap.hpp"
 #include "RuntimeInfo.hpp"
 
+/// @cond DEV
+namespace {
 using Pennylane::LightningQubit::Util::RuntimeInfo;
+} // namespace
+/// @endcond
 
 namespace Pennylane::LightningQubit::KernelMap::Internal {
 

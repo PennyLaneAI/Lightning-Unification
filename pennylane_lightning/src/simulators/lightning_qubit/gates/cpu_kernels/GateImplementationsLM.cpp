@@ -13,8 +13,13 @@
 // limitations under the License.
 
 #include "GateImplementationsLM.hpp"
+#include "Util.hpp" // exp2
 
+/// @cond DEV
+namespace {
 using Pennylane::Util::exp2;
+} // namespace
+/// @endcond
 
 namespace Pennylane::LightningQubit::Gates {
 

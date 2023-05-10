@@ -27,11 +27,13 @@
  * This file tests all gate operations (besides matrix) by comparing results
  * between different kernels (gate implementations).
  */
+/// @cond DEV
+namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Util;
 using namespace Pennylane::LightningQubit::Gates;
-
-using std::vector;
+} // namespace
+/// @endcond
 
 template <typename PrecisionT>
 auto kernelsImplementingGate(GateOperation gate_op) -> std::vector<KernelType> {
