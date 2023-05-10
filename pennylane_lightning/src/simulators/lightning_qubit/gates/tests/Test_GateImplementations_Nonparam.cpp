@@ -20,8 +20,8 @@
  * [PauliX, PauliY, PauliZ, Hadamard, S, T, CNOT, SWAP, CZ, Toffoli, CSWAP].
  */
 using namespace Pennylane::Util;
-using namespace Pennylane::Lightning_Qubit;
-using namespace Pennylane::Lightning_Qubit::Util;
+using namespace Pennylane::LightningQubit;
+using namespace Pennylane::LightningQubit::Util;
 
 /**
  * @brief Run test suit only when the gate is defined

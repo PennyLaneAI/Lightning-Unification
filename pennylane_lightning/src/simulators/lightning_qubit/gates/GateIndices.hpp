@@ -32,7 +32,7 @@
  * for loop is usually better performing, consider to use other options before
  * using functions below.
  */
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 
 /**
  * @brief Get indices of statevector data not participating in application
@@ -86,4 +86,4 @@ struct GateIndices {
           external{generateBitPatterns(
               getIndicesAfterExclusion(wires, num_qubits), num_qubits)} {}
 };
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

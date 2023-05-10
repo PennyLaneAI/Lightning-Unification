@@ -34,7 +34,7 @@
 #include <type_traits> // FuncReturn
 #include <vector>
 
-namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+namespace Pennylane::LightningQubit::Gates::AVXCommon {
 using Pennylane::Util::FuncReturn;
 using Pennylane::Util::log2PerfectPower;
 
@@ -237,4 +237,4 @@ class SingleQubitGateWithParamHelper {
                                       angle);
     }
 };
-} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon
+} // namespace Pennylane::LightningQubit::Gates::AVXCommon

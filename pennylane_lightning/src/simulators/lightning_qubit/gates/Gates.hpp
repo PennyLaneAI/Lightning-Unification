@@ -6,7 +6,7 @@
 
 #include "Util.hpp"
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 
 /**
  * @brief Create a matrix representation of the Identity gate data in row-major
@@ -534,4 +534,4 @@ static auto getControlledPhaseShift(const std::vector<U> &params)
     return getControlledPhaseShift<T>(params.front());
 }
 
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

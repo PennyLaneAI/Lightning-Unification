@@ -24,7 +24,7 @@
 #include <memory>
 
 // LCOV_EXCL_START
-namespace Pennylane::Lightning_Qubit::Util {
+namespace Pennylane::LightningQubit::Util {
 
 /**
  * @brief Enum class for defining CPU memory alignments
@@ -110,5 +110,5 @@ template <class T>
 constexpr auto getBestAllocator() -> Util::AlignedAllocator<T> {
     return getAllocator<T>(bestCPUMemoryModel());
 }
-} // namespace Pennylane::Lightning_Qubit::Util
+} // namespace Pennylane::LightningQubit::Util
 // LCOV_EXCL_STOP

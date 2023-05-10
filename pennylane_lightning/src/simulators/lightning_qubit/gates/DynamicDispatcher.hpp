@@ -42,7 +42,7 @@
 using Pennylane::Util::exp2;
 using Pennylane::Util::PairHash;
 
-namespace Pennylane::Lightning_Qubit::Internal {
+namespace Pennylane::LightningQubit::Internal {
 constexpr auto generatorNamesWithoutPrefix() {
     constexpr std::string_view prefix = "Generator";
     namespace GateConstant = Gates::Constant;
@@ -57,10 +57,10 @@ constexpr auto generatorNamesWithoutPrefix() {
     return res;
 }
 
-} // namespace Pennylane::Lightning_Qubit::Internal
+} // namespace Pennylane::LightningQubit::Internal
 /// @endcond
 
-namespace Pennylane::Lightning_Qubit {
+namespace Pennylane::LightningQubit {
 
 /**
  * @brief DynamicDispatcher class
@@ -520,10 +520,10 @@ template <typename PrecisionT> class DynamicDispatcher {
         return (iter->second)(data, num_qubits, wires, adj);
     }
 };
-} // namespace Pennylane::Lightning_Qubit
+} // namespace Pennylane::LightningQubit
 
 /// @cond DEV
-namespace Pennylane::Lightning_Qubit::Internal {
+namespace Pennylane::LightningQubit::Internal {
 int registerAllAvailableKernels_Float();
 int registerAllAvailableKernels_Double();
 
@@ -538,5 +538,5 @@ struct RegisterBeforeMain_Float {
 struct RegisterBeforeMain_Double {
     const static inline int dummy = registerAllAvailableKernels_Double();
 };
-} // namespace Pennylane::Lightning_Qubit::Internal
+} // namespace Pennylane::LightningQubit::Internal
 /// @endcond

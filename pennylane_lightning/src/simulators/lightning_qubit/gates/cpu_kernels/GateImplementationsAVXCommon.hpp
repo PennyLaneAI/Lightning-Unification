@@ -32,7 +32,7 @@
 #include <complex>
 #include <vector>
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 template <class Derived>
 class GateImplementationsAVXCommon
     : public PauliGenerator<GateImplementationsAVXCommon<Derived>> {
@@ -601,4 +601,4 @@ class GateImplementationsAVXCommon
         return gate_helper(arr, num_qubits, wires, inverse);
     }
 };
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

@@ -17,7 +17,7 @@
 #include "GateIndices.hpp"
 #include "Util.hpp" // exp2, maxDecimalForQubit
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 auto getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
                               size_t num_qubits) -> std::vector<size_t> {
     std::set<size_t> indices;
@@ -48,4 +48,4 @@ auto generateBitPatterns(const std::vector<size_t> &qubitIndices,
     }
     return indices;
 }
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

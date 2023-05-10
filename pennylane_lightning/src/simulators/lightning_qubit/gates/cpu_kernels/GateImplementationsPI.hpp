@@ -39,7 +39,7 @@
 
 using Pennylane::Util::ZERO;
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 /**
  * @brief Kernel functions for gate operations with precomputed indices
  *
@@ -1322,4 +1322,4 @@ extern template auto GateImplementationsPI::applyGeneratorControlledPhaseShift(
 extern template auto GateImplementationsPI::applyGeneratorControlledPhaseShift(
     std::complex<double> *, size_t, const std::vector<size_t> &, bool)
     -> double;
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

@@ -3,7 +3,7 @@
 
 #include <catch2/catch.hpp>
 
-using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::LightningQubit;
 
 TEST_CASE("Runtime information is correct", "[Test_RuntimeInfo]") {
     INFO("RuntimeInfo::AVX " << Util::RuntimeInfo::AVX());

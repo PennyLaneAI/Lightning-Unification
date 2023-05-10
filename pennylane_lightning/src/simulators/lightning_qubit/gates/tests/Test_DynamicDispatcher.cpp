@@ -22,14 +22,14 @@
 #include "LQubitTestHelpers.hpp" // createProductState, createRandomState
 #include "TestHelpers.hpp"
 
-using namespace Pennylane::Lightning_Qubit;
-using namespace Pennylane::Lightning_Qubit::Gates;
-namespace Constant = Pennylane::Lightning_Qubit::Gates::Constant;
+using namespace Pennylane::LightningQubit;
+using namespace Pennylane::LightningQubit::Gates;
+namespace Constant = Pennylane::LightningQubit::Gates::Constant;
 
-using Pennylane::Lightning_Qubit::Util::createProductState;
-using Pennylane::Lightning_Qubit::Util::createRandomState;
+using Pennylane::LightningQubit::Util::createProductState;
+using Pennylane::LightningQubit::Util::createRandomState;
 
-using Pennylane::Lightning_Qubit::Gates::callGateOps;
+using Pennylane::LightningQubit::Gates::callGateOps;
 
 /**
  * @file This file contains tests for DynamicDispatcher class

@@ -16,7 +16,7 @@
 
 using Pennylane::Util::exp2;
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 
 template <class PrecisionT, class ParamT>
 void GateImplementationsLM::applySingleExcitation(
@@ -569,4 +569,4 @@ template auto GateImplementationsLM::applyGeneratorSingleExcitationPlus<double>(
 
 // Explicit instantiations ends
 
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

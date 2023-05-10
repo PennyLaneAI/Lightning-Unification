@@ -27,9 +27,9 @@
  * This file tests all gate operations (besides matrix) by comparing results
  * between different kernels (gate implementations).
  */
-using namespace Pennylane::Lightning_Qubit;
-using namespace Pennylane::Lightning_Qubit::Util;
-using namespace Pennylane::Lightning_Qubit::Gates;
+using namespace Pennylane::LightningQubit;
+using namespace Pennylane::LightningQubit::Util;
+using namespace Pennylane::LightningQubit::Gates;
 
 using std::vector;
 

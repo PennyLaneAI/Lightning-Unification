@@ -30,7 +30,7 @@
 #include <version>
 #endif
 
-namespace Pennylane::Lightning_Qubit::Util {
+namespace Pennylane::LightningQubit::Util {
 /**
  * @brief Extract first elements from the array of pairs.
  *
@@ -120,4 +120,4 @@ constexpr size_t count_unique(const std::array<T, size> &arr) {
 }
 #endif
 
-} // namespace Pennylane::Lightning_Qubit::Util
+} // namespace Pennylane::LightningQubit::Util

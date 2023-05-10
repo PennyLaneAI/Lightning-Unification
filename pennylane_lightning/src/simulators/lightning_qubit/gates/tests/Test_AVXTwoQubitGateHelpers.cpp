@@ -3,7 +3,7 @@
 #include <catch2/catch.hpp>
 #include <tuple>
 
-using namespace Pennylane::Lightning_Qubit::Gates::AVXCommon;
+using namespace Pennylane::LightningQubit::Gates::AVXCommon;
 
 /**
  * Define mock classes. For symmetric gate, we do not have

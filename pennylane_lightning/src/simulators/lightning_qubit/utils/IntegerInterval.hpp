@@ -21,7 +21,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace Pennylane::Lightning_Qubit::Util {
+namespace Pennylane::LightningQubit::Util {
 
 /**
  * @brief Define integer interval [min_, max_)
@@ -112,4 +112,4 @@ bool is_disjoint(const IntegerInterval<IntegerType> &interval1,
     return (interval1.max() <= interval2.min()) ||
            (interval2.max() <= interval1.min());
 }
-} // namespace Pennylane::Lightning_Qubit::Util
+} // namespace Pennylane::LightningQubit::Util

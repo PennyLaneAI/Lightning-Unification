@@ -16,8 +16,8 @@
 #include "KernelMap.hpp"
 #include "KernelType.hpp"
 
-using namespace Pennylane::Lightning_Qubit;
-using namespace Pennylane::Lightning_Qubit::KernelMap;
+using namespace Pennylane::LightningQubit;
+using namespace Pennylane::LightningQubit::KernelMap;
 
 using Gates::GateOperation;
 using Gates::GeneratorOperation;
@@ -30,7 +30,7 @@ using Util::larger_than_equal_to;
 using Util::less_than;
 using Util::less_than_equal_to;
 
-namespace Pennylane::Lightning_Qubit::KernelMap::Internal {
+namespace Pennylane::LightningQubit::KernelMap::Internal {
 constexpr static auto all_qubit_numbers = Util::full_domain<size_t>();
 
 void assignKernelsForGateOp_Default() {
@@ -223,4 +223,4 @@ void assignKernelsForMatrixOp_Default() {
                                all_memory_model, all_qubit_numbers,
                                KernelType::PI);
 }
-} // namespace Pennylane::Lightning_Qubit::KernelMap::Internal
+} // namespace Pennylane::LightningQubit::KernelMap::Internal

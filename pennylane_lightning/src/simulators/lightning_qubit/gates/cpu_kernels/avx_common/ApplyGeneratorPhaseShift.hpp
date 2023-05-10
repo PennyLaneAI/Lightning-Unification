@@ -23,7 +23,7 @@
 
 #include <complex>
 
-namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+namespace Pennylane::LightningQubit::Gates::AVXCommon {
 
 template <typename PrecisionT, size_t packed_size>
 struct ApplyGeneratorPhaseShift {
@@ -77,4 +77,4 @@ struct ApplyGeneratorPhaseShift {
         return static_cast<PrecisionT>(1.0);
     }
 };
-} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon
+} // namespace Pennylane::LightningQubit::Gates::AVXCommon

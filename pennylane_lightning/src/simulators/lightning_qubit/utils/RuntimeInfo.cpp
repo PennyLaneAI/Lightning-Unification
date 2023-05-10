@@ -22,7 +22,7 @@
 #include <vector>
 #endif
 
-namespace Pennylane::Lightning_Qubit::Util {
+namespace Pennylane::LightningQubit::Util {
 #if (defined(__GNUC__) || defined(__clang__)) && defined(__x86_64__)
 RuntimeInfo::InternalRuntimeInfo::InternalRuntimeInfo() {
     unsigned int eax = 0;
@@ -127,4 +127,4 @@ RuntimeInfo::InternalRuntimeInfo::InternalRuntimeInfo() {
 #else
 RuntimeInfo::InternalRuntimeInfo::InternalRuntimeInfo(){};
 #endif
-} // namespace Pennylane::Lightning_Qubit::Util
+} // namespace Pennylane::LightningQubit::Util

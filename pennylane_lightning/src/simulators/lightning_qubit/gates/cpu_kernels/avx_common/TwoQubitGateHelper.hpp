@@ -39,7 +39,7 @@
 
 using Pennylane::Util::FuncReturn;
 
-namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+namespace Pennylane::LightningQubit::Gates::AVXCommon {
 using Pennylane::Util::FuncReturn;
 using Pennylane::Util::log2PerfectPower;
 
@@ -567,4 +567,4 @@ class TwoQubitGateWithParamHelper {
                                               inverse, angle);
     }
 };
-} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon
+} // namespace Pennylane::LightningQubit::Gates::AVXCommon

@@ -18,5 +18,5 @@
 #include "StateVectorLQubit.hpp"
 
 // explicit instantiation
-template class Pennylane::Lightning_Qubit::StateVectorLQubit<float>;
-template class Pennylane::Lightning_Qubit::StateVectorLQubit<double>;
+template class Pennylane::LightningQubit::StateVectorLQubit<float>;
+template class Pennylane::LightningQubit::StateVectorLQubit<double>;

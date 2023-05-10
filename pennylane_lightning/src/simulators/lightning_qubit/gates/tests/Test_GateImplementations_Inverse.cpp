@@ -22,9 +22,9 @@
  * constexpr member variable implemented_generators.
  */
 
-using namespace Pennylane::Lightning_Qubit;
-using namespace Pennylane::Lightning_Qubit::Util;
-using namespace Pennylane::Lightning_Qubit::Gates;
+using namespace Pennylane::LightningQubit;
+using namespace Pennylane::LightningQubit::Util;
+using namespace Pennylane::LightningQubit::Gates;
 
 template <typename PrecisionT, class RandomEngine>
 void testInverseGateKernel(RandomEngine &re, KernelType kernel,

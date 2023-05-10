@@ -23,9 +23,9 @@
 #include "KernelMap.hpp"
 #include "RuntimeInfo.hpp"
 
-using Pennylane::Lightning_Qubit::Util::RuntimeInfo;
+using Pennylane::LightningQubit::Util::RuntimeInfo;
 
-namespace Pennylane::Lightning_Qubit::KernelMap::Internal {
+namespace Pennylane::LightningQubit::KernelMap::Internal {
 
 int assignKernelsForGateOp() {
     assignKernelsForGateOp_Default();
@@ -81,4 +81,4 @@ int assignKernelsForMatrixOp() {
     // LCOV_EXCL_STOP
     return 1;
 }
-} // namespace Pennylane::Lightning_Qubit::KernelMap::Internal
+} // namespace Pennylane::LightningQubit::KernelMap::Internal

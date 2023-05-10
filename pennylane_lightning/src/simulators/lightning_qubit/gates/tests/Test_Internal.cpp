@@ -16,9 +16,9 @@
  * We test internal functions for test suite.
  */
 
-using namespace Pennylane::Lightning_Qubit;
-using namespace Pennylane::Lightning_Qubit::Util;
-using Pennylane::Lightning_Qubit::Gates::GateImplementationsPI;
+using namespace Pennylane::LightningQubit;
+using namespace Pennylane::LightningQubit::Util;
+using Pennylane::LightningQubit::Gates::GateImplementationsPI;
 
 TEMPLATE_TEST_CASE("Approx", "[Test_Internal]", float, double) {
     using PrecisionT = TestType;

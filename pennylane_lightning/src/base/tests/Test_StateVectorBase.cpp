@@ -8,7 +8,7 @@
 #ifdef _ENABLE_PLQUBIT
 #include "StateVectorLQubit.hpp"
 template <typename T> struct StateVectorBackend {
-    using StateVector = Pennylane::Lightning_Qubit::StateVectorLQubit<T>;
+    using StateVector = Pennylane::LightningQubit::StateVectorLQubit<T>;
     using Precision = T;
 };
 #elif defined(_ENABLE_PLKOKKOS)

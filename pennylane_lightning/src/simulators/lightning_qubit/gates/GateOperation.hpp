@@ -20,7 +20,7 @@
 #include <string>
 #include <utility>
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 /**
  * @brief Enum class for all gate operations
  */
@@ -109,4 +109,4 @@ enum class MatrixOperation : uint32_t {
     /* END (placeholder) */
     END
 };
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

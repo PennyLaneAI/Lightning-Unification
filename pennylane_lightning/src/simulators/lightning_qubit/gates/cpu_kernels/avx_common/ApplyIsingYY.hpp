@@ -23,7 +23,7 @@
 
 #include <complex>
 
-namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+namespace Pennylane::LightningQubit::Gates::AVXCommon {
 
 template <typename PrecisionT, size_t packed_size> struct ApplyIsingYY {
     using Precision = PrecisionT;
@@ -185,4 +185,4 @@ template <typename PrecisionT, size_t packed_size> struct ApplyIsingYY {
         }
     }
 };
-} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon
+} // namespace Pennylane::LightningQubit::Gates::AVXCommon

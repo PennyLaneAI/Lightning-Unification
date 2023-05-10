@@ -83,7 +83,7 @@
 #endif
 #endif
 
-namespace Pennylane::Lightning_Qubit::Util {
+namespace Pennylane::LightningQubit::Util {
 /* Create constexpr values */
 /// @cond DEV
 #if defined(PL_USE_OMP)
@@ -241,4 +241,4 @@ constexpr auto getCompilerVersion<Compiler::NVHPC>() -> std::string_view {
     std::pair{Compiler::MSVC, std::string_view{"MSVC"}},
     std::pair{Compiler::Unknown, std::string_view{"Unknown"}},
 };
-} // namespace Pennylane::Lightning_Qubit::Util
+} // namespace Pennylane::LightningQubit::Util

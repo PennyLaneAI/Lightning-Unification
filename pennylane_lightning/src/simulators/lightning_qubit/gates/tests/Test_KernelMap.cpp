@@ -8,9 +8,9 @@
 
 #include <catch2/catch.hpp>
 
-using namespace Pennylane::Lightning_Qubit;
-using namespace Pennylane::Lightning_Qubit::Util;
-using namespace Pennylane::Lightning_Qubit::KernelMap;
+using namespace Pennylane::LightningQubit;
+using namespace Pennylane::LightningQubit::Util;
+using namespace Pennylane::LightningQubit::KernelMap;
 
 using Catch::Matchers::Contains;
 using Pennylane::Util::for_each_enum;

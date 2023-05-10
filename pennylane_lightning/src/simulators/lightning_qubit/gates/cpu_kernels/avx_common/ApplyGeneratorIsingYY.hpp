@@ -24,7 +24,7 @@
 
 #include <complex>
 
-namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+namespace Pennylane::LightningQubit::Gates::AVXCommon {
 
 template <typename PrecisionT, size_t packed_size>
 struct ApplyGeneratorIsingYY {
@@ -131,4 +131,4 @@ struct ApplyGeneratorIsingYY {
             0.5); // NOLINT(readability-magic-numbers)
     }
 };
-} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon
+} // namespace Pennylane::LightningQubit::Gates::AVXCommon

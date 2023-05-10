@@ -55,7 +55,7 @@ using CBLAS_LAYOUT = enum CBLAS_LAYOUT {
 
 using namespace Pennylane::Util;
 
-namespace Pennylane::Lightning_Qubit::Util {
+namespace Pennylane::LightningQubit::Util {
 /**
  * @brief Transpose enum class
  */
@@ -946,4 +946,4 @@ void scaleAndAdd(std::complex<T> a, const std::vector<std::complex<T>> &x,
     }
     scaleAndAdd(x.size(), a, x.data(), y.data());
 }
-} // namespace Pennylane::Lightning_Qubit::Util
+} // namespace Pennylane::LightningQubit::Util

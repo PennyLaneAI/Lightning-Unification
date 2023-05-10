@@ -6,8 +6,8 @@
 
 #include <catch2/catch.hpp>
 
-using namespace Pennylane::Lightning_Qubit;
-using namespace Pennylane::Lightning_Qubit::Util;
+using namespace Pennylane::LightningQubit;
+using namespace Pennylane::LightningQubit::Util;
 
 template <typename PrecisionT, class GateImplementation>
 void testApplySingleQubitOp() {

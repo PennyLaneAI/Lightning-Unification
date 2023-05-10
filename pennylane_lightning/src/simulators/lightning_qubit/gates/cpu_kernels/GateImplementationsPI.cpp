@@ -13,7 +13,7 @@
 // limitations under the License.
 #include "GateImplementationsPI.hpp"
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 template <class PrecisionT, class ParamT>
 void GateImplementationsPI::applyDoubleExcitation(
     std::complex<PrecisionT> *arr, size_t num_qubits,
@@ -522,4 +522,4 @@ template auto GateImplementationsPI::applyGeneratorDoubleExcitationPlus<float>(
 template auto GateImplementationsPI::applyGeneratorDoubleExcitationPlus<double>(
     std::complex<double> *, size_t, const std::vector<size_t> &, bool)
     -> double;
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

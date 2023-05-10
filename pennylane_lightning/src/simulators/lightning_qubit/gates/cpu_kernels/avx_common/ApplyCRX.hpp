@@ -28,7 +28,7 @@
 #include <complex>
 #include <utility>
 
-namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+namespace Pennylane::LightningQubit::Gates::AVXCommon {
 template <typename PrecisionT, size_t packed_size> struct ApplyCRX {
     using Precision = PrecisionT;
     using PrecisionAVXConcept = AVXConceptType<PrecisionT, packed_size>;
@@ -325,4 +325,4 @@ template <typename PrecisionT, size_t packed_size> struct ApplyCRX {
         }
     }
 };
-} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon
+} // namespace Pennylane::LightningQubit::Gates::AVXCommon

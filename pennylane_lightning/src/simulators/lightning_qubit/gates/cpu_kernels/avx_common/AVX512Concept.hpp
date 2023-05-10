@@ -25,7 +25,7 @@
 
 #include <type_traits>
 
-namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+namespace Pennylane::LightningQubit::Gates::AVXCommon {
 ///@cond DEV
 namespace Internal {
 template <typename T> struct AVX512Intrinsic {
@@ -113,4 +113,4 @@ template <typename T> struct AVX512Concept {
     }
 };
 
-} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon
+} // namespace Pennylane::LightningQubit::Gates::AVXCommon

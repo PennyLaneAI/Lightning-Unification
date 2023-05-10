@@ -34,7 +34,7 @@
 using Pennylane::Util::exp2;
 using Pennylane::Util::INVSQRT2;
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 /**
  * @brief A gate operation implementation with less memory.
  *
@@ -1972,4 +1972,4 @@ GateImplementationsLM::applyGeneratorMultiRZ(std::complex<double> *, size_t,
     -> double;
 extern template auto GateImplementationsLM::applyGeneratorMultiRZ(
     std::complex<float> *, size_t, const std::vector<size_t> &, bool) -> float;
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

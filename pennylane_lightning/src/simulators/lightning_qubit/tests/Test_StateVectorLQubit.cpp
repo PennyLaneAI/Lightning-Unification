@@ -6,7 +6,7 @@
 
 #include <catch2/catch.hpp>
 
-using namespace Pennylane::Lightning_Qubit;
+using namespace Pennylane::LightningQubit;
 using namespace Pennylane::Util;
 
 TEMPLATE_TEST_CASE("LightningQubit::StateVectorLQubit::changeDataPtr",

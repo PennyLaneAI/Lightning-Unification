@@ -38,7 +38,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace Pennylane::Lightning_Qubit::Util {
+namespace Pennylane::LightningQubit::Util {
 
 template <typename T>
 using TestVector = std::vector<T, Util::AlignedAllocator<T>>;
@@ -303,4 +303,4 @@ bool operator==(const std::vector<T, AllocA> &lhs,
     return true;
 }
 
-} // namespace Pennylane::Lightning_Qubit::Util
+} // namespace Pennylane::LightningQubit::Util

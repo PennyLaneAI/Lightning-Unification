@@ -13,8 +13,8 @@
 // limitations under the License.
 #pragma once
 
-namespace Pennylane::Lightning_Qubit::KernelMap::Internal {
+namespace Pennylane::LightningQubit::KernelMap::Internal {
 void assignKernelsForGateOp_Default();
 void assignKernelsForGeneratorOp_Default();
 void assignKernelsForMatrixOp_Default();
-} // namespace Pennylane::Lightning_Qubit::KernelMap::Internal
+} // namespace Pennylane::LightningQubit::KernelMap::Internal

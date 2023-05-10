@@ -19,11 +19,11 @@
 #include "RegisterKernels_x64.hpp"
 #include "cpu_kernels/GateImplementationsAVX512.hpp"
 
-namespace Pennylane::Lightning_Qubit::Internal {
+namespace Pennylane::LightningQubit::Internal {
 void registerKernelsAVX512_Float() {
     registerKernel<float, float, Gates::GateImplementationsAVX512>();
 }
 void registerKernelsAVX512_Double() {
     registerKernel<double, double, Gates::GateImplementationsAVX512>();
 }
-} // namespace Pennylane::Lightning_Qubit::Internal
+} // namespace Pennylane::LightningQubit::Internal

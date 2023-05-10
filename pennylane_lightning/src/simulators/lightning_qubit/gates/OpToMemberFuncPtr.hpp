@@ -24,7 +24,7 @@
 #include <complex>
 #include <vector>
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 
 /**
  * @brief Return a specific member function pointer for a given gate operation.
@@ -600,4 +600,4 @@ inline void callMatrixOp(MatrixFuncPtrT<PrecisionT> func,
                          const std::vector<size_t> &wires, bool adj) {
     return func(data, num_qubits, matrix, wires, adj);
 }
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

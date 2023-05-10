@@ -4,7 +4,7 @@
 #include "GateOperation.hpp"
 #include "Util.hpp"
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 template <typename T, size_t size1, size_t size2>
 constexpr auto are_mutually_disjoint(const std::array<T, size1> &arr1,
                                      const std::array<T, size2> &arr2) -> bool {
@@ -91,4 +91,4 @@ static_assert(
     Util::count_unique(Util::first_elts_of(Constant::generator_wires)) ==
         Constant::generator_wires.size(),
     "First elements of generator_wires must be distinct.");
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

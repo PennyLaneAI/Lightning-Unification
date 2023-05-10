@@ -23,7 +23,7 @@
 
 #include <complex>
 
-namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+namespace Pennylane::LightningQubit::Gates::AVXCommon {
 template <typename PrecisionT, size_t packed_size> struct ApplyPauliZ {
     using Precision = PrecisionT;
     using PrecisionAVXConcept =
@@ -59,4 +59,4 @@ template <typename PrecisionT, size_t packed_size> struct ApplyPauliZ {
         }
     }
 };
-} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon
+} // namespace Pennylane::LightningQubit::Gates::AVXCommon

@@ -23,7 +23,7 @@
 
 #include <complex>
 
-namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+namespace Pennylane::LightningQubit::Gates::AVXCommon {
 
 template <typename PrecisionT, size_t packed_size> struct ApplyIsingZZ {
     using PrecisionAVXConcept =
@@ -153,4 +153,4 @@ template <typename PrecisionT, size_t packed_size> struct ApplyIsingZZ {
         }
     }
 };
-} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon
+} // namespace Pennylane::LightningQubit::Gates::AVXCommon

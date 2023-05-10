@@ -24,8 +24,8 @@
  * [RX, RY, RZ, PhaseShift, Rot, ControlledPhaseShift, CRX, CRY, CRZ, CRot]
  */
 
-using namespace Pennylane::Lightning_Qubit;
-using namespace Pennylane::Lightning_Qubit::Util;
+using namespace Pennylane::LightningQubit;
+using namespace Pennylane::LightningQubit::Util;
 
 using Pennylane::Util::INVSQRT2;
 

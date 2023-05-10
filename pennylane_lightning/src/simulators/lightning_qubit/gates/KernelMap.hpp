@@ -35,10 +35,10 @@
 using Pennylane::Util::for_each_enum;
 using Pennylane::Util::PairHash;
 
-using Pennylane::Lightning_Qubit::Util::CPUMemoryModel;
-using Pennylane::Lightning_Qubit::Util::Threading;
+using Pennylane::LightningQubit::Util::CPUMemoryModel;
+using Pennylane::LightningQubit::Util::Threading;
 
-namespace Pennylane::Lightning_Qubit::KernelMap {
+namespace Pennylane::LightningQubit::KernelMap {
 ///@cond DEV
 namespace Internal {
 
@@ -378,4 +378,4 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
         return std::get<2>(*cache_iter);
     }
 };
-} // namespace Pennylane::Lightning_Qubit::KernelMap
+} // namespace Pennylane::LightningQubit::KernelMap

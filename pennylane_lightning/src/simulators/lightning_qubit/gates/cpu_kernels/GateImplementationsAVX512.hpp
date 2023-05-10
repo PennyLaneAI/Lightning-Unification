@@ -29,7 +29,7 @@
 #include <complex>
 #include <vector>
 
-namespace Pennylane::Lightning_Qubit::Gates {
+namespace Pennylane::LightningQubit::Gates {
 
 // LCOV_EXCL_START
 class GateImplementationsAVX512
@@ -107,4 +107,4 @@ class GateImplementationsAVX512
     }
 };
 // LCOV_EXCL_STOP
-} // namespace Pennylane::Lightning_Qubit::Gates
+} // namespace Pennylane::LightningQubit::Gates

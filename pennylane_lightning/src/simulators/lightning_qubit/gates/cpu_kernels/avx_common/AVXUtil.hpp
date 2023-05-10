@@ -25,7 +25,7 @@
 
 #include <cstdlib>
 
-namespace Pennylane::Lightning_Qubit::Gates::AVXCommon {
+namespace Pennylane::LightningQubit::Gates::AVXCommon {
 using Pennylane::Util::exp2;
 using Pennylane::Util::fillLeadingOnes;
 using Pennylane::Util::fillTrailingOnes;
@@ -330,4 +330,4 @@ auto setValueOneTwo(Func &&func) -> AVXIntrinsicType<PrecisionT, packed_size> {
     }
     return setValue(data);
 }
-} // namespace Pennylane::Lightning_Qubit::Gates::AVXCommon
+} // namespace Pennylane::LightningQubit::Gates::AVXCommon

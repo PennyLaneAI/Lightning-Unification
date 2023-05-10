@@ -24,7 +24,7 @@
 #include "Error.hpp"   // PL_ABORT
 #include "StateVectorBase.hpp"
 
-namespace Pennylane::Lightning_Qubit {
+namespace Pennylane::LightningQubit {
 /**
  * @brief Lightning qubit state vector class.
  *
@@ -119,4 +119,4 @@ class StateVectorLQubit
      */
     [[nodiscard]] auto getLength() const -> std::size_t { return length_; }
 };
-} // namespace Pennylane::Lightning_Qubit
+} // namespace Pennylane::LightningQubit
