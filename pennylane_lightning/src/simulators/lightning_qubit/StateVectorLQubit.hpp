@@ -24,7 +24,6 @@
 #include "Error.hpp"   // PL_ABORT
 #include "StateVectorBase.hpp"
 
-#include "BitUtil.hpp"
 #include "Gates.hpp"
 #include "KernelMap.hpp"
 #include "KernelType.hpp"
