@@ -23,7 +23,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/support_kokkos.cmake")
 
 FindKokkos(lightning_external_libs)
 
-target_link_libraries(lightning_kokkos PRIVATE  lightning_compile_options
+target_link_libraries(lightning_kokkos PUBLIC   lightning_compile_options
                                                 lightning_external_libs
                                                 lightning_base
                                                 lightning_utils

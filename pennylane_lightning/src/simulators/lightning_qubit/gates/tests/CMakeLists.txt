@@ -11,15 +11,12 @@ include("${CMAKE_SOURCE_DIR}/cmake/support_tests.cmake")
 FetchAndIncludeCatch()
 
 ################################################################################
-# Define compile options and library
+# Define library
 ################################################################################
 
 add_library(pl_qubit_gates_tests INTERFACE)
 target_link_libraries(pl_qubit_gates_tests INTERFACE    Catch2::Catch2
                                                         pl_qubit_gates
-                                                        pl_qubit_utils
-                                                        lightning_utils
-                                                        lightning_qubit
                                                         )
 
 ProcessTestOptions(pl_qubit_gates_tests)
@@ -33,9 +30,6 @@ target_sources(pl_qubit_gates_tests INTERFACE runner_pl_qubit_gates.cpp)
 add_executable(compile_time_tests compile_time_tests.cpp)
 target_link_libraries(compile_time_tests    lightning_compile_options
                                             pl_qubit_gates
-                                            pl_qubit_utils
-                                            lightning_utils
-                                            lightning_qubit
                                             )
 
 set(TEST_SOURCES    Test_AVXSingleQubitGateHelpers.cpp
@@ -54,9 +48,7 @@ set(TEST_SOURCES    Test_AVXSingleQubitGateHelpers.cpp
                     )
 
 add_executable(pl_qubit_gates_test_runner ${TEST_SOURCES})
-target_link_libraries(pl_qubit_gates_test_runner PRIVATE    pl_qubit_gates_tests
-                                                            lightning_compile_options
-                                                            lightning_external_libs)
+target_link_libraries(pl_qubit_gates_test_runner PRIVATE    pl_qubit_gates_tests)
 catch_discover_tests(pl_qubit_gates_test_runner)
 
 # We build compile time tests before the runtime tests as build error messages

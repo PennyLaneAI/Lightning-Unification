@@ -11,12 +11,11 @@ include("${CMAKE_SOURCE_DIR}/cmake/support_tests.cmake")
 FetchAndIncludeCatch()
 
 ################################################################################
-# Define compile options and library
+# Define library
 ################################################################################
 
 add_library(executor_tests INTERFACE)
 target_link_libraries(executor_tests INTERFACE  Catch2::Catch2
-                                                lightning_utils
                                                 lightning_executor
                                                 )
 
@@ -31,10 +30,8 @@ set(TEST_SOURCES    Test_Executor.cpp
                     )
 
 add_executable(executor_test_runner ${TEST_SOURCES})
-target_link_libraries(executor_test_runner PRIVATE  executor_tests
-                                                    lightning_compile_options
-                                                    lightning_external_libs
-                                                    )
+target_link_libraries(executor_test_runner PRIVATE  executor_tests)
+
 catch_discover_tests(executor_test_runner)
 
 install(TARGETS executor_test_runner DESTINATION bin)

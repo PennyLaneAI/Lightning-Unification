@@ -3,6 +3,7 @@
 
 #include <catch2/catch.hpp>
 
+#include <iostream>
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit::Util;
@@ -16,4 +17,8 @@ TEST_CASE("Runtime information is correct", "[Test_RuntimeInfo]") {
     INFO("RuntimeInfo::vendor " << RuntimeInfo::vendor());
     INFO("RuntimeInfo::brand " << RuntimeInfo::brand());
     REQUIRE(true);
+    std::cout << "TESTE" << std::endl;
+    #ifdef _ENABLE_KOKKOS
+        std::cout << _ENABLE_KOKKOS << std::endl;
+    #endif
 }

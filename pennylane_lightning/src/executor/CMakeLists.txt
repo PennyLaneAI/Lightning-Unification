@@ -7,6 +7,7 @@ add_library(lightning_executor INTERFACE)
 target_include_directories(lightning_executor INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(lightning_executor INTERFACE  lightning_compile_options
                                                     lightning_external_libs
+                                                    lightning_utils
                                                     )
 
 if (BUILD_TESTS)

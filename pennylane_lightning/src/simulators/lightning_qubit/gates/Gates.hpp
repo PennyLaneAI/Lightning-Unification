@@ -3,6 +3,7 @@
 #include <cmath>
 #include <complex>
 #include <vector>
+#include <array>
 
 #include "Util.hpp"
 
