@@ -18,7 +18,7 @@ TEST_CASE("Runtime information is correct", "[Test_RuntimeInfo]") {
     INFO("RuntimeInfo::brand " << RuntimeInfo::brand());
     REQUIRE(true);
     std::cout << "TESTE" << std::endl;
-    #ifdef _ENABLE_KOKKOS
-        std::cout << _ENABLE_KOKKOS << std::endl;
-    #endif
+#ifdef _ENABLE_KOKKOS
+    std::cout << _ENABLE_KOKKOS << std::endl;
+#endif
 }

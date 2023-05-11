@@ -34,8 +34,8 @@
 
 /// @cond DEV
 namespace {
-using Pennylane::Util::log2PerfectPower;
 using Pennylane::Util::isPerfectPowerOf2;
+using Pennylane::Util::log2PerfectPower;
 } // namespace
 /// @endcond
 
@@ -70,8 +70,7 @@ class StateVectorLQubit
      * @param length The size of the data, i.e. 2^(number of qubits).
      */
     StateVectorLQubit(ComplexPrecisionT *data, size_t length)
-        : BaseType{log2PerfectPower(length)}, data_{data},
-          length_(length) {
+        : BaseType{log2PerfectPower(length)}, data_{data}, length_(length) {
         // check if length is a power of 2.
         if (!isPerfectPowerOf2(length)) {
             PL_ABORT(
