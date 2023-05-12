@@ -7,4 +7,4 @@ Even though it is possible to test available kernels by detecting the architectu
 
 In `Test_GateImplementations_(Param|Nonparam|Matrix).cpp` files we test only the default kernels (`LM` and `PI`), of which both paradigms are architecture agnostic.
 
-In `Test_GateImplementations_(Inverse|CompareKernels|Generator).cpp` files run tests registered to `DynamicDispatcher`. As we register kernels to `DynamicDispatcher` by detecting the runtime architecture, these files test all accessible kernels.
+In `Test_GateImplementations_(Inverse|CompareKernels|Generator).cpp` files run tests registered to `DynamicDispatcher`. As we register kernels to `DynamicDispatcher` by detecting the runtime architecture, these files test all accessible kernels on the executing CPU architecture.
