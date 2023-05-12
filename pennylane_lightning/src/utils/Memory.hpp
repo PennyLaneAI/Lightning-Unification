@@ -22,7 +22,7 @@
 #include "BitUtil.hpp"
 #include "TypeList.hpp"
 
-namespace Pennylane::LightningQubit::Util {
+namespace Pennylane::Util {
 /**
  * @brief Custom aligned allocate function.
  *
@@ -185,4 +185,4 @@ template <class PrecisionT> struct commonAlignmentHelper<PrecisionT, void> {
     constexpr static size_t value = 1;
 };
 /// @endcond
-} // namespace Pennylane::LightningQubit::Util
+} // namespace Pennylane::Util

@@ -22,9 +22,9 @@
 #include "ConstantUtil.hpp" // array_has_elt, lookup
 #include "Error.hpp"
 #include "GateOperation.hpp"
-#include "LinearAlgebra.hpp"
+#include "LinearAlgebra.hpp" // squaredNorm
 #include "Macros.hpp"
-#include "Memory.hpp"
+#include "Memory.hpp" // AlignedAllocator
 #include "TestKernels.hpp"
 #include "Util.hpp"
 
@@ -41,7 +41,7 @@
 namespace Pennylane::LightningQubit::Util {
 
 template <typename T>
-using TestVector = std::vector<T, Util::AlignedAllocator<T>>;
+using TestVector = std::vector<T, Pennylane::Util::AlignedAllocator<T>>;
 
 /**
  * @brief Multiplies every value in a dataset by a given complex scalar value.
@@ -109,7 +109,6 @@ auto createPlusState(size_t num_qubits)
 template <typename PrecisionT, class RandomEngine>
 auto createRandomState(RandomEngine &re, size_t num_qubits)
     -> TestVector<std::complex<PrecisionT>> {
-    using Util::squaredNorm;
 
     TestVector<std::complex<PrecisionT>> res(
         size_t{1U} << num_qubits, {0.0, 0.0},
@@ -120,7 +119,7 @@ auto createRandomState(RandomEngine &re, size_t num_qubits)
     }
 
     scaleVector(res, std::complex<PrecisionT>{1.0, 0.0} /
-                         std::sqrt(Util::squaredNorm(res.data(), res.size())));
+                         std::sqrt(squaredNorm(res.data(), res.size())));
     return res;
 }
 

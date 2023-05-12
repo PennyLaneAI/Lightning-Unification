@@ -30,6 +30,7 @@
 #include <vector>
 
 /// @cond DEV
+
 #if __has_include(<cblas.h>) && defined _ENABLE_BLAS
 #include <cblas.h>
 constexpr bool USE_CBLAS = true;
@@ -50,10 +51,12 @@ using CBLAS_LAYOUT = enum CBLAS_LAYOUT {
 };
 #endif
 #endif
-/// @endcond
-//
 
+namespace {
 using namespace Pennylane::Util;
+} // namespace
+
+/// @endcond
 
 namespace Pennylane::LightningQubit::Util {
 /**

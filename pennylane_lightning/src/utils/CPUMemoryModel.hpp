@@ -16,7 +16,7 @@
  * Define memory models for CPU
  */
 #pragma once
-#include "Macros.hpp"
+#include "Macros.hpp" // operating_system, OperatingSystem, cpu_arch
 #include "Memory.hpp"
 #include "RuntimeInfo.hpp"
 
@@ -24,7 +24,7 @@
 #include <memory>
 
 // LCOV_EXCL_START
-namespace Pennylane::LightningQubit::Util {
+namespace Pennylane::Util {
 
 /**
  * @brief Enum class for defining CPU memory alignments
@@ -67,11 +67,11 @@ inline auto bestCPUMemoryModel() -> CPUMemoryModel {
         (operating_system == OperatingSystem::Linux);
     if constexpr ((cpu_arch == CPUArch::X86_64) && is_unix) {
         // We enable AVX2/512 only for X86_64 arch with UNIX compatible OSs
-        if (Util::RuntimeInfo::AVX512F()) {
+        if (RuntimeInfo::AVX512F()) {
             // and the CPU support it as well
             return CPUMemoryModel::Aligned512;
         }
-        if (Util::RuntimeInfo::AVX2() && Util::RuntimeInfo::FMA()) {
+        if (RuntimeInfo::AVX2() && RuntimeInfo::FMA()) {
             return CPUMemoryModel::Aligned256;
         }
     }
@@ -110,5 +110,5 @@ template <class T>
 constexpr auto getBestAllocator() -> Util::AlignedAllocator<T> {
     return getAllocator<T>(bestCPUMemoryModel());
 }
-} // namespace Pennylane::LightningQubit::Util
+} // namespace Pennylane::Util
 // LCOV_EXCL_STOP

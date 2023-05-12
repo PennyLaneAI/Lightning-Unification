@@ -6,7 +6,7 @@
 #include <iostream>
 /// @cond DEV
 namespace {
-using namespace Pennylane::LightningQubit::Util;
+using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 

@@ -37,8 +37,8 @@ namespace {
 using Pennylane::Util::for_each_enum;
 using Pennylane::Util::PairHash;
 
-using Pennylane::LightningQubit::Util::CPUMemoryModel;
-using Pennylane::LightningQubit::Util::Threading;
+using Pennylane::Util::CPUMemoryModel;
+using Pennylane::Util::Threading;
 } // namespace
 /// @endcond
 

@@ -26,8 +26,7 @@ target_sources(pl_qubit_utils_tests INTERFACE runner_pl_qubit_utils.cpp)
 ################################################################################
 # Define targets
 ################################################################################
-set(TEST_SOURCES    Test_RuntimeInfo.cpp
-                    Test_LinearAlgebra.cpp
+set(TEST_SOURCES    Test_LinearAlgebra.cpp
                     )
 
 add_executable(pl_qubit_utils_test_runner ${TEST_SOURCES})
