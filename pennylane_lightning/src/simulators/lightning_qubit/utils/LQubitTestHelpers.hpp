@@ -38,10 +38,15 @@
 #include <type_traits>
 #include <vector>
 
+/// @cond DEV
+namespace {
+using namespace Pennylane::Util;
+} // namespace
+/// @endcond
+
 namespace Pennylane::LightningQubit::Util {
 
-template <typename T>
-using TestVector = std::vector<T, Pennylane::Util::AlignedAllocator<T>>;
+template <typename T> using TestVector = std::vector<T, AlignedAllocator<T>>;
 
 /**
  * @brief Multiplies every value in a dataset by a given complex scalar value.
