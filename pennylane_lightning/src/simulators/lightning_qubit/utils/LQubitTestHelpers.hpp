@@ -19,7 +19,7 @@
 
 #include "CPUMemoryModel.hpp" // getBestAllocator
 #include "Constant.hpp"
-#include "ConstantUtil.hpp" // array_has_elt, lookup
+#include "ConstantUtil.hpp" // array_has_elem, lookup
 #include "Error.hpp"
 #include "GateOperation.hpp"
 #include "LinearAlgebra.hpp" // squaredNorm
@@ -102,8 +102,8 @@ auto createPlusState(size_t num_qubits)
     TestVector<std::complex<PrecisionT>> res(
         size_t{1U} << num_qubits, {1.0, 0.0},
         getBestAllocator<std::complex<PrecisionT>>());
-    for (auto &elt : res) {
-        elt /= std::sqrt(1U << num_qubits);
+    for (auto &elem : res) {
+        elem /= std::sqrt(1U << num_qubits);
     }
     return res;
 }
@@ -151,35 +151,35 @@ auto createProductState(std::string_view str)
                                   -INVSQRT2<PrecisionT>()};
 
     for (size_t k = 0; k < (size_t{1U} << str.length()); k++) {
-        PrecisionT elt = 1.0;
+        PrecisionT elem = 1.0;
         for (size_t n = 0; n < str.length(); n++) {
             char c = str[n];
             const size_t wire = str.length() - 1 - n;
             switch (c) {
             case '0':
-                elt *= zero[(k >> wire) & 1U];
+                elem *= zero[(k >> wire) & 1U];
                 break;
             case '1':
-                elt *= one[(k >> wire) & 1U];
+                elem *= one[(k >> wire) & 1U];
                 break;
             case '+':
-                elt *= plus[(k >> wire) & 1U];
+                elem *= plus[(k >> wire) & 1U];
                 break;
             case '-':
-                elt *= minus[(k >> wire) & 1U];
+                elem *= minus[(k >> wire) & 1U];
                 break;
             default:
                 PL_ABORT("Unknown character in the argument.");
             }
         }
-        st[k] = elt;
+        st[k] = elem;
     }
     return st;
 }
 
 inline auto createWires(Gates::GateOperation op, size_t num_qubits)
     -> std::vector<size_t> {
-    if (array_has_elt(Gates::Constant::multi_qubit_gates, op)) {
+    if (array_has_elem(Gates::Constant::multi_qubit_gates, op)) {
         std::vector<size_t> wires(num_qubits);
         std::iota(wires.begin(), wires.end(), 0);
         return wires;

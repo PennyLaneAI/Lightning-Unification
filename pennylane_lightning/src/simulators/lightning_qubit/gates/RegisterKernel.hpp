@@ -166,8 +166,8 @@ void registerAllImplementedGateOps() {
     };
 
     [[maybe_unused]] const auto registered_gate_ops = std::apply(
-        [&registerGateToDispatcher](auto... elt) {
-            return std::make_tuple(registerGateToDispatcher(elt)...);
+        [&registerGateToDispatcher](auto... elem) {
+            return std::make_tuple(registerGateToDispatcher(elem)...);
         },
         gate_op_functor_tuple<PrecisionT, ParamT, GateImplementation>);
 }
@@ -190,8 +190,8 @@ void registerAllImplementedGeneratorOps() {
         };
 
     [[maybe_unused]] const auto registered_gntr_ops = std::apply(
-        [&registerGeneratorToDispatcher](auto... elt) {
-            return std::make_tuple(registerGeneratorToDispatcher(elt)...);
+        [&registerGeneratorToDispatcher](auto... elem) {
+            return std::make_tuple(registerGeneratorToDispatcher(elem)...);
         },
         generator_op_functor_tuple<PrecisionT, GateImplementation>);
 }
@@ -214,8 +214,8 @@ void registerAllImplementedMatrixOps() {
     };
 
     [[maybe_unused]] const auto registered_mat_ops = std::apply(
-        [&registerMatrixToDispatcher](auto... elt) {
-            return std::make_tuple(registerMatrixToDispatcher(elt)...);
+        [&registerMatrixToDispatcher](auto... elem) {
+            return std::make_tuple(registerMatrixToDispatcher(elem)...);
         },
         matrix_op_functor_tuple<PrecisionT, GateImplementation>);
 }

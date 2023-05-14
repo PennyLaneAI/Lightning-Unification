@@ -46,7 +46,7 @@ else()
     set(KERNEL_MAP_FILES    KernelMap_Default.cpp
                             AssignKernelMap_Default.cpp CACHE INTERNAL "" FORCE)
     add_library(pl_qubit_gates_kernel_map STATIC ${KERNEL_MAP_FILES})
-    target_link_libraries(pl_qubit_gates_kernel_map PRIVATE  pl_qubit_utils)
+    target_link_libraries(pl_qubit_gates_kernel_map PRIVATE  pl_qubit_utils lightning_external_libs lightning_compile_options)
 
     add_library(pl_qubit_gates_register_kernels_default STATIC RegisterKernels_Default.cpp cpu_kernels/GateImplementationsLM.cpp cpu_kernels/GateImplementationsPI.cpp GateIndices.cpp)
     target_include_directories(pl_qubit_gates_register_kernels_default PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

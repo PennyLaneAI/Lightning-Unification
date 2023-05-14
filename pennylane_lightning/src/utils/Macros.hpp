@@ -19,6 +19,9 @@
 #include <array>
 #include <string>
 
+#if defined(PL_USE_OMP) && !(__has_include(<omp.h>) && defined(_OPENMP))
+#undef PL_USE_OMP
+#endif
 /**
  * @brief Predefined macro variable to a string. Use std::format instead in
  * C++20.

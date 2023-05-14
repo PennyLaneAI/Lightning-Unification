@@ -22,8 +22,8 @@ using Pennylane::Util::LightningException;
 
 TEST_CASE("Test PriorityDispatchSet", "[PriorityDispatchSet]") {
     auto pds = PriorityDispatchSet();
-    pds.emplace(10U, Util::IntegerInterval<size_t>(10, 20),
-                Gates::KernelType::PI);
+    pds.emplace(Gates::KernelType::PI, 10U,
+                Util::IntegerInterval<size_t>(10, 20));
 
     SECTION("Test conflict") {
         /* If two elements has the same priority but integer intervals overlap,

@@ -70,7 +70,7 @@ class CombinationGenerator : public WiresGenerator {
 class PermutationGenerator : public WiresGenerator {
   private:
     std::vector<std::vector<size_t>> all_perms_;
-    std::vector<size_t> available_elts_;
+    std::vector<size_t> available_elems_;
     std::vector<size_t> v;
 
   public:
@@ -80,18 +80,18 @@ class PermutationGenerator : public WiresGenerator {
             return;
         }
         for (size_t i = 0; i < n; i++) {
-            v[r - 1] = available_elts_[i];
-            std::swap(available_elts_[n - 1], available_elts_[i]);
+            v[r - 1] = available_elems_[i];
+            std::swap(available_elems_[n - 1], available_elems_[i]);
             perm(n - 1, r - 1);
-            std::swap(available_elts_[n - 1], available_elts_[i]);
+            std::swap(available_elems_[n - 1], available_elems_[i]);
         }
     }
 
     PermutationGenerator(size_t n, size_t r) {
         v.resize(r);
 
-        available_elts_.resize(n);
-        std::iota(available_elts_.begin(), available_elts_.end(), 0);
+        available_elems_.resize(n);
+        std::iota(available_elems_.begin(), available_elems_.end(), 0);
         perm(n, r);
     }
 
@@ -111,7 +111,7 @@ class PermutationGenerator : public WiresGenerator {
  */
 auto inline createAllWires(size_t n_qubits, Gates::GateOperation gate_op,
                            bool order) -> std::vector<std::vector<size_t>> {
-    if (array_has_elt(Gates::Constant::multi_qubit_gates, gate_op)) {
+    if (array_has_elem(Gates::Constant::multi_qubit_gates, gate_op)) {
         // make all possible 2^N permutations
         std::vector<std::vector<size_t>> res;
         res.reserve((1U << n_qubits) - 1);

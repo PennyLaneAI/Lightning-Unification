@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-#ifdef PL_USE_OMP
+#if defined(PL_USE_OMP)
 #include <omp.h>
 #endif
 

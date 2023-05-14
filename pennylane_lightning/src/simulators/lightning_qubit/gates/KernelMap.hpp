@@ -16,6 +16,10 @@
  * Define kernel map for statevector
  */
 #pragma once
+
+// Ignore invalid warnings for compile-time checks without kernel specifics
+// NOLINTBEGIN
+
 #include "CPUMemoryModel.hpp"
 #include "DynamicDispatcher.hpp"
 #include "Error.hpp"
@@ -25,6 +29,7 @@
 #include "Threading.hpp"
 #include "Util.hpp" // PairHash, for_each_enum
 
+#include <cstdint>
 #include <deque>
 #include <functional>
 #include <mutex>
@@ -65,20 +70,37 @@ template <> struct AssignKernelForOp<Gates::MatrixOperation> {
 ///@endcond
 
 ///@cond DEV
-struct DispatchElement {
-    uint32_t priority;
-    Util::IntegerInterval<size_t> interval;
-    Gates::KernelType kernel;
-};
+class DispatchElement final {
+  private:
+    Gates::KernelType kernel_;
+    uint32_t priority_;
+    Util::IntegerInterval<size_t> interval_;
 
-inline bool lower_priority(const DispatchElement &lhs,
-                           const DispatchElement &rhs) {
-    return lhs.priority < rhs.priority;
-}
+  public:
+    DispatchElement(Gates::KernelType kernel, uint32_t priority,
+                    Util::IntegerInterval<size_t> interval)
+        : kernel_{kernel}, priority_{priority}, interval_{interval} {}
+    DispatchElement(const DispatchElement &other) = default;
+    DispatchElement(DispatchElement &&other) = default;
+    DispatchElement &operator=(const DispatchElement &other) = default;
+    DispatchElement &operator=(DispatchElement &&other) = default;
+    ~DispatchElement() = default;
+
+    [[nodiscard]] uint32_t getPriority() const { return priority_; }
+    [[nodiscard]] Util::IntegerInterval<size_t> getIntegerInterval() const {
+        return interval_;
+    }
+    [[nodiscard]] Gates::KernelType getKernelType() const { return kernel_; }
+};
 
 inline bool higher_priority(const DispatchElement &lhs,
                             const DispatchElement &rhs) {
-    return lhs.priority > rhs.priority;
+    return lhs.getPriority() > rhs.getPriority();
+}
+
+inline bool lower_priority(const DispatchElement &lhs,
+                           const DispatchElement &rhs) {
+    return lhs.getPriority() < rhs.getPriority();
 }
 
 /**
@@ -90,51 +112,67 @@ class PriorityDispatchSet {
     std::vector<DispatchElement> ordered_vec_;
 
   public:
+    PriorityDispatchSet() = default;
+    explicit PriorityDispatchSet(
+        const std::vector<DispatchElement> &ordered_vec)
+        : ordered_vec_(ordered_vec){};
+    PriorityDispatchSet(const PriorityDispatchSet &other) = default;
+    PriorityDispatchSet(PriorityDispatchSet &&other) = default;
+    PriorityDispatchSet &operator=(const PriorityDispatchSet &other) = default;
+    PriorityDispatchSet &operator=(PriorityDispatchSet &&other) = default;
+
+    ~PriorityDispatchSet() = default;
+
     [[nodiscard]] bool
     conflict(uint32_t test_priority,
              const Util::IntegerInterval<size_t> &test_interval) const {
-        const auto test_elt = DispatchElement{test_priority, test_interval,
-                                              Gates::KernelType::None};
+        const auto test_elem = DispatchElement{Gates::KernelType::None,
+                                               test_priority, test_interval};
         const auto [b, e] =
-            std::equal_range(ordered_vec_.begin(), ordered_vec_.end(), test_elt,
-                             higher_priority);
+            std::equal_range(ordered_vec_.begin(), ordered_vec_.end(),
+                             test_elem, higher_priority);
         for (auto iter = b; iter != e; ++iter) {
-            if (!is_disjoint(iter->interval, test_interval)) {
+            if (!is_disjoint(iter->getIntegerInterval(), test_interval)) {
                 return true;
             }
         }
         return false;
     }
 
-    void insert(const DispatchElement &elt) {
+    void insert(const DispatchElement &elem) {
         const auto iter_to_insert = std::upper_bound(
-            ordered_vec_.begin(), ordered_vec_.end(), elt, &higher_priority);
-        ordered_vec_.insert(iter_to_insert, elt);
+            ordered_vec_.begin(), ordered_vec_.end(), elem, &higher_priority);
+        ordered_vec_.insert(iter_to_insert, elem);
     }
 
     template <typename... Ts> void emplace(Ts &&...args) {
-        auto elt = DispatchElement{std::forward<Ts>(args)...};
+        auto elem = DispatchElement{std::forward<Ts>(args)...};
         const auto iter_to_insert = std::upper_bound(
-            ordered_vec_.begin(), ordered_vec_.end(), elt, &higher_priority);
-        ordered_vec_.insert(iter_to_insert, elt);
+            ordered_vec_.begin(), ordered_vec_.end(), elem, &higher_priority);
+        ordered_vec_.insert(iter_to_insert, elem);
     }
 
     [[nodiscard]] Gates::KernelType getKernel(size_t num_qubits) const {
-        for (const auto &elt : ordered_vec_) {
-            if (elt.interval(num_qubits)) {
-                return elt.kernel;
+        for (const auto &elem : ordered_vec_) {
+            if (elem.getIntegerInterval()(num_qubits)) {
+                return elem.getKernelType();
             }
         }
         PL_ABORT("Cannot find a kernel for the given number of qubits.");
     }
 
     void clearPriority(uint32_t remove_priority) {
-        const auto begin = std::lower_bound(
-            ordered_vec_.begin(), ordered_vec_.end(), remove_priority,
-            [](const auto &elt, uint32_t p) { return elt.priority > p; });
-        const auto end = std::upper_bound(
-            ordered_vec_.begin(), ordered_vec_.end(), remove_priority,
-            [](uint32_t p, const auto &elt) { return p > elt.priority; });
+
+        const auto begin =
+            std::lower_bound(ordered_vec_.begin(), ordered_vec_.end(),
+                             remove_priority, [](const auto &elem, uint32_t p) {
+                                 return elem.getPriority() > p;
+                             });
+        const auto end =
+            std::upper_bound(ordered_vec_.begin(), ordered_vec_.end(),
+                             remove_priority, [](uint32_t p, const auto &elem) {
+                                 return p > elem.getPriority();
+                             });
         ordered_vec_.erase(begin, end);
     }
 };
@@ -222,9 +260,9 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
         std::unique_lock cache_lock(cache_mutex_);
 
         const auto cache_iter =
-            std::find_if(cache_.begin(), cache_.end(), [=](const auto &elt) {
-                return (std::get<0>(elt) == num_qubits) &&
-                       (std::get<1>(elt) == dispatch_key);
+            std::find_if(cache_.begin(), cache_.end(), [=](const auto &elem) {
+                return (std::get<0>(elem) == num_qubits) &&
+                       (std::get<1>(elem) == dispatch_key);
             });
 
         if (cache_iter == cache_.end()) {
@@ -285,7 +323,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
         // Reset cache
         cache_.clear();
 
-        set.emplace(priority, interval, kernel);
+        set.emplace(kernel, priority, interval);
     }
 
     /**
@@ -297,6 +335,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
                            const Util::IntegerInterval<size_t> &interval,
                            Gates::KernelType kernel) {
         /* Priority for all threading is 1 */
+
         for_each_enum<Threading>([=, this](Threading threading) {
             assignKernelForOp(op, threading, memory_model, 1, interval, kernel);
         });
@@ -311,6 +350,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
                            const Util::IntegerInterval<size_t> &interval,
                            Gates::KernelType kernel) {
         /* Priority for all memory model is 2 */
+
         for_each_enum<CPUMemoryModel>([=, this](CPUMemoryModel memory_model) {
             assignKernelForOp(op, threading, memory_model, 2, interval, kernel);
         });
@@ -325,6 +365,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
                            const Util::IntegerInterval<size_t> &interval,
                            Gates::KernelType kernel) {
         /* Priority is 0 */
+
         for_each_enum<Threading, CPUMemoryModel>(
             [=, this](Threading threading, CPUMemoryModel memory_model) {
                 assignKernelForOp(op, threading, memory_model, 0, interval,
@@ -371,9 +412,9 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
         std::unique_lock cache_lock(cache_mutex_);
 
         const auto cache_iter =
-            std::find_if(cache_.begin(), cache_.end(), [=](const auto &elt) {
-                return (std::get<0>(elt) == num_qubits) &&
-                       (std::get<1>(elt) == dispatch_key);
+            std::find_if(cache_.begin(), cache_.end(), [=](const auto &elem) {
+                return (std::get<0>(elem) == num_qubits) &&
+                       (std::get<1>(elem) == dispatch_key);
             });
         if (cache_iter == cache_.end()) {
             cache_lock.unlock();
@@ -383,3 +424,4 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
     }
 };
 } // namespace Pennylane::LightningQubit::KernelMap
+// NOLINTEND
