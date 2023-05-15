@@ -61,8 +61,8 @@ template <class T, class Alloc = std::allocator<T>> struct PLApprox {
     [[nodiscard]] std::string describe() const {
         std::ostringstream ss;
         ss << "is Approx to {";
-        for (const auto &elt : comp_) {
-            ss << elt << ", ";
+        for (const auto &elem : comp_) {
+            ss << elem << ", ";
         }
         ss << "}" << std::endl;
         return ss.str();

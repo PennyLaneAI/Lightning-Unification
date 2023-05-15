@@ -41,12 +41,12 @@ namespace Pennylane::LightningQubit::Util {
  */
 template <typename T, typename U, size_t size>
 constexpr std::array<T, size>
-first_elts_of(const std::array<std::pair<T, U>, size> &arr) {
+first_elems_of(const std::array<std::pair<T, U>, size> &arr) {
     std::array<T, size> res = {
         T{},
     };
     std::transform(arr.begin(), arr.end(), res.begin(),
-                   [](const auto &elt) { return std::get<0>(elt); });
+                   [](const auto &elem) { return std::get<0>(elem); });
     return res;
 }
 /**
@@ -59,12 +59,12 @@ first_elts_of(const std::array<std::pair<T, U>, size> &arr) {
  */
 template <typename T, typename U, size_t size>
 constexpr std::array<U, size>
-second_elts_of(const std::array<std::pair<T, U>, size> &arr) {
+second_elems_of(const std::array<std::pair<T, U>, size> &arr) {
     std::array<U, size> res = {
         U{},
     };
     std::transform(arr.begin(), arr.end(), res.begin(),
-                   [](const auto &elt) { return std::get<1>(elt); });
+                   [](const auto &elem) { return std::get<1>(elem); });
     return res;
 }
 

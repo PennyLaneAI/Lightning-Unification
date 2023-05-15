@@ -1,4 +1,4 @@
-#include "ConstantUtil.hpp" // lookup, array_has_elt, prepend_to_tuple, tuple_to_array
+#include "ConstantUtil.hpp" // lookup, array_has_elem, prepend_to_tuple, tuple_to_array
 #include "CreateAllWires.hpp"
 #include "DynamicDispatcher.hpp"
 #include "TestHelpers.hpp"
@@ -69,7 +69,7 @@ template <size_t gntr_idx> constexpr auto generatorGatePairsIter() {
 }
 
 constexpr auto minNumQubitsFor(GeneratorOperation gntr_op) -> size_t {
-    if (array_has_elt(Constant::multi_qubit_generators, gntr_op)) {
+    if (array_has_elem(Constant::multi_qubit_generators, gntr_op)) {
         return 1;
     }
     return lookup(Constant::generator_wires, gntr_op);

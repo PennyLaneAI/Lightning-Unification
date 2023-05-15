@@ -58,13 +58,13 @@ constexpr auto lookup(const std::array<std::pair<Key, Value>, size> &arr,
  * @tparam U Type of array elements.
  * @tparam size Size of array.
  * @param arr Array to check.
- * @param elt Element to find.
+ * @param elem Element to find.
  */
 template <typename U, size_t size>
-constexpr auto array_has_elt(const std::array<U, size> &arr, const U &elt)
+constexpr auto array_has_elem(const std::array<U, size> &arr, const U &elem)
     -> bool {
     for (size_t idx = 0; idx < size; idx++) {
-        if (arr[idx] == elt) {
+        if (arr[idx] == elem) {
             return true;
         }
     }
@@ -78,9 +78,9 @@ namespace Internal {
  */
 template <class T, class Tuple, std::size_t... I>
 constexpr auto
-prepend_to_tuple_helper(T &&elt, Tuple &&t,
+prepend_to_tuple_helper(T &&elem, Tuple &&t,
                         [[maybe_unused]] std::index_sequence<I...> dummy) {
-    return std::make_tuple(elt, std::get<I>(std::forward<Tuple>(t))...);
+    return std::make_tuple(elem, std::get<I>(std::forward<Tuple>(t))...);
 }
 } // namespace Internal
 /// @endcond
@@ -90,13 +90,13 @@ prepend_to_tuple_helper(T &&elt, Tuple &&t,
  * @tparam T Type of element
  * @tparam Tuple Type of the tuple (usually std::tuple)
  *
- * @param elt Element to prepend
+ * @param elem Element to prepend
  * @param t Tuple to add an element
  */
 template <class T, class Tuple>
-constexpr auto prepend_to_tuple(T &&elt, Tuple &&t) {
+constexpr auto prepend_to_tuple(T &&elem, Tuple &&t) {
     return Internal::prepend_to_tuple_helper(
-        std::forward<T>(elt), std::forward<Tuple>(t),
+        std::forward<T>(elem), std::forward<Tuple>(t),
         std::make_index_sequence<
             std::tuple_size_v<std::remove_reference_t<Tuple>>>{});
 }

@@ -1,6 +1,6 @@
 #include "Constant.hpp"
-#include "ConstantTestHelpers.hpp" // count_unique, first_elts_of, second_elts_of
-#include "ConstantUtil.hpp"        // array_has_elt
+#include "ConstantTestHelpers.hpp" // count_unique, first_elems_of, second_elems_of
+#include "ConstantUtil.hpp"        // array_has_elem
 #include "GateOperation.hpp"
 #include "Util.hpp"
 
@@ -8,8 +8,8 @@ namespace Pennylane::LightningQubit::Gates {
 template <typename T, size_t size1, size_t size2>
 constexpr auto are_mutually_disjoint(const std::array<T, size1> &arr1,
                                      const std::array<T, size2> &arr2) -> bool {
-    return std::all_of(arr1.begin(), arr1.end(), [&arr2](const auto &elt) {
-        return !Util::array_has_elt(arr2, elt);
+    return std::all_of(arr1.begin(), arr1.end(), [&arr2](const auto &elem) {
+        return !Util::array_has_elem(arr2, elem);
     });
 }
 
@@ -20,10 +20,10 @@ constexpr auto are_mutually_disjoint(const std::array<T, size1> &arr1,
 static_assert(Constant::gate_names.size() ==
                   static_cast<size_t>(GateOperation::END),
               "Constant gate_names must be defined for all gate operations.");
-static_assert(Util::count_unique(Util::first_elts_of(Constant::gate_names)) ==
+static_assert(Util::count_unique(Util::first_elems_of(Constant::gate_names)) ==
                   Constant::gate_names.size(),
               "First elements of gate_names must be distinct.");
-static_assert(Util::count_unique(Util::second_elts_of(Constant::gate_names)) ==
+static_assert(Util::count_unique(Util::second_elems_of(Constant::gate_names)) ==
                   Constant::gate_names.size(),
               "Second elements of gate_names must be distinct.");
 
@@ -33,8 +33,8 @@ static_assert(Util::count_unique(Util::second_elts_of(Constant::gate_names)) ==
 
 constexpr auto check_generator_names_starts_with() -> bool {
     const auto &arr = Constant::generator_names;
-    return std::all_of(arr.begin(), arr.end(), [](const auto &elt) {
-        const auto &[gntr_op, gntr_name] = elt;
+    return std::all_of(arr.begin(), arr.end(), [](const auto &elem) {
+        const auto &[gntr_op, gntr_name] = elem;
         return gntr_name.substr(0, 9) == "Generator";
     });
     return true;
@@ -45,11 +45,11 @@ static_assert(
         static_cast<size_t>(GeneratorOperation::END),
     "Constant generator_names must be defined for all generator operations.");
 static_assert(
-    Util::count_unique(Util::first_elts_of(Constant::generator_names)) ==
+    Util::count_unique(Util::first_elems_of(Constant::generator_names)) ==
         Constant::generator_names.size(),
     "First elements of generator_names must be distinct.");
 static_assert(
-    Util::count_unique(Util::second_elts_of(Constant::generator_names)) ==
+    Util::count_unique(Util::second_elems_of(Constant::generator_names)) ==
         Constant::generator_names.size(),
     "Second elements of generator_names must be distinct.");
 static_assert(check_generator_names_starts_with(),
@@ -65,10 +65,10 @@ static_assert(Constant::gate_wires.size() ==
               "Constant gate_wires must be defined for all gate operations "
               "acting on a fixed number of qubits.");
 static_assert(
-    are_mutually_disjoint(Util::first_elts_of(Constant::gate_wires),
+    are_mutually_disjoint(Util::first_elems_of(Constant::gate_wires),
                           Constant::multi_qubit_gates),
     "Constant gate_wires must not define values for multi-qubit gates.");
-static_assert(Util::count_unique(Util::first_elts_of(Constant::gate_wires)) ==
+static_assert(Util::count_unique(Util::first_elems_of(Constant::gate_wires)) ==
                   Constant::gate_wires.size(),
               "First elements of gate_wires must be distinct.");
 
@@ -83,12 +83,12 @@ static_assert(
     "Constant generator_wires must be defined for all generator operations "
     "acting on a fixed number of qubits.");
 static_assert(
-    are_mutually_disjoint(Util::first_elts_of(Constant::generator_wires),
+    are_mutually_disjoint(Util::first_elems_of(Constant::generator_wires),
                           Constant::multi_qubit_generators),
     "Constant generator_wires must not define values for multi-qubit "
     "generators.");
 static_assert(
-    Util::count_unique(Util::first_elts_of(Constant::generator_wires)) ==
+    Util::count_unique(Util::first_elems_of(Constant::generator_wires)) ==
         Constant::generator_wires.size(),
     "First elements of generator_wires must be distinct.");
 } // namespace Pennylane::LightningQubit::Gates

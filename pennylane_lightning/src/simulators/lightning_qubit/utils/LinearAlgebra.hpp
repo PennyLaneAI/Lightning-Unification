@@ -833,8 +833,8 @@ auto randomUnitary(RandomEngine &re, size_t num_qubits)
             // orthogonalize row2
             std::transform(
                 row2_p, row2_p + dim, row1_p, row2_p,
-                [scale = dot12 / dot11](auto &elt2, const auto &elt1) {
-                    return elt2 - scale * elt1;
+                [scale = dot12 / dot11](auto &elem2, const auto &elem1) {
+                    return elem2 - scale * elem1;
                 });
         }
     }
