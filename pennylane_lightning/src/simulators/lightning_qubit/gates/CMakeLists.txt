@@ -16,7 +16,7 @@ if (ENABLE_GATE_DISPATCHER AND UNIX AND (${CMAKE_SYSTEM_PROCESSOR} MATCHES "(AMD
                             AssignKernelMap_AVX512.cpp
                             AssignKernelMap_Default.cpp CACHE INTERNAL "" FORCE)
     add_library(pl_qubit_gates_kernel_map STATIC ${KERNEL_MAP_FILES})
-    target_link_libraries(pl_qubit_gates_kernel_map PRIVATE  pl_qubit_utils)
+    target_link_libraries(pl_qubit_gates_kernel_map PRIVATE  pl_qubit_utils lightning_external_libs lightning_compile_options)
 
     add_library(pl_qubit_gates_register_kernels_avx2 STATIC RegisterKernels_AVX2.cpp)
     target_compile_options(pl_qubit_gates_register_kernels_avx2 PRIVATE "-mavx2;-mfma")
