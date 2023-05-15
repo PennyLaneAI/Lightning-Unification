@@ -25,7 +25,7 @@
 namespace Pennylane::LightningQubit::Internal {
 
 int registerAllAvailableKernels_Float() {
-    using Pennylane::LightningQubit::Util::RuntimeInfo;
+    using Pennylane::Util::RuntimeInfo;
     registerKernel<float, float, Gates::GateImplementationsLM>();
     registerKernel<float, float, Gates::GateImplementationsPI>();
 
@@ -39,7 +39,7 @@ int registerAllAvailableKernels_Float() {
 }
 
 int registerAllAvailableKernels_Double() {
-    using Pennylane::LightningQubit::Util::RuntimeInfo;
+    using Pennylane::Util::RuntimeInfo;
     registerKernel<double, double, Gates::GateImplementationsLM>();
     registerKernel<double, double, Gates::GateImplementationsPI>();
 

@@ -25,7 +25,7 @@
 
 /// @cond DEV
 namespace {
-using Pennylane::LightningQubit::Util::RuntimeInfo;
+using Pennylane::Util::RuntimeInfo;
 } // namespace
 /// @endcond
 

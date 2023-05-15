@@ -17,7 +17,7 @@
 
 /// @cond DEV
 namespace {
-using Pennylane::LightningQubit::Util::CPUMemoryModel;
+using Pennylane::Util::CPUMemoryModel;
 } // namespace
 /// @endcond
 
