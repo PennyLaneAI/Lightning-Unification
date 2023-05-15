@@ -17,7 +17,7 @@ add_library(lightning_qubit STATIC ${LQUBIT_FILES})
 
 option(ENABLE_KOKKOS "Enable Kokkos" ON)
 option(ENABLE_BLAS "Enable BLAS" OFF)
-# option(ENABLE_GATE_DISPATCHER "Enable gate kernel dispatching on AVX/AVX2/AVX512" ON)
+option(ENABLE_GATE_DISPATCHER "Enable gate kernel dispatching on AVX/AVX2/AVX512" ON)
 
 # Inform the compiler that this device is enabled.
 target_compile_options(lightning_compile_options INTERFACE "-D_ENABLE_PLQUBIT=1")
