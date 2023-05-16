@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 /**
  * @file
  * Defines the class representation for the Lightning qubit state vector.
@@ -23,7 +24,21 @@
 #include "Error.hpp"   // PL_ABORT
 #include "StateVectorBase.hpp"
 
-namespace Pennylane {
+#include "Gates.hpp"
+#include "KernelMap.hpp"
+#include "KernelType.hpp"
+#include "Memory.hpp"
+#include "Threading.hpp"
+#include "Util.hpp"
+
+/// @cond DEV
+namespace {
+using Pennylane::Util::isPerfectPowerOf2;
+using Pennylane::Util::log2PerfectPower;
+} // namespace
+/// @endcond
+
+namespace Pennylane::LightningQubit {
 /**
  * @brief Lightning qubit state vector class.
  *
@@ -54,10 +69,9 @@ class StateVectorLQubit
      * @param length The size of the data, i.e. 2^(number of qubits).
      */
     StateVectorLQubit(ComplexPrecisionT *data, size_t length)
-        : BaseType{Util::log2PerfectPower(length)}, data_{data},
-          length_(length) {
+        : BaseType{log2PerfectPower(length)}, data_{data}, length_(length) {
         // check if length is a power of 2.
-        if (!Util::isPerfectPowerOf2(length)) {
+        if (!isPerfectPowerOf2(length)) {
             PL_ABORT(
                 "The length of the state vector must be a power of 2. But " +
                 std::to_string(length) +
@@ -86,14 +100,14 @@ class StateVectorLQubit
      * @param length The size of the data, i.e. 2^(number of qubits).
      */
     void changeDataPtr(ComplexPrecisionT *data, size_t length) {
-        if (!Util::isPerfectPowerOf2(length)) {
+        if (!isPerfectPowerOf2(length)) {
             PL_ABORT(
                 "The length of the state vector must be a power of 2. But " +
                 std::to_string(length) +
                 " was given."); // TODO: change to std::format in C++20
         }
         data_ = data;
-        BaseType::setNumQubits(Util::log2PerfectPower(length));
+        BaseType::setNumQubits(log2PerfectPower(length));
         length_ = length;
     }
 
@@ -118,4 +132,4 @@ class StateVectorLQubit
      */
     [[nodiscard]] auto getLength() const -> std::size_t { return length_; }
 };
-} // namespace Pennylane
+} // namespace Pennylane::LightningQubit

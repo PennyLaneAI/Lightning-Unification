@@ -11,12 +11,11 @@ include("${CMAKE_SOURCE_DIR}/cmake/support_tests.cmake")
 FetchAndIncludeCatch()
 
 ################################################################################
-# Define compile options and library
+# Define library
 ################################################################################
 
 add_library(measurements_tests INTERFACE)
 target_link_libraries(measurements_tests INTERFACE  Catch2::Catch2
-                                                    lightning_utils
                                                     lightning_measurements
                                                     )
 
@@ -31,10 +30,8 @@ set(TEST_SOURCES    Test_Measurements.cpp
                     )
 
 add_executable(measurements_test_runner ${TEST_SOURCES})
-target_link_libraries(measurements_test_runner PRIVATE  measurements_tests
-                                                        lightning_compile_options
-                                                        lightning_external_libs
-                                                        )
+target_link_libraries(measurements_test_runner PRIVATE  measurements_tests)
+
 catch_discover_tests(measurements_test_runner)
 
 install(TARGETS measurements_test_runner DESTINATION bin)

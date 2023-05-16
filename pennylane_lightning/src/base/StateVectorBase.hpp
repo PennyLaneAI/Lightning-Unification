@@ -27,10 +27,6 @@
 /// @endcond
 
 #include <complex>
-#include <string>
-#include <vector>
-
-#include "Util.hpp" // exp2
 
 namespace Pennylane {
 /**

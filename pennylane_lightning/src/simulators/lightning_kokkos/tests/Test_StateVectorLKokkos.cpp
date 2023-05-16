@@ -6,7 +6,11 @@
 
 #include <catch2/catch.hpp>
 
+/// @cond DEV
+namespace {
 using namespace Pennylane;
+} // namespace
+/// @endcond
 
 TEMPLATE_TEST_CASE("LightningKokkos::StateVectorLKokkos::Constructors",
                    "[StateVectorLKokkos]", float, double) {

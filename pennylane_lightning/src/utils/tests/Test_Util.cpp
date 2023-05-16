@@ -4,8 +4,12 @@
 #include "Util.hpp"
 #include <catch2/catch.hpp>
 
+/// @cond DEV
+namespace {
 using namespace Pennylane;
 using namespace Pennylane::Util;
+} // namespace
+/// @endcond
 
 /**
  * @brief This tests the compile-time calculation of a given scalar

@@ -17,7 +17,7 @@ add_library(lightning_qubit STATIC ${LQUBIT_FILES})
 
 option(ENABLE_KOKKOS "Enable Kokkos" ON)
 option(ENABLE_BLAS "Enable BLAS" OFF)
-# option(ENABLE_GATE_DISPATCHER "Enable gate kernel dispatching on AVX/AVX2/AVX512" ON)
+option(ENABLE_GATE_DISPATCHER "Enable gate kernel dispatching on AVX/AVX2/AVX512" ON)
 
 # Inform the compiler that this device is enabled.
 target_compile_options(lightning_compile_options INTERFACE "-D_ENABLE_PLQUBIT=1")
@@ -54,13 +54,27 @@ else()
     message(STATUS "ENABLE_BLAS is OFF.")
 endif()
 
-target_link_libraries(lightning_qubit PRIVATE   lightning_compile_options
+target_link_libraries(lightning_qubit PUBLIC    lightning_compile_options
                                                 lightning_external_libs
                                                 lightning_base
                                                 lightning_utils
+                                                pl_qubit_utils
+                                                pl_qubit_gates
                                                 )
+
 target_include_directories(lightning_qubit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_property(TARGET lightning_qubit PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+###############################################################################
+# Include subdirectories
+###############################################################################
+set(COMPONENT_SUBDIRS   gates;
+                        utils;
+                        )
+
+foreach(COMP ${COMPONENT_SUBDIRS})
+    add_subdirectory(${COMP})
+endforeach()
 
 if (BUILD_TESTS)
     enable_testing()
