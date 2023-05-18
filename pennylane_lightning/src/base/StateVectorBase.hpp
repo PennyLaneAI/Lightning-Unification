@@ -74,6 +74,61 @@ template <class PrecisionT, class Derived> class StateVectorBase {
     [[nodiscard]] auto getNumQubits() const -> std::size_t {
         return num_qubits_;
     }
+
+    /**
+     * @brief Get the size of the statevector
+     *
+     * @return The size of the statevector
+     */
+    [[nodiscard]] size_t getLength() const {
+        return static_cast<size_t>(exp2(num_qubits_));
+    }
+
+    /**
+     * @brief Apply a single gate to the state-vector.
+     *
+     * @param opName Gate's name.
+     * @param wires Wires to apply gate to.
+     * @param adjoint Indicates whether to use adjoint of gate.
+     * @param params Optional parameter list for parametric gates.
+     */
+    inline void applyOperation(const std::string &opName,
+                               const std::vector<size_t> &wires,
+                               bool adjoint = false,
+                               const std::vector<PrecisionT> &params = {}) {
+        return static_cast<const Derived *>(this)->applyOperation(
+            opName, wires, adjoint, params);
+    }
+
+    /**
+     * @brief Apply a single generator to the state-vector.
+     *
+     * @param opName Name of generator to apply.
+     * @param wires Wires the generator applies to.
+     * @param adjoint Indicates whether to use adjoint of operator.
+     */
+    [[nodiscard]] inline auto applyGenerator(const std::string &opName,
+                                             const std::vector<size_t> &wires,
+                                             bool adjoint = false)
+        -> PrecisionT {
+        return static_cast<const Derived *>(this)->applyGenerator(opName, wires,
+                                                                  adjoint);
+    }
+
+    /**
+     * @brief Apply a given matrix directly to the statevector using a
+     * raw matrix pointer vector.
+     *
+     * @param matrix Pointer to the array data (in row-major format).
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicate whether inverse should be taken.
+     */
+    inline void applyMatrix(const ComplexPrecisionT *matrix,
+                            const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        return static_cast<const Derived *>(this)->applyMatrix(matrix, wires,
+                                                               inverse);
+    }
 };
 
 } // namespace Pennylane

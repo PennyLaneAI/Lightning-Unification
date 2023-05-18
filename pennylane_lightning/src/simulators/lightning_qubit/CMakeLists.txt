@@ -12,7 +12,10 @@ project(lightning_qubit
         LANGUAGES CXX C
 )
 
-set(LQUBIT_FILES StateVectorLQubit.cpp CACHE INTERNAL "" FORCE)
+set(LQUBIT_FILES    StateVectorLQubitManaged.cpp
+                    StateVectorLQubitRaw.cpp
+                    CACHE INTERNAL "" FORCE)
+
 add_library(lightning_qubit STATIC ${LQUBIT_FILES})
 
 option(ENABLE_KOKKOS "Enable Kokkos" ON)

@@ -27,7 +27,8 @@ target_sources(pl_qubit_tests INTERFACE runner_pl_qubit.cpp)
 # Define targets
 ################################################################################
 
-set(TEST_SOURCES    Test_StateVectorLQubit.cpp
+set(TEST_SOURCES    Test_StateVectorLQubitRaw.cpp
+                    Test_StateVectorLQubitManaged.cpp
                     )
 
 add_executable(pl_qubit_test_runner ${TEST_SOURCES})
