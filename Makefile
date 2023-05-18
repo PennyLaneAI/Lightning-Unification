@@ -54,6 +54,16 @@ else
 endif
 	cmake --build ./BuildTests --target test
 
+test-cpp-runner:
+	rm -rf ./BuildTests
+	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+ifdef verbose
+	cmake --build ./BuildTests --target $(runner) --verbose
+else
+	cmake --build ./BuildTests --target $(runner)
+endif
+	./BuildTests/$(runner)
+
 test-cpp-blas:
 	rm -rf ./BuildTests
 	cmake -BBuildTests -DBUILD_TESTS=ON  -DENABLE_BLAS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
@@ -89,4 +99,13 @@ ifdef verbose
 	cmake --build ./BuildTidy --verbose
 else
 	cmake --build ./BuildTidy
+endif
+
+check-tidy-runner:
+	rm -rf ./BuildTidy
+	cmake -BBuildTidy -DENABLE_CLANG_TIDY=ON -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+ifdef verbose
+	cmake --build ./BuildTidy --target $(runner) --verbose
+else
+	cmake --build ./BuildTidy --target $(runner)
 endif
