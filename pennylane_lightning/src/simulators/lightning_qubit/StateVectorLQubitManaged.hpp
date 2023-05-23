@@ -95,7 +95,7 @@ class StateVectorLQubitManaged
     /**
      * @brief Construct a statevector from data pointer
      *
-     * @param other_data Data pointer to construct the statvector from.
+     * @param other_data Data pointer to construct the statevector from.
      * @param other_size Size of the data
      * @param threading Threading option the statevector to use
      * @param memory_model Memory model the statevector will use

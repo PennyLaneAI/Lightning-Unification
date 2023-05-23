@@ -23,18 +23,18 @@
 #include <utility>
 #include <vector>
 
-#include "BitUtil.hpp" // log2PerfectPower, isPerfectPowerOf2
+#include "BitUtil.hpp"        // log2PerfectPower, isPerfectPowerOf2
+#include "CPUMemoryModel.hpp" // getMemoryModel
 #include "Error.hpp"
 #include "StateVectorLQubit.hpp"
-#include "CPUMemoryModel.hpp" // getMemoryModel
 
 #include <iostream>
 
 /// @cond DEV
 namespace {
+using Pennylane::Util::getMemoryModel;
 using Pennylane::Util::isPerfectPowerOf2;
 using Pennylane::Util::log2PerfectPower;
-using Pennylane::Util::getMemoryModel;
 } // namespace
 /// @endcond
 
@@ -81,12 +81,8 @@ class StateVectorLQubitRaw
                    getMemoryModel(static_cast<void *>(data))},
           data_{data}, length_(length) {
         // check length is perfect power of 2
-        if (!isPerfectPowerOf2(length)) {
-            PL_ABORT("The length of the array for StateVector must be "
-                     "a perfect power of 2. But " +
-                     std::to_string(length) +
-                     " is given."); // TODO: change to std::format in C++20
-        }
+        PL_ABORT_IF_NOT(isPerfectPowerOf2(length),
+                        "The size of provided data must be a power of 2.");
     }
 
     /**
@@ -102,39 +98,6 @@ class StateVectorLQubitRaw
      * @return ComplexPrecisionT* Pointer to statevector data.
      */
     auto getData() -> ComplexPrecisionT * { return data_; }
-
-    // /**
-    //  * @brief Redefine statevector data pointer.
-    //  *
-    //  * @param data New raw data pointer.
-    //  * @param length The size of the data, i.e. 2^(number of qubits).
-    //  */
-    // void changeDataPtr(ComplexPrecisionT *data, size_t length) {
-    //     if (!isPerfectPowerOf2(length)) {
-    //         PL_ABORT("The length of the array for StateVector must be "
-    //                  "a perfect power of 2. But " +
-    //                  std::to_string(length) +
-    //                  " is given."); // TODO: change to std::format in C++20
-    //     }
-    //     data_ = data;
-    //     BaseType::setNumQubits(log2PerfectPower(length));
-    //     length_ = length;
-    // }
-
-    // /**
-    //  * @brief Set statevector data from another data.
-    //  *
-    //  * @param data New raw data pointer.
-    //  * @param length The size of the data, i.e. 2^(number of qubits).
-    //  */
-    // void setDataFrom(ComplexPrecisionT *new_data, size_t length) {
-    //     if (length != this->getLength()) {
-    //         PL_ABORT("The length of data to set must be the same as "
-    //                  "the original data size"); // TODO: change to std::format
-    //                                             // in C++20
-    //     }
-    //     std::copy(new_data, new_data + length, data_);
-    // }
 
     /**
      * @brief Get the number of data elements in the statevector array.

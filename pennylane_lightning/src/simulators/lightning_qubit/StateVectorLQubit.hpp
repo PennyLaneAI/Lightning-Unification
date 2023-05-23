@@ -25,11 +25,11 @@
 #include <unordered_map>
 
 #include "CPUMemoryModel.hpp"
-#include "StateVectorBase.hpp"
-#include "Threading.hpp"
 #include "GateOperation.hpp"
 #include "KernelMap.hpp"
 #include "KernelType.hpp"
+#include "StateVectorBase.hpp"
+#include "Threading.hpp"
 
 /// @cond DEV
 namespace {
@@ -127,12 +127,12 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
     /**
      * @brief Get a kernel for a generator operation.
      *
-     * @param gntr_op Generator operation
+     * @param gen_op Generator operation
      * @return KernelType
      */
     [[nodiscard]] inline auto
-    getKernelForGenerator(GeneratorOperation gntr_op) const -> KernelType {
-        return kernel_for_generators_.at(gntr_op);
+    getKernelForGenerator(GeneratorOperation gen_op) const -> KernelType {
+        return kernel_for_generators_.at(gen_op);
     }
 
     /**
@@ -323,8 +323,8 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
                                       bool adj = false) -> PrecisionT {
         auto *arr = getData();
         const auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
-        const auto gntr_op = dispatcher.strToGeneratorOp(opName);
-        return dispatcher.applyGenerator(getKernelForGenerator(gntr_op), arr,
+        const auto gen_op = dispatcher.strToGeneratorOp(opName);
+        return dispatcher.applyGenerator(getKernelForGenerator(gen_op), arr,
                                          this->getNumQubits(), opName, wires,
                                          adj);
     }
