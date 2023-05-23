@@ -14,6 +14,7 @@ help:
 	@echo "                         use with 'backend=lightning_kokkos' for Kokkos device. Default: lightning_qubit"
 	@echo "  test-cpp [verbose=1]   to run the C++ test suite (requires CMake)"
 	@echo "                         use with 'verbose=1' for building with verbose flag"
+	@echo "  test-cpp [target=?]    to run a specific  C++ test target (requires CMake)."
 	@echo "  test-python            to run the Python test suite"
 	@echo "  format [check=1]       to apply C++ and Python formatter;"
 	@echo "                         use with 'check=1' to check instead of modify (requires black and clang-format)"
@@ -23,6 +24,8 @@ help:
 	@echo "                         use with 'backend=lightning_kokkos' for Kokkos device. Default: lightning_qubit"
 	@echo "  check-tidy [verbose=1] to build PennyLane-Lightning with ENABLE_CLANG_TIDY=ON (requires clang-tidy & CMake)"
 	@echo "                         use with 'verbose=1' for building with verbose flag"
+	@echo "  check-tidy [target=?]  to build a specific PennyLane-Lightning target with ENABLE_CLANG_TIDY=ON (requires clang-tidy & CMake)"
+
 .PHONY : clean
 clean:
 	find . -type d -name '__pycache__' -exec rm -r {} \+
@@ -47,22 +50,21 @@ endif
 test-cpp:
 	rm -rf ./BuildTests
 	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+ifdef target
+ifdef verbose
+	cmake --build ./BuildTests --target $(target) --verbose
+else
+	cmake --build ./BuildTests --target $(target)
+endif
+	./BuildTests/$(target)
+else
 ifdef verbose
 	cmake --build ./BuildTests --verbose
 else
 	cmake --build ./BuildTests
 endif
 	cmake --build ./BuildTests --target test
-
-test-cpp-runner:
-	rm -rf ./BuildTests
-	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
-ifdef verbose
-	cmake --build ./BuildTests --target $(runner) --verbose
-else
-	cmake --build ./BuildTests --target $(runner)
 endif
-	./BuildTests/$(runner)
 
 test-cpp-blas:
 	rm -rf ./BuildTests
@@ -95,17 +97,16 @@ endif
 check-tidy:
 	rm -rf ./BuildTidy
 	cmake -BBuildTidy -DENABLE_CLANG_TIDY=ON -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+ifdef target
+ifdef verbose
+	cmake --build ./BuildTidy --target $(target) --verbose
+else
+	cmake --build ./BuildTidy --target $(target)
+endif
+else
 ifdef verbose
 	cmake --build ./BuildTidy --verbose
 else
 	cmake --build ./BuildTidy
 endif
-
-check-tidy-runner:
-	rm -rf ./BuildTidy
-	cmake -BBuildTidy -DENABLE_CLANG_TIDY=ON -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
-ifdef verbose
-	cmake --build ./BuildTidy --target $(runner) --verbose
-else
-	cmake --build ./BuildTidy --target $(runner)
 endif
