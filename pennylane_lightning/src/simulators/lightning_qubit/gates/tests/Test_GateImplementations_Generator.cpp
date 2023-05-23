@@ -105,7 +105,8 @@ void testGeneratorEqualsGateDerivativeForKernel(
         for (size_t num_qubits = min_num_qubits; num_qubits < max_num_qubits;
              num_qubits++) {
             const auto wires = createWires(gate_op, num_qubits);
-            const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+            const auto ini_st =
+                createRandomStateVectorData<PrecisionT>(re, num_qubits);
 
             /* Apply generator to gntr_st */
             auto gntr_st = ini_st;

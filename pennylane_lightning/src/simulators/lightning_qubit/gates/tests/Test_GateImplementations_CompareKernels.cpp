@@ -88,7 +88,7 @@ void testApplyGate(RandomEngine &re, GateOperation gate_op, size_t num_qubits) {
 
     INFO(ss.str() << "PrecisionT = " << PrecisionToName<PrecisionT>::value);
 
-    const auto ini = createRandomState<PrecisionT>(re, num_qubits);
+    const auto ini = createRandomStateVectorData<PrecisionT>(re, num_qubits);
 
     const auto params = createParams<PrecisionT>(gate_op);
     const auto all_wires = createAllWires(num_qubits, gate_op, true);
@@ -190,7 +190,7 @@ void testMatrixOp(RandomEngine &re, size_t num_qubits, size_t num_wires,
     ss << "inverse: " << inverse;
     ss << ", num_qubits: " << num_qubits;
 
-    const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+    const auto ini_st = createRandomStateVectorData<PrecisionT>(re, num_qubits);
     const auto matrix = randomUnitary<PrecisionT>(re, num_qubits);
 
     DYNAMIC_SECTION(ss.str()) {

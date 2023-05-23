@@ -19,7 +19,7 @@
 #include "cpu_kernels/GateImplementationsLM.hpp"
 #include "cpu_kernels/GateImplementationsPI.hpp"
 
-#include "LQubitTestHelpers.hpp" // createProductState, createRandomState
+#include "LQubitTestHelpers.hpp" // createProductState, createRandomStateVectorData
 #include "TestHelpers.hpp"
 
 /// @cond DEV
@@ -28,7 +28,7 @@ using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Gates;
 
 using Pennylane::LightningQubit::Util::createProductState;
-using Pennylane::LightningQubit::Util::createRandomState;
+using Pennylane::LightningQubit::Util::createRandomStateVectorData;
 
 using Pennylane::LightningQubit::Gates::callGateOps;
 } // namespace
@@ -96,7 +96,8 @@ TEMPLATE_TEST_CASE("DynamicDispatcher::applyOperation", "[DynamicDispatcher]",
         std::mt19937 re{1337U};
         SECTION("PauliX") {
             const size_t num_qubits = 3;
-            const auto ini = createRandomState<PrecisionT>(re, num_qubits);
+            const auto ini =
+                createRandomStateVectorData<PrecisionT>(re, num_qubits);
             auto st1 = ini;
             auto st2 = ini;
 
@@ -111,7 +112,8 @@ TEMPLATE_TEST_CASE("DynamicDispatcher::applyOperation", "[DynamicDispatcher]",
         SECTION("IsingXY") {
             const size_t num_qubits = 3;
             const auto angle = TestType{0.4312};
-            const auto ini = createRandomState<PrecisionT>(re, num_qubits);
+            const auto ini =
+                createRandomStateVectorData<PrecisionT>(re, num_qubits);
             auto st1 = ini;
             auto st2 = ini;
 
