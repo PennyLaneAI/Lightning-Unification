@@ -5,10 +5,17 @@
 
 #include "TestHelpers.hpp"
 
+/**
+ * @file
+ *  Tests for functionality defined in the StateVectorBase class.
+ *  For Lightning Qubit, the base class is been tested against the
+ * StateVectorLQubitManaged class.
+ */
+
 #ifdef _ENABLE_PLQUBIT
-#include "StateVectorLQubit.hpp"
+#include "StateVectorLQubitManaged.hpp"
 template <typename T> struct StateVectorBackend {
-    using StateVector = Pennylane::LightningQubit::StateVectorLQubit<T>;
+    using StateVector = Pennylane::LightningQubit::StateVectorLQubitManaged<T>;
     using Precision = T;
 };
 #elif defined(_ENABLE_PLKOKKOS)
@@ -19,7 +26,11 @@ template <typename T> struct StateVectorBackend {
 };
 #endif
 
+/// @cond DEV
+namespace {
 using namespace Pennylane;
+} // namespace
+/// @endcond
 
 TEMPLATE_PRODUCT_TEST_CASE("Base::StateVectorBase", "[StateVectorBase]",
                            (StateVectorBackend), (float, double)) {
