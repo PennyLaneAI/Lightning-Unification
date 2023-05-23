@@ -190,6 +190,40 @@ isApproxEqual(const Data_t &data1, const Data_t &data2,
              data1.imag() != Approx(data2.imag()).epsilon(eps));
 }
 
+/**
+ * @brief Utility function to compare complex statevector data.
+ *
+ * @tparam Data_t Floating point data-type.
+ * @param data1 StateVector data array pointer 1.
+ * @param length1 StateVector data array pointer 1.
+ * @param data2 StateVector data array pointer 2.
+ * @param length2 StateVector data array pointer 1.
+ * @return true Data are approximately equal.
+ * @return false Data are not approximately equal.
+ */
+template <class Data_t>
+inline bool
+isApproxEqual(const Data_t *data1, const size_t length1, const Data_t *data2,
+              const size_t length2,
+              typename Data_t::value_type eps =
+                  std::numeric_limits<typename Data_t::value_type>::epsilon() *
+                  100) {
+    if (data1 == data2) {
+        return true;
+    }
+
+    if (length1 != length2) {
+        return false;
+    }
+
+    for (size_t idx = 0; idx < length1; idx++) {
+        if (!isApproxEqual(data1[idx], data2[idx], eps)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 #define PL_REQUIRE_THROWS_MATCHES(expr, type, message_match)                   \
     REQUIRE_THROWS_AS(expr, type);                                             \
     REQUIRE_THROWS_WITH(expr, Catch::Matchers::Contains(message_match));

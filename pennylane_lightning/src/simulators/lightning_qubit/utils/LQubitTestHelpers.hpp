@@ -35,7 +35,6 @@
 #include <complex>
 #include <random>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 /// @cond DEV
@@ -112,7 +111,7 @@ auto createPlusState(size_t num_qubits)
  * @brief create a random state
  */
 template <typename PrecisionT, class RandomEngine>
-auto createRandomState(RandomEngine &re, size_t num_qubits)
+auto createRandomStateVectorData(RandomEngine &re, size_t num_qubits)
     -> TestVector<std::complex<PrecisionT>> {
 
     TestVector<std::complex<PrecisionT>> res(
