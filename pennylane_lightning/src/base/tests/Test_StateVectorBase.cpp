@@ -18,12 +18,6 @@ template <typename T> struct StateVectorBackend {
     using StateVector = Pennylane::LightningQubit::StateVectorLQubitManaged<T>;
     using Precision = T;
 };
-#elif defined(_ENABLE_PLKOKKOS)
-#include "StateVectorLKokkos.hpp"
-template <typename T> struct StateVectorBackend {
-    using StateVector = Pennylane::StateVectorLKokkos<T>;
-    using Precision = T;
-};
 #endif
 
 /// @cond DEV
