@@ -19,16 +19,16 @@
 #include "cpu_kernels/GateImplementationsLM.hpp"
 #include "cpu_kernels/GateImplementationsPI.hpp"
 
-#include "LQubitTestHelpers.hpp" // createProductState, createRandomStateVectorData
-#include "TestHelpers.hpp"
+#include "LQubitTestHelpers.hpp"
+#include "TestHelpers.hpp" // createProductState, createRandomStateVectorData
 
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Gates;
 
-using Pennylane::LightningQubit::Util::createProductState;
-using Pennylane::LightningQubit::Util::createRandomStateVectorData;
+using Pennylane::Util::createProductState;
+using Pennylane::Util::createRandomStateVectorData;
 
 using Pennylane::LightningQubit::Gates::callGateOps;
 } // namespace

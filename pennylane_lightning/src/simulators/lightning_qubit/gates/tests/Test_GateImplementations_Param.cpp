@@ -1,7 +1,7 @@
 #include "CPUMemoryModel.hpp"
 #include "LQubitTestHelpers.hpp"
-#include "TestHelpers.hpp" // PrecisionToName
-#include "Util.hpp" // INVSQRT2
+#include "TestHelpers.hpp" // PrecisionToName, createProductState
+#include "Util.hpp"        // INVSQRT2
 #include "cpu_kernels/GateImplementationsLM.hpp"
 #include "cpu_kernels/GateImplementationsPI.hpp"
 

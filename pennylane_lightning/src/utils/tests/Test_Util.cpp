@@ -1,4 +1,5 @@
 #include <cmath>
+#include <vector>
 
 #include "TestHelpers.hpp"
 #include "Util.hpp"
@@ -67,5 +68,18 @@ TEMPLATE_TEST_CASE("Utility math functions", "[Util]", float, double) {
                       static_cast<size_t>(std::pow(2, num_qubits - index - 1)));
             }
         }
+    }
+}
+
+TEMPLATE_TEST_CASE("Util::squaredNorm", "[Util][LinearAlgebra]", float,
+                   double) {
+    SECTION("For real type") {
+        std::vector<TestType> vec{0.0, 1.0, 3.0, 10.0};
+        CHECK(squaredNorm(vec) == Approx(110.0));
+    }
+
+    SECTION("For complex type") {
+        std::vector<std::complex<TestType>> vec{{0.0, 1.0}, {3.0, 10.0}};
+        CHECK(squaredNorm(vec) == Approx(110.0));
     }
 }

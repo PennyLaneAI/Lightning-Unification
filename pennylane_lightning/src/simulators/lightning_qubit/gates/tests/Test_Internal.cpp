@@ -1,6 +1,6 @@
-#include "CreateAllWires.hpp"    // CombinationGenerator, PermutationGenerator
-#include "LQubitTestHelpers.hpp" // createProductState, createZeroState
-#include "TestHelpers.hpp"
+#include "CreateAllWires.hpp" // CombinationGenerator, PermutationGenerator
+#include "LQubitTestHelpers.hpp"
+#include "TestHelpers.hpp" // createProductState, createZeroState
 #include "cpu_kernels/GateImplementationsPI.hpp"
 
 #include <catch2/catch.hpp>
