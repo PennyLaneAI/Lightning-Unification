@@ -271,15 +271,6 @@ void write_CSR_vectors(std::vector<index_type> &row_map,
     }
 };
 
-template <class PrecisionT> struct PrecisionToName;
-
-template <> struct PrecisionToName<float> {
-    constexpr static auto value = "float";
-};
-template <> struct PrecisionToName<double> {
-    constexpr static auto value = "double";
-};
-
 /**
  * @brief Compare std::vectors with same elements data type but different
  * allocators.

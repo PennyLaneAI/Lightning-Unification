@@ -1,6 +1,6 @@
 #include "CPUMemoryModel.hpp"
-#include "LQubitTestHelpers.hpp" // PrecisionToName
-#include "TestHelpers.hpp"
+#include "LQubitTestHelpers.hpp"
+#include "TestHelpers.hpp" // PrecisionToName
 #include "Util.hpp" // INVSQRT2
 #include "cpu_kernels/GateImplementationsLM.hpp"
 #include "cpu_kernels/GateImplementationsPI.hpp"

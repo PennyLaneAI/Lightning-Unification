@@ -224,6 +224,15 @@ isApproxEqual(const Data_t *data1, const size_t length1, const Data_t *data2,
     return true;
 }
 
+template <class PrecisionT> struct PrecisionToName;
+
+template <> struct PrecisionToName<float> {
+    constexpr static auto value = "float";
+};
+template <> struct PrecisionToName<double> {
+    constexpr static auto value = "double";
+};
+
 #define PL_REQUIRE_THROWS_MATCHES(expr, type, message_match)                   \
     REQUIRE_THROWS_AS(expr, type);                                             \
     REQUIRE_THROWS_WITH(expr, Catch::Matchers::Contains(message_match));

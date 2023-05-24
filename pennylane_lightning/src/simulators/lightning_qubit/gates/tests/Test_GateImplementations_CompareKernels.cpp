@@ -1,6 +1,6 @@
 #include "CreateAllWires.hpp"
-#include "LQubitTestHelpers.hpp" // PrecisionToName
-#include "TestHelpers.hpp"
+#include "LQubitTestHelpers.hpp"
+#include "TestHelpers.hpp" // PrecisionToName
 #include "TestKernels.hpp"
 
 #include "ConstantUtil.hpp" // lookup, array_has_elem
