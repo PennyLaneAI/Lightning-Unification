@@ -342,7 +342,6 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
                             const ComplexPrecisionT *matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
-        using Gates::MatrixOperation;
 
         const auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
         auto *arr = getData();
@@ -366,7 +365,6 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
                             const std::vector<ComplexPrecisionT> &matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
-        using Gates::MatrixOperation;
 
         PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
                     "The size of matrix does not match with the given "
@@ -420,27 +418,5 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
 
         applyMatrix(matrix.data(), wires, inverse);
     }
-
-    // /**
-    //  * @brief Compare statevectors.
-    //  *
-    //  * @tparam RhsDerived The derived class for another statevector.
-    //  * @param rhs Another statevector to compare.
-    //  * @return bool
-    //  */
-    // template <class RhsDerived>
-    // bool operator==(const StateVectorLQubit<PrecisionT, RhsDerived> &rhs) {
-    //     if (this->getNumQubits() != rhs.getNumQubits()) {
-    //         return false;
-    //     }
-    //     const ComplexPrecisionT *data1 = getData();
-    //     const ComplexPrecisionT *data2 = rhs.getData();
-    //     for (size_t k = 0; k < this->getLength(); k++) {
-    //         if (data1[k] != data2[k]) {
-    //             return false;
-    //         }
-    //     }
-    //     return true;
-    // }
 };
 } // namespace Pennylane::LightningQubit
