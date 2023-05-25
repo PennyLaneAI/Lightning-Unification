@@ -29,19 +29,19 @@ add_library(lightning_external_libs INTERFACE)
 # It will be uncommented when we move to a newer set-up.
 # target_compile_features(lightning_compile_options INTERFACE cxx_std_20)
 
-# Initial attempt to find which BLAS implementation is chosen
-function(get_blas_impl)
-    string(FIND "${BLAS_LIBRARIES}" "mkl" FOUND_MKL)
-    string(FIND "${BLAS_LIBRARIES}" "openblas" FOUND_OPENBLAS)
+# # Initial attempt to find which BLAS implementation is chosen
+# function(get_blas_impl)
+#     string(FIND "${BLAS_LIBRARIES}" "mkl" FOUND_MKL)
+#     string(FIND "${BLAS_LIBRARIES}" "openblas" FOUND_OPENBLAS)
 
-    if (NOT (FOUND_MKL EQUAL -1)) # MKL is found
-        set(BLAS_IMPL "MKL" PARENT_SCOPE)
-    elseif (NOT (FOUND_OPENBLAS EQUAL -1))
-        set(BLAS_IMPL "OpenBLAS" PARENT_SCOPE)
-    else()
-        set(BLAS_IMPL "Unknown" PARENT_SCOPE)
-    endif()
-endfunction()
+#     if (NOT (FOUND_MKL EQUAL -1)) # MKL is found
+#         set(BLAS_IMPL "MKL" PARENT_SCOPE)
+#     elseif (NOT (FOUND_OPENBLAS EQUAL -1))
+#         set(BLAS_IMPL "OpenBLAS" PARENT_SCOPE)
+#     else()
+#         set(BLAS_IMPL "Unknown" PARENT_SCOPE)
+#     endif()
+# endfunction()
 
 if(MSVC) # For M_PI
     target_compile_options(lightning_compile_options INTERFACE /D_USE_MATH_DEFINES)
