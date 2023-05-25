@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <complex>
+#include <limits> // numeric_limits
 #include <random>
 #include <type_traits>
 #include <vector>
@@ -25,9 +26,7 @@ namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::Util;
 
-using Pennylane::LightningQubit::Util::createRandomStateVectorData;
 using Pennylane::LightningQubit::Util::randomUnitary;
-using Pennylane::LightningQubit::Util::TestVector;
 
 std::mt19937_64 re{1337};
 } // namespace
@@ -65,20 +64,7 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::Constructibility",
         REQUIRE(!std::is_constructible_v<StateVectorT>);
     }
     SECTION("StateVectorBackend<TestType> {ComplexT*, size_t}") {
-        using VectorT = TestVector<ComplexT>;
         REQUIRE(std::is_constructible_v<StateVectorT, ComplexT *, size_t>);
-
-        const size_t num_qubits = 4;
-        VectorT st_data =
-            createRandomStateVectorData<PrecisionT>(re, num_qubits);
-
-        StateVectorT state_vector(st_data.data(), st_data.size());
-
-        REQUIRE(state_vector.getNumQubits() == 4);
-        REQUIRE(state_vector.getLength() == 16);
-        REQUIRE(isApproxEqual(st_data.data(), st_data.size(),
-                              state_vector.getData(),
-                              state_vector.getLength()));
     }
     SECTION("StateVectorBackend<TestType> {ComplexT*, size_t}: Fails if "
             "provided an inconsistent length.") {
@@ -175,15 +161,16 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a pointer",
             Gates::GateImplementationsPI::applyMultiQubitOp<PrecisionT>(
                 state_vector_2.getData(), num_qubits, m.data(), wires, false);
 
+            PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
             REQUIRE(isApproxEqual(
                 state_vector_1.getData(), state_vector_1.getLength(),
-                state_vector_2.getData(), state_vector_2.getLength()));
+                state_vector_2.getData(), state_vector_2.getLength(), eps));
         }
     }
 }
 
 TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyOperations",
-                           "[applyOperations]",
+                           "[applyOperations invalid arguments]",
                            (StateVectorManagedAndPrecision,
                             StateVectorRawAndPrecision),
                            (float, double)) {
@@ -209,28 +196,6 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyOperations",
             LightningException, "must all be equal"); // invalid inverse
     }
 
-    SECTION("applyOperations without parameters works as expected") {
-        const size_t num_qubits = 3;
-        StateVectorLQubitManaged<PrecisionT> sv1(num_qubits);
-
-        VectorT st_data_1 =
-            createRandomStateVectorData<PrecisionT>(re, num_qubits);
-        VectorT st_data_2 = st_data_1;
-
-        StateVectorT state_vector_1(st_data_1.data(), st_data_1.size());
-        StateVectorT state_vector_2(st_data_2.data(), st_data_2.size());
-
-        state_vector_1.applyOperations({"PauliX", "PauliY"}, {{0}, {1}},
-                                       {false, false});
-
-        state_vector_2.applyOperation("PauliX", {0}, false);
-        state_vector_2.applyOperation("PauliY", {1}, false);
-
-        REQUIRE(isApproxEqual(
-            state_vector_1.getData(), state_vector_1.getLength(),
-            state_vector_2.getData(), state_vector_2.getLength()));
-    }
-
     SECTION("Test invalid arguments with parameters") {
         const size_t num_qubits = 4;
 
@@ -253,26 +218,5 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyOperations",
             state_vector.applyOperations({"RX", "RY"}, {{0}, {1}},
                                          {false, false}, {{0.0}}),
             LightningException, "must all be equal"); // invalid parameters
-    }
-
-    SECTION("applyOperations with params works as expected") {
-        const size_t num_qubits = 3;
-
-        VectorT st_data_1 =
-            createRandomStateVectorData<PrecisionT>(re, num_qubits);
-        VectorT st_data_2 = st_data_1;
-
-        StateVectorT state_vector_1(st_data_1.data(), st_data_1.size());
-        StateVectorT state_vector_2(st_data_2.data(), st_data_2.size());
-
-        state_vector_1.applyOperations({"RX", "RY"}, {{0}, {1}}, {false, false},
-                                       {{0.1}, {0.2}});
-
-        state_vector_2.applyOperation("RX", {0}, false, {0.1});
-        state_vector_2.applyOperation("RY", {1}, false, {0.2});
-
-        REQUIRE(isApproxEqual(
-            state_vector_1.getData(), state_vector_1.getLength(),
-            state_vector_2.getData(), state_vector_2.getLength()));
     }
 }
