@@ -62,7 +62,7 @@ class StateVectorLQubitManaged
 
   public:
     /**
-     * @brief Create a new statevector
+     * @brief Create a new statevector in the computational basis state |0...0>
      *
      * @param num_qubits Number of qubits
      * @param threading Threading option the statevector to use

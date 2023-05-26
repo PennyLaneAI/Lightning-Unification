@@ -154,7 +154,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
     }
 
     /**
-     * @brief Get threading of the statevector.
+     * @brief Get threading mode of the statevector.
      */
     [[nodiscard]] inline Threading threading() const { return threading_; }
 
