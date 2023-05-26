@@ -3,6 +3,18 @@ PYTHON3 := $(shell which python3 2>/dev/null)
 PYTHON := python3
 TESTRUNNER := -m pytest tests --tb=short
 
+ifdef verbose
+    VERBOSE := --verbose
+else
+    VERBOSE :=
+endif
+
+ifdef check
+    CHECK := --check
+else
+    CHECK :=
+endif
+
 .PHONY: help
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -41,72 +53,40 @@ test-python: test-builtin
 build:
 	rm -rf ./Build
 	cmake -BBuild -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
-ifdef verbose
-	cmake --build ./Build --verbose
-else
-	cmake --build ./Build
-endif
+	cmake --build ./Build $(VERBOSE)
 
 test-cpp:
 	rm -rf ./BuildTests
 	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 ifdef target
-ifdef verbose
-	cmake --build ./BuildTests --target $(target) --verbose
-else
-	cmake --build ./BuildTests --target $(target)
-endif
+	cmake --build ./BuildTests $(VERBOSE) --target $(target)
 	./BuildTests/$(target)
 else
-ifdef verbose
-	cmake --build ./BuildTests --verbose
-else
-	cmake --build ./BuildTests
-endif
-	cmake --build ./BuildTests --target test
+	cmake --build ./BuildTests $(VERBOSE)
+	cmake --build ./BuildTests $(VERBOSE) --target test
 endif
 
 test-cpp-blas:
 	rm -rf ./BuildTests
 	cmake -BBuildTests -DBUILD_TESTS=ON  -DENABLE_BLAS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
-ifdef verbose
-	cmake --build ./BuildTests --verbose
-else
-	cmake --build ./BuildTests
-endif
-	cmake --build ./BuildTests --target test
+	cmake --build ./BuildTests $(VERBOSE)
+	cmake --build ./BuildTests $(VERBOSE) --target test
 
 .PHONY: format format-cpp
 format: format-cpp format-python
 
 format-cpp:
-ifdef check
-	./bin/format --check --cfversion $(if $(version:-=),$(version),0) ./pennylane_lightning
-else
-	./bin/format --cfversion $(if $(version:-=),$(version),0) ./pennylane_lightning
-endif
+	./bin/format $(CHECK) --cfversion $(if $(version:-=),$(version),0) ./pennylane_lightning
 
 format-python:
-ifdef check
-	black -l 100 ./pennylane_lightning/ ./tests --check
-else
-	black -l 100 ./pennylane_lightning/ ./tests
-endif
+	black -l 100 ./pennylane_lightning/ ./tests $(CHECK)
 
 .PHONY: check-tidy
 check-tidy:
 	rm -rf ./BuildTidy
 	cmake -BBuildTidy -DENABLE_CLANG_TIDY=ON -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 ifdef target
-ifdef verbose
-	cmake --build ./BuildTidy --target $(target) --verbose
+	cmake --build ./BuildTidy $(VERBOSE) --target $(target)
 else
-	cmake --build ./BuildTidy --target $(target)
-endif
-else
-ifdef verbose
-	cmake --build ./BuildTidy --verbose
-else
-	cmake --build ./BuildTidy
-endif
+	cmake --build ./BuildTidy $(VERBOSE)
 endif
