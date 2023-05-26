@@ -22,7 +22,9 @@ using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 
-#ifdef _ENABLE_PLQUBIT
+#ifdef _ENABLE_PLQUBITA
+constexpr bool BACKEND_FOUND = true;
+
 #include "LQubitTestHelpers.hpp"
 #include "TestStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
 
@@ -32,6 +34,11 @@ using namespace Pennylane::LightningQubit::Util;
 } // namespace
 /// @endcond
 
+#else
+constexpr bool BACKEND_FOUND = false;
+using TestStateVectorBackends = Pennylane::Util::TypeList<void>;
+
+template <class StateVector> struct StateVectorToName {};
 #endif
 
 template <typename TypeList> void testStateVectorBase() {
@@ -56,13 +63,14 @@ template <typename TypeList> void testStateVectorBase() {
 }
 
 TEST_CASE("StateVectorBase", "[StateVectorBase]") {
-
-    testStateVectorBase<TestStateVectorBackends>();
+    if constexpr (BACKEND_FOUND) {
+        testStateVectorBase<TestStateVectorBackends>();
+    }
 }
 
 template <typename TypeList> void testApplyOperations() {
-    std::mt19937_64 re{1337};
     if constexpr (!std::is_same_v<TypeList, void>) {
+        std::mt19937_64 re{1337};
         using StateVectorT = typename TypeList::Type::StateVector;
         using PrecisionT = typename TypeList::Type::Precision;
         using ComplexT = std::complex<PrecisionT>;
@@ -114,6 +122,7 @@ template <typename TypeList> void testApplyOperations() {
 }
 
 TEST_CASE("StateVectorBase::applyOperations", "[applyOperations]") {
-
-    testApplyOperations<TestStateVectorBackends>();
+    if constexpr (BACKEND_FOUND) {
+        testApplyOperations<TestStateVectorBackends>();
+    }
 }
