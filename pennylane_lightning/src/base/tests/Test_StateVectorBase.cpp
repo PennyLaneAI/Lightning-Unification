@@ -22,7 +22,7 @@ using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 
-#ifdef _ENABLE_PLQUBITA
+#ifdef _ENABLE_PLQUBIT
 constexpr bool BACKEND_FOUND = true;
 
 #include "LQubitTestHelpers.hpp"
