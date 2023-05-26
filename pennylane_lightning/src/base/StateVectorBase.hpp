@@ -88,8 +88,8 @@ template <class PrecisionT, class Derived> class StateVectorBase {
                                const std::vector<size_t> &wires,
                                bool adjoint = false,
                                const std::vector<PrecisionT> &params = {}) {
-        return static_cast<const Derived *>(this)->applyOperation(
-            opName, wires, adjoint, params);
+        return static_cast<Derived *>(this)->applyOperation(opName, wires,
+                                                            adjoint, params);
     }
 
     /**
@@ -107,7 +107,7 @@ template <class PrecisionT, class Derived> class StateVectorBase {
                     const std::vector<std::vector<size_t>> &ops_wires,
                     const std::vector<bool> &ops_adjoint,
                     const std::vector<std::vector<PrecisionT>> &ops_params) {
-        return static_cast<const Derived *>(this)->applyOperations(
+        return static_cast<Derived *>(this)->applyOperations(
             ops, ops_wires, ops_adjoint, ops_params);
     }
 
@@ -121,8 +121,8 @@ template <class PrecisionT, class Derived> class StateVectorBase {
     inline auto applyGenerator(const std::string &opName,
                                const std::vector<size_t> &wires,
                                bool adjoint = false) -> PrecisionT {
-        return static_cast<const Derived *>(this)->applyGenerator(opName, wires,
-                                                                  adjoint);
+        return static_cast<Derived *>(this)->applyGenerator(opName, wires,
+                                                            adjoint);
     }
 
     /**
@@ -136,23 +136,8 @@ template <class PrecisionT, class Derived> class StateVectorBase {
     inline void applyMatrix(const ComplexPrecisionT *matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
-        return static_cast<const Derived *>(this)->applyMatrix(matrix, wires,
-                                                               inverse);
-    }
-
-    /**
-     * @brief Apply a given matrix directly to the statevector.
-     *
-     * @param matrix Matrix data (in row-major format) stored in a std::vector.
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicate whether inverse should be taken.
-     */
-    template <typename Alloc>
-    inline void applyMatrix(const std::vector<ComplexPrecisionT, Alloc> &matrix,
-                            const std::vector<size_t> &wires,
-                            bool inverse = false) {
-        return static_cast<const Derived *>(this)->applyMatrix(matrix, wires,
-                                                               inverse);
+        return static_cast<Derived *>(this)->applyMatrix(matrix, wires,
+                                                         inverse);
     }
 };
 
