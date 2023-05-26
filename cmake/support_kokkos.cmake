@@ -5,7 +5,8 @@
 # Include this file only once
 include_guard()
 
-set(KOKKOS_VERSION 3.7.00)
+set(KOKKOS_VERSION 4.0.01)
+message(STATUS "Requested Kokkos and Kokkos Kernels libraries version: ${KOKKOS_VERSION}")
 
 # Macro to aid in finding Kokkos and Kokkos Kernels with 3 potential install options:
 # 1. Fully integrated Kokkos packages and CMake module files
