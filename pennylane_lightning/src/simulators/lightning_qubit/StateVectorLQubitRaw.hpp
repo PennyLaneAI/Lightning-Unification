@@ -54,7 +54,7 @@ namespace Pennylane::LightningQubit {
  * @tparam PrecisionT Floating point precision of underlying statevector data.
  */
 template <class PrecisionT = double>
-class StateVectorLQubitRaw
+class StateVectorLQubitRaw final
     : public StateVectorLQubit<PrecisionT, StateVectorLQubitRaw<PrecisionT>> {
   public:
     using BaseType =

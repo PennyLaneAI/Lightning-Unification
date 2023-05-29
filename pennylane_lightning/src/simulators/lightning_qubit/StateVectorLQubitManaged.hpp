@@ -50,7 +50,7 @@ namespace Pennylane::LightningQubit {
  * @tparam PrecisionT Precision data type
  */
 template <class PrecisionT = double>
-class StateVectorLQubitManaged
+class StateVectorLQubitManaged final
     : public StateVectorLQubit<PrecisionT,
                                StateVectorLQubitManaged<PrecisionT>> {
   public:
