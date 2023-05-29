@@ -64,10 +64,14 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
 
   private:
     using BaseType = StateVectorBase<PrecisionT, Derived>;
+    using GateKernelMap = std::unordered_map<GateOperation, KernelType>;
+    using GeneratorKernelMap =
+        std::unordered_map<GeneratorOperation, KernelType>;
+    using MatrixKernelMap = std::unordered_map<MatrixOperation, KernelType>;
 
-    std::unordered_map<GateOperation, KernelType> kernel_for_gates_;
-    std::unordered_map<GeneratorOperation, KernelType> kernel_for_generators_;
-    std::unordered_map<MatrixOperation, KernelType> kernel_for_matrices_;
+    GateKernelMap kernel_for_gates_;
+    GeneratorKernelMap kernel_for_generators_;
+    MatrixKernelMap kernel_for_matrices_;
 
     /**
      * @brief Internal function to set kernels for all operations depending on
@@ -145,44 +149,47 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      */
     [[nodiscard]] inline Threading threading() const { return threading_; }
 
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+
     /**
      * @brief Get kernels for all gate operations.
      */
-    [[nodiscard]] inline auto getGateKernelMap()
-        const & -> const std::unordered_map<GateOperation, KernelType> & {
+    [[nodiscard]] inline auto
+    getGateKernelMap() const & -> const GateKernelMap & {
         return kernel_for_gates_;
     }
 
-    [[nodiscard]] inline auto
-    getGateKernelMap() && -> std::unordered_map<GateOperation, KernelType> {
+    [[nodiscard]] inline auto getGateKernelMap() && -> GateKernelMap {
         return kernel_for_gates_;
     }
 
     /**
      * @brief Get kernels for all generator operations.
      */
-    [[nodiscard]] inline auto getGeneratorKernelMap()
-        const & -> const std::unordered_map<GeneratorOperation, KernelType> & {
+    [[nodiscard]] inline auto
+    getGeneratorKernelMap() const & -> const GeneratorKernelMap & {
         return kernel_for_generators_;
     }
 
-    [[nodiscard]] inline auto getGeneratorKernelMap()
-        && -> std::unordered_map<GeneratorOperation, KernelType> {
+    [[nodiscard]] inline auto getGeneratorKernelMap() && -> GeneratorKernelMap {
         return kernel_for_generators_;
     }
 
     /**
      * @brief Get kernels for all matrix operations.
      */
-    [[nodiscard]] inline auto getMatrixKernelMap()
-        const & -> const std::unordered_map<MatrixOperation, KernelType> & {
+    [[nodiscard]] inline auto
+    getMatrixKernelMap() const & -> const MatrixKernelMap & {
         return kernel_for_matrices_;
     }
 
-    [[nodiscard]] inline auto
-    getMatrixKernelMap() && -> std::unordered_map<MatrixOperation, KernelType> {
+    [[nodiscard]] inline auto getMatrixKernelMap() && -> MatrixKernelMap {
         return kernel_for_matrices_;
     }
+
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
 
     /**
      * @brief Apply a single gate to the state-vector using a given kernel.
