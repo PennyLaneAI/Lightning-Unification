@@ -185,9 +185,6 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      */
     [[nodiscard]] inline Threading threading() const { return threading_; }
 
-    ////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////
-
     /**
      *  @brief Returns a tuple containing the gate, generator, and matrix kernel
      * maps respectively.
