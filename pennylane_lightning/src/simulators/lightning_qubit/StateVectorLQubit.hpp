@@ -128,30 +128,6 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
         return kernel_for_matrices_.at(mat_op);
     }
 
-  protected:
-    explicit StateVectorLQubit(size_t num_qubits, Threading threading,
-                               CPUMemoryModel memory_model)
-        : BaseType(num_qubits), threading_{threading}, memory_model_{
-                                                           memory_model} {
-        setKernels(num_qubits, threading, memory_model);
-    }
-
-  public:
-    /**
-     * @brief Get the statevector's memory model.
-     */
-    [[nodiscard]] inline CPUMemoryModel memoryModel() const {
-        return memory_model_;
-    }
-
-    /**
-     * @brief Get the statevector's threading mode.
-     */
-    [[nodiscard]] inline Threading threading() const { return threading_; }
-
-    ////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////
-
     /**
      * @brief Get kernels for all gate operations.
      */
@@ -188,8 +164,46 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
         return kernel_for_matrices_;
     }
 
+  protected:
+    explicit StateVectorLQubit(size_t num_qubits, Threading threading,
+                               CPUMemoryModel memory_model)
+        : BaseType(num_qubits), threading_{threading}, memory_model_{
+                                                           memory_model} {
+        setKernels(num_qubits, threading, memory_model);
+    }
+
+  public:
+    /**
+     * @brief Get the statevector's memory model.
+     */
+    [[nodiscard]] inline CPUMemoryModel memoryModel() const {
+        return memory_model_;
+    }
+
+    /**
+     * @brief Get the statevector's threading mode.
+     */
+    [[nodiscard]] inline Threading threading() const { return threading_; }
+
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     *  @brief Returns a tuple containing the gate, generator, and matrix kernel
+     * maps respectively.
+     */
+    [[nodiscard]] auto getSupportedKernels()
+        const & -> std::tuple<const GateKernelMap &, const GeneratorKernelMap &,
+                              const MatrixKernelMap &> {
+        return {getGateKernelMap(), getGeneratorKernelMap(),
+                getMatrixKernelMap()};
+    }
+
+    [[nodiscard]] auto getSupportedKernels() && -> std::tuple<
+        GateKernelMap &&, GeneratorKernelMap &&, MatrixKernelMap &&> {
+        return {getGateKernelMap(), getGeneratorKernelMap(),
+                getMatrixKernelMap()};
+    }
 
     /**
      * @brief Apply a single gate to the state-vector using a given kernel.
