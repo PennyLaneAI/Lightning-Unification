@@ -87,4 +87,16 @@ TEMPLATE_TEST_CASE("StateVectorLQubitManaged::StateVectorLQubitManaged",
         REQUIRE((getMemoryModel(sv.getDataVector().data()) ==
                  CPUMemoryModel::Aligned512));
     }
+
+    SECTION("updateData") {
+        using TestVectorT = TestVector<std::complex<PrecisionT>>;
+        const size_t num_qubits = 3;
+        StateVectorLQubitManaged<PrecisionT> sv(num_qubits);
+
+        TestVectorT st_data =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
+        sv.updateData(st_data);
+
+        REQUIRE(sv.getDataVector() == approx(st_data));
+    }
 }
