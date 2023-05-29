@@ -91,28 +91,6 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
                 num_qubits, threading, memory_model);
     }
 
-  protected:
-    explicit StateVectorLQubit(size_t num_qubits, Threading threading,
-                               CPUMemoryModel memory_model)
-        : BaseType(num_qubits), threading_{threading}, memory_model_{
-                                                           memory_model} {
-        setKernels(num_qubits, threading, memory_model);
-    }
-
-  public:
-    /**
-     * @brief Get the data pointer of the statevector
-     *
-     * @return The pointer to the data of statevector
-     */
-    [[nodiscard]] inline auto getData() -> decltype(auto) {
-        return static_cast<Derived *>(this)->getData();
-    }
-
-    [[nodiscard]] inline auto getData() const -> decltype(auto) {
-        return static_cast<const Derived *>(this)->getData();
-    }
-
     /**
      * @brief Get a kernel for a gate operation.
      *
@@ -144,6 +122,28 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
     [[nodiscard]] inline auto getKernelForMatrix(MatrixOperation mat_op) const
         -> KernelType {
         return kernel_for_matrices_.at(mat_op);
+    }
+
+  protected:
+    explicit StateVectorLQubit(size_t num_qubits, Threading threading,
+                               CPUMemoryModel memory_model)
+        : BaseType(num_qubits), threading_{threading}, memory_model_{
+                                                           memory_model} {
+        setKernels(num_qubits, threading, memory_model);
+    }
+
+  public:
+    /**
+     * @brief Get the data pointer of the statevector
+     *
+     * @return The pointer to the data of statevector
+     */
+    [[nodiscard]] inline auto getData() -> decltype(auto) {
+        return static_cast<Derived *>(this)->getData();
+    }
+
+    [[nodiscard]] inline auto getData() const -> decltype(auto) {
+        return static_cast<const Derived *>(this)->getData();
     }
 
     /**
