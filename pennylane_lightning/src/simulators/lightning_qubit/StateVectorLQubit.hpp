@@ -134,27 +134,14 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
 
   public:
     /**
-     * @brief Get the data pointer of the statevector
-     *
-     * @return The pointer to the data of statevector
-     */
-    [[nodiscard]] inline auto getData() -> decltype(auto) {
-        return static_cast<Derived *>(this)->getData();
-    }
-
-    [[nodiscard]] inline auto getData() const -> decltype(auto) {
-        return static_cast<const Derived *>(this)->getData();
-    }
-
-    /**
-     * @brief Get memory model of the statevector.
+     * @brief Get the statevector's memory model.
      */
     [[nodiscard]] inline CPUMemoryModel memoryModel() const {
         return memory_model_;
     }
 
     /**
-     * @brief Get threading mode of the statevector.
+     * @brief Get the statevector's threading mode.
      */
     [[nodiscard]] inline Threading threading() const { return threading_; }
 
@@ -209,7 +196,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
     void applyOperation(Gates::KernelType kernel, const std::string &opName,
                         const std::vector<size_t> &wires, bool inverse = false,
                         const std::vector<PrecisionT> &params = {}) {
-        auto *arr = getData();
+        auto *arr = this->getData();
         DynamicDispatcher<PrecisionT>::getInstance().applyOperation(
             kernel, arr, this->getNumQubits(), opName, wires, inverse, params);
     }
@@ -225,7 +212,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
     void applyOperation(const std::string &opName,
                         const std::vector<size_t> &wires, bool inverse = false,
                         const std::vector<PrecisionT> &params = {}) {
-        auto *arr = getData();
+        auto *arr = this->getData();
         auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
         const auto gate_op = dispatcher.strToGateOp(opName);
         dispatcher.applyOperation(getKernelForGate(gate_op), arr,
@@ -306,7 +293,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
                                              const std::string &opName,
                                              const std::vector<size_t> &wires,
                                              bool adj = false) -> PrecisionT {
-        auto *arr = getData();
+        auto *arr = this->getData();
         return DynamicDispatcher<PrecisionT>::getInstance().applyGenerator(
             kernel, arr, this->getNumQubits(), opName, wires, adj);
     }
@@ -321,7 +308,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
     [[nodiscard]] auto applyGenerator(const std::string &opName,
                                       const std::vector<size_t> &wires,
                                       bool adj = false) -> PrecisionT {
-        auto *arr = getData();
+        auto *arr = this->getData();
         const auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
         const auto gen_op = dispatcher.strToGeneratorOp(opName);
         return dispatcher.applyGenerator(getKernelForGenerator(gen_op), arr,
@@ -344,7 +331,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
                             bool inverse = false) {
 
         const auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
-        auto *arr = getData();
+        auto *arr = this->getData();
 
         PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
 

@@ -77,6 +77,19 @@ template <class PrecisionT, class Derived> class StateVectorBase {
     }
 
     /**
+     * @brief Get the data pointer of the statevector
+     *
+     * @return A pointer to the statevector data
+     */
+    [[nodiscard]] inline auto getData() -> decltype(auto) {
+        return static_cast<Derived *>(this)->getData();
+    }
+
+    [[nodiscard]] inline auto getData() const -> decltype(auto) {
+        return static_cast<const Derived *>(this)->getData();
+    }
+
+    /**
      * @brief Apply a single gate to the state-vector.
      *
      * @param opName Gate's name.
