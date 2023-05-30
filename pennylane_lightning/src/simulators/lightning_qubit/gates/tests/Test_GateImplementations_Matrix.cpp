@@ -1,7 +1,7 @@
-#include "ConstantUtil.hpp"      // array_has_elem
-#include "LQubitTestHelpers.hpp" // PrecisionToName
-#include "LinearAlgebra.hpp"     // randomUnitary
-#include "TestHelpers.hpp"
+#include "ConstantUtil.hpp" // array_has_elem
+#include "LQubitTestHelpers.hpp"
+#include "LinearAlgebra.hpp" // randomUnitary
+#include "TestHelpers.hpp"   // PrecisionToName
 #include "Util.hpp"
 
 #include <catch2/catch.hpp>
@@ -796,7 +796,8 @@ void testApplySingleQubitOpInverse() {
                     << PrecisionToName<PrecisionT>::value) {
         const std::vector<size_t> wires{0};
 
-        const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+        const auto ini_st =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
 
         const auto matrix = randomUnitary<PrecisionT>(re, wires.size());
 
@@ -813,7 +814,8 @@ void testApplySingleQubitOpInverse() {
                     << PrecisionToName<PrecisionT>::value) {
         const std::vector<size_t> wires{1};
 
-        const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+        const auto ini_st =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
 
         const auto matrix = randomUnitary<PrecisionT>(re, wires.size());
 
@@ -831,7 +833,8 @@ void testApplySingleQubitOpInverse() {
                     << PrecisionToName<PrecisionT>::value) {
         const std::vector<size_t> wires{2};
 
-        const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+        const auto ini_st =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
 
         const auto matrix = randomUnitary<PrecisionT>(re, wires.size());
 
@@ -849,7 +852,8 @@ void testApplySingleQubitOpInverse() {
                     << PrecisionToName<PrecisionT>::value) {
         const std::vector<size_t> wires{3};
 
-        const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+        const auto ini_st =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
 
         const auto matrix = randomUnitary<PrecisionT>(re, wires.size());
 
@@ -873,7 +877,8 @@ void testApplyTwoQubitOpInverse() {
                     << PrecisionToName<PrecisionT>::value) {
         const std::vector<size_t> wires{0, 1};
 
-        const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+        const auto ini_st =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
 
         const auto matrix = randomUnitary<PrecisionT>(re, wires.size());
 
@@ -890,7 +895,8 @@ void testApplyTwoQubitOpInverse() {
                     << PrecisionToName<PrecisionT>::value) {
         const std::vector<size_t> wires{1, 2};
 
-        const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+        const auto ini_st =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
         const auto matrix = randomUnitary<PrecisionT>(re, wires.size());
 
         auto st = ini_st;
@@ -906,7 +912,8 @@ void testApplyTwoQubitOpInverse() {
                     << PrecisionToName<PrecisionT>::value) {
         const std::vector<size_t> wires{1, 3};
 
-        const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+        const auto ini_st =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
         const auto matrix = randomUnitary<PrecisionT>(re, wires.size());
 
         auto st = ini_st;
@@ -930,7 +937,8 @@ void testApplyMultiQubitOpInverse() {
                     << PrecisionToName<PrecisionT>::value) {
         const std::vector<size_t> wires{1, 2, 3};
 
-        const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+        const auto ini_st =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
         const auto matrix = randomUnitary<PrecisionT>(re, wires.size());
 
         auto st = ini_st;
@@ -945,7 +953,8 @@ void testApplyMultiQubitOpInverse() {
                     << ", wires = {0,1,2,3} - "
                     << PrecisionToName<PrecisionT>::value) {
         const std::vector<size_t> wires{0, 1, 2, 3};
-        const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+        const auto ini_st =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
 
         const auto matrix = randomUnitary<PrecisionT>(re, wires.size());
 

@@ -1,4 +1,4 @@
-// Copyright 2018-2022 Xanadu Quantum Technologies Inc.
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "StateVectorLKokkos.hpp"
+/**
+ * @file
+ * StateVector explicit instantiation.
+ */
 
-// explicit instantiation
-template class Pennylane::StateVectorLKokkos<float>;
-template class Pennylane::StateVectorLKokkos<double>;
+#include "StateVectorLQubitManaged.hpp"
+
+template class Pennylane::LightningQubit::StateVectorLQubitManaged<float>;
+template class Pennylane::LightningQubit::StateVectorLQubitManaged<double>;

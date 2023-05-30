@@ -1,5 +1,5 @@
-#include "LQubitTestHelpers.hpp" // PrecisionToName
-#include "TestHelpers.hpp"
+#include "LQubitTestHelpers.hpp"
+#include "TestHelpers.hpp" // PrecisionToName, createProductState
 #include "TestKernels.hpp"
 #include "Util.hpp" // ConstMult, INVSQRT2, IMAG, ZERO
 

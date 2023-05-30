@@ -18,9 +18,14 @@
  */
 #pragma once
 
+#include "CPUMemoryModel.hpp" // getBestAllocator
+#include "Error.hpp"          // PL_ABORT
+#include "Memory.hpp"         // AlignedAllocator
 #include "TypeTraits.hpp"
+#include "Util.hpp" // INVSQRT2
 
 #include <catch2/catch.hpp>
+#include <random>
 
 namespace Pennylane::Util {
 template <class T, class Alloc = std::allocator<T>> struct PLApprox {
@@ -188,6 +193,206 @@ isApproxEqual(const Data_t &data1, const Data_t &data2,
                   100) {
     return !(data1.real() != Approx(data2.real()).epsilon(eps) ||
              data1.imag() != Approx(data2.imag()).epsilon(eps));
+}
+
+/**
+ * @brief Utility function to compare complex statevector data.
+ *
+ * @tparam Data_t Floating point data-type.
+ * @param data1 StateVector data array pointer 1.
+ * @param length1 StateVector data array pointer 1.
+ * @param data2 StateVector data array pointer 2.
+ * @param length2 StateVector data array pointer 1.
+ * @return true Data are approximately equal.
+ * @return false Data are not approximately equal.
+ */
+template <class Data_t>
+inline bool
+isApproxEqual(const Data_t *data1, const size_t length1, const Data_t *data2,
+              const size_t length2,
+              typename Data_t::value_type eps =
+                  std::numeric_limits<typename Data_t::value_type>::epsilon() *
+                  100) {
+    if (data1 == data2) {
+        return true;
+    }
+
+    if (length1 != length2) {
+        return false;
+    }
+
+    for (size_t idx = 0; idx < length1; idx++) {
+        if (!isApproxEqual(data1[idx], data2[idx], eps)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template <class PrecisionT> struct PrecisionToName;
+
+template <> struct PrecisionToName<float> {
+    constexpr static auto value = "float";
+};
+template <> struct PrecisionToName<double> {
+    constexpr static auto value = "double";
+};
+
+template <typename T> using TestVector = std::vector<T, AlignedAllocator<T>>;
+
+/**
+ * @brief Multiplies every value in a dataset by a given complex scalar value.
+ *
+ * @tparam Data_t Precision of complex data type. Supports float and double
+ * data.
+ * @param data Data to be scaled.
+ * @param scalar Scalar value.
+ */
+template <class Data_t, class Alloc>
+void scaleVector(std::vector<std::complex<Data_t>, Alloc> &data,
+                 std::complex<Data_t> scalar) {
+    std::transform(
+        data.begin(), data.end(), data.begin(),
+        [scalar](const std::complex<Data_t> &c) { return c * scalar; });
+}
+
+/**
+ * @brief Multiplies every value in a dataset by a given complex scalar value.
+ *
+ * @tparam Data_t Precision of complex data type. Supports float and double
+ * data.
+ * @param data Data to be scaled.
+ * @param scalar Scalar value.
+ */
+template <class Data_t, class Alloc>
+void scaleVector(std::vector<std::complex<Data_t>, Alloc> &data,
+                 Data_t scalar) {
+    std::transform(
+        data.begin(), data.end(), data.begin(),
+        [scalar](const std::complex<Data_t> &c) { return c * scalar; });
+}
+
+/**
+ * @brief create |0>^N
+ */
+template <typename PrecisionT>
+auto createZeroState(size_t num_qubits)
+    -> TestVector<std::complex<PrecisionT>> {
+    TestVector<std::complex<PrecisionT>> res(
+        size_t{1U} << num_qubits, {0.0, 0.0},
+        getBestAllocator<std::complex<PrecisionT>>());
+    res[0] = std::complex<PrecisionT>{1.0, 0.0};
+    return res;
+}
+
+/**
+ * @brief create |+>^N
+ */
+template <typename PrecisionT>
+auto createPlusState(size_t num_qubits)
+    -> TestVector<std::complex<PrecisionT>> {
+    TestVector<std::complex<PrecisionT>> res(
+        size_t{1U} << num_qubits, {1.0, 0.0},
+        getBestAllocator<std::complex<PrecisionT>>());
+    for (auto &elem : res) {
+        elem /= std::sqrt(1U << num_qubits);
+    }
+    return res;
+}
+
+/**
+ * @brief create a random state
+ */
+template <typename PrecisionT, class RandomEngine>
+auto createRandomStateVectorData(RandomEngine &re, size_t num_qubits)
+    -> TestVector<std::complex<PrecisionT>> {
+
+    TestVector<std::complex<PrecisionT>> res(
+        size_t{1U} << num_qubits, {0.0, 0.0},
+        getBestAllocator<std::complex<PrecisionT>>());
+    std::uniform_real_distribution<PrecisionT> dist;
+    for (size_t idx = 0; idx < (size_t{1U} << num_qubits); idx++) {
+        res[idx] = {dist(re), dist(re)};
+    }
+
+    scaleVector(res, std::complex<PrecisionT>{1.0, 0.0} /
+                         std::sqrt(squaredNorm(res.data(), res.size())));
+    return res;
+}
+
+/**
+ * @brief Create an arbitrary product state in X- or Z-basis.
+ *
+ * Example: createProductState("+01") will produce |+01> state.
+ * Note that the wire index starts from the left.
+ */
+template <typename PrecisionT>
+auto createProductState(std::string_view str)
+    -> TestVector<std::complex<PrecisionT>> {
+    using Pennylane::Util::INVSQRT2;
+    TestVector<std::complex<PrecisionT>> st(
+        getBestAllocator<std::complex<PrecisionT>>());
+    st.resize(1U << str.length());
+
+    std::vector<PrecisionT> zero{1.0, 0.0};
+    std::vector<PrecisionT> one{0.0, 1.0};
+
+    std::vector<PrecisionT> plus{INVSQRT2<PrecisionT>(),
+                                 INVSQRT2<PrecisionT>()};
+    std::vector<PrecisionT> minus{INVSQRT2<PrecisionT>(),
+                                  -INVSQRT2<PrecisionT>()};
+
+    for (size_t k = 0; k < (size_t{1U} << str.length()); k++) {
+        PrecisionT elem = 1.0;
+        for (size_t n = 0; n < str.length(); n++) {
+            char c = str[n];
+            const size_t wire = str.length() - 1 - n;
+            switch (c) {
+            case '0':
+                elem *= zero[(k >> wire) & 1U];
+                break;
+            case '1':
+                elem *= one[(k >> wire) & 1U];
+                break;
+            case '+':
+                elem *= plus[(k >> wire) & 1U];
+                break;
+            case '-':
+                elem *= minus[(k >> wire) & 1U];
+                break;
+            default:
+                PL_ABORT("Unknown character in the argument.");
+            }
+        }
+        st[k] = elem;
+    }
+    return st;
+}
+
+/**
+ * @brief Compare std::vectors with same elements data type but different
+ * allocators.
+ *
+ * @tparam T Element data type.
+ * @tparam AllocA Allocator for the first vector.
+ * @tparam AllocB Allocator for the second vector.
+ * @param lhs First vector
+ * @param rhs Second vector
+ * @return true
+ * @return false
+ */
+template <class T, class AllocA, class AllocB>
+bool operator==(const std::vector<T, AllocA> &lhs,
+                const std::vector<T, AllocB> &rhs) {
+    if (lhs.size() != rhs.size()) {
+        return false;
+    }
+    for (size_t idx = 0; idx < lhs.size(); idx++) {
+        if (lhs[idx] != rhs[idx]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 #define PL_REQUIRE_THROWS_MATCHES(expr, type, message_match)                   \

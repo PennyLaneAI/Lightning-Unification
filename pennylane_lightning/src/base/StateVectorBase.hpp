@@ -59,20 +59,98 @@ template <class PrecisionT, class Derived> class StateVectorBase {
     explicit StateVectorBase(size_t num_qubits) : num_qubits_{num_qubits} {}
 
     /**
-     * @brief Redefine the number of qubits in the statevector and number of
-     * elements.
-     *
-     * @param qubits New number of qubits represented by statevector.
-     */
-    void setNumQubits(size_t qubits) { num_qubits_ = qubits; }
-
-    /**
      * @brief Get the number of qubits represented by the statevector data.
      *
      * @return std::size_t
      */
     [[nodiscard]] auto getNumQubits() const -> std::size_t {
         return num_qubits_;
+    }
+
+    /**
+     * @brief Get the size of the statevector
+     *
+     * @return The size of the statevector
+     */
+    [[nodiscard]] size_t getLength() const {
+        return static_cast<size_t>(exp2(num_qubits_));
+    }
+
+    /**
+     * @brief Get the data pointer of the statevector
+     *
+     * @return A pointer to the statevector data
+     */
+    [[nodiscard]] inline auto getData() -> decltype(auto) {
+        return static_cast<Derived *>(this)->getData();
+    }
+
+    [[nodiscard]] inline auto getData() const -> decltype(auto) {
+        return static_cast<const Derived *>(this)->getData();
+    }
+
+    /**
+     * @brief Apply a single gate to the state-vector.
+     *
+     * @param opName Gate's name.
+     * @param wires Wires to apply gate to.
+     * @param adjoint Indicates whether to use adjoint of gate.
+     * @param params Optional parameter list for parametric gates.
+     */
+    inline void applyOperation(const std::string &opName,
+                               const std::vector<size_t> &wires,
+                               bool adjoint = false,
+                               const std::vector<PrecisionT> &params = {}) {
+        return static_cast<Derived *>(this)->applyOperation(opName, wires,
+                                                            adjoint, params);
+    }
+
+    /**
+     * @brief Apply multiple gates to the state-vector.
+     *
+     * @param ops Vector of gate names to be applied in order.
+     * @param ops_wires Vector of wires on which to apply index-matched gate
+     * name.
+     * @param ops_inverse Indicates whether gate at matched index is to be
+     * inverted.
+     * @param ops_params Optional parameter data for index matched gates.
+     */
+    void
+    applyOperations(const std::vector<std::string> &ops,
+                    const std::vector<std::vector<size_t>> &ops_wires,
+                    const std::vector<bool> &ops_adjoint,
+                    const std::vector<std::vector<PrecisionT>> &ops_params) {
+        return static_cast<Derived *>(this)->applyOperations(
+            ops, ops_wires, ops_adjoint, ops_params);
+    }
+
+    /**
+     * @brief Apply a single generator to the state-vector.
+     *
+     * @param opName Name of generator to apply.
+     * @param wires Wires the generator applies to.
+     * @param adjoint Indicates whether to use adjoint of operator.
+     */
+    inline auto applyGenerator(const std::string &opName,
+                               const std::vector<size_t> &wires,
+                               bool adjoint = false) -> PrecisionT {
+        return static_cast<Derived *>(this)->applyGenerator(opName, wires,
+                                                            adjoint);
+    }
+
+    /**
+     * @brief Apply a given matrix directly to the statevector using a
+     * raw matrix pointer vector.
+     *
+     * @param matrix Pointer to the array data (in row-major format).
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicate whether inverse should be taken.
+     */
+    inline void applyMatrix(const ComplexPrecisionT *matrix,
+                            const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        return static_cast<Derived *>(this)->applyMatrix(matrix, wires,
+                                                         inverse);
     }
 };
 

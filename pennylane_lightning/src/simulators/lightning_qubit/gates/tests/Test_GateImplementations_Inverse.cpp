@@ -40,7 +40,8 @@ void testInverseGateKernel(RandomEngine &re, KernelType kernel,
 
     DYNAMIC_SECTION("Test inverse of " << gate_name << " for kernel "
                                        << kernel_name) {
-        const auto ini_st = createRandomState<PrecisionT>(re, num_qubits);
+        const auto ini_st =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
 
         auto st = ini_st;
 

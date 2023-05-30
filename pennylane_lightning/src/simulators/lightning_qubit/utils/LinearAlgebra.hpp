@@ -759,43 +759,6 @@ inline auto matrixMatProd(const std::vector<std::complex<T>> m_left,
 }
 
 /**
- * @brief @rst
- * Compute the squared norm of a real/complex vector :math:`\sum_k |v_k|^2`
- * @endrst
- *
- * @param data Data pointer
- * @param data_size Size of the data
- */
-template <class T>
-auto squaredNorm(const T *data, size_t data_size) -> remove_complex_t<T> {
-    if constexpr (is_complex_v<T>) {
-        // complex type
-        using PrecisionT = remove_complex_t<T>;
-        return std::transform_reduce(
-            data, data + data_size, PrecisionT{}, std::plus<PrecisionT>(),
-            static_cast<PrecisionT (*)(const std::complex<PrecisionT> &)>(
-                &std::norm<PrecisionT>));
-    } else {
-        using PrecisionT = T;
-        return std::transform_reduce(
-            data, data + data_size, PrecisionT{}, std::plus<PrecisionT>(),
-            static_cast<PrecisionT (*)(PrecisionT)>(std::norm));
-    }
-}
-
-/**
- * @brief @rst
- * Compute the squared norm of a real/complex vector :math:`\sum_k |v_k|^2`
- * @endrst
- *
- * @param vec std::vector containing data
- */
-template <class T, class Alloc>
-auto squaredNorm(const std::vector<T, Alloc> &vec) -> remove_complex_t<T> {
-    return squaredNorm(vec.data(), vec.size());
-}
-
-/**
  * @brief Generate random unitary matrix
  *
  * @tparam PrecisionT Floating point type

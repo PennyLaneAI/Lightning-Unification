@@ -1,44 +1,128 @@
 #include <complex>
 #include <vector>
 
+#include <iostream>
+#include <random>
+
 #include <catch2/catch.hpp>
 
-#include "TestHelpers.hpp"
+#include "TestHelpers.hpp" // createZeroState, createRandomStateVectorData
+#include "TypeList.hpp"
+
+/**
+ * @file
+ *  Tests for functionality defined in the StateVectorBase class.
+ *  For Lightning Qubit, the base class is been tested against the
+ * StateVectorLQubitManaged class.
+ */
+
+/// @cond DEV
+namespace {
+using namespace Pennylane::Util;
+} // namespace
+/// @endcond
 
 #ifdef _ENABLE_PLQUBIT
-#include "StateVectorLQubit.hpp"
-template <typename T> struct StateVectorBackend {
-    using StateVector = Pennylane::LightningQubit::StateVectorLQubit<T>;
-    using Precision = T;
-};
-#elif defined(_ENABLE_PLKOKKOS)
-#include "StateVectorLKokkos.hpp"
-template <typename T> struct StateVectorBackend {
-    using StateVector = Pennylane::StateVectorLKokkos<T>;
-    using Precision = T;
-};
+constexpr bool BACKEND_FOUND = true;
+
+#include "LQubitTestHelpers.hpp"
+#include "TestStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
+
+/// @cond DEV
+namespace {
+using namespace Pennylane::LightningQubit::Util;
+} // namespace
+/// @endcond
+
+#else
+constexpr bool BACKEND_FOUND = false;
+using TestStateVectorBackends = Pennylane::Util::TypeList<void>;
+
+template <class StateVector> struct StateVectorToName {};
 #endif
 
-using namespace Pennylane;
+template <typename TypeList> void testStateVectorBase() {
+    if constexpr (!std::is_same_v<TypeList, void>) {
+        using StateVectorT = typename TypeList::Type::StateVector;
+        using PrecisionT = typename TypeList::Type::Precision;
+        using ComplexT = std::complex<PrecisionT>;
+        using VectorT = TestVector<ComplexT>;
 
-TEMPLATE_PRODUCT_TEST_CASE("Base::StateVectorBase", "[StateVectorBase]",
-                           (StateVectorBackend), (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
-    using ComplexType = std::complex<PrecisionT>;
+        const size_t num_qubits = 4;
+        VectorT st_data = createZeroState<PrecisionT>(num_qubits);
 
-    SECTION("Testing StateVectorBase methods") {
-        const size_t size_vector = 1U << 4U;
+        StateVectorT state_vector(st_data.data(), st_data.size());
 
-        std::vector<ComplexType> st_data1(size_vector);
-        std::iota(st_data1.begin(), st_data1.end(), 0);
-        StateVectorT sv1(st_data1.data(), st_data1.size());
+        DYNAMIC_SECTION("Methods implemented in the base class - "
+                        << StateVectorToName<StateVectorT>::name) {
+            REQUIRE(state_vector.getNumQubits() == 4);
+            REQUIRE(state_vector.getLength() == 16);
+        }
+        testStateVectorBase<typename TypeList::Next>();
+    }
+}
 
-        std::vector<ComplexType> st_data2(size_vector);
-        std::iota(st_data2.begin(), st_data2.end(), 0);
-        StateVectorT sv2(st_data2.data(), st_data2.size());
+TEST_CASE("StateVectorBase", "[StateVectorBase]") {
+    if constexpr (BACKEND_FOUND) {
+        testStateVectorBase<TestStateVectorBackends>();
+    }
+}
 
-        REQUIRE(sv1.getNumQubits() == 4);
-        REQUIRE(sv1.getLength() == 16);
+template <typename TypeList> void testApplyOperations() {
+    if constexpr (!std::is_same_v<TypeList, void>) {
+        std::mt19937_64 re{1337};
+        using StateVectorT = typename TypeList::Type::StateVector;
+        using PrecisionT = typename TypeList::Type::Precision;
+        using ComplexT = std::complex<PrecisionT>;
+        using VectorT = TestVector<ComplexT>;
+
+        const size_t num_qubits = 3;
+
+        DYNAMIC_SECTION("Apply operations without parameters - "
+                        << StateVectorToName<StateVectorT>::name) {
+            VectorT st_data_1 =
+                createRandomStateVectorData<PrecisionT>(re, num_qubits);
+            VectorT st_data_2 = st_data_1;
+
+            StateVectorT state_vector_1(st_data_1.data(), st_data_1.size());
+            StateVectorT state_vector_2(st_data_2.data(), st_data_2.size());
+
+            state_vector_1.applyOperations({"PauliX", "PauliY"}, {{0}, {1}},
+                                           {false, false});
+
+            state_vector_2.applyOperation("PauliX", {0}, false);
+            state_vector_2.applyOperation("PauliY", {1}, false);
+
+            REQUIRE(isApproxEqual(
+                state_vector_1.getData(), state_vector_1.getLength(),
+                state_vector_2.getData(), state_vector_2.getLength()));
+        }
+
+        DYNAMIC_SECTION("Apply operations with parameters - "
+                        << StateVectorToName<StateVectorT>::name) {
+            VectorT st_data_1 =
+                createRandomStateVectorData<PrecisionT>(re, num_qubits);
+            VectorT st_data_2 = st_data_1;
+
+            StateVectorT state_vector_1(st_data_1.data(), st_data_1.size());
+            StateVectorT state_vector_2(st_data_2.data(), st_data_2.size());
+
+            state_vector_1.applyOperations({"RX", "RY"}, {{0}, {1}},
+                                           {false, false}, {{0.1}, {0.2}});
+
+            state_vector_2.applyOperation("RX", {0}, false, {0.1});
+            state_vector_2.applyOperation("RY", {1}, false, {0.2});
+
+            REQUIRE(isApproxEqual(
+                state_vector_1.getData(), state_vector_1.getLength(),
+                state_vector_2.getData(), state_vector_2.getLength()));
+        }
+        testApplyOperations<typename TypeList::Next>();
+    }
+}
+
+TEST_CASE("StateVectorBase::applyOperations", "[applyOperations]") {
+    if constexpr (BACKEND_FOUND) {
+        testApplyOperations<TestStateVectorBackends>();
     }
 }

@@ -731,19 +731,6 @@ TEMPLATE_TEST_CASE("Transpose", "[Util][LinearAlgebra]", float, double) {
     }
 }
 
-TEMPLATE_TEST_CASE("Util::squaredNorm", "[Util][LinearAlgebra]", float,
-                   double) {
-    SECTION("For real type") {
-        std::vector<TestType> vec{0.0, 1.0, 3.0, 10.0};
-        CHECK(Util::squaredNorm(vec) == Approx(110.0));
-    }
-
-    SECTION("For complex type") {
-        std::vector<std::complex<TestType>> vec{{0.0, 1.0}, {3.0, 10.0}};
-        CHECK(Util::squaredNorm(vec) == Approx(110.0));
-    }
-}
-
 TEMPLATE_TEST_CASE("Util::scaleAndAdd", "[Util][LinearAlgebra]", float,
                    double) {
     using PrecisionT = TestType;

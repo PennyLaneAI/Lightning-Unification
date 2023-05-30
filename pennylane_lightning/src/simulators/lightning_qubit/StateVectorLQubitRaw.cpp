@@ -11,12 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 /**
- * @file StateVectorLQubit.cpp
+ * @file
+ * StateVector Raw explicit instantiation.
  */
 
-#include "StateVectorLQubit.hpp"
+#include "StateVectorLQubitRaw.hpp"
 
-// explicit instantiation
-template class Pennylane::LightningQubit::StateVectorLQubit<float>;
-template class Pennylane::LightningQubit::StateVectorLQubit<double>;
+template class Pennylane::LightningQubit::StateVectorLQubitRaw<float>;
+template class Pennylane::LightningQubit::StateVectorLQubitRaw<double>;
