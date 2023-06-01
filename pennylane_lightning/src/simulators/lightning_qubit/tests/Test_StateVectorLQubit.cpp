@@ -1,8 +1,7 @@
 #include "LQubitTestHelpers.hpp" // createRandomStateVectorData
 #include "LinearAlgebra.hpp"     //randomUnitary
-#include "StateVectorLQubitManaged.hpp"
-#include "StateVectorLQubitRaw.hpp"
 #include "TestHelpers.hpp"
+#include "TestStateVectors.hpp" // StateVectorManagedAndPrecision, StateVectorRawAndPrecision
 #include "cpu_kernels/GateImplementationsPI.hpp"
 
 #include <algorithm>
@@ -27,20 +26,12 @@ using namespace Pennylane::LightningQubit;
 using namespace Pennylane::Util;
 
 using Pennylane::LightningQubit::Util::randomUnitary;
+using Pennylane::LightningQubit::Util::StateVectorManagedAndPrecision;
+using Pennylane::LightningQubit::Util::StateVectorRawAndPrecision;
 
 std::mt19937_64 re{1337};
 } // namespace
 /// @endcond
-
-template <typename T> struct StateVectorManagedAndPrecision {
-    using StateVector = Pennylane::LightningQubit::StateVectorLQubitManaged<T>;
-    using Precision = T;
-};
-
-template <typename T> struct StateVectorRawAndPrecision {
-    using StateVector = Pennylane::LightningQubit::StateVectorLQubitRaw<T>;
-    using Precision = T;
-};
 
 TEMPLATE_TEST_CASE("StateVectorLQubit::Constructibility",
                    "[Default Constructibility]", StateVectorLQubitRaw<>,
