@@ -14,7 +14,6 @@
 /**
  * @file StateVectorBase.hpp
  * Defines a base class for all simulators.
- * This class has methods necessary for the executor class and algorithms.
  */
 
 #pragma once

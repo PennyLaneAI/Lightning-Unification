@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include "Executor.hpp"
-
 #include "pybind11/complex.h"
 #include "pybind11/functional.h"
 #include "pybind11/numpy.h"
