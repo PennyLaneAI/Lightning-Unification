@@ -7,8 +7,8 @@ project(lightning_components LANGUAGES CXX)
 ###############################################################################
 set(COMPONENT_SUBDIRS   algorithms
                         base
-                        executor
                         measurements
+                        observables
                         simulators
                         utils
 )
