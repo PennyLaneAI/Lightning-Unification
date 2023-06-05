@@ -105,5 +105,27 @@ class StateVectorLQubitRaw final
      * @return std::size_t
      */
     [[nodiscard]] auto getLength() const -> std::size_t { return length_; }
+
+    /**
+     * @brief Update data of the class to new_data
+     *
+     * @param new_data data pointer to new data.
+     * @param new_size size of underlying data storage.
+     */
+    void updateData(const ComplexPrecisionT *new_data, size_t new_size) {
+        assert(length_ == new_size);
+        std::copy(new_data, new_data + new_size, data_);
+    }
+
+    /**
+     * @brief Update data of the class to new_data
+     *
+     * @tparam Alloc Allocator type of std::vector to use for updating data.
+     * @param new_data std::vector contains data.
+     */
+    template <class Alloc>
+    void updateData(const std::vector<ComplexPrecisionT, Alloc> &new_data) {
+        updateData(new_data.data(), new_data.size());
+    }
 };
 } // namespace Pennylane::LightningQubit

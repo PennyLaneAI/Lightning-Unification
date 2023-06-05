@@ -161,14 +161,23 @@ class StateVectorLQubitManaged final
     /**
      * @brief Update data of the class to new_data
      *
+     * @param new_data data pointer to new data.
+     * @param new_size size of underlying data storage.
+     */
+    void updateData(const ComplexPrecisionT *new_data, size_t new_size) {
+        assert(data_.size() == new_size);
+        std::copy(new_data, new_data + new_size, data_.data());
+    }
+
+    /**
+     * @brief Update data of the class to new_data
+     *
      * @tparam Alloc Allocator type of std::vector to use for updating data.
      * @param new_data std::vector contains data.
      */
     template <class Alloc>
     void updateData(const std::vector<ComplexPrecisionT, Alloc> &new_data) {
-        assert(data_.size() == new_data.size());
-        std::copy(new_data.data(), new_data.data() + new_data.size(),
-                  data_.data());
+        updateData(new_data.data(), new_data.size());
     }
 
     AlignedAllocator<ComplexPrecisionT> allocator() const {
