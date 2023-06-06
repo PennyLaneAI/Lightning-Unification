@@ -47,15 +47,15 @@ namespace Pennylane::LightningQubit {
  * @brief StateVector class where data resides in CPU memory. Memory ownership
  * resides within class.
  *
- * @tparam PrecisionT Precision data type
+ * @tparam fp_t Precision data type
  */
-template <class PrecisionT = double>
+template <class fp_t = double>
 class StateVectorLQubitManaged final
-    : public StateVectorLQubit<PrecisionT,
-                               StateVectorLQubitManaged<PrecisionT>> {
+    : public StateVectorLQubit<fp_t, StateVectorLQubitManaged<fp_t>> {
   public:
-    using BaseType = StateVectorLQubit<PrecisionT, StateVectorLQubitManaged>;
+    using PrecisionT = fp_t;
     using ComplexPrecisionT = std::complex<PrecisionT>;
+    using BaseType = StateVectorLQubit<PrecisionT, StateVectorLQubitManaged>;
 
   private:
     std::vector<ComplexPrecisionT, AlignedAllocator<ComplexPrecisionT>> data_;

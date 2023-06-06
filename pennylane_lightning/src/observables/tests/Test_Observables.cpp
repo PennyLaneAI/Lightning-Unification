@@ -42,8 +42,7 @@ template <class StateVector> struct StateVectorToName {};
 template <typename TypeList> void testNamedObsBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using StateVectorT = typename TypeList::Type::StateVector;
-        using PrecisionT = typename TypeList::Type::Precision;
-        using NamedObsT = NamedObsBase<StateVectorT, PrecisionT>;
+        using NamedObsT = NamedObsBase<StateVectorT>;
 
         DYNAMIC_SECTION("Name of the Observable must be correct - "
                         << StateVectorToName<StateVectorT>::name) {
@@ -95,7 +94,7 @@ template <typename TypeList> void testHermitianObsBase() {
         using StateVectorT = typename TypeList::Type::StateVector;
         using PrecisionT = typename TypeList::Type::Precision;
         using ComplexT = typename std::complex<PrecisionT>;
-        using HermitianObsT = HermitianObsBase<StateVectorT, PrecisionT>;
+        using HermitianObsT = HermitianObsBase<StateVectorT>;
 
         DYNAMIC_SECTION("HermitianObs only accepts correct arguments - "
                         << StateVectorToName<StateVectorT>::name) {
@@ -161,9 +160,9 @@ template <typename TypeList> void testTensorProdObsBase() {
         using StateVectorT = typename TypeList::Type::StateVector;
         using PrecisionT = typename TypeList::Type::Precision;
         using ComplexT = typename std::complex<PrecisionT>;
-        using HermitianObsT = HermitianObsBase<StateVectorT, PrecisionT>;
-        using NamedObsT = NamedObsBase<StateVectorT, PrecisionT>;
-        using TensorProdObsT = TensorProdObsBase<StateVectorT, PrecisionT>;
+        using HermitianObsT = HermitianObsBase<StateVectorT>;
+        using NamedObsT = NamedObsBase<StateVectorT>;
+        using TensorProdObsT = TensorProdObsBase<StateVectorT>;
 
         DYNAMIC_SECTION("Overlapping wires throw an exception - "
                         << StateVectorToName<StateVectorT>::name) {
@@ -281,9 +280,9 @@ template <typename TypeList> void testHamiltonianBase() {
         using StateVectorT = typename TypeList::Type::StateVector;
         using PrecisionT = typename TypeList::Type::Precision;
         using ComplexT = typename std::complex<PrecisionT>;
-        using NamedObsT = NamedObsBase<StateVectorT, PrecisionT>;
-        using TensorProdObsT = TensorProdObsBase<StateVectorT, PrecisionT>;
-        using HamiltonianT = HamiltonianBase<StateVectorT, PrecisionT>;
+        using NamedObsT = NamedObsBase<StateVectorT>;
+        using TensorProdObsT = TensorProdObsBase<StateVectorT>;
+        using HamiltonianT = HamiltonianBase<StateVectorT>;
 
         const auto h = PrecisionT{0.809}; // half of the golden ratio
 

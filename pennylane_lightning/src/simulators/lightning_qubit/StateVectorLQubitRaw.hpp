@@ -51,15 +51,16 @@ namespace Pennylane::LightningQubit {
  * `complex<float>`) or 64-bit (128-bit `complex<double>`) floating point
  * representation.
  *
- * @tparam PrecisionT Floating point precision of underlying statevector data.
+ * @tparam fp_t Floating point precision of underlying statevector data.
  */
-template <class PrecisionT = double>
+template <class fp_t = double>
 class StateVectorLQubitRaw final
-    : public StateVectorLQubit<PrecisionT, StateVectorLQubitRaw<PrecisionT>> {
+    : public StateVectorLQubit<fp_t, StateVectorLQubitRaw<fp_t>> {
   public:
+    using PrecisionT = fp_t;
+    using ComplexPrecisionT = std::complex<PrecisionT>;
     using BaseType =
         StateVectorLQubit<PrecisionT, StateVectorLQubitRaw<PrecisionT>>;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
 
   private:
     ComplexPrecisionT *data_;

@@ -31,9 +31,11 @@ namespace Pennylane::Observables {
  * We note that all subclasses must be immutable (does not provide any setter).
  *
  * @tparam StateVectorT State vector class.
- * @tparam PrecisionT float point type.
  */
-template <class StateVectorT, class PrecisionT> class Observable {
+template <class StateVectorT> class Observable {
+  public:
+    using PrecisionT = typename StateVectorT::PrecisionT;
+
   protected:
     Observable() = default;
     Observable(const Observable &) = default;
@@ -46,12 +48,11 @@ template <class StateVectorT, class PrecisionT> class Observable {
      * @brief Polymorphic function comparing this to another Observable
      * object.
      *
-     * @param Another instance of subclass of Observable<StateVectorT,
-     PrecisionT> to
-     * compare
+     * @param Another instance of subclass of Observable<StateVectorT> to
+     * compare.
      */
     [[nodiscard]] virtual bool
-    isEqual(const Observable<StateVectorT, PrecisionT> &other) const = 0;
+    isEqual(const Observable<StateVectorT> &other) const = 0;
 
   public:
     virtual ~Observable() = default;
@@ -74,8 +75,7 @@ template <class StateVectorT, class PrecisionT> class Observable {
     /**
      * @brief Test whether this object is equal to another object
      */
-    [[nodiscard]] auto
-    operator==(const Observable<StateVectorT, PrecisionT> &other) const
+    [[nodiscard]] auto operator==(const Observable<StateVectorT> &other) const
         -> bool {
         return typeid(*this) == typeid(other) && isEqual(other);
     }
@@ -83,8 +83,7 @@ template <class StateVectorT, class PrecisionT> class Observable {
     /**
      * @brief Test whether this object is different from another object.
      */
-    [[nodiscard]] auto
-    operator!=(const Observable<StateVectorT, PrecisionT> &other) const
+    [[nodiscard]] auto operator!=(const Observable<StateVectorT> &other) const
         -> bool {
         return !(*this == other);
     }
@@ -94,10 +93,12 @@ template <class StateVectorT, class PrecisionT> class Observable {
  * @brief Base class for named observables (PauliX, PauliY, PauliZ, etc.)
  *
  * @tparam StateVectorT State vector class.
- * @tparam PrecisionT float point type.
  */
-template <class StateVectorT, class PrecisionT>
-class NamedObsBase : public Observable<StateVectorT, PrecisionT> {
+template <class StateVectorT>
+class NamedObsBase : public Observable<StateVectorT> {
+  public:
+    using PrecisionT = typename StateVectorT::PrecisionT;
+
   protected:
     std::string obs_name_;
     std::vector<size_t> wires_;
@@ -105,10 +106,10 @@ class NamedObsBase : public Observable<StateVectorT, PrecisionT> {
 
   private:
     [[nodiscard]] auto
-    isEqual(const Observable<StateVectorT, PrecisionT> &other) const
+    isEqual(const Observable<StateVectorT> &other) const
         -> bool override {
         const auto &other_cast =
-            static_cast<const NamedObsBase<StateVectorT, PrecisionT> &>(other);
+            static_cast<const NamedObsBase<StateVectorT> &>(other);
 
         return (obs_name_ == other_cast.obs_name_) &&
                (wires_ == other_cast.wires_) && (params_ == other_cast.params_);
@@ -147,22 +148,22 @@ class NamedObsBase : public Observable<StateVectorT, PrecisionT> {
  * @brief Base class for Hermitian observables
  *
  * @tparam StateVectorT State vector class.
- * @tparam PrecisionT float point type.
  */
-template <class StateVectorT, class PrecisionT>
-class HermitianObsBase : public Observable<StateVectorT, PrecisionT> {
-  protected:
+template <class StateVectorT>
+class HermitianObsBase : public Observable<StateVectorT> {
+  public:
+    using PrecisionT = typename StateVectorT::PrecisionT;
     using MatrixT = std::vector<std::complex<PrecisionT>>;
+
+  protected:
     MatrixT matrix_;
     std::vector<size_t> wires_;
 
   private:
-    [[nodiscard]] auto
-    isEqual(const Observable<StateVectorT, PrecisionT> &other) const
+    [[nodiscard]] auto isEqual(const Observable<StateVectorT> &other) const
         -> bool override {
         const auto &other_cast =
-            static_cast<const HermitianObsBase<StateVectorT, PrecisionT> &>(
-                other);
+            static_cast<const HermitianObsBase<StateVectorT> &>(other);
 
         return (matrix_ == other_cast.matrix_) && (wires_ == other_cast.wires_);
     }
@@ -198,21 +199,18 @@ class HermitianObsBase : public Observable<StateVectorT, PrecisionT> {
  * @brief Base class for a tensor product of observables.
  *
  * @tparam StateVectorT State vector class.
- * @tparam PrecisionT float point type.
  */
-template <class StateVectorT, class PrecisionT>
-class TensorProdObsBase : public Observable<StateVectorT, PrecisionT> {
+template <class StateVectorT>
+class TensorProdObsBase : public Observable<StateVectorT> {
   protected:
-    std::vector<std::shared_ptr<Observable<StateVectorT, PrecisionT>>> obs_;
+    std::vector<std::shared_ptr<Observable<StateVectorT>>> obs_;
     std::vector<size_t> all_wires_;
 
   private:
-    [[nodiscard]] auto
-    isEqual(const Observable<StateVectorT, PrecisionT> &other) const
+    [[nodiscard]] auto isEqual(const Observable<StateVectorT> &other) const
         -> bool override {
         const auto &other_cast =
-            static_cast<const TensorProdObsBase<StateVectorT, PrecisionT> &>(
-                other);
+            static_cast<const TensorProdObsBase<StateVectorT> &>(other);
 
         if (obs_.size() != other_cast.obs_.size()) {
             return false;
@@ -257,13 +255,12 @@ class TensorProdObsBase : public Observable<StateVectorT, PrecisionT> {
      * brace-enclosed initializer list correctly.
      *
      * @param obs List of observables
-     * @return std::shared_ptr<TensorProdObsBase<StateVectorT, PrecisionT>>
+     * @return std::shared_ptr<TensorProdObsBase<StateVectorT>>
      */
-    static auto create(std::initializer_list<
-                       std::shared_ptr<Observable<StateVectorT, PrecisionT>>>
-                           obs)
-        -> std::shared_ptr<TensorProdObsBase<StateVectorT, PrecisionT>> {
-        return std::shared_ptr<TensorProdObsBase<StateVectorT, PrecisionT>>{
+    static auto
+    create(std::initializer_list<std::shared_ptr<Observable<StateVectorT>>> obs)
+        -> std::shared_ptr<TensorProdObsBase<StateVectorT>> {
+        return std::shared_ptr<TensorProdObsBase<StateVectorT>>{
             new TensorProdObsBase(std::move(obs))};
     }
 
@@ -275,12 +272,12 @@ class TensorProdObsBase : public Observable<StateVectorT, PrecisionT> {
      * brace-enclosed initializer list correctly.
      *
      * @param obs List of observables
-     * @return std::shared_ptr<TensorProdObsBase<StateVectorT, PrecisionT>>
+     * @return std::shared_ptr<TensorProdObsBase<StateVectorT>>
      */
-    static auto create(
-        std::vector<std::shared_ptr<Observable<StateVectorT, PrecisionT>>> obs)
-        -> std::shared_ptr<TensorProdObsBase<StateVectorT, PrecisionT>> {
-        return std::shared_ptr<TensorProdObsBase<StateVectorT, PrecisionT>>{
+    static auto
+    create(std::vector<std::shared_ptr<Observable<StateVectorT>>> obs)
+        -> std::shared_ptr<TensorProdObsBase<StateVectorT>> {
+        return std::shared_ptr<TensorProdObsBase<StateVectorT>>{
             new TensorProdObsBase(std::move(obs))};
     }
 
@@ -325,20 +322,21 @@ class TensorProdObsBase : public Observable<StateVectorT, PrecisionT> {
  * observables.
  *
  * @tparam StateVectorT State vector class.
- * @tparam PrecisionT float point type.
  */
-template <class StateVectorT, class PrecisionT>
-class HamiltonianBase : public Observable<StateVectorT, PrecisionT> {
+template <class StateVectorT>
+class HamiltonianBase : public Observable<StateVectorT> {
+  public:
+    using PrecisionT = typename StateVectorT::PrecisionT;
+
   protected:
     std::vector<PrecisionT> coeffs_;
-    std::vector<std::shared_ptr<Observable<StateVectorT, PrecisionT>>> obs_;
+    std::vector<std::shared_ptr<Observable<StateVectorT>>> obs_;
 
   private:
     [[nodiscard]] bool
-    isEqual(const Observable<StateVectorT, PrecisionT> &other) const override {
+    isEqual(const Observable<StateVectorT> &other) const override {
         const auto &other_cast =
-            static_cast<const HamiltonianBase<StateVectorT, PrecisionT> &>(
-                other);
+            static_cast<const HamiltonianBase<StateVectorT> &>(other);
 
         if (coeffs_ != other_cast.coeffs_) {
             return false;
@@ -374,17 +372,15 @@ class HamiltonianBase : public Observable<StateVectorT, PrecisionT> {
      *
      * @param coeffs Arguments to construct coefficients
      * @param obs Arguments to construct observables
-     * @return std::shared_ptr<HamiltonianBase<StateVectorT, PrecisionT>>
+     * @return std::shared_ptr<HamiltonianBase<StateVectorT>>
      */
     static auto
     create(std::initializer_list<PrecisionT> coeffs,
-           std::initializer_list<
-               std::shared_ptr<Observable<StateVectorT, PrecisionT>>>
-               obs)
-        -> std::shared_ptr<HamiltonianBase<StateVectorT, PrecisionT>> {
-        return std::shared_ptr<HamiltonianBase<StateVectorT, PrecisionT>>(
-            new HamiltonianBase<StateVectorT, PrecisionT>{std::move(coeffs),
-                                                          std::move(obs)});
+           std::initializer_list<std::shared_ptr<Observable<StateVectorT>>> obs)
+        -> std::shared_ptr<HamiltonianBase<StateVectorT>> {
+        return std::shared_ptr<HamiltonianBase<StateVectorT>>(
+            new HamiltonianBase<StateVectorT>{std::move(coeffs),
+                                              std::move(obs)});
     }
 
     void applyInPlace([[maybe_unused]] StateVectorT &sv) const override {

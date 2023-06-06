@@ -20,7 +20,7 @@ TEMPLATE_PRODUCT_TEST_CASE("NamedObs", "[Observables]",
                            (float, double)) {
     using StateVectorT = typename TestType::StateVector;
     using PrecisionT = typename TestType::Precision;
-    using NamedObsT = NamedObs<StateVectorT, PrecisionT>;
+    using NamedObsT = NamedObs<StateVectorT>;
 
     SECTION("Non-Default constructibility") {
         REQUIRE(!std::is_constructible_v<NamedObsT>);
@@ -66,7 +66,7 @@ TEMPLATE_PRODUCT_TEST_CASE("HermitianObs", "[Observables]",
     using StateVectorT = typename TestType::StateVector;
     using PrecisionT = typename TestType::Precision;
     using MatrixT = std::vector<std::complex<PrecisionT>>;
-    using HermitianObsT = HermitianObs<StateVectorT, PrecisionT>;
+    using HermitianObsT = HermitianObs<StateVectorT>;
 
     SECTION("Non-Default constructibility") {
         REQUIRE(!std::is_constructible_v<HermitianObsT>);
@@ -91,10 +91,9 @@ TEMPLATE_PRODUCT_TEST_CASE("TensorProdObs", "[Observables]",
                             StateVectorRawAndPrecision),
                            (float, double)) {
     using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
-    using TensorProdObsT = TensorProdObs<StateVectorT, PrecisionT>;
-    using NamedObsT = NamedObs<StateVectorT, PrecisionT>;
-    using HermitianObsT = HermitianObs<StateVectorT, PrecisionT>;
+    using TensorProdObsT = TensorProdObs<StateVectorT>;
+    using NamedObsT = NamedObs<StateVectorT>;
+    using HermitianObsT = HermitianObs<StateVectorT>;
 
     SECTION("Constructibility - NamedObs") {
         REQUIRE(
@@ -121,10 +120,10 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian", "[Observables]",
                            (float, double)) {
     using StateVectorT = typename TestType::StateVector;
     using PrecisionT = typename TestType::Precision;
-    using TensorProdObsT = TensorProdObs<StateVectorT, PrecisionT>;
-    using NamedObsT = NamedObs<StateVectorT, PrecisionT>;
-    using HermitianObsT = HermitianObs<StateVectorT, PrecisionT>;
-    using HamiltonianT = Hamiltonian<StateVectorT, PrecisionT>;
+    using TensorProdObsT = TensorProdObs<StateVectorT>;
+    using NamedObsT = NamedObs<StateVectorT>;
+    using HermitianObsT = HermitianObs<StateVectorT>;
+    using HamiltonianT = Hamiltonian<StateVectorT>;
 
     SECTION("Constructibility - NamedObs") {
         REQUIRE(
@@ -158,9 +157,9 @@ TEMPLATE_TEST_CASE("Hamiltonian::ApplyInPlace<StateVectorLQubitManaged>",
     using PrecisionT = TestType;
     using ComplexT = std::complex<PrecisionT>;
     using StateVectorT = StateVectorLQubitManaged<PrecisionT>;
-    using TensorProdObsT = TensorProdObs<StateVectorT, PrecisionT>;
-    using NamedObsT = NamedObs<StateVectorT, PrecisionT>;
-    using HamiltonianT = Hamiltonian<StateVectorT, PrecisionT>;
+    using TensorProdObsT = TensorProdObs<StateVectorT>;
+    using NamedObsT = NamedObs<StateVectorT>;
+    using HamiltonianT = Hamiltonian<StateVectorT>;
 
     const auto h = PrecisionT{0.809}; // half of the golden ratio
 
@@ -216,9 +215,9 @@ TEMPLATE_TEST_CASE("Hamiltonian::ApplyInPlace<StateVectorLQubitRaw>",
                    "[Observables]", float, double) {
     using PrecisionT = TestType;
     using StateVectorT = StateVectorLQubitRaw<PrecisionT>;
-    using TensorProdObsT = TensorProdObs<StateVectorT, PrecisionT>;
-    using NamedObsT = NamedObs<StateVectorT, PrecisionT>;
-    using HamiltonianT = Hamiltonian<StateVectorT, PrecisionT>;
+    using TensorProdObsT = TensorProdObs<StateVectorT>;
+    using NamedObsT = NamedObs<StateVectorT>;
+    using HamiltonianT = Hamiltonian<StateVectorT>;
 
     const auto h = PrecisionT{0.809}; // half of the golden ratio
 

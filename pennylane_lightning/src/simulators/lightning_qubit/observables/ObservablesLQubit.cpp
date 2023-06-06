@@ -18,31 +18,26 @@
 
 using namespace Pennylane::LightningQubit;
 
-template class Observables::NamedObs<StateVectorLQubitRaw<float>, float>;
-template class Observables::NamedObs<StateVectorLQubitRaw<double>, double>;
+template class Observables::NamedObs<StateVectorLQubitRaw<float>>;
+template class Observables::NamedObs<StateVectorLQubitRaw<double>>;
 
-template class Observables::NamedObs<StateVectorLQubitManaged<float>, float>;
-template class Observables::NamedObs<StateVectorLQubitManaged<double>, double>;
+template class Observables::NamedObs<StateVectorLQubitManaged<float>>;
+template class Observables::NamedObs<StateVectorLQubitManaged<double>>;
 
-template class Observables::HermitianObs<StateVectorLQubitRaw<float>, float>;
-template class Observables::HermitianObs<StateVectorLQubitRaw<double>, double>;
+template class Observables::HermitianObs<StateVectorLQubitRaw<float>>;
+template class Observables::HermitianObs<StateVectorLQubitRaw<double>>;
 
-template class Observables::HermitianObs<StateVectorLQubitManaged<float>,
-                                         float>;
-template class Observables::HermitianObs<StateVectorLQubitManaged<double>,
-                                         double>;
+template class Observables::HermitianObs<StateVectorLQubitManaged<float>>;
+template class Observables::HermitianObs<StateVectorLQubitManaged<double>>;
 
-template class Observables::TensorProdObs<StateVectorLQubitRaw<float>, float>;
-template class Observables::TensorProdObs<StateVectorLQubitRaw<double>, double>;
+template class Observables::TensorProdObs<StateVectorLQubitRaw<float>>;
+template class Observables::TensorProdObs<StateVectorLQubitRaw<double>>;
 
-template class Observables::TensorProdObs<StateVectorLQubitManaged<float>,
-                                          float>;
-template class Observables::TensorProdObs<StateVectorLQubitManaged<double>,
-                                          double>;
+template class Observables::TensorProdObs<StateVectorLQubitManaged<float>>;
+template class Observables::TensorProdObs<StateVectorLQubitManaged<double>>;
 
-template class Observables::Hamiltonian<StateVectorLQubitRaw<float>, float>;
-template class Observables::Hamiltonian<StateVectorLQubitRaw<double>, double>;
+template class Observables::Hamiltonian<StateVectorLQubitRaw<float>>;
+template class Observables::Hamiltonian<StateVectorLQubitRaw<double>>;
 
-template class Observables::Hamiltonian<StateVectorLQubitManaged<float>, float>;
-template class Observables::Hamiltonian<StateVectorLQubitManaged<double>,
-                                        double>;
+template class Observables::Hamiltonian<StateVectorLQubitManaged<float>>;
+template class Observables::Hamiltonian<StateVectorLQubitManaged<double>>;

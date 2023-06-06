@@ -49,12 +49,12 @@ namespace Pennylane::LightningQubit::Observables {
  * @brief Final class for named observables (PauliX, PauliY, PauliZ, etc.)
  *
  * @tparam StateVectorT State vector class.
- * @tparam PrecisionT float point type.
  */
-template <class StateVectorT, class PrecisionT>
-class NamedObs final : public NamedObsBase<StateVectorT, PrecisionT> {
+template <class StateVectorT>
+class NamedObs final : public NamedObsBase<StateVectorT> {
   public:
-    using BaseType = NamedObsBase<StateVectorT, PrecisionT>;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using BaseType = NamedObsBase<StateVectorT>;
     /**
      * @brief Construct a NamedObs object, representing a given observable.
      *
@@ -81,13 +81,13 @@ class NamedObs final : public NamedObsBase<StateVectorT, PrecisionT> {
  * @brief Final class for Hermitian observables
  *
  * @tparam StateVectorT State vector class.
- * @tparam PrecisionT float point type.
  */
-template <class StateVectorT, class PrecisionT>
-class HermitianObs final : public HermitianObsBase<StateVectorT, PrecisionT> {
+template <class StateVectorT>
+class HermitianObs final : public HermitianObsBase<StateVectorT> {
   public:
-    using BaseType = HermitianObsBase<StateVectorT, PrecisionT>;
+    using PrecisionT = typename StateVectorT::PrecisionT;
     using MatrixT = std::vector<std::complex<PrecisionT>>;
+    using BaseType = HermitianObsBase<StateVectorT>;
 
     /**
      * @brief Create an Hermitian observable
@@ -103,12 +103,12 @@ class HermitianObs final : public HermitianObsBase<StateVectorT, PrecisionT> {
  * @brief Final class for TensorProdObs observables
  *
  * @tparam StateVectorT State vector class.
- * @tparam PrecisionT float point type.
  */
-template <class StateVectorT, class PrecisionT>
-class TensorProdObs final : public TensorProdObsBase<StateVectorT, PrecisionT> {
+template <class StateVectorT>
+class TensorProdObs final : public TensorProdObsBase<StateVectorT> {
   public:
-    using BaseType = TensorProdObsBase<StateVectorT, PrecisionT>;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using BaseType = TensorProdObsBase<StateVectorT>;
     /**
      * @brief Create an Hermitian observable
      *
@@ -127,18 +127,17 @@ class TensorProdObs final : public TensorProdObsBase<StateVectorT, PrecisionT> {
      *
      * @param obs List of observables
      */
-    static auto create(std::initializer_list<
-                       std::shared_ptr<Observable<StateVectorT, PrecisionT>>>
-                           obs)
-        -> std::shared_ptr<TensorProdObs<StateVectorT, PrecisionT>> {
-        return std::shared_ptr<TensorProdObs<StateVectorT, PrecisionT>>{
+    static auto
+    create(std::initializer_list<std::shared_ptr<Observable<StateVectorT>>> obs)
+        -> std::shared_ptr<TensorProdObs<StateVectorT>> {
+        return std::shared_ptr<TensorProdObs<StateVectorT>>{
             new TensorProdObs(std::move(obs))};
     }
 
-    static auto create(
-        std::vector<std::shared_ptr<Observable<StateVectorT, PrecisionT>>> obs)
-        -> std::shared_ptr<TensorProdObs<StateVectorT, PrecisionT>> {
-        return std::shared_ptr<TensorProdObs<StateVectorT, PrecisionT>>{
+    static auto
+    create(std::vector<std::shared_ptr<Observable<StateVectorT>>> obs)
+        -> std::shared_ptr<TensorProdObs<StateVectorT>> {
+        return std::shared_ptr<TensorProdObs<StateVectorT>>{
             new TensorProdObs(std::move(obs))};
     }
 };
@@ -148,25 +147,23 @@ namespace detail {
 using Pennylane::LightningQubit::Util::scaleAndAdd;
 
 // Default implementation
-template <class StateVectorT, class PrecisionT, bool use_openmp>
-struct HamiltonianApplyInPlace {
-    static void
-    run([[maybe_unused]] const std::vector<PrecisionT> &coeffs,
-        [[maybe_unused]] const std::vector<
-            std::shared_ptr<Observable<StateVectorT, PrecisionT>>> &terms,
-        [[maybe_unused]] StateVectorT &sv) {
+template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    static void run([[maybe_unused]] const std::vector<PrecisionT> &coeffs,
+                    [[maybe_unused]] const std::vector<
+                        std::shared_ptr<Observable<StateVectorT>>> &terms,
+                    [[maybe_unused]] StateVectorT &sv) {
         PL_ABORT("HamiltonianApplyInPlace::run() not implemented for this "
                  "combination of State Vector, Precision and openMP usage.");
     }
 };
 
 template <class PrecisionT>
-struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, PrecisionT,
-                               false> {
+struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, false> {
     static void
     run(const std::vector<PrecisionT> &coeffs,
-        const std::vector<std::shared_ptr<
-            Observable<StateVectorLQubitManaged<PrecisionT>, PrecisionT>>>
+        const std::vector<
+            std::shared_ptr<Observable<StateVectorLQubitManaged<PrecisionT>>>>
             &terms,
         StateVectorLQubitManaged<PrecisionT> &sv) {
         auto allocator = sv.allocator();
@@ -185,12 +182,11 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, PrecisionT,
 
 #if defined(_OPENMP)
 template <class PrecisionT>
-struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, PrecisionT,
-                               true> {
+struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
     static void
     run(const std::vector<PrecisionT> &coeffs,
-        const std::vector<std::shared_ptr<
-            Observable<StateVectorLQubitManaged<PrecisionT>, PrecisionT>>>
+        const std::vector<
+            std::shared_ptr<Observable<StateVectorLQubitManaged<PrecisionT>>>>
             &terms,
         StateVectorLQubitManaged<PrecisionT> &sv) {
         const size_t length = sv.getLength();
@@ -237,12 +233,12 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, PrecisionT,
  * observables.
  *
  * @tparam StateVectorT State vector class.
- * @tparam PrecisionT float point type.
  */
-template <class StateVectorT, class PrecisionT>
-class Hamiltonian final : public HamiltonianBase<StateVectorT, PrecisionT> {
+template <class StateVectorT>
+class Hamiltonian final : public HamiltonianBase<StateVectorT> {
   public:
-    using BaseType = HamiltonianBase<StateVectorT, PrecisionT>;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using BaseType = HamiltonianBase<StateVectorT>;
 
     /**
      * @brief Create a Hamiltonian from coefficients and observables
@@ -265,18 +261,16 @@ class Hamiltonian final : public HamiltonianBase<StateVectorT, PrecisionT> {
      */
     static auto
     create(std::initializer_list<PrecisionT> coeffs,
-           std::initializer_list<
-               std::shared_ptr<Observable<StateVectorT, PrecisionT>>>
-               obs) -> std::shared_ptr<Hamiltonian<StateVectorT, PrecisionT>> {
-        return std::shared_ptr<Hamiltonian<StateVectorT, PrecisionT>>(
-            new Hamiltonian<StateVectorT, PrecisionT>{std::move(coeffs),
-                                                      std::move(obs)});
+           std::initializer_list<std::shared_ptr<Observable<StateVectorT>>> obs)
+        -> std::shared_ptr<Hamiltonian<StateVectorT>> {
+        return std::shared_ptr<Hamiltonian<StateVectorT>>(
+            new Hamiltonian<StateVectorT>{std::move(coeffs), std::move(obs)});
     }
 
     void applyInPlace(StateVectorT &sv) const override {
         detail::HamiltonianApplyInPlace<
-            StateVectorT, PrecisionT,
-            Pennylane::Util::use_openmp>::run(this->coeffs_, this->obs_, sv);
+            StateVectorT, Pennylane::Util::use_openmp>::run(this->coeffs_,
+                                                            this->obs_, sv);
     }
 };
 
