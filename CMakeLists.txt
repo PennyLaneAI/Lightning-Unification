@@ -87,13 +87,12 @@ target_include_directories(pennylane_lightning  INTERFACE "$<INSTALL_INTERFACE:$
 if(ENABLE_PYTHON)
     message(STATUS "ENABLE_PYTHON is ON.")
     pybind11_add_module(lightning_qubit_ops "pennylane_lightning/src/bindings/Bindings.cpp")
-    target_link_libraries(lightning_qubit_ops PRIVATE lightning_executor
-                                                      lightning_utils
-                                                      )
 
     target_link_libraries(lightning_qubit_ops PRIVATE lightning_compile_options
                                                       lightning_external_libs
+                                                      lightning_utils
                                                       )
+
     set_target_properties(lightning_qubit_ops PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
     target_compile_definitions(lightning_qubit_ops PRIVATE VERSION_INFO=${VERSION_STRING})

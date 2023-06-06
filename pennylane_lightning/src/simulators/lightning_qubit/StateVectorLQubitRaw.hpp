@@ -51,15 +51,16 @@ namespace Pennylane::LightningQubit {
  * `complex<float>`) or 64-bit (128-bit `complex<double>`) floating point
  * representation.
  *
- * @tparam PrecisionT Floating point precision of underlying statevector data.
+ * @tparam fp_t Floating point precision of underlying statevector data.
  */
-template <class PrecisionT = double>
+template <class fp_t = double>
 class StateVectorLQubitRaw final
-    : public StateVectorLQubit<PrecisionT, StateVectorLQubitRaw<PrecisionT>> {
+    : public StateVectorLQubit<fp_t, StateVectorLQubitRaw<fp_t>> {
   public:
+    using PrecisionT = fp_t;
+    using ComplexPrecisionT = std::complex<PrecisionT>;
     using BaseType =
         StateVectorLQubit<PrecisionT, StateVectorLQubitRaw<PrecisionT>>;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
 
   private:
     ComplexPrecisionT *data_;
@@ -105,5 +106,27 @@ class StateVectorLQubitRaw final
      * @return std::size_t
      */
     [[nodiscard]] auto getLength() const -> std::size_t { return length_; }
+
+    /**
+     * @brief Update data of the class to new_data
+     *
+     * @param new_data data pointer to new data.
+     * @param new_size size of underlying data storage.
+     */
+    void updateData(const ComplexPrecisionT *new_data, size_t new_size) {
+        assert(length_ == new_size);
+        std::copy(new_data, new_data + new_size, data_);
+    }
+
+    /**
+     * @brief Update data of the class to new_data
+     *
+     * @tparam Alloc Allocator type of std::vector to use for updating data.
+     * @param new_data std::vector contains data.
+     */
+    template <class Alloc>
+    void updateData(const std::vector<ComplexPrecisionT, Alloc> &new_data) {
+        updateData(new_data.data(), new_data.size());
+    }
 };
 } // namespace Pennylane::LightningQubit

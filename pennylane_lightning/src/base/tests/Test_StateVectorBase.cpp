@@ -12,8 +12,6 @@
 /**
  * @file
  *  Tests for functionality defined in the StateVectorBase class.
- *  For Lightning Qubit, the base class is been tested against the
- * StateVectorLQubitManaged class.
  */
 
 /// @cond DEV

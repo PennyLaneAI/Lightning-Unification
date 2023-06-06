@@ -47,15 +47,15 @@ namespace Pennylane::LightningQubit {
  * @brief StateVector class where data resides in CPU memory. Memory ownership
  * resides within class.
  *
- * @tparam PrecisionT Precision data type
+ * @tparam fp_t Precision data type
  */
-template <class PrecisionT = double>
+template <class fp_t = double>
 class StateVectorLQubitManaged final
-    : public StateVectorLQubit<PrecisionT,
-                               StateVectorLQubitManaged<PrecisionT>> {
+    : public StateVectorLQubit<fp_t, StateVectorLQubitManaged<fp_t>> {
   public:
-    using BaseType = StateVectorLQubit<PrecisionT, StateVectorLQubitManaged>;
+    using PrecisionT = fp_t;
     using ComplexPrecisionT = std::complex<PrecisionT>;
+    using BaseType = StateVectorLQubit<PrecisionT, StateVectorLQubitManaged>;
 
   private:
     std::vector<ComplexPrecisionT, AlignedAllocator<ComplexPrecisionT>> data_;
@@ -161,14 +161,23 @@ class StateVectorLQubitManaged final
     /**
      * @brief Update data of the class to new_data
      *
+     * @param new_data data pointer to new data.
+     * @param new_size size of underlying data storage.
+     */
+    void updateData(const ComplexPrecisionT *new_data, size_t new_size) {
+        assert(data_.size() == new_size);
+        std::copy(new_data, new_data + new_size, data_.data());
+    }
+
+    /**
+     * @brief Update data of the class to new_data
+     *
      * @tparam Alloc Allocator type of std::vector to use for updating data.
      * @param new_data std::vector contains data.
      */
     template <class Alloc>
     void updateData(const std::vector<ComplexPrecisionT, Alloc> &new_data) {
-        assert(data_.size() == new_data.size());
-        std::copy(new_data.data(), new_data.data() + new_data.size(),
-                  data_.data());
+        updateData(new_data.data(), new_data.size());
     }
 
     AlignedAllocator<ComplexPrecisionT> allocator() const {
