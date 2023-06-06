@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <complex>
 #include <memory>
+#include <typeinfo>
 #include <unordered_set>
 #include <vector>
 
@@ -175,8 +176,7 @@ class HermitianObsBase : public Observable<StateVectorT, PrecisionT> {
      */
     HermitianObsBase(MatrixT matrix, std::vector<size_t> wires)
         : matrix_{std::move(matrix)}, wires_{std::move(wires)} {
-        PL_ASSERT(matrix_.size() ==
-                  Util::exp2(wires_.size()) * Util::exp2(wires_.size()));
+        PL_ASSERT(matrix_.size() == Util::exp2(2 * wires_.size()));
     }
 
     [[nodiscard]] auto getMatrix() const -> const MatrixT & { return matrix_; }
@@ -257,6 +257,7 @@ class TensorProdObsBase : public Observable<StateVectorT, PrecisionT> {
      * brace-enclosed initializer list correctly.
      *
      * @param obs List of observables
+     * @return std::shared_ptr<TensorProdObsBase<StateVectorT, PrecisionT>>
      */
     static auto create(std::initializer_list<
                        std::shared_ptr<Observable<StateVectorT, PrecisionT>>>
@@ -266,6 +267,16 @@ class TensorProdObsBase : public Observable<StateVectorT, PrecisionT> {
             new TensorProdObsBase(std::move(obs))};
     }
 
+    /**
+     * @brief Convenient wrapper for the constructor as the constructor does not
+     * convert the std::shared_ptr with a derived class correctly.
+     *
+     * This function is useful as std::make_shared does not handle
+     * brace-enclosed initializer list correctly.
+     *
+     * @param obs List of observables
+     * @return std::shared_ptr<TensorProdObsBase<StateVectorT, PrecisionT>>
+     */
     static auto create(
         std::vector<std::shared_ptr<Observable<StateVectorT, PrecisionT>>> obs)
         -> std::shared_ptr<TensorProdObsBase<StateVectorT, PrecisionT>> {
@@ -363,6 +374,7 @@ class HamiltonianBase : public Observable<StateVectorT, PrecisionT> {
      *
      * @param coeffs Arguments to construct coefficients
      * @param obs Arguments to construct observables
+     * @return std::shared_ptr<HamiltonianBase<StateVectorT, PrecisionT>>
      */
     static auto
     create(std::initializer_list<PrecisionT> coeffs,
