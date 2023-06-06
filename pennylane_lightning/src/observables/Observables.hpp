@@ -105,8 +105,7 @@ class NamedObsBase : public Observable<StateVectorT> {
     std::vector<PrecisionT> params_;
 
   private:
-    [[nodiscard]] auto
-    isEqual(const Observable<StateVectorT> &other) const
+    [[nodiscard]] auto isEqual(const Observable<StateVectorT> &other) const
         -> bool override {
         const auto &other_cast =
             static_cast<const NamedObsBase<StateVectorT> &>(other);
