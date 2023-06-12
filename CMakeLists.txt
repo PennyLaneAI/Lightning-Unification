@@ -106,11 +106,6 @@ if(ENABLE_PYTHON)
     target_compile_definitions(pennylane_lightning_ops PRIVATE VERSION_INFO=${VERSION_STRING})
 endif()
 
-    set_target_properties(pennylane_lightning_ops PROPERTIES CXX_VISIBILITY_PRESET hidden)
-
-    target_compile_definitions(pennylane_lightning_ops PRIVATE VERSION_INFO=${VERSION_STRING})
-endif()
-
 install(TARGETS pennylane_lightning
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
