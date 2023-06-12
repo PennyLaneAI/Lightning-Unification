@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(pl_qubit_tests)
+project(lightning_qubit_tests)
 
 # Default build type for test code is Debug
 if(NOT CMAKE_BUILD_TYPE)
@@ -14,14 +14,14 @@ FetchAndIncludeCatch()
 # Define library
 ################################################################################
 
-add_library(pl_qubit_tests INTERFACE)
-target_link_libraries(pl_qubit_tests INTERFACE  Catch2::Catch2
+add_library(lightning_qubit_tests INTERFACE)
+target_link_libraries(lightning_qubit_tests INTERFACE  Catch2::Catch2
                                                 lightning_qubit
                                                 )
 
-ProcessTestOptions(pl_qubit_tests)
+ProcessTestOptions(lightning_qubit_tests)
 
-target_sources(pl_qubit_tests INTERFACE runner_pl_qubit.cpp)
+target_sources(lightning_qubit_tests INTERFACE runner_lightning_qubit.cpp)
 
 ################################################################################
 # Define targets
@@ -31,9 +31,9 @@ set(TEST_SOURCES    Test_StateVectorLQubit.cpp
                     Test_StateVectorLQubitManaged.cpp
                     )
 
-add_executable(pl_qubit_test_runner ${TEST_SOURCES})
-target_link_libraries(pl_qubit_test_runner PRIVATE  pl_qubit_tests)
+add_executable(lightning_qubit_test_runner ${TEST_SOURCES})
+target_link_libraries(lightning_qubit_test_runner PRIVATE  lightning_qubit_tests)
 
-catch_discover_tests(pl_qubit_test_runner)
+catch_discover_tests(lightning_qubit_test_runner)
 
-install(TARGETS pl_qubit_test_runner DESTINATION bin)
+install(TARGETS lightning_qubit_test_runner DESTINATION bin)
