@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Test something.
+Test binary information of ``lightning.qubit``.
 """
+import pytest
 
-import numpy as np
+try:
+    from pennylane_lightning.pennylane_lightning_ops import runtime_info, compile_info
+except (ImportError, ModuleNotFoundError):
+    pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
 
-class TestSomething:
-    """---"""
-
-    def test_one_qubit_circuit(self):
-        assert 1 == 1
+def test_runtime_info():
+    m = runtime_info()
+    for key in ["AVX", "AVX2", "AVX512F"]:
+        assert key in m
