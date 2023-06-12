@@ -45,6 +45,22 @@ using StateVectorBackends =
                               StateVectorLQubitRaw<double>, void>;
 
 /**
+ * @brief Register matrix.
+ */
+template <class StateVectorT>
+void registerMatrix(
+    StateVectorT &st,
+    const pybind11::array_t<std::complex<typename StateVectorT::PrecisionT>,
+                            pybind11::array::c_style |
+                                pybind11::array::forcecast> &matrix,
+    const std::vector<size_t> &wires, bool inverse = false) {
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    st.applyMatrix(
+        static_cast<const std::complex<PrecisionT> *>(matrix.request().ptr),
+        wires, inverse);
+}
+
+/**
  * @brief Register StateVector class to pybind.
  *
  * @tparam StateVectorT Statevector type to register
@@ -62,20 +78,8 @@ void registerGatesForStateVector(PyClass &pyclass) {
     using Pennylane::Util::for_each_enum;
     namespace Constant = Gates::Constant;
 
-    { // Register matrix
-        const std::string doc = "Apply a given matrix to wires.";
-        auto func =
-            [](StateVectorT &st,
-               const pybind11::array_t<std::complex<PrecisionT>,
-                                       pybind11::array::c_style |
-                                           pybind11::array::forcecast> &matrix,
-               const std::vector<size_t> &wires, bool inverse = false) {
-                st.applyMatrix(static_cast<const std::complex<PrecisionT> *>(
-                                   matrix.request().ptr),
-                               wires, inverse);
-            };
-        pyclass.def("applyMatrix", func, doc.c_str());
-    }
+    pyclass.def("applyMatrix", &registerMatrix<StateVectorT>,
+                "Apply a given matrix to wires.");
 
     for_each_enum<GateOperation>([&pyclass](GateOperation gate_op) {
         using Pennylane::LightningQubit::Util::lookup;

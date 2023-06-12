@@ -22,6 +22,12 @@ import numpy as np
 
 from .lightning_base import backend_info, LightningBase, CPP_BINARY_AVAILABLE
 
+from .pennylane_lightning_ops import (
+    allocate_aligned_array,
+    get_alignment,
+    best_alignment,
+)
+
 if backend_info()["NAME"] == "lightning.qubit":
     from pennylane import (
         math,
@@ -193,6 +199,25 @@ if backend_info()["NAME"] == "lightning.qubit":
                     raise ValueError("Shots should be greater than num_burnin.")
                 self._kernel_name = kernel_name
                 self._num_burnin = num_burnin
+
+        @staticmethod
+        def _asarray(arr, dtype=None):
+            arr = np.asarray(arr)  # arr is not copied
+
+            if arr.dtype.kind not in ["f", "c"]:
+                return arr
+
+            if not dtype:
+                dtype = arr.dtype
+
+            # We allocate a new aligned memory and copy data to there if alignment or dtype mismatches
+            # Note that get_alignment does not necessarily return CPUMemoryModel(Unaligned) even for
+            # numpy allocated memory as the memory location happens to be aligned.
+            if int(get_alignment(arr)) < int(best_alignment()) or arr.dtype != dtype:
+                new_arr = allocate_aligned_array(arr.size, np.dtype(dtype)).reshape(arr.shape)
+                np.copyto(new_arr, arr)
+                arr = new_arr
+            return arr
 
         def _create_basis_state(self, index):
             """Return a computational basis state over all wires.
