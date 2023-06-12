@@ -9,7 +9,6 @@ target_link_libraries(lightning_observables INTERFACE   lightning_compile_option
                                                         lightning_external_libs
                                                         lightning_utils
                                                         )
-
 set_property(TARGET lightning_observables PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if (BUILD_TESTS)
