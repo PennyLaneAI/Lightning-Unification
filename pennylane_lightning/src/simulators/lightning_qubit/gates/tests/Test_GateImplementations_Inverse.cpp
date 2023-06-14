@@ -1,8 +1,8 @@
 #include "ConstantUtil.hpp" // lookup
-#include "CreateAllWires.hpp"
 #include "DynamicDispatcher.hpp"
 #include "OpToMemberFuncPtr.hpp"
 #include "TestHelpers.hpp"
+#include "TestHelpersWires.hpp"
 #include "TestKernels.hpp"
 #include "Util.hpp"
 

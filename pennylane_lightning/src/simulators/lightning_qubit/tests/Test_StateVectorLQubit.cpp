@@ -1,6 +1,6 @@
-#include "LQubitTestHelpers.hpp" // createRandomStateVectorData
-#include "LinearAlgebra.hpp"     //randomUnitary
-#include "TestHelpers.hpp"
+#include "LinearAlgebra.hpp" //randomUnitary
+#include "TestHelpers.hpp"   // createRandomStateVectorData
+#include "TestHelpersWires.hpp"
 #include "TestStateVectors.hpp" // StateVectorManagedAndPrecision, StateVectorRawAndPrecision
 #include "cpu_kernels/GateImplementationsPI.hpp"
 

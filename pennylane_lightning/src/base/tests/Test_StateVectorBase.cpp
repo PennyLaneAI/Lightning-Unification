@@ -23,7 +23,7 @@ using namespace Pennylane::Util;
 #ifdef _ENABLE_PLQUBIT
 constexpr bool BACKEND_FOUND = true;
 
-#include "LQubitTestHelpers.hpp"
+#include "TestHelpersWires.hpp"
 #include "TestStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
 
 /// @cond DEV

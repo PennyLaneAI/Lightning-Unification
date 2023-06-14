@@ -17,14 +17,8 @@
  * Defines helper methods for PennyLane Lightning Simulator.
  */
 
-#include "Constant.hpp"
-#include "ConstantUtil.hpp" // array_has_elem, lookup
-#include "Error.hpp"
-#include "GateOperation.hpp"
-#include "Macros.hpp"
-#include "TestKernels.hpp"
-
 #pragma once
+
 #include <catch2/catch.hpp>
 
 #include <algorithm>
@@ -39,44 +33,6 @@ using namespace Pennylane::Util;
 /// @endcond
 
 namespace Pennylane::LightningQubit::Util {
-
-inline auto createWires(Gates::GateOperation op, size_t num_qubits)
-    -> std::vector<size_t> {
-    if (array_has_elem(Gates::Constant::multi_qubit_gates, op)) {
-        std::vector<size_t> wires(num_qubits);
-        std::iota(wires.begin(), wires.end(), 0);
-        return wires;
-    }
-    switch (lookup(Gates::Constant::gate_wires, op)) {
-    case 1:
-        return {0};
-    case 2:
-        return {0, 1};
-    case 3:
-        return {0, 1, 2};
-    case 4:
-        return {0, 1, 2, 3};
-    default:
-        PL_ABORT("The number of wires for a given gate is unknown.");
-    }
-    return {};
-}
-
-template <class PrecisionT>
-auto createParams(Gates::GateOperation op) -> std::vector<PrecisionT> {
-    switch (lookup(Gates::Constant::gate_num_params, op)) {
-    case 0:
-        return {};
-    case 1:
-        return {static_cast<PrecisionT>(0.312)};
-    case 3:
-        return {static_cast<PrecisionT>(0.128), static_cast<PrecisionT>(-0.563),
-                static_cast<PrecisionT>(1.414)};
-    default:
-        PL_ABORT("The number of parameters for a given gate is unknown.");
-    }
-    return {};
-}
 
 /**
  * @brief Fills the empty vectors with the CSR (Compressed Sparse Row) sparse

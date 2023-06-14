@@ -1,7 +1,7 @@
-#include "ConstantUtil.hpp" // array_has_elem
-#include "LQubitTestHelpers.hpp"
+#include "ConstantUtil.hpp"  // array_has_elem
 #include "LinearAlgebra.hpp" // randomUnitary
 #include "TestHelpers.hpp"   // PrecisionToName
+#include "TestHelpersWires.hpp"
 #include "Util.hpp"
 
 #include <catch2/catch.hpp>

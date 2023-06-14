@@ -1,7 +1,7 @@
 #include "ConstantUtil.hpp" // lookup, array_has_elem, prepend_to_tuple, tuple_to_array
-#include "CreateAllWires.hpp"
 #include "DynamicDispatcher.hpp"
 #include "TestHelpers.hpp"
+#include "TestHelpersWires.hpp"
 #include "Util.hpp"
 
 #include <catch2/catch.hpp>
