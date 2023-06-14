@@ -59,10 +59,11 @@ class StateVectorLQubitRaw final
   public:
     using PrecisionT = fp_t;
     using ComplexPrecisionT = std::complex<PrecisionT>;
+
+  private:
     using BaseType =
         StateVectorLQubit<PrecisionT, StateVectorLQubitRaw<PrecisionT>>;
 
-  private:
     ComplexPrecisionT *data_;
     size_t length_;
 

@@ -52,9 +52,11 @@ namespace Pennylane::LightningQubit::Observables {
  */
 template <class StateVectorT>
 class NamedObs final : public NamedObsBase<StateVectorT> {
+  private:
+    using BaseType = NamedObsBase<StateVectorT>;
+
   public:
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using BaseType = NamedObsBase<StateVectorT>;
     /**
      * @brief Construct a NamedObs object, representing a given observable.
      *
@@ -84,10 +86,12 @@ class NamedObs final : public NamedObsBase<StateVectorT> {
  */
 template <class StateVectorT>
 class HermitianObs final : public HermitianObsBase<StateVectorT> {
+  private:
+    using BaseType = HermitianObsBase<StateVectorT>;
+
   public:
     using PrecisionT = typename StateVectorT::PrecisionT;
     using MatrixT = std::vector<std::complex<PrecisionT>>;
-    using BaseType = HermitianObsBase<StateVectorT>;
 
     /**
      * @brief Create an Hermitian observable
@@ -106,9 +110,12 @@ class HermitianObs final : public HermitianObsBase<StateVectorT> {
  */
 template <class StateVectorT>
 class TensorProdObs final : public TensorProdObsBase<StateVectorT> {
+  private:
+    using BaseType = TensorProdObsBase<StateVectorT>;
+
   public:
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using BaseType = TensorProdObsBase<StateVectorT>;
+
     /**
      * @brief Create an Hermitian observable
      *
@@ -236,9 +243,11 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
  */
 template <class StateVectorT>
 class Hamiltonian final : public HamiltonianBase<StateVectorT> {
+  private:
+    using BaseType = HamiltonianBase<StateVectorT>;
+
   public:
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using BaseType = HamiltonianBase<StateVectorT>;
 
     /**
      * @brief Create a Hamiltonian from coefficients and observables

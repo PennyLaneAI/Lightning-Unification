@@ -55,9 +55,10 @@ class StateVectorLQubitManaged final
   public:
     using PrecisionT = fp_t;
     using ComplexPrecisionT = std::complex<PrecisionT>;
-    using BaseType = StateVectorLQubit<PrecisionT, StateVectorLQubitManaged>;
 
   private:
+    using BaseType =
+        StateVectorLQubit<PrecisionT, StateVectorLQubitManaged<PrecisionT>>;
     std::vector<ComplexPrecisionT, AlignedAllocator<ComplexPrecisionT>> data_;
 
   public:

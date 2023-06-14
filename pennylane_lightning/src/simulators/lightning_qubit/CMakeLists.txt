@@ -62,8 +62,8 @@ target_link_libraries(lightning_qubit PUBLIC    lightning_compile_options
                                                 lightning_external_libs
                                                 lightning_base
                                                 lightning_utils
-                                                pl_qubit_utils
-                                                pl_qubit_gates
+                                                lightning_qubit_utils
+                                                lightning_qubit_gates
                                                 )
 
 target_include_directories(lightning_qubit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

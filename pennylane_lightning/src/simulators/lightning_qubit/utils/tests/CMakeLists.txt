@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(pl_qubit_utils_tests)
+project(lightning_qubit_utils_tests)
 
 # Default build type for test code is Debug
 if(NOT CMAKE_BUILD_TYPE)
@@ -14,14 +14,14 @@ FetchAndIncludeCatch()
 # Define library
 ################################################################################
 
-add_library(pl_qubit_utils_tests INTERFACE)
-target_link_libraries(pl_qubit_utils_tests INTERFACE    Catch2::Catch2
-                                                        pl_qubit_utils
+add_library(lightning_qubit_utils_tests INTERFACE)
+target_link_libraries(lightning_qubit_utils_tests INTERFACE    Catch2::Catch2
+                                                        lightning_qubit_utils
                                                         )
 
-ProcessTestOptions(pl_qubit_utils_tests)
+ProcessTestOptions(lightning_qubit_utils_tests)
 
-target_sources(pl_qubit_utils_tests INTERFACE runner_pl_qubit_utils.cpp)
+target_sources(lightning_qubit_utils_tests INTERFACE runner_lightning_qubit_utils.cpp)
 
 ################################################################################
 # Define targets
@@ -29,8 +29,8 @@ target_sources(pl_qubit_utils_tests INTERFACE runner_pl_qubit_utils.cpp)
 set(TEST_SOURCES    Test_LinearAlgebra.cpp
                     )
 
-add_executable(pl_qubit_utils_test_runner ${TEST_SOURCES})
-target_link_libraries(pl_qubit_utils_test_runner PRIVATE pl_qubit_utils_tests)
-catch_discover_tests(pl_qubit_utils_test_runner)
+add_executable(lightning_qubit_utils_test_runner ${TEST_SOURCES})
+target_link_libraries(lightning_qubit_utils_test_runner PRIVATE lightning_qubit_utils_tests)
+catch_discover_tests(lightning_qubit_utils_test_runner)
 
-install(TARGETS pl_qubit_utils_test_runner DESTINATION bin)
+install(TARGETS lightning_qubit_utils_test_runner DESTINATION bin)
