@@ -17,6 +17,7 @@
 namespace {
 using namespace Pennylane::Observables;
 
+using Pennylane::Util::LightningException;
 } // namespace
 /// @endcond
 
