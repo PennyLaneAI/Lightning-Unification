@@ -11,7 +11,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 /**
- * @file Measurements.cpp
- * Defines the Measurements Class.
+ * @file TransitionKernels.cpp
+ * @brief Explicitly instantiate classes for Markov chain Monte Carlo (MCMC)
+ * sampling.
+ *
  */
+
+#include "TransitionKernels.hpp"
+
+using namespace Pennylane::LightningQubit;
+
+template class Measures::TransitionKernel<float>;
+template class Measures::TransitionKernel<double>;
+
+template class Measures::LocalTransitionKernel<float>;
+template class Measures::LocalTransitionKernel<double>;
+
+template class Measures::NonZeroRandomTransitionKernel<float>;
+template class Measures::NonZeroRandomTransitionKernel<double>;
