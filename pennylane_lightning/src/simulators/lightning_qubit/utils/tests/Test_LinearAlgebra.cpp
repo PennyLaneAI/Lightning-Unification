@@ -810,3 +810,35 @@ TEMPLATE_TEST_CASE("Util::scaleAndAdd", "[Util][LinearAlgebra]", float,
             32, {1.0, 0.0}, x.data(), y.data()));
     }
 }
+
+/**
+ * @brief Test randomUnitary is correct
+ */
+TEMPLATE_TEST_CASE("randomUnitary", "[Util][LinearAlgebra]", float, double) {
+    using PrecisionT = TestType;
+
+    std::mt19937 re{1337};
+
+    for (size_t num_qubits = 1; num_qubits <= 5; num_qubits++) {
+        const size_t dim = (1U << num_qubits);
+        const auto unitary = Util::randomUnitary<PrecisionT>(re, num_qubits);
+
+        auto unitary_dagger = Util::Transpose(unitary, dim, dim);
+        std::transform(
+            unitary_dagger.begin(), unitary_dagger.end(),
+            unitary_dagger.begin(),
+            [](const std::complex<PrecisionT> &v) { return std::conj(v); });
+
+        std::vector<std::complex<PrecisionT>> mat(dim * dim);
+        Util::matrixMatProd(unitary.data(), unitary_dagger.data(), mat.data(),
+                            dim, dim, dim);
+
+        std::vector<std::complex<PrecisionT>> identity(
+            dim * dim, std::complex<PrecisionT>{});
+        for (size_t i = 0; i < dim; i++) {
+            identity[i * dim + i] = std::complex<PrecisionT>{1.0, 0.0};
+        }
+
+        REQUIRE(mat == approx(identity).margin(1e-5));
+    }
+}
