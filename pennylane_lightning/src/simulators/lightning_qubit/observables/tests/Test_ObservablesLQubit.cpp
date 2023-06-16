@@ -145,11 +145,12 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian", "[Observables]",
     }
 }
 
-TEMPLATE_TEST_CASE("Hamiltonian::ApplyInPlace<StateVectorLQubitManaged>",
-                   "[Observables]", float, double) {
-    using PrecisionT = TestType;
+TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian::ApplyInPlace", "[Observables]",
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
+                           (float, double)) {
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
     using ComplexPrecisionT = std::complex<PrecisionT>;
-    using StateVectorT = StateVectorLQubitManaged<PrecisionT>;
     using TensorProdObsT = TensorProdObs<StateVectorT>;
     using NamedObsT = NamedObs<StateVectorT>;
     using HamiltonianT = Hamiltonian<StateVectorT>;
@@ -201,32 +202,5 @@ TEMPLATE_TEST_CASE("Hamiltonian::ApplyInPlace<StateVectorLQubitManaged>",
                                   state_vector.getLength(), expected.data(),
                                   expected.size()));
         }
-    }
-}
-
-TEMPLATE_TEST_CASE("Hamiltonian::ApplyInPlace<StateVectorLQubitRaw>",
-                   "[Observables]", float, double) {
-    using PrecisionT = TestType;
-    using StateVectorT = StateVectorLQubitRaw<PrecisionT>;
-    using TensorProdObsT = TensorProdObs<StateVectorT>;
-    using NamedObsT = NamedObs<StateVectorT>;
-    using HamiltonianT = Hamiltonian<StateVectorT>;
-
-    const auto h = PrecisionT{0.809}; // half of the golden ratio
-
-    auto zz = std::make_shared<TensorProdObsT>(
-        std::make_shared<NamedObsT>("PauliZ", std::vector<size_t>{0}),
-        std::make_shared<NamedObsT>("PauliZ", std::vector<size_t>{1}));
-
-    auto x1 = std::make_shared<NamedObsT>("PauliX", std::vector<size_t>{0});
-    auto x2 = std::make_shared<NamedObsT>("PauliX", std::vector<size_t>{1});
-
-    auto ham = HamiltonianT::create({PrecisionT{1.0}, h, h}, {zz, x1, x2});
-
-    SECTION("ApplyInPlace", "[Not implemented]") {
-        auto st_data = createProductState<PrecisionT>("+-");
-        StateVectorT state_vector(st_data.data(), st_data.size());
-
-        REQUIRE_THROWS_AS(ham->applyInPlace(state_vector), LightningException);
     }
 }
