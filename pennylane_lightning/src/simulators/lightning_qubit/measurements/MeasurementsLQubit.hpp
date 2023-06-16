@@ -562,7 +562,7 @@ class Measurements final
 
   private:
     /**
-     * @brief Support function that calculates <bra|obs|ket> for obtaining the
+     * @brief Support function that calculates <bra|obs|ket> to obtain the
      * observable's expectation value.
      *
      * @param bra Reference to the statevector where the observable will be
