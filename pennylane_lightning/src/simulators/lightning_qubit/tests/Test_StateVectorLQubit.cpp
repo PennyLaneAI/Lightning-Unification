@@ -1,7 +1,8 @@
 #include "LinearAlgebra.hpp" //randomUnitary
-#include "TestHelpers.hpp"   // createRandomStateVectorData
+#include "StateVectorLQubitManaged.hpp"
+#include "StateVectorLQubitRaw.hpp"
+#include "TestHelpers.hpp" // createRandomStateVectorData
 #include "TestHelpersWires.hpp"
-#include "TestStateVectors.hpp" // StateVectorManagedAndPrecision, StateVectorRawAndPrecision
 #include "cpu_kernels/GateImplementationsPI.hpp"
 
 #include <algorithm>
@@ -26,8 +27,6 @@ using namespace Pennylane::LightningQubit;
 using namespace Pennylane::Util;
 
 using Pennylane::LightningQubit::Util::randomUnitary;
-using Pennylane::LightningQubit::Util::StateVectorManagedAndPrecision;
-using Pennylane::LightningQubit::Util::StateVectorRawAndPrecision;
 
 std::mt19937_64 re{1337};
 } // namespace
@@ -44,22 +43,23 @@ TEMPLATE_TEST_CASE("StateVectorLQubit::Constructibility",
 
 TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::Constructibility",
                            "[General Constructibility]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
-    using ComplexT = std::complex<PrecisionT>;
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexPrecisionT = std::complex<PrecisionT>;
 
     SECTION("StateVectorBackend<TestType>") {
         REQUIRE(!std::is_constructible_v<StateVectorT>);
     }
-    SECTION("StateVectorBackend<TestType> {ComplexT*, size_t}") {
-        REQUIRE(std::is_constructible_v<StateVectorT, ComplexT *, size_t>);
+    SECTION("StateVectorBackend<TestType> {ComplexPrecisionT*, size_t}") {
+        REQUIRE(
+            std::is_constructible_v<StateVectorT, ComplexPrecisionT *, size_t>);
     }
-    SECTION("StateVectorBackend<TestType> {ComplexT*, size_t}: Fails if "
-            "provided an inconsistent length.") {
-        std::vector<ComplexT> st_data(14, 0.0);
+    SECTION(
+        "StateVectorBackend<TestType> {ComplexPrecisionT*, size_t}: Fails if "
+        "provided an inconsistent length.") {
+        std::vector<ComplexPrecisionT> st_data(14, 0.0);
         REQUIRE_THROWS_WITH(
             StateVectorT(st_data.data(), st_data.size()),
             Catch::Contains("The size of provided data must be a power of 2."));
@@ -75,16 +75,15 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::Constructibility",
 
 TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a std::vector",
                            "[applyMatrix]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
-    using ComplexT = std::complex<PrecisionT>;
-    using VectorT = TestVector<ComplexT>;
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using VectorT = TestVector<ComplexPrecisionT>;
 
     SECTION("Test wrong matrix size") {
-        std::vector<ComplexT> m(7, 0.0);
+        std::vector<ComplexPrecisionT> m(7, 0.0);
         const size_t num_qubits = 4;
         VectorT st_data =
             createRandomStateVectorData<PrecisionT>(re, num_qubits);
@@ -97,7 +96,7 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a std::vector",
     }
 
     SECTION("Test wrong number of wires") {
-        std::vector<ComplexT> m(8, 0.0);
+        std::vector<ComplexPrecisionT> m(8, 0.0);
         const size_t num_qubits = 4;
         VectorT st_data =
             createRandomStateVectorData<PrecisionT>(re, num_qubits);
@@ -112,16 +111,15 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a std::vector",
 
 TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a pointer",
                            "[applyMatrix]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
-    using ComplexT = std::complex<PrecisionT>;
-    using VectorT = TestVector<ComplexT>;
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using VectorT = TestVector<ComplexPrecisionT>;
 
     SECTION("Test wrong matrix") {
-        std::vector<ComplexT> m(8, 0.0);
+        std::vector<ComplexPrecisionT> m(8, 0.0);
         const size_t num_qubits = 4;
         VectorT st_data =
             createRandomStateVectorData<PrecisionT>(re, num_qubits);
@@ -162,13 +160,12 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a pointer",
 
 TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyOperations",
                            "[applyOperations invalid arguments]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
-    using ComplexT = std::complex<PrecisionT>;
-    using VectorT = TestVector<ComplexT>;
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using VectorT = TestVector<ComplexPrecisionT>;
 
     SECTION("Test invalid arguments without parameters") {
         const size_t num_qubits = 4;

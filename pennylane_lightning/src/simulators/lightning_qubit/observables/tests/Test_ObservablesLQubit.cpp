@@ -1,6 +1,5 @@
 #include "ObservablesLQubit.hpp"
 #include "TestHelpers.hpp"
-#include "TestStateVectors.hpp" // StateVectorManagedAndPrecision, StateVectorRawAndPrecision
 
 #include <catch2/catch.hpp>
 
@@ -8,18 +7,15 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit::Observables;
-using Pennylane::LightningQubit::Util::StateVectorManagedAndPrecision;
-using Pennylane::LightningQubit::Util::StateVectorRawAndPrecision;
 using Pennylane::Util::LightningException;
 } // namespace
 /// @endcond
 
 TEMPLATE_PRODUCT_TEST_CASE("NamedObs", "[Observables]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
     using NamedObsT = NamedObs<StateVectorT>;
 
     SECTION("Non-Default constructibility") {
@@ -60,11 +56,10 @@ TEMPLATE_PRODUCT_TEST_CASE("NamedObs", "[Observables]",
 }
 
 TEMPLATE_PRODUCT_TEST_CASE("HermitianObs", "[Observables]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
     using MatrixT = std::vector<std::complex<PrecisionT>>;
     using HermitianObsT = HermitianObs<StateVectorT>;
 
@@ -87,10 +82,9 @@ TEMPLATE_PRODUCT_TEST_CASE("HermitianObs", "[Observables]",
 }
 
 TEMPLATE_PRODUCT_TEST_CASE("TensorProdObs", "[Observables]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
+    using StateVectorT = TestType;
     using TensorProdObsT = TensorProdObs<StateVectorT>;
     using NamedObsT = NamedObs<StateVectorT>;
     using HermitianObsT = HermitianObs<StateVectorT>;
@@ -115,11 +109,10 @@ TEMPLATE_PRODUCT_TEST_CASE("TensorProdObs", "[Observables]",
     }
 }
 TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian", "[Observables]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
     using TensorProdObsT = TensorProdObs<StateVectorT>;
     using NamedObsT = NamedObs<StateVectorT>;
     using HermitianObsT = HermitianObs<StateVectorT>;
@@ -155,7 +148,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian", "[Observables]",
 TEMPLATE_TEST_CASE("Hamiltonian::ApplyInPlace<StateVectorLQubitManaged>",
                    "[Observables]", float, double) {
     using PrecisionT = TestType;
-    using ComplexT = std::complex<PrecisionT>;
+    using ComplexPrecisionT = std::complex<PrecisionT>;
     using StateVectorT = StateVectorLQubitManaged<PrecisionT>;
     using TensorProdObsT = TensorProdObs<StateVectorT>;
     using NamedObsT = NamedObs<StateVectorT>;
@@ -179,11 +172,11 @@ TEMPLATE_TEST_CASE("Hamiltonian::ApplyInPlace<StateVectorLQubitManaged>",
 
             ham->applyInPlace(state_vector);
 
-            auto expected = std::vector<ComplexT>{
-                ComplexT{0.5, 0.0},
-                ComplexT{0.5, 0.0},
-                ComplexT{-0.5, 0.0},
-                ComplexT{-0.5, 0.0},
+            auto expected = std::vector<ComplexPrecisionT>{
+                ComplexPrecisionT{0.5, 0.0},
+                ComplexPrecisionT{0.5, 0.0},
+                ComplexPrecisionT{-0.5, 0.0},
+                ComplexPrecisionT{-0.5, 0.0},
             };
 
             REQUIRE(isApproxEqual(state_vector.getData(),
@@ -197,11 +190,11 @@ TEMPLATE_TEST_CASE("Hamiltonian::ApplyInPlace<StateVectorLQubitManaged>",
 
             ham->applyInPlace(state_vector);
 
-            auto expected = std::vector<ComplexT>{
-                ComplexT{h, 0.0},
-                ComplexT{-1.0, 0.0},
-                ComplexT{0.0, 0.0},
-                ComplexT{h, 0.0},
+            auto expected = std::vector<ComplexPrecisionT>{
+                ComplexPrecisionT{h, 0.0},
+                ComplexPrecisionT{-1.0, 0.0},
+                ComplexPrecisionT{0.0, 0.0},
+                ComplexPrecisionT{h, 0.0},
             };
 
             REQUIRE(isApproxEqual(state_vector.getData(),

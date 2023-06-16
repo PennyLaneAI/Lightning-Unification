@@ -271,4 +271,78 @@ auto squaredNorm(const std::vector<T, Alloc> &vec) -> remove_complex_t<T> {
     return squaredNorm(vec.data(), vec.size());
 }
 
+/**
+ * @brief Determines the indices that would sort an array.
+ *
+ * @tparam T Vector data type.
+ * @param arr Array to be inspected.
+ * @param length Size of the array
+ * @return a vector with indices that would sort the array.
+ */
+template <typename T>
+inline auto sorting_indices(const T *arr, size_t length)
+    -> std::vector<size_t> {
+    std::vector<size_t> indices(length);
+    iota(indices.begin(), indices.end(), 0);
+
+    // indices will be sorted in accordance to the array provided.
+    sort(indices.begin(), indices.end(),
+         [&arr](size_t i1, size_t i2) { return arr[i1] < arr[i2]; });
+
+    return indices;
+}
+
+/**
+ * @brief Determines the indices that would sort a vector.
+ *
+ * @tparam T Array data type.
+ * @param vec Vector to be inspected.
+ * @return a vector with indices that would sort the vector.
+ */
+template <typename T>
+inline auto sorting_indices(const std::vector<T> &vec) -> std::vector<size_t> {
+    return sorting_indices(vec.data(), vec.size());
+}
+
+/**
+ * @brief Determines the transposed index of a tensor stored linearly.
+ *  This function assumes each axis will have a length of 2 (|0>, |1>).
+ *
+ * @param ind index after transposition.
+ * @param new_axes new axes distribution.
+ * @return unsigned int with the new transposed index.
+ */
+inline auto transposed_state_index(size_t ind,
+                                   const std::vector<size_t> &new_axes)
+    -> size_t {
+    size_t new_index = 0;
+    const size_t max_axis = new_axes.size() - 1;
+    // NOLINTNEXTLINE(modernize-loop-convert)
+    for (auto axis = new_axes.rbegin(); axis != new_axes.rend(); ++axis) {
+        new_index += (ind % 2) << (max_axis - *axis);
+        ind /= 2;
+    }
+    return new_index;
+}
+
+/**
+ * @brief Template for the transposition of state tensors,
+ * axes are assumed to have a length of 2 (|0>, |1>).
+ *
+ * @tparam T Tensor data type.
+ * @param tensor Tensor to be transposed.
+ * @param new_axes new axes distribution.
+ * @return Transposed Tensor.
+ */
+template <typename T>
+auto transpose_state_tensor(const std::vector<T> &tensor,
+                            const std::vector<size_t> &new_axes)
+    -> std::vector<T> {
+    std::vector<T> transposed_tensor(tensor.size());
+    for (size_t ind = 0; ind < tensor.size(); ind++) {
+        transposed_tensor[ind] = tensor[transposed_state_index(ind, new_axes)];
+    }
+    return transposed_tensor;
+}
+
 } // namespace Pennylane::Util

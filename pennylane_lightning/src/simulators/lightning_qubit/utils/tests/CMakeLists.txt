@@ -15,9 +15,10 @@ FetchAndIncludeCatch()
 ################################################################################
 
 add_library(lightning_qubit_utils_tests INTERFACE)
-target_link_libraries(lightning_qubit_utils_tests INTERFACE Catch2::Catch2
-                                                            lightning_qubit_utils
-                                                            )
+target_link_libraries(lightning_qubit_utils_tests INTERFACE     Catch2::Catch2
+                                                                lightning_utils
+                                                                lightning_qubit_utils
+                                                                )
 
 ProcessTestOptions(lightning_qubit_utils_tests)
 
@@ -26,7 +27,9 @@ target_sources(lightning_qubit_utils_tests INTERFACE runner_lightning_qubit_util
 ################################################################################
 # Define targets
 ################################################################################
-set(TEST_SOURCES    Test_LinearAlgebra.cpp
+set(TEST_SOURCES    Test_ConstantUtil.cpp
+                    Test_KokkosSparse.cpp
+                    Test_LinearAlgebra.cpp
                     )
 
 add_executable(lightning_qubit_utils_test_runner ${TEST_SOURCES})
