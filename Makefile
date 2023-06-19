@@ -41,8 +41,7 @@ help:
 .PHONY : clean
 clean:
 	find . -type d -name '__pycache__' -exec rm -r {} \+
-	rm -rf build
-	rm -rf Build BuildTests BuildTidy BuildGBench
+	rm -rf build Build BuildTests BuildTidy BuildGBench
 	rm -rf pennylane_lightning/lightning_qubit_ops*
 
 test-builtin:
