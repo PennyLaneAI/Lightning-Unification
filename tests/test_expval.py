@@ -108,6 +108,7 @@ class TestExpval:
 @pytest.mark.parametrize("diff_method", ("parameter-shift",))
 class TestExpOperatorArithmetic:
     """Test integration of lightning with SProd, Prod, and Sum."""
+
     dev = qml.device("lightning.qubit", wires=2)
 
     def test_sprod(self, diff_method):

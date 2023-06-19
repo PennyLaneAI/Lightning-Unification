@@ -24,6 +24,7 @@ from pennylane_lightning.lightning_qubit import CPP_BINARY_AVAILABLE
 if not CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
+
 class TestMCMCSample:
     """Tests that samples are properly calculated."""
 

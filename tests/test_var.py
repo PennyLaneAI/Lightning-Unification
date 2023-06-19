@@ -23,6 +23,7 @@ from conftest import THETA, PHI, VARPHI
 
 np.random.seed(42)
 
+
 @pytest.mark.parametrize("theta, phi", list(zip(THETA, PHI)))
 class TestVar:
     """Tests for the variance"""

@@ -610,6 +610,7 @@ class TestSample:
         # they square to 1
         assert np.allclose(s1**2, 1, atol=tol, rtol=0)
 
+
 class TestWiresInVar:
     """Test different Wires settings in Lightning's var."""
 
