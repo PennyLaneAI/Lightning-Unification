@@ -767,7 +767,7 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
     static void applyIsingXX(std::complex<PrecisionT> *arr, size_t num_qubits,
                              const std::vector<size_t> &wires, bool inverse,
                              ParamT angle) {
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = std::complex<PrecisionT>;
         using std::imag;
         using std::real;
         PL_ASSERT(wires.size() == 2);
@@ -792,19 +792,19 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
             const size_t i01 = i00 | rev_wire0_shift;
             const size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-            const ComplexPrecisionT v00 = arr[i00];
-            const ComplexPrecisionT v01 = arr[i01];
-            const ComplexPrecisionT v10 = arr[i10];
-            const ComplexPrecisionT v11 = arr[i11];
+            const ComplexT v00 = arr[i00];
+            const ComplexT v01 = arr[i01];
+            const ComplexT v10 = arr[i10];
+            const ComplexT v11 = arr[i11];
 
-            arr[i00] = ComplexPrecisionT{cr * real(v00) + sj * imag(v11),
-                                         cr * imag(v00) - sj * real(v11)};
-            arr[i01] = ComplexPrecisionT{cr * real(v01) + sj * imag(v10),
-                                         cr * imag(v01) - sj * real(v10)};
-            arr[i10] = ComplexPrecisionT{cr * real(v10) + sj * imag(v01),
-                                         cr * imag(v10) - sj * real(v01)};
-            arr[i11] = ComplexPrecisionT{cr * real(v11) + sj * imag(v00),
-                                         cr * imag(v11) - sj * real(v00)};
+            arr[i00] = ComplexT{cr * real(v00) + sj * imag(v11),
+                                cr * imag(v00) - sj * real(v11)};
+            arr[i01] = ComplexT{cr * real(v01) + sj * imag(v10),
+                                cr * imag(v01) - sj * real(v10)};
+            arr[i10] = ComplexT{cr * real(v10) + sj * imag(v01),
+                                cr * imag(v10) - sj * real(v01)};
+            arr[i11] = ComplexT{cr * real(v11) + sj * imag(v00),
+                                cr * imag(v11) - sj * real(v00)};
         }
     }
 
@@ -812,7 +812,7 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
     static void
     applyIsingXY(std::complex<PrecisionT> *arr, const size_t num_qubits,
                  const std::vector<size_t> &wires, bool inverse, ParamT angle) {
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = std::complex<PrecisionT>;
         using std::imag;
         using std::real;
         PL_ASSERT(wires.size() == 2);
@@ -837,17 +837,17 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
             const size_t i01 = i00 | rev_wire0_shift;
             const size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-            const ComplexPrecisionT v00 = arr[i00];
-            const ComplexPrecisionT v01 = arr[i01];
-            const ComplexPrecisionT v10 = arr[i10];
-            const ComplexPrecisionT v11 = arr[i11];
+            const ComplexT v00 = arr[i00];
+            const ComplexT v01 = arr[i01];
+            const ComplexT v10 = arr[i10];
+            const ComplexT v11 = arr[i11];
 
-            arr[i00] = ComplexPrecisionT{real(v00), imag(v00)};
-            arr[i01] = ComplexPrecisionT{cr * real(v01) - sj * imag(v10),
-                                         cr * imag(v01) + sj * real(v10)};
-            arr[i10] = ComplexPrecisionT{cr * real(v10) - sj * imag(v01),
-                                         cr * imag(v10) + sj * real(v01)};
-            arr[i11] = ComplexPrecisionT{real(v11), imag(v11)};
+            arr[i00] = ComplexT{real(v00), imag(v00)};
+            arr[i01] = ComplexT{cr * real(v01) - sj * imag(v10),
+                                cr * imag(v01) + sj * real(v10)};
+            arr[i10] = ComplexT{cr * real(v10) - sj * imag(v01),
+                                cr * imag(v10) + sj * real(v01)};
+            arr[i11] = ComplexT{real(v11), imag(v11)};
         }
     }
 
@@ -855,7 +855,7 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
     static void applyIsingYY(std::complex<PrecisionT> *arr, size_t num_qubits,
                              const std::vector<size_t> &wires, bool inverse,
                              ParamT angle) {
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = std::complex<PrecisionT>;
         using std::imag;
         using std::real;
         PL_ASSERT(wires.size() == 2);
@@ -880,19 +880,19 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
             const size_t i01 = i00 | rev_wire0_shift;
             const size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-            const ComplexPrecisionT v00 = arr[i00];
-            const ComplexPrecisionT v01 = arr[i01];
-            const ComplexPrecisionT v10 = arr[i10];
-            const ComplexPrecisionT v11 = arr[i11];
+            const ComplexT v00 = arr[i00];
+            const ComplexT v01 = arr[i01];
+            const ComplexT v10 = arr[i10];
+            const ComplexT v11 = arr[i11];
 
-            arr[i00] = ComplexPrecisionT{cr * real(v00) - sj * imag(v11),
-                                         cr * imag(v00) + sj * real(v11)};
-            arr[i01] = ComplexPrecisionT{cr * real(v01) + sj * imag(v10),
-                                         cr * imag(v01) - sj * real(v10)};
-            arr[i10] = ComplexPrecisionT{cr * real(v10) + sj * imag(v01),
-                                         cr * imag(v10) - sj * real(v01)};
-            arr[i11] = ComplexPrecisionT{cr * real(v11) - sj * imag(v00),
-                                         cr * imag(v11) + sj * real(v00)};
+            arr[i00] = ComplexT{cr * real(v00) - sj * imag(v11),
+                                cr * imag(v00) + sj * real(v11)};
+            arr[i01] = ComplexT{cr * real(v01) + sj * imag(v10),
+                                cr * imag(v01) - sj * real(v10)};
+            arr[i10] = ComplexT{cr * real(v10) + sj * imag(v01),
+                                cr * imag(v10) - sj * real(v01)};
+            arr[i11] = ComplexT{cr * real(v11) - sj * imag(v00),
+                                cr * imag(v11) + sj * real(v00)};
         }
     }
 
@@ -1484,7 +1484,7 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
     applyGeneratorCRX(std::complex<PrecisionT> *arr, size_t num_qubits,
                       const std::vector<size_t> &wires,
                       [[maybe_unused]] bool adj) -> PrecisionT {
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = std::complex<PrecisionT>;
         PL_ASSERT(wires.size() == 2);
         const size_t rev_wire0 = num_qubits - wires[1] - 1;
         const size_t rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
@@ -1500,8 +1500,8 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
             const size_t i10 = i00 | rev_wire1_shift;
             const size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-            arr[i00] = ComplexPrecisionT{};
-            arr[i01] = ComplexPrecisionT{};
+            arr[i00] = ComplexT{};
+            arr[i01] = ComplexT{};
 
             std::swap(arr[i10], arr[i11]);
         }
@@ -1515,7 +1515,7 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
     applyGeneratorCRY(std::complex<PrecisionT> *arr, size_t num_qubits,
                       const std::vector<size_t> &wires,
                       [[maybe_unused]] bool adj) -> PrecisionT {
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = std::complex<PrecisionT>;
         PL_ASSERT(wires.size() == 2);
         const size_t rev_wire0 = num_qubits - wires[1] - 1;
         const size_t rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
@@ -1531,14 +1531,13 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
             const size_t i10 = i00 | rev_wire1_shift;
             const size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-            arr[i00] = ComplexPrecisionT{};
-            arr[i01] = ComplexPrecisionT{};
+            arr[i00] = ComplexT{};
+            arr[i01] = ComplexT{};
 
             const auto v0 = arr[i10];
 
-            arr[i10] =
-                ComplexPrecisionT{std::imag(arr[i11]), -std::real(arr[i11])};
-            arr[i11] = ComplexPrecisionT{-std::imag(v0), std::real(v0)};
+            arr[i10] = ComplexT{std::imag(arr[i11]), -std::real(arr[i11])};
+            arr[i11] = ComplexT{-std::imag(v0), std::real(v0)};
         }
         // NOLINTNEXTLINE(readability-magic-numbers)
         return -static_cast<PrecisionT>(0.5);
@@ -1549,7 +1548,7 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
     applyGeneratorCRZ(std::complex<PrecisionT> *arr, size_t num_qubits,
                       const std::vector<size_t> &wires,
                       [[maybe_unused]] bool adj) -> PrecisionT {
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = std::complex<PrecisionT>;
         PL_ASSERT(wires.size() == 2);
         const size_t rev_wire0 = num_qubits - wires[1] - 1;
         const size_t rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
@@ -1564,8 +1563,8 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
             const size_t i01 = i00 | rev_wire0_shift;
             const size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-            arr[i00] = ComplexPrecisionT{};
-            arr[i01] = ComplexPrecisionT{};
+            arr[i00] = ComplexT{};
+            arr[i01] = ComplexT{};
             arr[i11] *= -1;
         }
         // NOLINTNEXTLINE(readability-magic-numbers)
@@ -1577,7 +1576,7 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
         std::complex<PrecisionT> *arr, size_t num_qubits,
         const std::vector<size_t> &wires, [[maybe_unused]] bool adj)
         -> PrecisionT {
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = std::complex<PrecisionT>;
         PL_ASSERT(wires.size() == 2);
         const size_t rev_wire0 = num_qubits - wires[1] - 1;
         const size_t rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
@@ -1592,9 +1591,9 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
             const size_t i01 = i00 | rev_wire0_shift;
             const size_t i10 = i00 | rev_wire1_shift;
 
-            arr[i00] = ComplexPrecisionT{};
-            arr[i01] = ComplexPrecisionT{};
-            arr[i10] = ComplexPrecisionT{};
+            arr[i00] = ComplexT{};
+            arr[i01] = ComplexT{};
+            arr[i10] = ComplexT{};
         }
         // NOLINTNEXTLINE(readability-magic-numbers)
         return static_cast<PrecisionT>(1);

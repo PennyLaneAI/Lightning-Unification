@@ -141,7 +141,8 @@ template <typename TypeList> void testHermitianObsExpval() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using StateVectorT = typename TypeList::Type;
         using PrecisionT = typename StateVectorT::PrecisionT;
-        using MatrixT = std::vector<std::complex<PrecisionT>>;
+        using ComplexT = typename StateVectorT::ComplexT;
+        using MatrixT = std::vector<ComplexT>;
 
         // Defining the State Vector that will be measured.
         auto statevector_data = createNonTrivialState<StateVectorT>();
@@ -338,7 +339,7 @@ template <typename TypeList> void testSamples() {
         using StateVectorT = typename TypeList::Type;
         using PrecisionT = typename StateVectorT::PrecisionT;
 
-        constexpr uint32_t twos[] = {
+        constexpr size_t twos[] = {
             1U << 0U,  1U << 1U,  1U << 2U,  1U << 3U,  1U << 4U,  1U << 5U,
             1U << 6U,  1U << 7U,  1U << 8U,  1U << 9U,  1U << 10U, 1U << 11U,
             1U << 12U, 1U << 13U, 1U << 14U, 1U << 15U, 1U << 16U, 1U << 17U,

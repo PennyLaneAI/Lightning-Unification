@@ -86,7 +86,7 @@ template <class PrecisionT, class RandomEngine>
 void testGeneratorEqualsGateDerivativeForKernel(
     RandomEngine &re, Gates::KernelType kernel,
     Gates::GeneratorOperation gntr_op, bool inverse) {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     constexpr static auto I = Pennylane::Util::IMAG<PrecisionT>();
 
     constexpr static auto eps = PrecisionT{1e-3}; // For finite difference
@@ -128,13 +128,11 @@ void testGeneratorEqualsGateDerivativeForKernel(
             dispatcher.applyOperation(kernel, diff_st_2.data(), num_qubits,
                                       gate_op, wires, inverse, {-eps});
 
-            std::vector<ComplexPrecisionT> gate_der_st(size_t{1U}
-                                                       << num_qubits);
+            std::vector<ComplexT> gate_der_st(size_t{1U} << num_qubits);
 
-            std::transform(
-                diff_st_1.cbegin(), diff_st_1.cend(), diff_st_2.cbegin(),
-                gate_der_st.begin(),
-                [](ComplexPrecisionT a, ComplexPrecisionT b) { return a - b; });
+            std::transform(diff_st_1.cbegin(), diff_st_1.cend(),
+                           diff_st_2.cbegin(), gate_der_st.begin(),
+                           [](ComplexT a, ComplexT b) { return a - b; });
 
             scaleVector(gate_der_st, static_cast<PrecisionT>(0.5) / eps);
 

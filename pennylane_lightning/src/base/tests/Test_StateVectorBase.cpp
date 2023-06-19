@@ -43,8 +43,8 @@ template <typename TypeList> void testStateVectorBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using StateVectorT = typename TypeList::Type;
         using PrecisionT = typename StateVectorT::PrecisionT;
-        using ComplexPrecisionT = std::complex<PrecisionT>;
-        using VectorT = TestVector<ComplexPrecisionT>;
+        using ComplexT = typename StateVectorT::ComplexT;
+        using VectorT = TestVector<ComplexT>;
 
         const size_t num_qubits = 4;
         VectorT st_data = createZeroState<PrecisionT>(num_qubits);
@@ -71,8 +71,8 @@ template <typename TypeList> void testApplyOperations() {
         std::mt19937_64 re{1337};
         using StateVectorT = typename TypeList::Type;
         using PrecisionT = typename StateVectorT::PrecisionT;
-        using ComplexPrecisionT = std::complex<PrecisionT>;
-        using VectorT = TestVector<ComplexPrecisionT>;
+        using ComplexT = typename StateVectorT::ComplexT;
+        using VectorT = TestVector<ComplexT>;
 
         const size_t num_qubits = 3;
 

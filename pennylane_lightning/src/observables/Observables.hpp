@@ -152,7 +152,8 @@ template <class StateVectorT>
 class HermitianObsBase : public Observable<StateVectorT> {
   public:
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using MatrixT = std::vector<std::complex<PrecisionT>>;
+    using ComplexT = typename StateVectorT::ComplexT;
+    using MatrixT = std::vector<ComplexT>;
 
   protected:
     MatrixT matrix_;

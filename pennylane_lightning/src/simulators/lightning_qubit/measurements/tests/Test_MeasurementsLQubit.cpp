@@ -44,7 +44,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values", "[Measurements]",
                            (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = typename StateVectorT::ComplexT;
 
     // Defining the statevector that will be measured.
     auto statevector_data = createNonTrivialState<StateVectorT>();
@@ -55,7 +55,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values", "[Measurements]",
     Measurements<StateVectorT> Measurer(statevector);
 
     SECTION("Testing single operation defined by a matrix:") {
-        std::vector<ComplexPrecisionT> PauliX = {0, 1, 1, 0};
+        std::vector<ComplexT> PauliX = {0, 1, 1, 0};
         std::vector<size_t> wires_single = {0};
         PrecisionT exp_value = Measurer.expval(PauliX, wires_single);
         PrecisionT exp_values_ref = 0.492725;
@@ -70,14 +70,14 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values", "[Measurements]",
     }
 
     SECTION("Testing list of operators defined by a matrix:") {
-        std::vector<ComplexPrecisionT> PauliX = {0, 1, 1, 0};
-        std::vector<ComplexPrecisionT> PauliY = {0, {0, -1}, {0, 1}, 0};
-        std::vector<ComplexPrecisionT> PauliZ = {1, 0, 0, -1};
+        std::vector<ComplexT> PauliX = {0, 1, 1, 0};
+        std::vector<ComplexT> PauliY = {0, {0, -1}, {0, 1}, 0};
+        std::vector<ComplexT> PauliZ = {1, 0, 0, -1};
 
         std::vector<PrecisionT> exp_values;
         std::vector<PrecisionT> exp_values_ref;
         std::vector<std::vector<size_t>> wires_list = {{0}, {1}, {2}};
-        std::vector<std::vector<ComplexPrecisionT>> operations_list;
+        std::vector<std::vector<ComplexT>> operations_list;
 
         operations_list = {PauliX, PauliX, PauliX};
         exp_values = Measurer.expval(operations_list, wires_list);
@@ -123,7 +123,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Variances", "[Measurements]",
                            (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = typename StateVectorT::ComplexT;
 
     // Defining the State Vector that will be measured.
     auto statevector_data = createNonTrivialState<StateVectorT>();
@@ -134,7 +134,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Variances", "[Measurements]",
     Measurements<StateVectorT> Measurer(statevector);
 
     SECTION("Testing single operation defined by a matrix:") {
-        std::vector<ComplexPrecisionT> PauliX = {0, 1, 1, 0};
+        std::vector<ComplexT> PauliX = {0, 1, 1, 0};
         std::vector<size_t> wires_single = {0};
         PrecisionT variance = Measurer.var(PauliX, wires_single);
         PrecisionT variances_ref = 0.7572222;
@@ -149,17 +149,14 @@ TEMPLATE_PRODUCT_TEST_CASE("Variances", "[Measurements]",
     }
 
     SECTION("Testing list of operators defined by a matrix:") {
-        std::vector<ComplexPrecisionT> PauliX = {
-            {0, 0}, {1, 0}, {1, 0}, {0, 0}};
-        std::vector<ComplexPrecisionT> PauliY = {
-            {0, 0}, {0, -1}, {0, 1}, {0, 0}};
-        std::vector<ComplexPrecisionT> PauliZ = {
-            {1, 0}, {0, 0}, {0, 0}, {-1, 0}};
+        std::vector<ComplexT> PauliX = {{0, 0}, {1, 0}, {1, 0}, {0, 0}};
+        std::vector<ComplexT> PauliY = {{0, 0}, {0, -1}, {0, 1}, {0, 0}};
+        std::vector<ComplexT> PauliZ = {{1, 0}, {0, 0}, {0, 0}, {-1, 0}};
 
         std::vector<PrecisionT> variances;
         std::vector<PrecisionT> variances_ref;
         std::vector<std::vector<size_t>> wires_list = {{0}, {1}, {2}};
-        std::vector<std::vector<ComplexPrecisionT>> operations_list;
+        std::vector<std::vector<ComplexT>> operations_list;
 
         operations_list = {PauliX, PauliX, PauliX};
         variances = Measurer.var(operations_list, wires_list);

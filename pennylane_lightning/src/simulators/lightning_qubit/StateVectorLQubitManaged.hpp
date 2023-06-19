@@ -54,12 +54,12 @@ class StateVectorLQubitManaged final
     : public StateVectorLQubit<fp_t, StateVectorLQubitManaged<fp_t>> {
   public:
     using PrecisionT = fp_t;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
 
   private:
     using BaseType =
         StateVectorLQubit<PrecisionT, StateVectorLQubitManaged<PrecisionT>>;
-    std::vector<ComplexPrecisionT, AlignedAllocator<ComplexPrecisionT>> data_;
+    std::vector<ComplexT, AlignedAllocator<ComplexT>> data_;
 
   public:
     /**
@@ -73,8 +73,8 @@ class StateVectorLQubitManaged final
         size_t num_qubits, Threading threading = Threading::SingleThread,
         CPUMemoryModel memory_model = bestCPUMemoryModel())
         : BaseType{num_qubits, threading, memory_model},
-          data_{exp2(num_qubits), ComplexPrecisionT{0.0, 0.0},
-                getAllocator<ComplexPrecisionT>(this->memory_model_)} {
+          data_{exp2(num_qubits), ComplexT{0.0, 0.0},
+                getAllocator<ComplexT>(this->memory_model_)} {
         data_[0] = {1, 0};
     }
 
@@ -91,7 +91,7 @@ class StateVectorLQubitManaged final
         : BaseType(other.getNumQubits(), other.threading(),
                    other.memoryModel()),
           data_{other.getData(), other.getData() + other.getLength(),
-                getAllocator<ComplexPrecisionT>(this->memory_model_)} {}
+                getAllocator<ComplexT>(this->memory_model_)} {}
 
     /**
      * @brief Construct a statevector from data pointer
@@ -101,13 +101,12 @@ class StateVectorLQubitManaged final
      * @param threading Threading option the statevector to use
      * @param memory_model Memory model the statevector will use
      */
-    StateVectorLQubitManaged(const ComplexPrecisionT *other_data,
-                             size_t other_size,
+    StateVectorLQubitManaged(const ComplexT *other_data, size_t other_size,
                              Threading threading = Threading::SingleThread,
                              CPUMemoryModel memory_model = bestCPUMemoryModel())
         : BaseType(log2PerfectPower(other_size), threading, memory_model),
           data_{other_data, other_data + other_size,
-                getAllocator<ComplexPrecisionT>(this->memory_model_)} {
+                getAllocator<ComplexT>(this->memory_model_)} {
         PL_ABORT_IF_NOT(isPerfectPowerOf2(other_size),
                         "The size of provided data must be a power of 2.");
     }
@@ -139,9 +138,9 @@ class StateVectorLQubitManaged final
 
     ~StateVectorLQubitManaged() = default;
 
-    [[nodiscard]] auto getData() -> ComplexPrecisionT * { return data_.data(); }
+    [[nodiscard]] auto getData() -> ComplexT * { return data_.data(); }
 
-    [[nodiscard]] auto getData() const -> const ComplexPrecisionT * {
+    [[nodiscard]] auto getData() const -> const ComplexT * {
         return data_.data();
     }
 
@@ -149,13 +148,12 @@ class StateVectorLQubitManaged final
      * @brief Get underlying data vector
      */
     [[nodiscard]] auto getDataVector()
-        -> std::vector<ComplexPrecisionT, AlignedAllocator<ComplexPrecisionT>>
-            & {
+        -> std::vector<ComplexT, AlignedAllocator<ComplexT>> & {
         return data_;
     }
 
-    [[nodiscard]] auto getDataVector() const -> const
-        std::vector<ComplexPrecisionT, AlignedAllocator<ComplexPrecisionT>> & {
+    [[nodiscard]] auto getDataVector() const
+        -> const std::vector<ComplexT, AlignedAllocator<ComplexT>> & {
         return data_;
     }
 
@@ -165,7 +163,7 @@ class StateVectorLQubitManaged final
      * @param new_data data pointer to new data.
      * @param new_size size of underlying data storage.
      */
-    void updateData(const ComplexPrecisionT *new_data, size_t new_size) {
+    void updateData(const ComplexT *new_data, size_t new_size) {
         assert(data_.size() == new_size);
         std::copy(new_data, new_data + new_size, data_.data());
     }
@@ -177,11 +175,11 @@ class StateVectorLQubitManaged final
      * @param new_data std::vector contains data.
      */
     template <class Alloc>
-    void updateData(const std::vector<ComplexPrecisionT, Alloc> &new_data) {
+    void updateData(const std::vector<ComplexT, Alloc> &new_data) {
         updateData(new_data.data(), new_data.size());
     }
 
-    AlignedAllocator<ComplexPrecisionT> allocator() const {
+    AlignedAllocator<ComplexT> allocator() const {
         return data_.get_allocator();
     }
 };
