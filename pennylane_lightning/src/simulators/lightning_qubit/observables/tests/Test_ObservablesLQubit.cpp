@@ -59,7 +59,6 @@ TEMPLATE_PRODUCT_TEST_CASE("HermitianObs", "[Observables]",
                            (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
     using StateVectorT = TestType;
-    using PrecisionT = typename StateVectorT::PrecisionT;
     using ComplexT = typename StateVectorT::ComplexT;
     using MatrixT = std::vector<ComplexT>;
     using HermitianObsT = HermitianObs<StateVectorT>;
