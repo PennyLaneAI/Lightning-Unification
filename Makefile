@@ -61,6 +61,7 @@ build:
 test-cpp:
 	rm -rf ./BuildTests
 	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_OPENMP=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+
 ifdef target
 	cmake --build ./BuildTests $(VERBOSE) --target $(target)
 	./BuildTests/$(target)
