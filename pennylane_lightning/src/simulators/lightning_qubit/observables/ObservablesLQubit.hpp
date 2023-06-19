@@ -156,6 +156,7 @@ using Pennylane::LightningQubit::Util::scaleAndAdd;
 // Default implementation
 template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
     using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexT = typename StateVectorT::ComplexT;
     static void
     run(const std::vector<PrecisionT> &coeffs,
         const std::vector<std::shared_ptr<Observable<StateVectorT>>> &terms,
@@ -163,20 +164,18 @@ template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
         if constexpr (std::is_same_v<StateVectorLQubitManaged<PrecisionT>,
                                      StateVectorT>) {
             auto allocator = sv.allocator();
-            std::vector<std::complex<PrecisionT>, decltype(allocator)> res(
-                sv.getLength(), std::complex<PrecisionT>{0.0, 0.0}, allocator);
+            std::vector<ComplexT, decltype(allocator)> res(
+                sv.getLength(), ComplexT{0.0, 0.0}, allocator);
             for (size_t term_idx = 0; term_idx < coeffs.size(); term_idx++) {
                 StateVectorT tmp(sv);
                 terms[term_idx]->applyInPlace(tmp);
-                Util::scaleAndAdd(
-                    tmp.getLength(),
-                    std::complex<PrecisionT>{coeffs[term_idx], 0.0},
-                    tmp.getData(), res.data());
+                Util::scaleAndAdd(tmp.getLength(),
+                                  ComplexT{coeffs[term_idx], 0.0},
+                                  tmp.getData(), res.data());
             }
             sv.updateData(res);
         } else if constexpr (std::is_same_v<StateVectorLQubitRaw<PrecisionT>,
                                             StateVectorT>) {
-            using ComplexT = typename StateVectorT::ComplexT;
             std::vector<ComplexT> res(sv.getLength(), ComplexT{0.0, 0.0});
             for (size_t term_idx = 0; term_idx < coeffs.size(); term_idx++) {
                 std::vector<ComplexT> tmp_data_storage(
