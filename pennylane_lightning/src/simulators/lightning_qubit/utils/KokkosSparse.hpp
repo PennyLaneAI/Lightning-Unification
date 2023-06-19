@@ -19,6 +19,9 @@
 
 #pragma once
 
+#include <complex>
+#include <vector>
+
 #include "Error.hpp"
 
 #ifdef _ENABLE_KOKKOS
@@ -31,8 +34,6 @@
 constexpr bool USE_KOKKOS = true;
 
 // Implementing Kokkos Sparse operations.
-#include <complex>
-#include <vector>
 
 namespace Pennylane::LightningQubit::Util {
 using device_type = typename Kokkos::Device<
