@@ -58,13 +58,13 @@ class StateVectorLQubitRaw final
     : public StateVectorLQubit<fp_t, StateVectorLQubitRaw<fp_t>> {
   public:
     using PrecisionT = fp_t;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
 
   private:
     using BaseType =
         StateVectorLQubit<PrecisionT, StateVectorLQubitRaw<PrecisionT>>;
 
-    ComplexPrecisionT *data_;
+    ComplexT *data_;
     size_t length_;
 
   public:
@@ -77,7 +77,7 @@ class StateVectorLQubitRaw final
      * @param length The size of the data, i.e. 2^(number of qubits).
      * @param threading Threading option the statevector to use
      */
-    StateVectorLQubitRaw(ComplexPrecisionT *data, size_t length,
+    StateVectorLQubitRaw(ComplexT *data, size_t length,
                          Threading threading = Threading::SingleThread)
         : BaseType{log2PerfectPower(length), threading,
                    getMemoryModel(static_cast<void *>(data))},
@@ -90,16 +90,16 @@ class StateVectorLQubitRaw final
     /**
      * @brief Get the underlying data pointer.
      *
-     * @return const ComplexPrecisionT* Pointer to statevector data.
+     * @return const ComplexT* Pointer to statevector data.
      */
-    [[nodiscard]] auto getData() const -> ComplexPrecisionT * { return data_; }
+    [[nodiscard]] auto getData() const -> ComplexT * { return data_; }
 
     /**
      * @brief Get the underlying data pointer.
      *
-     * @return ComplexPrecisionT* Pointer to statevector data.
+     * @return ComplexT* Pointer to statevector data.
      */
-    auto getData() -> ComplexPrecisionT * { return data_; }
+    auto getData() -> ComplexT * { return data_; }
 
     /**
      * @brief Get the number of data elements in the statevector array.
@@ -114,7 +114,7 @@ class StateVectorLQubitRaw final
      * @param new_data data pointer to new data.
      * @param new_size size of underlying data storage.
      */
-    void updateData(const ComplexPrecisionT *new_data, size_t new_size) {
+    void updateData(const ComplexT *new_data, size_t new_size) {
         assert(length_ == new_size);
         std::copy(new_data, new_data + new_size, data_);
     }
@@ -126,7 +126,7 @@ class StateVectorLQubitRaw final
      * @param new_data std::vector contains data.
      */
     template <class Alloc>
-    void updateData(const std::vector<ComplexPrecisionT, Alloc> &new_data) {
+    void updateData(const std::vector<ComplexT, Alloc> &new_data) {
         updateData(new_data.data(), new_data.size());
     }
 };

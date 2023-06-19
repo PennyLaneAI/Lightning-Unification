@@ -1,7 +1,8 @@
 #include "LinearAlgebra.hpp" //randomUnitary
-#include "TestHelpers.hpp"   // createRandomStateVectorData
+#include "StateVectorLQubitManaged.hpp"
+#include "StateVectorLQubitRaw.hpp"
+#include "TestHelpers.hpp" // createRandomStateVectorData
 #include "TestHelpersWires.hpp"
-#include "TestStateVectors.hpp" // StateVectorManagedAndPrecision, StateVectorRawAndPrecision
 #include "cpu_kernels/GateImplementationsPI.hpp"
 
 #include <algorithm>
@@ -26,8 +27,6 @@ using namespace Pennylane::LightningQubit;
 using namespace Pennylane::Util;
 
 using Pennylane::LightningQubit::Util::randomUnitary;
-using Pennylane::LightningQubit::Util::StateVectorManagedAndPrecision;
-using Pennylane::LightningQubit::Util::StateVectorRawAndPrecision;
 
 std::mt19937_64 re{1337};
 } // namespace
@@ -44,12 +43,10 @@ TEMPLATE_TEST_CASE("StateVectorLQubit::Constructibility",
 
 TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::Constructibility",
                            "[General Constructibility]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
-    using ComplexT = std::complex<PrecisionT>;
+    using StateVectorT = TestType;
+    using ComplexT = typename StateVectorT::ComplexT;
 
     SECTION("StateVectorBackend<TestType>") {
         REQUIRE(!std::is_constructible_v<StateVectorT>);
@@ -75,12 +72,11 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::Constructibility",
 
 TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a std::vector",
                            "[applyMatrix]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
-    using ComplexT = std::complex<PrecisionT>;
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexT = typename StateVectorT::ComplexT;
     using VectorT = TestVector<ComplexT>;
 
     SECTION("Test wrong matrix size") {
@@ -112,12 +108,11 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a std::vector",
 
 TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a pointer",
                            "[applyMatrix]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
-    using ComplexT = std::complex<PrecisionT>;
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexT = typename StateVectorT::ComplexT;
     using VectorT = TestVector<ComplexT>;
 
     SECTION("Test wrong matrix") {
@@ -162,12 +157,11 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a pointer",
 
 TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyOperations",
                            "[applyOperations invalid arguments]",
-                           (StateVectorManagedAndPrecision,
-                            StateVectorRawAndPrecision),
+                           (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
-    using StateVectorT = typename TestType::StateVector;
-    using PrecisionT = typename TestType::Precision;
-    using ComplexT = std::complex<PrecisionT>;
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexT = typename StateVectorT::ComplexT;
     using VectorT = TestVector<ComplexT>;
 
     SECTION("Test invalid arguments without parameters") {

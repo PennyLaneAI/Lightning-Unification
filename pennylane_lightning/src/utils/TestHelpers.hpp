@@ -25,7 +25,10 @@
 #include "Util.hpp" // INVSQRT2
 
 #include <catch2/catch.hpp>
+#include <complex>
 #include <random>
+#include <string>
+#include <vector>
 
 namespace Pennylane::Util {
 template <class T, class Alloc = std::allocator<T>> struct PLApprox {
@@ -368,6 +371,106 @@ auto createProductState(std::string_view str)
     }
     return st;
 }
+
+/**
+ * @brief Create non-trivial statevector data using the provided StateVectorT.
+ *
+ * @tparam StateVectorT Backend used to generate data
+ * @param num_qubits number of qubits
+ * @return std::vector<typename StateVectorT::ComplexT>>
+ */
+template <class StateVectorT>
+auto createNonTrivialState(size_t num_qubits = 3)
+    -> std::vector<typename StateVectorT::ComplexT> {
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexT = typename StateVectorT::ComplexT;
+
+    size_t data_size = Util::exp2(num_qubits);
+
+    std::vector<ComplexT> arr(data_size, {0, 0});
+    arr[0] = {1, 0};
+    StateVectorT Measured_StateVector(arr.data(), data_size);
+
+    std::vector<std::string> gates;
+    std::vector<std::vector<size_t>> wires;
+    std::vector<bool> inv_op(num_qubits * 2, false);
+    std::vector<std::vector<PrecisionT>> phase;
+
+    PrecisionT initial_phase = 0.7;
+    for (size_t n_qubit = 0; n_qubit < num_qubits; n_qubit++) {
+        gates.emplace_back("RX");
+        gates.emplace_back("RY");
+
+        wires.push_back({n_qubit});
+        wires.push_back({n_qubit});
+
+        phase.push_back({initial_phase});
+        phase.push_back({initial_phase});
+        initial_phase -= 0.2;
+    }
+    Measured_StateVector.applyOperations(gates, wires, inv_op, phase);
+
+    return std::vector<ComplexT>(Measured_StateVector.getData(),
+                                 Measured_StateVector.getData() +
+                                     Measured_StateVector.getLength());
+}
+
+/**
+ * @brief Fills the empty vectors with the CSR (Compressed Sparse Row) sparse
+ * matrix representation for a tri-diagonal + periodic boundary conditions
+ * Hamiltonian.
+ *
+ * @tparam PrecisionT data float point precision.
+ * @tparam IndexT integer type used as indices of the sparse matrix.
+ * @param row_map the j element encodes the total number of non-zeros above
+ * row j.
+ * @param entries column indices.
+ * @param values  matrix non-zero elements.
+ * @param numRows matrix number of rows.
+ */
+template <class PrecisionT, class IndexT>
+void write_CSR_vectors(std::vector<IndexT> &row_map,
+                       std::vector<IndexT> &entries,
+                       std::vector<std::complex<PrecisionT>> &values,
+                       IndexT numRows) {
+    const std::complex<PrecisionT> SC_ONE = 1.0;
+
+    row_map.resize(numRows + 1);
+    for (IndexT rowIdx = 1; rowIdx < (IndexT)row_map.size(); ++rowIdx) {
+        row_map[rowIdx] = row_map[rowIdx - 1] + 3;
+    };
+    const IndexT numNNZ = row_map[numRows];
+
+    entries.resize(numNNZ);
+    values.resize(numNNZ);
+    for (IndexT rowIdx = 0; rowIdx < numRows; ++rowIdx) {
+        if (rowIdx == 0) {
+            entries[0] = rowIdx;
+            entries[1] = rowIdx + 1;
+            entries[2] = numRows - 1;
+
+            values[0] = SC_ONE;
+            values[1] = -SC_ONE;
+            values[2] = -SC_ONE;
+        } else if (rowIdx == numRows - 1) {
+            entries[row_map[rowIdx]] = 0;
+            entries[row_map[rowIdx] + 1] = rowIdx - 1;
+            entries[row_map[rowIdx] + 2] = rowIdx;
+
+            values[row_map[rowIdx]] = -SC_ONE;
+            values[row_map[rowIdx] + 1] = -SC_ONE;
+            values[row_map[rowIdx] + 2] = SC_ONE;
+        } else {
+            entries[row_map[rowIdx]] = rowIdx - 1;
+            entries[row_map[rowIdx] + 1] = rowIdx;
+            entries[row_map[rowIdx] + 2] = rowIdx + 1;
+
+            values[row_map[rowIdx]] = -SC_ONE;
+            values[row_map[rowIdx] + 1] = SC_ONE;
+            values[row_map[rowIdx] + 2] = -SC_ONE;
+        }
+    }
+};
 
 /**
  * @brief Compare std::vectors with same elements data type but different

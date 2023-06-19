@@ -1,7 +1,8 @@
 #include "Error.hpp" // LightningException
 #include "Observables.hpp"
-#include "TestHelpers.hpp"
+#include "TestHelpers.hpp" // isApproxEqual, createZeroState, createProductState
 #include "TypeList.hpp"
+#include "Util.hpp" // TestVector
 
 #include <catch2/catch.hpp>
 
@@ -17,15 +18,18 @@
 namespace {
 using namespace Pennylane::Observables;
 
+using Pennylane::Util::createProductState;
+using Pennylane::Util::createZeroState;
+using Pennylane::Util::isApproxEqual;
 using Pennylane::Util::LightningException;
+using Pennylane::Util::TestVector;
 } // namespace
 /// @endcond
 
 #ifdef _ENABLE_PLQUBIT
 constexpr bool BACKEND_FOUND = true;
 
-#include "LQubitTestHelpers.hpp"
-#include "TestStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
+#include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
 
 /// @cond DEV
 namespace {
@@ -42,7 +46,7 @@ template <class StateVector> struct StateVectorToName {};
 
 template <typename TypeList> void testNamedObsBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
-        using StateVectorT = typename TypeList::Type::StateVector;
+        using StateVectorT = typename TypeList::Type;
         using NamedObsT = NamedObsBase<StateVectorT>;
 
         DYNAMIC_SECTION("Name of the Observable must be correct - "
@@ -92,9 +96,8 @@ TEST_CASE("Methods implemented in the NamedObsBase class", "[NamedObsBase]") {
 
 template <typename TypeList> void testHermitianObsBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
-        using StateVectorT = typename TypeList::Type::StateVector;
-        using PrecisionT = typename TypeList::Type::Precision;
-        using ComplexT = typename std::complex<PrecisionT>;
+        using StateVectorT = typename TypeList::Type;
+        using ComplexT = typename StateVectorT::ComplexT;
         using HermitianObsT = HermitianObsBase<StateVectorT>;
 
         DYNAMIC_SECTION("HermitianObs only accepts correct arguments - "
@@ -158,9 +161,9 @@ TEST_CASE("Methods implemented in the HermitianObsBase class",
 
 template <typename TypeList> void testTensorProdObsBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
-        using StateVectorT = typename TypeList::Type::StateVector;
-        using PrecisionT = typename TypeList::Type::Precision;
-        using ComplexT = typename std::complex<PrecisionT>;
+        using StateVectorT = typename TypeList::Type;
+        using PrecisionT = typename StateVectorT::PrecisionT;
+        using ComplexT = typename StateVectorT::ComplexT;
         using HermitianObsT = HermitianObsBase<StateVectorT>;
         using NamedObsT = NamedObsBase<StateVectorT>;
         using TensorProdObsT = TensorProdObsBase<StateVectorT>;
@@ -278,9 +281,9 @@ TEST_CASE("Methods implemented in the TensorProdObsBase class",
 
 template <typename TypeList> void testHamiltonianBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
-        using StateVectorT = typename TypeList::Type::StateVector;
-        using PrecisionT = typename TypeList::Type::Precision;
-        using ComplexT = typename std::complex<PrecisionT>;
+        using StateVectorT = typename TypeList::Type;
+        using PrecisionT = typename StateVectorT::PrecisionT;
+        using ComplexT = typename StateVectorT::ComplexT;
         using NamedObsT = NamedObsBase<StateVectorT>;
         using TensorProdObsT = TensorProdObsBase<StateVectorT>;
         using HamiltonianT = HamiltonianBase<StateVectorT>;

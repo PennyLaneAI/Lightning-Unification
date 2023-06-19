@@ -31,19 +31,7 @@ template <> struct StateVectorToName<StateVectorLQubitRaw<double>> {
     constexpr static auto name = "StateVectorLQubitRaw<double>";
 };
 
-template <typename T> struct StateVectorManagedAndPrecision {
-    using StateVector = Pennylane::LightningQubit::StateVectorLQubitManaged<T>;
-    using Precision = T;
-};
-
-template <typename T> struct StateVectorRawAndPrecision {
-    using StateVector = Pennylane::LightningQubit::StateVectorLQubitRaw<T>;
-    using Precision = T;
-};
-
-using TestStateVectorBackends =
-    Pennylane::Util::TypeList<StateVectorManagedAndPrecision<float>,
-                              StateVectorManagedAndPrecision<double>,
-                              StateVectorRawAndPrecision<float>,
-                              StateVectorRawAndPrecision<double>, void>;
+using TestStateVectorBackends = Pennylane::Util::TypeList<
+    StateVectorLQubitManaged<float>, StateVectorLQubitManaged<double>,
+    StateVectorLQubitRaw<float>, StateVectorLQubitRaw<double>, void>;
 } // namespace Pennylane::LightningQubit::Util

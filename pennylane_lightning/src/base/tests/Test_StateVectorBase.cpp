@@ -23,8 +23,8 @@ using namespace Pennylane::Util;
 #ifdef _ENABLE_PLQUBIT
 constexpr bool BACKEND_FOUND = true;
 
+#include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
 #include "TestHelpersWires.hpp"
-#include "TestStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
 
 /// @cond DEV
 namespace {
@@ -41,9 +41,9 @@ template <class StateVector> struct StateVectorToName {};
 
 template <typename TypeList> void testStateVectorBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
-        using StateVectorT = typename TypeList::Type::StateVector;
-        using PrecisionT = typename TypeList::Type::Precision;
-        using ComplexT = std::complex<PrecisionT>;
+        using StateVectorT = typename TypeList::Type;
+        using PrecisionT = typename StateVectorT::PrecisionT;
+        using ComplexT = typename StateVectorT::ComplexT;
         using VectorT = TestVector<ComplexT>;
 
         const size_t num_qubits = 4;
@@ -69,9 +69,9 @@ TEST_CASE("StateVectorBase", "[StateVectorBase]") {
 template <typename TypeList> void testApplyOperations() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         std::mt19937_64 re{1337};
-        using StateVectorT = typename TypeList::Type::StateVector;
-        using PrecisionT = typename TypeList::Type::Precision;
-        using ComplexT = std::complex<PrecisionT>;
+        using StateVectorT = typename TypeList::Type;
+        using PrecisionT = typename StateVectorT::PrecisionT;
+        using ComplexT = typename StateVectorT::ComplexT;
         using VectorT = TestVector<ComplexT>;
 
         const size_t num_qubits = 3;

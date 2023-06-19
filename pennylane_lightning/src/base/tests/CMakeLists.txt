@@ -15,9 +15,7 @@ FetchAndIncludeCatch()
 ################################################################################
 
 add_library(base_tests INTERFACE)
-target_link_libraries(base_tests INTERFACE  Catch2::Catch2
-                                            lightning_base
-                                            )
+target_link_libraries(base_tests INTERFACE  Catch2::Catch2)
 
 ProcessTestOptions(base_tests)
 

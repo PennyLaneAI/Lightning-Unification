@@ -15,8 +15,12 @@ FetchAndIncludeCatch()
 ################################################################################
 
 add_library(measurements_tests INTERFACE)
-target_link_libraries(measurements_tests INTERFACE  Catch2::Catch2
-                                                    lightning_measurements
+target_link_libraries(measurements_tests INTERFACE  Catch2::Catch2)
+
+# Create dependency on the dynamically defined simulator/backend target.
+target_link_libraries(measurements_tests INTERFACE  ${PL_BACKEND}
+                                                    "${PL_BACKEND}_measurements"
+                                                    "${PL_BACKEND}_observables"
                                                     )
 
 ProcessTestOptions(measurements_tests)
@@ -26,7 +30,7 @@ target_sources(measurements_tests INTERFACE runner_measurements.cpp)
 ################################################################################
 # Define targets
 ################################################################################
-set(TEST_SOURCES    Test_Measurements.cpp
+set(TEST_SOURCES    Test_MeasurementsBase.cpp
                     )
 
 add_executable(measurements_test_runner ${TEST_SOURCES})

@@ -48,7 +48,7 @@ template <class PrecisionT, class Derived> class StateVectorBase {
     /**
      * @brief StateVector complex precision type.
      */
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
 
     /**
      * @brief Constructor used by derived classes.
@@ -145,7 +145,7 @@ template <class PrecisionT, class Derived> class StateVectorBase {
      * @param wires Wires to apply gate to.
      * @param inverse Indicate whether inverse should be taken.
      */
-    inline void applyMatrix(const ComplexPrecisionT *matrix,
+    inline void applyMatrix(const ComplexT *matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
         return static_cast<Derived *>(this)->applyMatrix(matrix, wires,
