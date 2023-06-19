@@ -23,7 +23,8 @@
 #include "ConstantUtil.hpp" // lookup
 #include "DynamicDispatcher.hpp"
 #include "GateOperation.hpp"
-
+#include "KokkosSparse.hpp"
+#include "MeasurementsLQubit.hpp"
 #include "StateVectorLQubitRaw.hpp"
 
 #include "TypeList.hpp"
@@ -33,6 +34,7 @@
 /// @cond DEV
 namespace {
 using Pennylane::LightningQubit::StateVectorLQubitRaw;
+using namespace Pennylane::LightningQubit::Measures;
 } // namespace
 /// @endcond
 
@@ -147,12 +149,99 @@ void registerBackendClassSpecificBindings(PyClass &pyclass) {
 }
 
 /**
+ * @brief Register Specific Measurements Class functionalities
+ *
+ * @tparam StateVectorT
+ * @tparam PyClass
+ * @param pyclass Pybind11's measurements class to bind methods.
+ */
+template <class StateVectorT, class PyClass>
+void registerBackendSpecificMeasurements(PyClass &pyclass) {
+    using PrecisionT =
+        typename StateVectorT::PrecisionT; // Statevector's precision.
+    using ParamT = PrecisionT;             // Parameter's data precision
+
+    using np_arr_c = py::array_t<std::complex<ParamT>,
+                                 py::array::c_style | py::array::forcecast>;
+    using sparse_index_type =
+        long int; // Kokkos Kernels needs signed int as Ordinal type.
+    using np_arr_sparse_ind =
+        py::array_t<sparse_index_type,
+                    py::array::c_style | py::array::forcecast>;
+
+    pyclass
+        .def("expval",
+             static_cast<PrecisionT (Measurements<StateVectorT>::*)(
+                 const std::string &, const std::vector<size_t> &)>(
+                 &Measurements<StateVectorT>::expval),
+             "Expected value of an operation by name.")
+        .def(
+            "expval",
+            [](Measurements<StateVectorT> &M, const np_arr_sparse_ind row_map,
+               const np_arr_sparse_ind entries, const np_arr_c values) {
+                return M.expval(
+                    static_cast<sparse_index_type *>(row_map.request().ptr),
+                    static_cast<sparse_index_type>(row_map.request().size),
+                    static_cast<sparse_index_type *>(entries.request().ptr),
+                    static_cast<std::complex<PrecisionT> *>(
+                        values.request().ptr),
+                    static_cast<sparse_index_type>(values.request().size));
+            },
+            "Expected value of a sparse Hamiltonian.")
+        .def("var",
+             [](Measurements<StateVectorT> &M, const std::string &operation,
+                const std::vector<size_t> &wires) {
+                 return M.var(operation, wires);
+             })
+        .def("var",
+             static_cast<PrecisionT (Measurements<StateVectorT>::*)(
+                 const std::string &, const std::vector<size_t> &)>(
+                 &Measurements<StateVectorT>::var),
+             "Variance of an operation by name.")
+        .def(
+            "var",
+            [](Measurements<StateVectorT> &M, const np_arr_sparse_ind row_map,
+               const np_arr_sparse_ind entries, const np_arr_c values) {
+                return M.var(
+                    static_cast<sparse_index_type *>(row_map.request().ptr),
+                    static_cast<sparse_index_type>(row_map.request().size),
+                    static_cast<sparse_index_type *>(entries.request().ptr),
+                    static_cast<std::complex<PrecisionT> *>(
+                        values.request().ptr),
+                    static_cast<sparse_index_type>(values.request().size));
+            },
+            "Expected value of a sparse Hamiltonian.")
+        .def("generate_mcmc_samples",
+             [](Measurements<StateVectorT> &M, size_t num_wires,
+                const std::string &kernelname, size_t num_burnin,
+                size_t num_shots) {
+                 std::vector<size_t> &&result = M.generate_samples_metropolis(
+                     kernelname, num_burnin, num_shots);
+
+                 const size_t ndim = 2;
+                 const std::vector<size_t> shape{num_shots, num_wires};
+                 constexpr auto sz = sizeof(size_t);
+                 const std::vector<size_t> strides{sz * num_wires, sz};
+                 // return 2-D NumPy array
+                 return py::array(py::buffer_info(
+                     result.data(), /* data as contiguous array  */
+                     sz,            /* size of one scalar        */
+                     py::format_descriptor<size_t>::format(), /* data type */
+                     ndim,   /* number of dimensions      */
+                     shape,  /* shape of the matrix       */
+                     strides /* strides for each axis     */
+                     ));
+             });
+}
+
+/**
  * @brief Provide backend information.
  */
 auto getBackendInfo() -> pybind11::dict {
     using namespace pybind11::literals;
 
-    return pybind11::dict("NAME"_a = "lightning.qubit");
+    return pybind11::dict("NAME"_a = "lightning.qubit",
+                          "USE_KOKKOS"_a = USE_KOKKOS);
 }
 
 /**

@@ -41,13 +41,15 @@
 #include <vector>
 
 #ifdef _ENABLE_PLQUBIT
-#include "LQubitBindings.hpp" // StateVectorBackends, registerBackendClassSpecificBindings
+#include "LQubitBindings.hpp" // StateVectorBackends, registerBackendClassSpecificBindings, registerBackendSpecificMeasurements
+#include "MeasurementsLQubit.hpp"
 #include "ObservablesLQubit.hpp"
 
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Observables;
+using namespace Pennylane::LightningQubit::Measures;
 } // namespace
 /// @endcond
 #else
@@ -181,6 +183,76 @@ void registerArrayAlignmentBindings(py::module_ &m) {
 }
 
 /**
+ * @brief Return basic information of the compiled binary.
+ */
+auto getCompileInfo() -> pybind11::dict {
+    using namespace Pennylane::Util;
+    using namespace pybind11::literals;
+
+    const std::string_view cpu_arch_str = [] {
+        switch (cpu_arch) {
+        case CPUArch::X86_64:
+            return "x86_64";
+        case CPUArch::PPC64:
+            return "PPC64";
+        case CPUArch::ARM:
+            return "ARM";
+        default:
+            return "Unknown";
+        }
+    }();
+
+    const std::string_view compiler_name_str = [] {
+        switch (compiler) {
+        case Compiler::GCC:
+            return "GCC";
+        case Compiler::Clang:
+            return "Clang";
+        case Compiler::MSVC:
+            return "MSVC";
+        case Compiler::NVCC:
+            return "NVCC";
+        case Compiler::NVHPC:
+            return "NVHPC";
+        default:
+            return "Unknown";
+        }
+    }();
+
+    const auto compiler_version_str = getCompilerVersion<compiler>();
+
+    return pybind11::dict("cpu.arch"_a = cpu_arch_str,
+                          "compiler.name"_a = compiler_name_str,
+                          "compiler.version"_a = compiler_version_str,
+                          "AVX2"_a = use_avx2, "AVX512F"_a = use_avx512f);
+}
+
+/**
+ * @brief Return basic information of runtime environment
+ */
+auto getRuntimeInfo() -> pybind11::dict {
+    using Pennylane::Util::RuntimeInfo;
+    using namespace pybind11::literals;
+
+    return pybind11::dict("AVX"_a = RuntimeInfo::AVX(),
+                          "AVX2"_a = RuntimeInfo::AVX2(),
+                          "AVX512F"_a = RuntimeInfo::AVX512F());
+}
+
+/**
+ * @brief Register bindings for general info.
+ *
+ * @param m Pybind11 module.
+ */
+void registerInfo(py::module_ &m) {
+    /* Add compile info */
+    m.def("compile_info", &getCompileInfo, "Compiled binary information.");
+
+    /* Add runtime info */
+    m.def("runtime_info", &getRuntimeInfo, "Runtime information.");
+}
+
+/**
  * @brief Register Observable Classes
  *
  * @tparam StateVectorT
@@ -308,73 +380,59 @@ template <class StateVectorT> void registerObservables(py::module_ &m) {
 }
 
 /**
- * @brief Return basic information of the compiled binary.
- */
-auto getCompileInfo() -> pybind11::dict {
-    using namespace Pennylane::Util;
-    using namespace pybind11::literals;
-
-    const std::string_view cpu_arch_str = [] {
-        switch (cpu_arch) {
-        case CPUArch::X86_64:
-            return "x86_64";
-        case CPUArch::PPC64:
-            return "PPC64";
-        case CPUArch::ARM:
-            return "ARM";
-        default:
-            return "Unknown";
-        }
-    }();
-
-    const std::string_view compiler_name_str = [] {
-        switch (compiler) {
-        case Compiler::GCC:
-            return "GCC";
-        case Compiler::Clang:
-            return "Clang";
-        case Compiler::MSVC:
-            return "MSVC";
-        case Compiler::NVCC:
-            return "NVCC";
-        case Compiler::NVHPC:
-            return "NVHPC";
-        default:
-            return "Unknown";
-        }
-    }();
-
-    const auto compiler_version_str = getCompilerVersion<compiler>();
-
-    return pybind11::dict("cpu.arch"_a = cpu_arch_str,
-                          "compiler.name"_a = compiler_name_str,
-                          "compiler.version"_a = compiler_version_str,
-                          "AVX2"_a = use_avx2, "AVX512F"_a = use_avx512f);
-}
-
-/**
- * @brief Return basic information of runtime environment
- */
-auto getRuntimeInfo() -> pybind11::dict {
-    using Pennylane::Util::RuntimeInfo;
-    using namespace pybind11::literals;
-
-    return pybind11::dict("AVX"_a = RuntimeInfo::AVX(),
-                          "AVX2"_a = RuntimeInfo::AVX2(),
-                          "AVX512F"_a = RuntimeInfo::AVX512F());
-}
-
-/**
- * @brief Register bindings for general info.
+ * @brief Register Agnostic Measurements Class functionalities
  *
- * @param m Pybind11 module.
+ * @tparam StateVectorT
+ * @tparam PyClass
+ * @param pyclass Pybind11's measurements class to bind methods.
  */
-void registerInfo(py::module_ &m) {
-    /* Add compile info */
-    m.def("compile_info", &getCompileInfo, "Compiled binary information.");
+template <class StateVectorT, class PyClass>
+void registerBackendAgnosticMeasurements(PyClass &pyclass) {
+    using PrecisionT =
+        typename StateVectorT::PrecisionT; // Statevector's precision.
+    using ParamT = PrecisionT;             // Parameter's data precision
 
-    /* Add runtime info */
-    m.def("runtime_info", &getRuntimeInfo, "Runtime information.");
+    pyclass
+        .def("probs",
+             [](Measurements<StateVectorT> &M,
+                const std::vector<size_t> &wires) {
+                 return py::array_t<ParamT>(py::cast(M.probs(wires)));
+             })
+        .def("probs",
+             [](Measurements<StateVectorT> &M) {
+                 return py::array_t<ParamT>(py::cast(M.probs()));
+             })
+        .def(
+            "expval",
+            [](Measurements<StateVectorT> &M,
+               const std::shared_ptr<Observable<StateVectorT>> &ob) {
+                return M.expval(*ob);
+            },
+            "Expected value of an observable object.")
+        .def(
+            "var",
+            [](Measurements<StateVectorT> &M,
+               const std::shared_ptr<Observable<StateVectorT>> &ob) {
+                return M.var(*ob);
+            },
+            "Variance of an observable object.")
+        .def("generate_samples", [](Measurements<StateVectorT> &M,
+                                    size_t num_wires, size_t num_shots) {
+            auto &&result = M.generate_samples(num_shots);
+            const size_t ndim = 2;
+            const std::vector<size_t> shape{num_shots, num_wires};
+            constexpr auto sz = sizeof(size_t);
+            const std::vector<size_t> strides{sz * num_wires, sz};
+            // return 2-D NumPy array
+            return py::array(py::buffer_info(
+                result.data(), /* data as contiguous array  */
+                sz,            /* size of one scalar        */
+                py::format_descriptor<size_t>::format(), /* data type */
+                ndim,   /* number of dimensions      */
+                shape,  /* shape of the matrix       */
+                strides /* strides for each axis     */
+                ));
+        });
 }
 
 /**
@@ -404,11 +462,21 @@ template <class StateVectorT> void lightningClassBindings(py::module_ &m) {
     //***********************************************************************//
     //                              Observables
     //***********************************************************************//
-
     /* Observables submodule */
     py::module_ obs_submodule =
-        m.def_submodule("observables", "Submodule for observables.");
+        m.def_submodule("observables", "Submodule for observables classes.");
     registerObservables<StateVectorT>(obs_submodule);
+
+    //***********************************************************************//
+    //                             Measurements
+    //***********************************************************************//
+    class_name = "MeasurementsC" + bitsize;
+    auto pyclass_measurements = py::class_<Measurements<StateVectorT>>(
+        m, class_name.c_str(), py::module_local());
+
+    pyclass_measurements.def(py::init<const StateVectorT &>());
+    registerBackendAgnosticMeasurements<StateVectorT>(pyclass_measurements);
+    registerBackendSpecificMeasurements<StateVectorT>(pyclass_measurements);
 }
 
 template <typename TypeList>

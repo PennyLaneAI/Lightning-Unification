@@ -48,14 +48,14 @@ from ._version import __version__
 try:
     from .pennylane_lightning_ops import (
         # adjoint_diff,
-        # MeasuresC64,
+        MeasurementsC64,
         StateVectorC64,
-        # MeasuresC128,
+        MeasurementsC128,
         StateVectorC128,
         backend_info,
     )
 
-    from ._serialize import _serialize_ob, _serialize_observables, _serialize_ops
+    # from ._serialize import _serialize_ob, _serialize_observables, _serialize_ops
 
     CPP_BINARY_AVAILABLE = True
 except ModuleNotFoundError:
@@ -490,197 +490,68 @@ if CPP_BINARY_AVAILABLE:
 
         #     return processing_fns
 
-        # def probability(self, wires=None, shot_range=None, bin_size=None):
-        #     """Return the probability of each computational basis state.
+        def probability(self, wires=None, shot_range=None, bin_size=None):
+            """Return the probability of each computational basis state.
 
-        #     Devices that require a finite number of shots always return the
-        #     estimated probability.
+            Devices that require a finite number of shots always return the
+            estimated probability.
 
-        #     Args:
-        #         wires (Iterable[Number, str], Number, str, Wires): wires to return
-        #             marginal probabilities for. Wires not provided are traced out of the system.
-        #         shot_range (tuple[int]): 2-tuple of integers specifying the range of samples
-        #             to use. If not specified, all samples are used.
-        #         bin_size (int): Divides the shot range into bins of size ``bin_size``, and
-        #             returns the measurement statistic separately over each bin. If not
-        #             provided, the entire shot range is treated as a single bin.
+            Args:
+                wires (Iterable[Number, str], Number, str, Wires): wires to return
+                    marginal probabilities for. Wires not provided are traced out of the system.
+                shot_range (tuple[int]): 2-tuple of integers specifying the range of samples
+                    to use. If not specified, all samples are used.
+                bin_size (int): Divides the shot range into bins of size ``bin_size``, and
+                    returns the measurement statistic separately over each bin. If not
+                    provided, the entire shot range is treated as a single bin.
 
-        #     Returns:
-        #         array[float]: list of the probabilities
-        #     """
-        #     if self.shots is not None:
-        #         return self.estimate_probability(wires=wires, shot_range=shot_range, bin_size=bin_size)
+            Returns:
+                array[float]: list of the probabilities
+            """
+            if self.shots is not None:
+                return self.estimate_probability(
+                    wires=wires, shot_range=shot_range, bin_size=bin_size
+                )
 
-        #     wires = wires or self.wires
-        #     wires = Wires(wires)
+            wires = wires or self.wires
+            wires = Wires(wires)
 
-        #     # translate to wire labels used by device
-        #     device_wires = self.map_wires(wires)
+            # translate to wire labels used by device
+            device_wires = self.map_wires(wires)
 
-        #     if (
-        #         device_wires
-        #         and len(device_wires) > 1
-        #         and (not np.all(np.array(device_wires)[:-1] <= np.array(device_wires)[1:]))
-        #     ):
-        #         raise RuntimeError(
-        #             "Lightning does not currently support out-of-order indices for probabilities"
-        #         )
+            if (
+                device_wires
+                and len(device_wires) > 1
+                and (not np.all(np.array(device_wires)[:-1] <= np.array(device_wires)[1:]))
+            ):
+                raise RuntimeError(
+                    "Lightning does not currently support out-of-order indices for probabilities"
+                )
 
-        #     # To support np.complex64 based on the type of self._state
-        #     dtype = self._state.dtype
-        #     ket = np.ravel(self._state)
+            # To support np.complex64 based on the type of self._state
+            dtype = self._state.dtype
+            ket = np.ravel(self._state)
 
-        #     state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
-        #     M = MeasuresC64(state_vector) if self.use_csingle else MeasuresC128(state_vector)
-        #     return M.probs(device_wires)
+            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
+            M = (
+                MeasurementsC64(state_vector)
+                if self.use_csingle
+                else MeasurementsC128(state_vector)
+            )
+            return M.probs(device_wires)
 
-        # def generate_samples(self):
-        #     """Generate samples
-
-        #     Returns:
-        #         array[int]: array of samples in binary representation with shape ``(dev.shots, dev.num_wires)``
-        #     """
-        #     # Initialization of state
-        #     ket = np.ravel(self._state)
-
-        #     state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
-        #     M = MeasuresC64(state_vector) if self.use_csingle else MeasuresC128(state_vector)
-        #     if self._mcmc:
-        #         return M.generate_mcmc_samples(
-        #             len(self.wires), self._kernel_name, self._num_burnin, self.shots
-        #         ).astype(int, copy=False)
-        #     else:
-        #         return M.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
-
-        # def expval(self, observable, shot_range=None, bin_size=None):
-        #     """Expectation value of the supplied observable.
-
-        #     Args:
-        #         observable: A PennyLane observable.
-        #         shot_range (tuple[int]): 2-tuple of integers specifying the range of samples
-        #             to use. If not specified, all samples are used.
-        #         bin_size (int): Divides the shot range into bins of size ``bin_size``, and
-        #             returns the measurement statistic separately over each bin. If not
-        #             provided, the entire shot range is treated as a single bin.
-
-        #     Returns:
-        #         Expectation value of the observable
-        #     """
-        #     if observable.name in [
-        #         "Identity",
-        #         "Projector",
-        #     ]:
-        #         return super().expval(observable, shot_range=shot_range, bin_size=bin_size)
-
-        #     if self.shots is not None:
-        #         # estimate the expectation value
-        #         # LightningQubit doesn't support sampling yet
-        #         samples = self.sample(observable, shot_range=shot_range, bin_size=bin_size)
-        #         return np.squeeze(np.mean(samples, axis=0))
-
-        #     # Initialization of state
-        #     ket = np.ravel(self._pre_rotated_state)
-
-        #     state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
-        #     M = MeasuresC64(state_vector) if self.use_csingle else MeasuresC128(state_vector)
-        #     if observable.name == "SparseHamiltonian":
-        #         if Kokkos_info()["USE_KOKKOS"] == True:
-        #             # ensuring CSR sparse representation.
-
-        #             CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
-        #                 copy=False
-        #             )
-        #             return M.expval(
-        #                 CSR_SparseHamiltonian.indptr,
-        #                 CSR_SparseHamiltonian.indices,
-        #                 CSR_SparseHamiltonian.data,
-        #             )
-        #         raise NotImplementedError(
-        #             "The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels."
-        #         )
-
-        #     if (
-        #         observable.name in ["Hamiltonian", "Hermitian"]
-        #         or (observable.arithmetic_depth > 0)
-        #         or isinstance(observable.name, List)
-        #     ):
-        #         ob_serialized = _serialize_ob(observable, self.wire_map, use_csingle=self.use_csingle)
-        #         return M.expval(ob_serialized)
-
-        #     # translate to wire labels used by device
-        #     observable_wires = self.map_wires(observable.wires)
-
-        #     return M.expval(observable.name, observable_wires)
-
-        # def var(self, observable, shot_range=None, bin_size=None):
-        #     """Variance of the supplied observable.
-
-        #     Args:
-        #         observable: A PennyLane observable.
-        #         shot_range (tuple[int]): 2-tuple of integers specifying the range of samples
-        #             to use. If not specified, all samples are used.
-        #         bin_size (int): Divides the shot range into bins of size ``bin_size``, and
-        #             returns the measurement statistic separately over each bin. If not
-        #             provided, the entire shot range is treated as a single bin.
-
-        #     Returns:
-        #         Variance of the observable
-        #     """
-        #     if observable.name in [
-        #         "Identity",
-        #         "Projector",
-        #     ]:
-        #         return super().var(observable, shot_range=shot_range, bin_size=bin_size)
-
-        #     if self.shots is not None:
-        #         # estimate the var
-        #         # LightningQubit doesn't support sampling yet
-        #         samples = self.sample(observable, shot_range=shot_range, bin_size=bin_size)
-        #         return np.squeeze(np.var(samples, axis=0))
-
-        #     # Initialization of state
-        #     ket = np.ravel(self._pre_rotated_state)
-
-        #     state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
-        #     M = MeasuresC64(state_vector) if self.use_csingle else MeasuresC128(state_vector)
-
-        #     if observable.name == "SparseHamiltonian":
-        #         if Kokkos_info()["USE_KOKKOS"] == True:
-        #             # ensuring CSR sparse representation.
-
-        #             CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
-        #                 copy=False
-        #             )
-        #             return M.var(
-        #                 CSR_SparseHamiltonian.indptr,
-        #                 CSR_SparseHamiltonian.indices,
-        #                 CSR_SparseHamiltonian.data,
-        #             )
-        #         raise NotImplementedError(
-        #             "The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels."
-        #         )
-
-        #     if (
-        #         observable.name in ["Hamiltonian", "Hermitian"]
-        #         or (observable.arithmetic_depth > 0)
-        #         or isinstance(observable.name, List)
-        #     ):
-        #         ob_serialized = _serialize_ob(observable, self.wire_map, use_csingle=self.use_csingle)
-        #         return M.var(ob_serialized)
-
-        #     # translate to wire labels used by device
-        #     observable_wires = self.map_wires(observable.wires)
-
-        #     return M.var(observable.name, observable_wires)
-
-        # def _get_diagonalizing_gates(self, circuit: qml.tape.QuantumTape) -> List[Operation]:
-        #     skip_diagonalizing = lambda obs: isinstance(obs, qml.Hamiltonian) or (
-        #         isinstance(obs, qml.ops.Sum) and obs._pauli_rep is not None
-        #     )
-        #     meas_filtered = list(
-        #         filter(lambda m: m.obs is None or not skip_diagonalizing(m.obs), circuit.measurements)
-        #     )
-        #     return super()._get_diagonalizing_gates(qml.tape.QuantumScript(measurements=meas_filtered))
+        def _get_diagonalizing_gates(self, circuit: qml.tape.QuantumTape) -> List[Operation]:
+            skip_diagonalizing = lambda obs: isinstance(obs, qml.Hamiltonian) or (
+                isinstance(obs, qml.ops.Sum) and obs._pauli_rep is not None
+            )
+            meas_filtered = list(
+                filter(
+                    lambda m: m.obs is None or not skip_diagonalizing(m.obs), circuit.measurements
+                )
+            )
+            return super()._get_diagonalizing_gates(
+                qml.tape.QuantumScript(measurements=meas_filtered)
+            )
 
 else:  # binaries not available
 

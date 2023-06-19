@@ -99,6 +99,7 @@ if(ENABLE_PYTHON)
     target_link_libraries(pennylane_lightning_ops PRIVATE   ${PL_BACKEND} #simulator
                                                             "${PL_BACKEND}_observables"
                                                             "${PL_BACKEND}_bindings"
+                                                            "${PL_BACKEND}_measurements"
                                                       )
 
     set_target_properties(pennylane_lightning_ops PROPERTIES CXX_VISIBILITY_PRESET hidden)

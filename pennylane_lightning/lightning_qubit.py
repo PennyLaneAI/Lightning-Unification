@@ -16,6 +16,7 @@ r"""
 This module contains the :class:`~.LightningQubit` class, a PennyLane simulator device that
 interfaces with C++ for fast linear algebra calculations.
 """
+from typing import List
 from itertools import islice, product
 from warnings import warn
 import numpy as np
@@ -50,11 +51,14 @@ if backend_info()["NAME"] == "lightning.qubit":
 
     from .pennylane_lightning_ops import (
         # adjoint_diff,
-        # MeasuresC64,
+        MeasurementsC64,
         StateVectorC64,
-        # MeasuresC128,
+        MeasurementsC128,
         StateVectorC128,
+        backend_info,
     )
+
+    from ._serialize import _serialize_ob
 
     def _chunk_iterable(it, num_chunks):
         "Lazy-evaluated chunking of given iterable from https://stackoverflow.com/a/22045226"
@@ -383,6 +387,161 @@ if backend_info()["NAME"] == "lightning.qubit":
                 self._state = self.apply_lightning(np.copy(self._pre_rotated_state), rotations)
             else:
                 self._state = self._pre_rotated_state
+
+        def expval(self, observable, shot_range=None, bin_size=None):
+            """Expectation value of the supplied observable.
+
+            Args:
+                observable: A PennyLane observable.
+                shot_range (tuple[int]): 2-tuple of integers specifying the range of samples
+                    to use. If not specified, all samples are used.
+                bin_size (int): Divides the shot range into bins of size ``bin_size``, and
+                    returns the measurement statistic separately over each bin. If not
+                    provided, the entire shot range is treated as a single bin.
+
+            Returns:
+                Expectation value of the observable
+            """
+            if observable.name in [
+                "Identity",
+                "Projector",
+            ]:
+                return super().expval(observable, shot_range=shot_range, bin_size=bin_size)
+
+            if self.shots is not None:
+                # estimate the expectation value
+                # LightningQubit doesn't support sampling yet
+                samples = self.sample(observable, shot_range=shot_range, bin_size=bin_size)
+                return np.squeeze(np.mean(samples, axis=0))
+
+            # Initialization of state
+            ket = np.ravel(self._pre_rotated_state)
+
+            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
+            M = (
+                MeasurementsC64(state_vector)
+                if self.use_csingle
+                else MeasurementsC128(state_vector)
+            )
+            if observable.name == "SparseHamiltonian":
+                if backend_info()["USE_KOKKOS"] == True:
+                    # ensuring CSR sparse representation.
+
+                    CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
+                        copy=False
+                    )
+                    return M.expval(
+                        CSR_SparseHamiltonian.indptr,
+                        CSR_SparseHamiltonian.indices,
+                        CSR_SparseHamiltonian.data,
+                    )
+                raise NotImplementedError(
+                    "The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels."
+                )
+
+            if (
+                observable.name in ["Hamiltonian", "Hermitian"]
+                or (observable.arithmetic_depth > 0)
+                or isinstance(observable.name, List)
+            ):
+                ob_serialized = _serialize_ob(
+                    observable, self.wire_map, use_csingle=self.use_csingle
+                )
+                return M.expval(ob_serialized)
+
+            # translate to wire labels used by device
+            observable_wires = self.map_wires(observable.wires)
+
+            return M.expval(observable.name, observable_wires)
+
+        def var(self, observable, shot_range=None, bin_size=None):
+            """Variance of the supplied observable.
+
+            Args:
+                observable: A PennyLane observable.
+                shot_range (tuple[int]): 2-tuple of integers specifying the range of samples
+                    to use. If not specified, all samples are used.
+                bin_size (int): Divides the shot range into bins of size ``bin_size``, and
+                    returns the measurement statistic separately over each bin. If not
+                    provided, the entire shot range is treated as a single bin.
+
+            Returns:
+                Variance of the observable
+            """
+            if observable.name in [
+                "Identity",
+                "Projector",
+            ]:
+                return super().var(observable, shot_range=shot_range, bin_size=bin_size)
+
+            if self.shots is not None:
+                # estimate the var
+                # LightningQubit doesn't support sampling yet
+                samples = self.sample(observable, shot_range=shot_range, bin_size=bin_size)
+                return np.squeeze(np.var(samples, axis=0))
+
+            # Initialization of state
+            ket = np.ravel(self._pre_rotated_state)
+
+            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
+            M = (
+                MeasurementsC64(state_vector)
+                if self.use_csingle
+                else MeasurementsC128(state_vector)
+            )
+
+            if observable.name == "SparseHamiltonian":
+                if backend_info()["USE_KOKKOS"] == True:
+                    # ensuring CSR sparse representation.
+
+                    CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
+                        copy=False
+                    )
+                    return M.var(
+                        CSR_SparseHamiltonian.indptr,
+                        CSR_SparseHamiltonian.indices,
+                        CSR_SparseHamiltonian.data,
+                    )
+                raise NotImplementedError(
+                    "The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels."
+                )
+
+            if (
+                observable.name in ["Hamiltonian", "Hermitian"]
+                or (observable.arithmetic_depth > 0)
+                or isinstance(observable.name, List)
+            ):
+                ob_serialized = _serialize_ob(
+                    observable, self.wire_map, use_csingle=self.use_csingle
+                )
+                return M.var(ob_serialized)
+
+            # translate to wire labels used by device
+            observable_wires = self.map_wires(observable.wires)
+
+            return M.var(observable.name, observable_wires)
+
+        def generate_samples(self):
+            """Generate samples
+
+            Returns:
+                array[int]: array of samples in binary representation with shape ``(dev.shots, dev.num_wires)``
+            """
+            # Initialization of state
+            ket = np.ravel(self._state)
+
+            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
+            M = (
+                MeasurementsC64(state_vector)
+                if self.use_csingle
+                else MeasurementsC128(state_vector)
+            )
+            if self._mcmc:
+                return M.generate_mcmc_samples(
+                    len(self.wires), self._kernel_name, self._num_burnin, self.shots
+                ).astype(int, copy=False)
+            else:
+                return M.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
 
 else:
 
