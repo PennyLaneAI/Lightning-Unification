@@ -17,7 +17,6 @@
  */
 #pragma once
 
-#include <complex>
 #include <vector>
 
 #include "Observables.hpp"
