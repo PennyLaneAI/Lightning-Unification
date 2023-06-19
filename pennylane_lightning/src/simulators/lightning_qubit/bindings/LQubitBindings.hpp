@@ -177,8 +177,8 @@ void registerBackendSpecificMeasurements(PyClass &pyclass) {
              "Expected value of an operation by name.")
         .def(
             "expval",
-            [](Measurements<StateVectorT> &M, const np_arr_sparse_ind row_map,
-               const np_arr_sparse_ind entries, const np_arr_c values) {
+            [](Measurements<StateVectorT> &M, const np_arr_sparse_ind &row_map,
+               const np_arr_sparse_ind &entries, const np_arr_c &values) {
                 return M.expval(
                     static_cast<sparse_index_type *>(row_map.request().ptr),
                     static_cast<sparse_index_type>(row_map.request().size),
@@ -200,8 +200,8 @@ void registerBackendSpecificMeasurements(PyClass &pyclass) {
              "Variance of an operation by name.")
         .def(
             "var",
-            [](Measurements<StateVectorT> &M, const np_arr_sparse_ind row_map,
-               const np_arr_sparse_ind entries, const np_arr_c values) {
+            [](Measurements<StateVectorT> &M, const np_arr_sparse_ind &row_map,
+               const np_arr_sparse_ind &entries, const np_arr_c &values) {
                 return M.var(
                     static_cast<sparse_index_type *>(row_map.request().ptr),
                     static_cast<sparse_index_type>(row_map.request().size),
