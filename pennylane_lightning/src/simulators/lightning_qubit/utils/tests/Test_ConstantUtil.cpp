@@ -1,7 +1,3 @@
-#include <algorithm>
-#include <complex>
-#include <vector>
-
 #include <catch2/catch.hpp>
 
 #include "ConstantTestHelpers.hpp"
