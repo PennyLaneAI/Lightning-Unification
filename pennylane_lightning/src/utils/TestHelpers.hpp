@@ -377,17 +377,17 @@ auto createProductState(std::string_view str)
  *
  * @tparam StateVectorT Backend used to generate data
  * @param num_qubits number of qubits
- * @return std::vector<typename StateVectorT::ComplexPrecisionT>>
+ * @return std::vector<typename StateVectorT::ComplexT>>
  */
 template <class StateVectorT>
 auto createNonTrivialState(size_t num_qubits = 3)
-    -> std::vector<typename StateVectorT::ComplexPrecisionT> {
+    -> std::vector<typename StateVectorT::ComplexT> {
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = typename StateVectorT::ComplexPrecisionT;
+    using ComplexT = typename StateVectorT::ComplexT;
 
     size_t data_size = Util::exp2(num_qubits);
 
-    std::vector<ComplexPrecisionT> arr(data_size, {0, 0});
+    std::vector<ComplexT> arr(data_size, {0, 0});
     arr[0] = {1, 0};
     StateVectorT Measured_StateVector(arr.data(), data_size);
 
@@ -410,9 +410,9 @@ auto createNonTrivialState(size_t num_qubits = 3)
     }
     Measured_StateVector.applyOperations(gates, wires, inv_op, phase);
 
-    return std::vector<ComplexPrecisionT>(Measured_StateVector.getData(),
-                                          Measured_StateVector.getData() +
-                                              Measured_StateVector.getLength());
+    return std::vector<ComplexT>(Measured_StateVector.getData(),
+                                 Measured_StateVector.getData() +
+                                     Measured_StateVector.getLength());
 }
 
 /**

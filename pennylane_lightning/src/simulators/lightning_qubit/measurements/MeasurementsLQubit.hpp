@@ -64,7 +64,7 @@ class Measurements final
     : public MeasurementsBase<StateVectorT, Measurements<StateVectorT>> {
   private:
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = typename StateVectorT::ComplexT;
     using BaseType = MeasurementsBase<StateVectorT, Measurements<StateVectorT>>;
 
   public:
@@ -78,14 +78,13 @@ class Measurements final
      * in lexicographic order.
      */
     std::vector<PrecisionT> probs() {
-        const ComplexPrecisionT *arr_data = this->_statevector.getData();
+        const ComplexT *arr_data = this->_statevector.getData();
         std::vector<PrecisionT> basis_probs(this->_statevector.getLength(), 0);
 
-        std::transform(arr_data, arr_data + this->_statevector.getLength(),
-                       basis_probs.begin(),
-                       [](const ComplexPrecisionT &z) -> PrecisionT {
-                           return std::norm(z);
-                       });
+        std::transform(
+            arr_data, arr_data + this->_statevector.getLength(),
+            basis_probs.begin(),
+            [](const ComplexT &z) -> PrecisionT { return std::norm(z); });
         return basis_probs;
     };
 
@@ -109,7 +108,7 @@ class Measurements final
             sorted_wires[pos] = wires[sorted_ind_wires[pos]];
         }
         // Determining probabilities for the sorted wires.
-        const ComplexPrecisionT *arr_data = this->_statevector.getData();
+        const ComplexT *arr_data = this->_statevector.getData();
 
         size_t num_qubits = this->_statevector.getNumQubits();
 
@@ -144,7 +143,7 @@ class Measurements final
      * @param wires Wires where to apply the operator.
      * @return Floating point expected value of the observable.
      */
-    PrecisionT expval(const std::vector<ComplexPrecisionT> &matrix,
+    PrecisionT expval(const std::vector<ComplexT> &matrix,
                       const std::vector<size_t> &wires) {
         // Copying the original state vector, for the application of the
         // observable operator.
@@ -153,7 +152,7 @@ class Measurements final
 
         operator_statevector.applyMatrix(matrix, wires);
 
-        ComplexPrecisionT expected_value = Util::innerProdC(
+        ComplexT expected_value = Util::innerProdC(
             this->_statevector.getData(), operator_statevector.getData(),
             this->_statevector.getLength());
         return std::real(expected_value);
@@ -175,7 +174,7 @@ class Measurements final
 
         operator_statevector.applyOperation(operation, wires);
 
-        ComplexPrecisionT expected_value = Util::innerProdC(
+        ComplexT expected_value = Util::innerProdC(
             this->_statevector.getData(), operator_statevector.getData(),
             this->_statevector.getLength());
         return std::real(expected_value);
@@ -197,10 +196,10 @@ class Measurements final
      * @return Floating point expected value of the observable.
      */
     template <class index_type>
-    PrecisionT
-    expval(const index_type *row_map_ptr, const index_type row_map_size,
-           const index_type *entries_ptr, const ComplexPrecisionT *values_ptr,
-           const index_type numNNZ) {
+    PrecisionT expval(const index_type *row_map_ptr,
+                      const index_type row_map_size,
+                      const index_type *entries_ptr, const ComplexT *values_ptr,
+                      const index_type numNNZ) {
         PL_ABORT_IF(
             (this->_statevector.getLength() != (size_t(row_map_size) - 1)),
             "Statevector and Hamiltonian have incompatible sizes.");
@@ -209,7 +208,7 @@ class Measurements final
             static_cast<index_type>(this->_statevector.getLength()),
             row_map_ptr, row_map_size, entries_ptr, values_ptr, numNNZ);
 
-        ComplexPrecisionT expected_value = Util::innerProdC(
+        ComplexT expected_value = Util::innerProdC(
             this->_statevector.getData(), operator_vector.data(),
             this->_statevector.getLength());
         return std::real(expected_value);
@@ -256,7 +255,7 @@ class Measurements final
             result = calculateObsExpval(sv, ob, this->_statevector);
         } else if constexpr (std::is_same_v<StateVectorLQubitRaw<PrecisionT>,
                                             StateVectorT>) {
-            std::vector<ComplexPrecisionT> data_storage(
+            std::vector<ComplexT> data_storage(
                 this->_statevector.getData(),
                 this->_statevector.getData() + this->_statevector.getLength());
             StateVectorT sv(data_storage.data(), data_storage.size());
@@ -281,7 +280,7 @@ class Measurements final
 
         } else if constexpr (std::is_same_v<StateVectorLQubitRaw<PrecisionT>,
                                             StateVectorT>) {
-            std::vector<ComplexPrecisionT> data_storage(
+            std::vector<ComplexT> data_storage(
                 this->_statevector.getData(),
                 this->_statevector.getData() + this->_statevector.getLength());
             StateVectorT sv(data_storage.data(), data_storage.size());
@@ -325,7 +324,7 @@ class Measurements final
      * @param wires Wires where to apply the operator.
      * @return Floating point with the variance of the observable.
      */
-    PrecisionT var(const std::vector<ComplexPrecisionT> &matrix,
+    PrecisionT var(const std::vector<ComplexT> &matrix,
                    const std::vector<size_t> &wires) {
         // Copying the original state vector, for the application of the
         // observable operator.
@@ -452,8 +451,7 @@ class Measurements final
      */
     template <class index_type>
     PrecisionT var(const index_type *row_map_ptr, const index_type row_map_size,
-                   const index_type *entries_ptr,
-                   const ComplexPrecisionT *values_ptr,
+                   const index_type *entries_ptr, const ComplexT *values_ptr,
                    const index_type numNNZ) {
         PL_ABORT_IF(
             (this->_statevector.getLength() != (size_t(row_map_size) - 1)),

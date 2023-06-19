@@ -97,43 +97,39 @@ TEST_CASE("Methods implemented in the NamedObsBase class", "[NamedObsBase]") {
 template <typename TypeList> void testHermitianObsBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using StateVectorT = typename TypeList::Type;
-        using PrecisionT = typename StateVectorT::PrecisionT;
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = typename StateVectorT::ComplexT;
         using HermitianObsT = HermitianObsBase<StateVectorT>;
 
         DYNAMIC_SECTION("HermitianObs only accepts correct arguments - "
                         << StateVectorToName<StateVectorT>::name) {
-            auto ob1 = HermitianObsT{
-                std::vector<ComplexPrecisionT>{0.0, 0.0, 0.0, 0.0}, {0}};
-            auto ob2 = HermitianObsT{
-                std::vector<ComplexPrecisionT>(16, ComplexPrecisionT{}),
-                {0, 1}};
+            auto ob1 =
+                HermitianObsT{std::vector<ComplexT>{0.0, 0.0, 0.0, 0.0}, {0}};
+            auto ob2 =
+                HermitianObsT{std::vector<ComplexT>(16, ComplexT{}), {0, 1}};
             REQUIRE_THROWS_AS(
-                HermitianObsT(std::vector<ComplexPrecisionT>{0.0, 0.0, 0.0},
-                              {0}),
+                HermitianObsT(std::vector<ComplexT>{0.0, 0.0, 0.0}, {0}),
                 LightningException);
             REQUIRE_THROWS_AS(
-                HermitianObsT(
-                    std::vector<ComplexPrecisionT>{0.0, 0.0, 0.0, 0.0, 0.0},
-                    {0, 1}),
+                HermitianObsT(std::vector<ComplexT>{0.0, 0.0, 0.0, 0.0, 0.0},
+                              {0, 1}),
                 LightningException);
         }
 
         DYNAMIC_SECTION("getObsName - "
                         << StateVectorToName<StateVectorT>::name) {
-            REQUIRE(HermitianObsT(
-                        std::vector<ComplexPrecisionT>{1.0, 0.0, 2.0, 0.0}, {0})
-                        .getObsName() == "Hermitian");
+            REQUIRE(
+                HermitianObsT(std::vector<ComplexT>{1.0, 0.0, 2.0, 0.0}, {0})
+                    .getObsName() == "Hermitian");
         }
 
         DYNAMIC_SECTION("Comparing objects matrices - "
                         << StateVectorToName<StateVectorT>::name) {
-            auto ob1 = HermitianObsT{
-                std::vector<ComplexPrecisionT>{1.0, 0.0, 0.0, 0.0}, {0}};
-            auto ob2 = HermitianObsT{
-                std::vector<ComplexPrecisionT>{1.0, 0.0, 0.0, 0.0}, {0}};
-            auto ob3 = HermitianObsT{
-                std::vector<ComplexPrecisionT>{0.0, 1.0, 0.0, 0.0}, {0}};
+            auto ob1 =
+                HermitianObsT{std::vector<ComplexT>{1.0, 0.0, 0.0, 0.0}, {0}};
+            auto ob2 =
+                HermitianObsT{std::vector<ComplexT>{1.0, 0.0, 0.0, 0.0}, {0}};
+            auto ob3 =
+                HermitianObsT{std::vector<ComplexT>{0.0, 1.0, 0.0, 0.0}, {0}};
             REQUIRE(ob1 == ob2);
             REQUIRE(ob1 != ob3);
             REQUIRE(ob2 != ob3);
@@ -141,12 +137,12 @@ template <typename TypeList> void testHermitianObsBase() {
 
         DYNAMIC_SECTION("Comparing objects wires - "
                         << StateVectorToName<StateVectorT>::name) {
-            auto ob1 = HermitianObsT{
-                std::vector<ComplexPrecisionT>{1.0, 0.0, -1.0, 0.0}, {0}};
-            auto ob2 = HermitianObsT{
-                std::vector<ComplexPrecisionT>{1.0, 0.0, -1.0, 0.0}, {0}};
-            auto ob3 = HermitianObsT{
-                std::vector<ComplexPrecisionT>{1.0, 0.0, -1.0, 0.0}, {1}};
+            auto ob1 =
+                HermitianObsT{std::vector<ComplexT>{1.0, 0.0, -1.0, 0.0}, {0}};
+            auto ob2 =
+                HermitianObsT{std::vector<ComplexT>{1.0, 0.0, -1.0, 0.0}, {0}};
+            auto ob3 =
+                HermitianObsT{std::vector<ComplexT>{1.0, 0.0, -1.0, 0.0}, {1}};
             REQUIRE(ob1 == ob2);
             REQUIRE(ob1 != ob3);
             REQUIRE(ob2 != ob3);
@@ -167,7 +163,7 @@ template <typename TypeList> void testTensorProdObsBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using StateVectorT = typename TypeList::Type;
         using PrecisionT = typename StateVectorT::PrecisionT;
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = typename StateVectorT::ComplexT;
         using HermitianObsT = HermitianObsBase<StateVectorT>;
         using NamedObsT = NamedObsBase<StateVectorT>;
         using TensorProdObsT = TensorProdObsBase<StateVectorT>;
@@ -175,7 +171,7 @@ template <typename TypeList> void testTensorProdObsBase() {
         DYNAMIC_SECTION("Overlapping wires throw an exception - "
                         << StateVectorToName<StateVectorT>::name) {
             auto ob1 = std::make_shared<HermitianObsT>(
-                std::vector<ComplexPrecisionT>(16, ComplexPrecisionT{0.0, 0.0}),
+                std::vector<ComplexT>(16, ComplexT{0.0, 0.0}),
                 std::vector<size_t>{0, 1});
             auto ob2_1 =
                 std::make_shared<NamedObsT>("PauliX", std::vector<size_t>{1});
@@ -191,7 +187,7 @@ template <typename TypeList> void testTensorProdObsBase() {
             "Constructing an observable with non-overlapping wires - "
             << StateVectorToName<StateVectorT>::name) {
             auto ob1 = std::make_shared<HermitianObsT>(
-                std::vector<ComplexPrecisionT>(16, ComplexPrecisionT{0.0, 0.0}),
+                std::vector<ComplexT>(16, ComplexT{0.0, 0.0}),
                 std::vector<size_t>{0, 1});
             auto ob2_1 =
                 std::make_shared<NamedObsT>("PauliX", std::vector<size_t>{2});
@@ -236,7 +232,7 @@ template <typename TypeList> void testTensorProdObsBase() {
 
         DYNAMIC_SECTION("Tensor product applies to a statevector correctly"
                         << StateVectorToName<StateVectorT>::name) {
-            using VectorT = TestVector<ComplexPrecisionT>;
+            using VectorT = TestVector<ComplexT>;
 
             auto obs = TensorProdObsT{
                 std::make_shared<NamedObsT>("PauliX", std::vector<size_t>{0}),
@@ -287,7 +283,7 @@ template <typename TypeList> void testHamiltonianBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using StateVectorT = typename TypeList::Type;
         using PrecisionT = typename StateVectorT::PrecisionT;
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = typename StateVectorT::ComplexT;
         using NamedObsT = NamedObsBase<StateVectorT>;
         using TensorProdObsT = TensorProdObsBase<StateVectorT>;
         using HamiltonianT = HamiltonianBase<StateVectorT>;
@@ -409,7 +405,7 @@ template <typename TypeList> void testHamiltonianBase() {
 
             DYNAMIC_SECTION("applyInPlace must fail - "
                             << StateVectorToName<StateVectorT>::name) {
-                using VectorT = TestVector<ComplexPrecisionT>;
+                using VectorT = TestVector<ComplexT>;
 
                 auto ham =
                     HamiltonianT::create({PrecisionT{1.0}, h, h}, {zz, x1, x2});

@@ -561,7 +561,7 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
     static void applyIsingXX(std::complex<PrecisionT> *arr, size_t num_qubits,
                              const std::vector<size_t> &wires, bool inverse,
                              ParamT angle) {
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = std::complex<PrecisionT>;
         PL_ASSERT(wires.size() == 2);
         const auto [indices, externalIndices] = GateIndices(wires, num_qubits);
 
@@ -577,14 +577,14 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
             const auto v2 = shiftedState[indices[2]];
             const auto v3 = shiftedState[indices[3]];
 
-            shiftedState[indices[0]] = ComplexPrecisionT{
-                cr * real(v0) + sj * imag(v3), cr * imag(v0) - sj * real(v3)};
-            shiftedState[indices[1]] = ComplexPrecisionT{
-                cr * real(v1) + sj * imag(v2), cr * imag(v1) - sj * real(v2)};
-            shiftedState[indices[2]] = ComplexPrecisionT{
-                cr * real(v2) + sj * imag(v1), cr * imag(v2) - sj * real(v1)};
-            shiftedState[indices[3]] = ComplexPrecisionT{
-                cr * real(v3) + sj * imag(v0), cr * imag(v3) - sj * real(v0)};
+            shiftedState[indices[0]] = ComplexT{cr * real(v0) + sj * imag(v3),
+                                                cr * imag(v0) - sj * real(v3)};
+            shiftedState[indices[1]] = ComplexT{cr * real(v1) + sj * imag(v2),
+                                                cr * imag(v1) - sj * real(v2)};
+            shiftedState[indices[2]] = ComplexT{cr * real(v2) + sj * imag(v1),
+                                                cr * imag(v2) - sj * real(v1)};
+            shiftedState[indices[3]] = ComplexT{cr * real(v3) + sj * imag(v0),
+                                                cr * imag(v3) - sj * real(v0)};
         }
     }
 
@@ -592,7 +592,7 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
     static void applyIsingXY(std::complex<PrecisionT> *arr, size_t num_qubits,
                              const std::vector<size_t> &wires, bool inverse,
                              ParamT angle) {
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = std::complex<PrecisionT>;
         PL_ASSERT(wires.size() == 2);
         const auto [indices, externalIndices] = GateIndices(wires, num_qubits);
 
@@ -608,12 +608,12 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
             const auto v2 = shiftedState[indices[2]];
             const auto v3 = shiftedState[indices[3]];
 
-            shiftedState[indices[0]] = ComplexPrecisionT{real(v0), imag(v0)};
-            shiftedState[indices[1]] = ComplexPrecisionT{
-                cr * real(v1) - sj * imag(v2), cr * imag(v1) + sj * real(v2)};
-            shiftedState[indices[2]] = ComplexPrecisionT{
-                cr * real(v2) - sj * imag(v1), cr * imag(v2) + sj * real(v1)};
-            shiftedState[indices[3]] = ComplexPrecisionT{real(v3), imag(v3)};
+            shiftedState[indices[0]] = ComplexT{real(v0), imag(v0)};
+            shiftedState[indices[1]] = ComplexT{cr * real(v1) - sj * imag(v2),
+                                                cr * imag(v1) + sj * real(v2)};
+            shiftedState[indices[2]] = ComplexT{cr * real(v2) - sj * imag(v1),
+                                                cr * imag(v2) + sj * real(v1)};
+            shiftedState[indices[3]] = ComplexT{real(v3), imag(v3)};
         }
     }
 
@@ -621,7 +621,7 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
     static void applyIsingYY(std::complex<PrecisionT> *arr, size_t num_qubits,
                              const std::vector<size_t> &wires, bool inverse,
                              ParamT angle) {
-        using ComplexPrecisionT = std::complex<PrecisionT>;
+        using ComplexT = std::complex<PrecisionT>;
         PL_ASSERT(wires.size() == 2);
         const auto [indices, externalIndices] = GateIndices(wires, num_qubits);
 
@@ -637,14 +637,14 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
             const auto v2 = shiftedState[indices[2]];
             const auto v3 = shiftedState[indices[3]];
 
-            shiftedState[indices[0]] = ComplexPrecisionT{
-                cr * real(v0) - sj * imag(v3), cr * imag(v0) + sj * real(v3)};
-            shiftedState[indices[1]] = ComplexPrecisionT{
-                cr * real(v1) + sj * imag(v2), cr * imag(v1) - sj * real(v2)};
-            shiftedState[indices[2]] = ComplexPrecisionT{
-                cr * real(v2) + sj * imag(v1), cr * imag(v2) - sj * real(v1)};
-            shiftedState[indices[3]] = ComplexPrecisionT{
-                cr * real(v3) - sj * imag(v0), cr * imag(v3) + sj * real(v0)};
+            shiftedState[indices[0]] = ComplexT{cr * real(v0) - sj * imag(v3),
+                                                cr * imag(v0) + sj * real(v3)};
+            shiftedState[indices[1]] = ComplexT{cr * real(v1) + sj * imag(v2),
+                                                cr * imag(v1) - sj * real(v2)};
+            shiftedState[indices[2]] = ComplexT{cr * real(v2) + sj * imag(v1),
+                                                cr * imag(v2) - sj * real(v1)};
+            shiftedState[indices[3]] = ComplexT{cr * real(v3) - sj * imag(v0),
+                                                cr * imag(v3) + sj * real(v0)};
         }
     }
 

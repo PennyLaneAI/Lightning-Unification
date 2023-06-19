@@ -118,15 +118,15 @@ PENNYLANE_RUN_TEST(PauliX);
 
 template <typename PrecisionT, class GateImplementation>
 void testApplyPauliY() {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
 
-    constexpr ComplexPrecisionT p =
+    constexpr ComplexT p =
         ConstMult(static_cast<PrecisionT>(0.5),
                   ConstMult(INVSQRT2<PrecisionT>(), IMAG<PrecisionT>()));
-    constexpr ComplexPrecisionT m = ConstMult(-1, p);
+    constexpr ComplexT m = ConstMult(-1, p);
 
-    const std::vector<std::vector<ComplexPrecisionT>> expected_results = {
+    const std::vector<std::vector<ComplexT>> expected_results = {
         {m, m, m, m, p, p, p, p},
         {m, m, p, p, m, m, p, p},
         {m, p, m, p, m, p, m, p}};
@@ -143,14 +143,13 @@ PENNYLANE_RUN_TEST(PauliY);
 
 template <typename PrecisionT, class GateImplementation>
 void testApplyPauliZ() {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
 
-    constexpr ComplexPrecisionT p(static_cast<PrecisionT>(0.5) *
-                                  INVSQRT2<PrecisionT>());
-    constexpr ComplexPrecisionT m(ConstMult(-1, p));
+    constexpr ComplexT p(static_cast<PrecisionT>(0.5) * INVSQRT2<PrecisionT>());
+    constexpr ComplexT m(ConstMult(-1, p));
 
-    const std::vector<std::vector<ComplexPrecisionT>> expected_results = {
+    const std::vector<std::vector<ComplexT>> expected_results = {
         {p, p, p, p, m, m, m, m},
         {p, p, m, m, p, p, m, m},
         {p, m, p, m, p, m, p, m}};
@@ -185,14 +184,13 @@ void testApplyHadamard() {
 PENNYLANE_RUN_TEST(Hadamard);
 
 template <typename PrecisionT, class GateImplementation> void testApplyS() {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
 
-    constexpr ComplexPrecisionT r(static_cast<PrecisionT>(0.5) *
-                                  INVSQRT2<PrecisionT>());
-    constexpr ComplexPrecisionT i(ConstMult(r, IMAG<PrecisionT>()));
+    constexpr ComplexT r(static_cast<PrecisionT>(0.5) * INVSQRT2<PrecisionT>());
+    constexpr ComplexT i(ConstMult(r, IMAG<PrecisionT>()));
 
-    const std::vector<std::vector<ComplexPrecisionT>> expected_results = {
+    const std::vector<std::vector<ComplexT>> expected_results = {
         {r, r, r, r, i, i, i, i},
         {r, r, i, i, r, r, i, i},
         {r, i, r, i, r, i, r, i}};
@@ -208,14 +206,14 @@ template <typename PrecisionT, class GateImplementation> void testApplyS() {
 PENNYLANE_RUN_TEST(S);
 
 template <typename PrecisionT, class GateImplementation> void testApplyT() {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
     // Test using |+++> state
 
-    ComplexPrecisionT r(1.0 / (2.0 * std::sqrt(2)), 0);
-    ComplexPrecisionT i(1.0 / 4, 1.0 / 4);
+    ComplexT r(1.0 / (2.0 * std::sqrt(2)), 0);
+    ComplexT i(1.0 / 4, 1.0 / 4);
 
-    const std::vector<std::vector<ComplexPrecisionT>> expected_results = {
+    const std::vector<std::vector<ComplexT>> expected_results = {
         {r, r, r, r, i, i, i, i},
         {r, r, i, i, r, r, i, i},
         {r, i, r, i, r, i, r, i}};
@@ -272,15 +270,15 @@ PENNYLANE_RUN_TEST(CNOT);
 
 // NOLINTNEXTLINE: Avoiding complexity errors
 template <typename PrecisionT, class GateImplementation> void testApplyCY() {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
     auto ini_st_aligned = createProductState<PrecisionT>(
         "+10"); // Test using |+10> state using AlignedAllocator
-    std::vector<ComplexPrecisionT> ini_st{
+    std::vector<ComplexT> ini_st{
         ini_st_aligned.begin(),
         ini_st_aligned
             .end()}; // Converted aligned data to default vector alignment
-    CHECK(ini_st == std::vector<ComplexPrecisionT>{
+    CHECK(ini_st == std::vector<ComplexT>{
                         ZERO<PrecisionT>(), ZERO<PrecisionT>(),
                         std::complex<PrecisionT>(INVSQRT2<PrecisionT>(), 0),
                         ZERO<PrecisionT>(), ZERO<PrecisionT>(),
@@ -291,7 +289,7 @@ template <typename PrecisionT, class GateImplementation> void testApplyCY() {
     DYNAMIC_SECTION(GateImplementation::name
                     << ", CY 0,1 |+10> -> i|100> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
             std::complex<PrecisionT>(INVSQRT2<PrecisionT>(), 0),
@@ -309,7 +307,7 @@ template <typename PrecisionT, class GateImplementation> void testApplyCY() {
     DYNAMIC_SECTION(GateImplementation::name
                     << ", CY 0,2 |+10> -> |010> + i |111> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
             std::complex<PrecisionT>(INVSQRT2<PrecisionT>(), 0.0),
@@ -327,7 +325,7 @@ template <typename PrecisionT, class GateImplementation> void testApplyCY() {
     DYNAMIC_SECTION(GateImplementation::name
                     << ", CY 1,2 |+10> -> i|+11> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
@@ -347,19 +345,19 @@ PENNYLANE_RUN_TEST(CY);
 
 // NOLINTNEXTLINE: Avoiding complexity errors
 template <typename PrecisionT, class GateImplementation> void testApplyCZ() {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
 
     auto ini_st_aligned = createProductState<PrecisionT>(
         "+10"); // Test using |+10> state using AlignedAllocator
-    std::vector<ComplexPrecisionT> ini_st{
+    std::vector<ComplexT> ini_st{
         ini_st_aligned.begin(),
         ini_st_aligned
             .end()}; // Converted aligned data to default vector alignment
     DYNAMIC_SECTION(GateImplementation::name
                     << ", CZ0,1 |+10> -> |-10> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
             std::complex<PrecisionT>(INVSQRT2<PrecisionT>(), 0),
@@ -412,25 +410,25 @@ PENNYLANE_RUN_TEST(CZ);
 
 // NOLINTNEXTLINE: Avoiding complexity errors
 template <typename PrecisionT, class GateImplementation> void testApplySWAP() {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
     auto ini_st_aligned = createProductState<PrecisionT>(
         "+10"); // Test using |+10> state using AlignedAllocator
-    std::vector<ComplexPrecisionT> ini_st{
+    std::vector<ComplexT> ini_st{
         ini_st_aligned.begin(),
         ini_st_aligned
             .end()}; // Converted aligned data to default vector alignment
 
-    CHECK(ini_st == std::vector<ComplexPrecisionT>{
-                        ZERO<PrecisionT>(), ZERO<PrecisionT>(),
-                        INVSQRT2<PrecisionT>(), ZERO<PrecisionT>(),
-                        ZERO<PrecisionT>(), ZERO<PrecisionT>(),
-                        INVSQRT2<PrecisionT>(), ZERO<PrecisionT>()});
+    CHECK(ini_st ==
+          std::vector<ComplexT>{ZERO<PrecisionT>(), ZERO<PrecisionT>(),
+                                INVSQRT2<PrecisionT>(), ZERO<PrecisionT>(),
+                                ZERO<PrecisionT>(), ZERO<PrecisionT>(),
+                                INVSQRT2<PrecisionT>(), ZERO<PrecisionT>()});
 
     DYNAMIC_SECTION(GateImplementation::name
                     << ", SWAP0,1 |+10> -> |1+0> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
@@ -452,7 +450,7 @@ template <typename PrecisionT, class GateImplementation> void testApplySWAP() {
     DYNAMIC_SECTION(GateImplementation::name
                     << ", SWAP0,2 |+10> -> |01+> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
             std::complex<PrecisionT>(INVSQRT2<PrecisionT>(), 0),
@@ -474,7 +472,7 @@ template <typename PrecisionT, class GateImplementation> void testApplySWAP() {
     DYNAMIC_SECTION(GateImplementation::name
                     << ", SWAP1,2 |+10> -> |+01> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             std::complex<PrecisionT>(INVSQRT2<PrecisionT>(), 0),
             ZERO<PrecisionT>(),
@@ -501,11 +499,11 @@ PENNYLANE_RUN_TEST(SWAP);
  ******************************************************************************/
 template <typename PrecisionT, class GateImplementation>
 void testApplyToffoli() {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
     auto ini_st_aligned = createProductState<PrecisionT>(
         "+10"); // Test using |+10> state using AlignedAllocator
-    std::vector<ComplexPrecisionT> ini_st{
+    std::vector<ComplexT> ini_st{
         ini_st_aligned.begin(),
         ini_st_aligned
             .end()}; // Converted aligned data to default vector alignment
@@ -514,7 +512,7 @@ void testApplyToffoli() {
     DYNAMIC_SECTION(GateImplementation::name
                     << ", Toffoli 0,1,2 |+10> -> |010> + |111> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
             std::complex<PrecisionT>(INVSQRT2<PrecisionT>(), 0),
@@ -535,7 +533,7 @@ void testApplyToffoli() {
     DYNAMIC_SECTION(GateImplementation::name
                     << ", Toffoli 1,0,2 |+10> -> |010> + |111> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
             std::complex<PrecisionT>(INVSQRT2<PrecisionT>(), 0),
@@ -580,12 +578,12 @@ void testApplyToffoli() {
 PENNYLANE_RUN_TEST(Toffoli);
 
 template <typename PrecisionT, class GateImplementation> void testApplyCSWAP() {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
 
     auto ini_st_aligned = createProductState<PrecisionT>(
         "+10"); // Test using |+10> state using AlignedAllocator
-    std::vector<ComplexPrecisionT> ini_st{
+    std::vector<ComplexT> ini_st{
         ini_st_aligned.begin(),
         ini_st_aligned
             .end()}; // Converted aligned data to default vector alignment
@@ -593,7 +591,7 @@ template <typename PrecisionT, class GateImplementation> void testApplyCSWAP() {
     DYNAMIC_SECTION(GateImplementation::name
                     << ", CSWAP 0,1,2 |+10> -> |010> + |101> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
             std::complex<PrecisionT>(INVSQRT2<PrecisionT>(), 0),
@@ -612,7 +610,7 @@ template <typename PrecisionT, class GateImplementation> void testApplyCSWAP() {
     DYNAMIC_SECTION(GateImplementation::name
                     << ", CSWAP 1,0,2 |+10> -> |01+> - "
                     << PrecisionToName<PrecisionT>::value) {
-        std::vector<ComplexPrecisionT> expected{
+        std::vector<ComplexT> expected{
             ZERO<PrecisionT>(),
             ZERO<PrecisionT>(),
             std::complex<PrecisionT>(INVSQRT2<PrecisionT>(), 0),

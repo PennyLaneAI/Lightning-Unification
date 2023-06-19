@@ -770,14 +770,14 @@ inline auto matrixMatProd(const std::vector<std::complex<T>> m_left,
 template <typename PrecisionT, class RandomEngine>
 auto randomUnitary(RandomEngine &re, size_t num_qubits)
     -> std::vector<std::complex<PrecisionT>> {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     const size_t dim = (1U << num_qubits);
-    std::vector<ComplexPrecisionT> res(dim * dim, ComplexPrecisionT{});
+    std::vector<ComplexT> res(dim * dim, ComplexT{});
 
     std::normal_distribution<PrecisionT> dist;
 
-    auto generator = [&dist, &re]() -> ComplexPrecisionT {
-        return ComplexPrecisionT{dist(re), dist(re)};
+    auto generator = [&dist, &re]() -> ComplexT {
+        return ComplexT{dist(re), dist(re)};
     };
 
     std::generate(res.begin(), res.end(), generator);
@@ -787,11 +787,11 @@ auto randomUnitary(RandomEngine &re, size_t num_qubits)
     // Use QR decomposition when we have LAPACK support.
 
     for (size_t row2 = 0; row2 < dim; row2++) {
-        ComplexPrecisionT *row2_p = res.data() + row2 * dim;
+        ComplexT *row2_p = res.data() + row2 * dim;
         for (size_t row1 = 0; row1 < row2; row1++) {
-            const ComplexPrecisionT *row1_p = res.data() + row1 * dim;
-            ComplexPrecisionT dot12 = Util::innerProdC(row1_p, row2_p, dim);
-            ComplexPrecisionT dot11 = squaredNorm(row1_p, dim);
+            const ComplexT *row1_p = res.data() + row1 * dim;
+            ComplexT dot12 = Util::innerProdC(row1_p, row2_p, dim);
+            ComplexT dot11 = squaredNorm(row1_p, dim);
 
             // orthogonalize row2
             std::transform(
@@ -804,7 +804,7 @@ auto randomUnitary(RandomEngine &re, size_t num_qubits)
 
     // Normalize each row
     for (size_t row = 0; row < dim; row++) {
-        ComplexPrecisionT *row_p = res.data() + row * dim;
+        ComplexT *row_p = res.data() + row * dim;
         PrecisionT norm2 = std::sqrt(squaredNorm(row_p, dim));
 
         // normalize row2

@@ -56,7 +56,7 @@ namespace Pennylane::LightningQubit {
 template <class PrecisionT, class Derived>
 class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
   public:
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
 
   protected:
     const Threading threading_;
@@ -343,8 +343,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param wires Wires to apply gate to.
      * @param inverse Indicate whether inverse should be taken.
      */
-    inline void applyMatrix(Gates::KernelType kernel,
-                            const ComplexPrecisionT *matrix,
+    inline void applyMatrix(Gates::KernelType kernel, const ComplexT *matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
 
@@ -367,7 +366,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param inverse Indicate whether inverse should be taken.
      */
     inline void applyMatrix(Gates::KernelType kernel,
-                            const std::vector<ComplexPrecisionT> &matrix,
+                            const std::vector<ComplexT> &matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
 
@@ -386,7 +385,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param wires Wires to apply gate to.
      * @param inverse Indicate whether inverse should be taken.
      */
-    inline void applyMatrix(const ComplexPrecisionT *matrix,
+    inline void applyMatrix(const ComplexT *matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
         using Gates::MatrixOperation;
@@ -414,7 +413,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param inverse Indicate whether inverse should be taken.
      */
     template <typename Alloc>
-    inline void applyMatrix(const std::vector<ComplexPrecisionT, Alloc> &matrix,
+    inline void applyMatrix(const std::vector<ComplexT, Alloc> &matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
         PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),

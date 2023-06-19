@@ -156,64 +156,47 @@ using Pennylane::LightningQubit::Util::scaleAndAdd;
 // Default implementation
 template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
     using PrecisionT = typename StateVectorT::PrecisionT;
-    static void run([[maybe_unused]] const std::vector<PrecisionT> &coeffs,
-                    [[maybe_unused]] const std::vector<
-                        std::shared_ptr<Observable<StateVectorT>>> &terms,
-                    [[maybe_unused]] StateVectorT &sv) {
-        PL_ABORT("HamiltonianApplyInPlace::run() not implemented for this "
-                 "combination of State Vector, Precision and openMP usage.");
-    }
-};
-
-template <class PrecisionT>
-struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, false> {
     static void
     run(const std::vector<PrecisionT> &coeffs,
-        const std::vector<
-            std::shared_ptr<Observable<StateVectorLQubitManaged<PrecisionT>>>>
-            &terms,
-        StateVectorLQubitManaged<PrecisionT> &sv) {
-        auto allocator = sv.allocator();
-        std::vector<std::complex<PrecisionT>, decltype(allocator)> res(
-            sv.getLength(), std::complex<PrecisionT>{0.0, 0.0}, allocator);
-        for (size_t term_idx = 0; term_idx < coeffs.size(); term_idx++) {
-            StateVectorLQubitManaged<PrecisionT> tmp(sv);
-            terms[term_idx]->applyInPlace(tmp);
-            Util::scaleAndAdd(tmp.getLength(),
-                              std::complex<PrecisionT>{coeffs[term_idx], 0.0},
-                              tmp.getData(), res.data());
+        const std::vector<std::shared_ptr<Observable<StateVectorT>>> &terms,
+        StateVectorT &sv) {
+        if constexpr (std::is_same_v<StateVectorLQubitManaged<PrecisionT>,
+                                     StateVectorT>) {
+            auto allocator = sv.allocator();
+            std::vector<std::complex<PrecisionT>, decltype(allocator)> res(
+                sv.getLength(), std::complex<PrecisionT>{0.0, 0.0}, allocator);
+            for (size_t term_idx = 0; term_idx < coeffs.size(); term_idx++) {
+                StateVectorT tmp(sv);
+                terms[term_idx]->applyInPlace(tmp);
+                Util::scaleAndAdd(
+                    tmp.getLength(),
+                    std::complex<PrecisionT>{coeffs[term_idx], 0.0},
+                    tmp.getData(), res.data());
+            }
+            sv.updateData(res);
+        } else if constexpr (std::is_same_v<StateVectorLQubitRaw<PrecisionT>,
+                                            StateVectorT>) {
+            using ComplexT = typename StateVectorT::ComplexT;
+            std::vector<ComplexT> res(sv.getLength(), ComplexT{0.0, 0.0});
+            for (size_t term_idx = 0; term_idx < coeffs.size(); term_idx++) {
+                std::vector<ComplexT> tmp_data_storage(
+                    sv.getData(), sv.getData() + sv.getLength());
+                StateVectorT tmp(tmp_data_storage.data(),
+                                 tmp_data_storage.size());
+                terms[term_idx]->applyInPlace(tmp);
+                Util::scaleAndAdd(tmp.getLength(),
+                                  ComplexT{coeffs[term_idx], 0.0},
+                                  tmp.getData(), res.data());
+            }
+            sv.updateData(res);
         }
-        sv.updateData(res);
-    }
-};
-
-template <class PrecisionT>
-struct HamiltonianApplyInPlace<StateVectorLQubitRaw<PrecisionT>, false> {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
-    static void run(const std::vector<PrecisionT> &coeffs,
-                    const std::vector<std::shared_ptr<
-                        Observable<StateVectorLQubitRaw<PrecisionT>>>> &terms,
-                    StateVectorLQubitRaw<PrecisionT> &sv) {
-        std::vector<ComplexPrecisionT> res(sv.getLength(),
-                                           ComplexPrecisionT{0.0, 0.0});
-        for (size_t term_idx = 0; term_idx < coeffs.size(); term_idx++) {
-            std::vector<ComplexPrecisionT> tmp_data_storage(
-                sv.getData(), sv.getData() + sv.getLength());
-            StateVectorLQubitRaw<PrecisionT> tmp(tmp_data_storage.data(),
-                                                 tmp_data_storage.size());
-            terms[term_idx]->applyInPlace(tmp);
-            Util::scaleAndAdd(tmp.getLength(),
-                              ComplexPrecisionT{coeffs[term_idx], 0.0},
-                              tmp.getData(), res.data());
-        }
-        sv.updateData(res);
     }
 };
 
 #if defined(_OPENMP)
 template <class PrecisionT>
 struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     static void
     run(const std::vector<PrecisionT> &coeffs,
         const std::vector<
@@ -223,29 +206,29 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
         const size_t length = sv.getLength();
         auto allocator = sv.allocator();
 
-        std::vector<ComplexPrecisionT, decltype(allocator)> sum(
-            length, ComplexPrecisionT{}, allocator);
+        std::vector<ComplexT, decltype(allocator)> sum(length, ComplexT{},
+                                                       allocator);
 
 #pragma omp parallel default(none) firstprivate(length, allocator)             \
     shared(coeffs, terms, sv, sum)
         {
             StateVectorLQubitManaged<PrecisionT> tmp(sv.getNumQubits());
 
-            std::vector<ComplexPrecisionT, decltype(allocator)> local_sv(
-                length, ComplexPrecisionT{}, allocator);
+            std::vector<ComplexT, decltype(allocator)> local_sv(
+                length, ComplexT{}, allocator);
 
 #pragma omp for
             for (size_t term_idx = 0; term_idx < terms.size(); term_idx++) {
                 tmp.updateData(sv.getDataVector());
                 terms[term_idx]->applyInPlace(tmp);
-                scaleAndAdd(length, ComplexPrecisionT{coeffs[term_idx], 0.0},
+                scaleAndAdd(length, ComplexT{coeffs[term_idx], 0.0},
                             tmp.getData(), local_sv.data());
             }
 
 #pragma omp critical
             {
-                scaleAndAdd(length, ComplexPrecisionT{1.0, 0.0},
-                            local_sv.data(), sum.data());
+                scaleAndAdd(length, ComplexT{1.0, 0.0}, local_sv.data(),
+                            sum.data());
             }
         }
 
@@ -255,25 +238,24 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
 
 template <class PrecisionT>
 struct HamiltonianApplyInPlace<StateVectorLQubitRaw<PrecisionT>, true> {
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = std::complex<PrecisionT>;
     static void run(const std::vector<PrecisionT> &coeffs,
                     const std::vector<std::shared_ptr<
                         Observable<StateVectorLQubitRaw<PrecisionT>>>> &terms,
                     StateVectorLQubitRaw<PrecisionT> &sv) {
         const size_t length = sv.getLength();
 
-        std::vector<ComplexPrecisionT> sum(length, ComplexPrecisionT{});
+        std::vector<ComplexT> sum(length, ComplexT{});
 
 #pragma omp parallel default(none) firstprivate(length)                        \
     shared(coeffs, terms, sv, sum)
-        { //NOLINT(openmp-exception-escape)
-            std::vector<ComplexPrecisionT> tmp_data_storage(
+        { // NOLINT(openmp-exception-escape)
+            std::vector<ComplexT> tmp_data_storage(
                 sv.getData(), sv.getData() + sv.getLength());
             StateVectorLQubitRaw<PrecisionT> tmp(tmp_data_storage.data(),
                                                  tmp_data_storage.size());
 
-            std::vector<ComplexPrecisionT> local_sv(length,
-                                                    ComplexPrecisionT{});
+            std::vector<ComplexT> local_sv(length, ComplexT{});
 
 #pragma omp for
             for (size_t term_idx = 0; term_idx < terms.size(); term_idx++) {
@@ -282,14 +264,14 @@ struct HamiltonianApplyInPlace<StateVectorLQubitRaw<PrecisionT>, true> {
                           tmp_data_storage.data());
 
                 terms[term_idx]->applyInPlace(tmp);
-                scaleAndAdd(length, ComplexPrecisionT{coeffs[term_idx], 0.0},
+                scaleAndAdd(length, ComplexT{coeffs[term_idx], 0.0},
                             tmp.getData(), local_sv.data());
             }
 
 #pragma omp critical
             {
-                scaleAndAdd(length, ComplexPrecisionT{1.0, 0.0},
-                            local_sv.data(), sum.data());
+                scaleAndAdd(length, ComplexT{1.0, 0.0}, local_sv.data(),
+                            sum.data());
             }
         }
 

@@ -45,7 +45,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values - Sparse Hamiltonian [Kokkos]",
                            (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = typename StateVectorT::ComplexT;
 
     // Defining the statevector that will be measured.
     auto statevector_data = createNonTrivialState<StateVectorT>();
@@ -62,7 +62,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values - Sparse Hamiltonian [Kokkos]",
 
             std::vector<long> row_map;
             std::vector<long> entries;
-            std::vector<ComplexPrecisionT> values;
+            std::vector<ComplexT> values;
             write_CSR_vectors(row_map, entries, values, data_size);
 
             PrecisionT exp_values = Measurer.expval(
@@ -79,7 +79,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values - Sparse Hamiltonian [Kokkos]",
 
             std::vector<long> row_map;
             std::vector<long> entries;
-            std::vector<ComplexPrecisionT> values;
+            std::vector<ComplexT> values;
             write_CSR_vectors(row_map, entries, values, data_size);
 
             PL_CHECK_THROWS_MATCHES(
@@ -97,7 +97,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values - Sparse Hamiltonian [Kokkos]",
 
             std::vector<long> row_map;
             std::vector<long> entries;
-            std::vector<ComplexPrecisionT> values;
+            std::vector<ComplexT> values;
             write_CSR_vectors(row_map, entries, values, data_size);
 
             PL_CHECK_THROWS_MATCHES(

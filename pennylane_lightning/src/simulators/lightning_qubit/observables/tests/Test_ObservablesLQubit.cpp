@@ -59,8 +59,8 @@ TEMPLATE_PRODUCT_TEST_CASE("HermitianObs", "[Observables]",
                            (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
     using StateVectorT = TestType;
-    using PrecisionT = typename StateVectorT::PrecisionT;
-    using MatrixT = std::vector<std::complex<PrecisionT>>;
+    using ComplexT = typename StateVectorT::ComplexT;
+    using MatrixT = std::vector<ComplexT>;
     using HermitianObsT = HermitianObs<StateVectorT>;
 
     SECTION("Non-Default constructibility") {
@@ -150,7 +150,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian::ApplyInPlace", "[Observables]",
                            (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = typename StateVectorT::ComplexT;
     using TensorProdObsT = TensorProdObs<StateVectorT>;
     using NamedObsT = NamedObs<StateVectorT>;
     using HamiltonianT = Hamiltonian<StateVectorT>;
@@ -173,11 +173,11 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian::ApplyInPlace", "[Observables]",
 
             ham->applyInPlace(state_vector);
 
-            auto expected = std::vector<ComplexPrecisionT>{
-                ComplexPrecisionT{0.5, 0.0},
-                ComplexPrecisionT{0.5, 0.0},
-                ComplexPrecisionT{-0.5, 0.0},
-                ComplexPrecisionT{-0.5, 0.0},
+            auto expected = std::vector<ComplexT>{
+                ComplexT{0.5, 0.0},
+                ComplexT{0.5, 0.0},
+                ComplexT{-0.5, 0.0},
+                ComplexT{-0.5, 0.0},
             };
 
             REQUIRE(isApproxEqual(state_vector.getData(),
@@ -191,11 +191,11 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian::ApplyInPlace", "[Observables]",
 
             ham->applyInPlace(state_vector);
 
-            auto expected = std::vector<ComplexPrecisionT>{
-                ComplexPrecisionT{h, 0.0},
-                ComplexPrecisionT{-1.0, 0.0},
-                ComplexPrecisionT{0.0, 0.0},
-                ComplexPrecisionT{h, 0.0},
+            auto expected = std::vector<ComplexT>{
+                ComplexT{h, 0.0},
+                ComplexT{-1.0, 0.0},
+                ComplexT{0.0, 0.0},
+                ComplexT{h, 0.0},
             };
 
             REQUIRE(isApproxEqual(state_vector.getData(),

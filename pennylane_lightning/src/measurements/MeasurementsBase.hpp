@@ -43,7 +43,7 @@ namespace Pennylane::Measures {
 template <class StateVectorT, class Derived> class MeasurementsBase {
   private:
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = typename StateVectorT::ComplexT;
 
   protected:
     const StateVectorT &_statevector;

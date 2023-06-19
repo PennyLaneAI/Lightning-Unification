@@ -46,20 +46,17 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::Constructibility",
                            (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
     using StateVectorT = TestType;
-    using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
+    using ComplexT = typename StateVectorT::ComplexT;
 
     SECTION("StateVectorBackend<TestType>") {
         REQUIRE(!std::is_constructible_v<StateVectorT>);
     }
-    SECTION("StateVectorBackend<TestType> {ComplexPrecisionT*, size_t}") {
-        REQUIRE(
-            std::is_constructible_v<StateVectorT, ComplexPrecisionT *, size_t>);
+    SECTION("StateVectorBackend<TestType> {ComplexT*, size_t}") {
+        REQUIRE(std::is_constructible_v<StateVectorT, ComplexT *, size_t>);
     }
-    SECTION(
-        "StateVectorBackend<TestType> {ComplexPrecisionT*, size_t}: Fails if "
-        "provided an inconsistent length.") {
-        std::vector<ComplexPrecisionT> st_data(14, 0.0);
+    SECTION("StateVectorBackend<TestType> {ComplexT*, size_t}: Fails if "
+            "provided an inconsistent length.") {
+        std::vector<ComplexT> st_data(14, 0.0);
         REQUIRE_THROWS_WITH(
             StateVectorT(st_data.data(), st_data.size()),
             Catch::Contains("The size of provided data must be a power of 2."));
@@ -79,11 +76,11 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a std::vector",
                            (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
-    using VectorT = TestVector<ComplexPrecisionT>;
+    using ComplexT = typename StateVectorT::ComplexT;
+    using VectorT = TestVector<ComplexT>;
 
     SECTION("Test wrong matrix size") {
-        std::vector<ComplexPrecisionT> m(7, 0.0);
+        std::vector<ComplexT> m(7, 0.0);
         const size_t num_qubits = 4;
         VectorT st_data =
             createRandomStateVectorData<PrecisionT>(re, num_qubits);
@@ -96,7 +93,7 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a std::vector",
     }
 
     SECTION("Test wrong number of wires") {
-        std::vector<ComplexPrecisionT> m(8, 0.0);
+        std::vector<ComplexT> m(8, 0.0);
         const size_t num_qubits = 4;
         VectorT st_data =
             createRandomStateVectorData<PrecisionT>(re, num_qubits);
@@ -115,11 +112,11 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyMatrix with a pointer",
                            (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
-    using VectorT = TestVector<ComplexPrecisionT>;
+    using ComplexT = typename StateVectorT::ComplexT;
+    using VectorT = TestVector<ComplexT>;
 
     SECTION("Test wrong matrix") {
-        std::vector<ComplexPrecisionT> m(8, 0.0);
+        std::vector<ComplexT> m(8, 0.0);
         const size_t num_qubits = 4;
         VectorT st_data =
             createRandomStateVectorData<PrecisionT>(re, num_qubits);
@@ -164,8 +161,8 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyOperations",
                            (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using ComplexPrecisionT = std::complex<PrecisionT>;
-    using VectorT = TestVector<ComplexPrecisionT>;
+    using ComplexT = typename StateVectorT::ComplexT;
+    using VectorT = TestVector<ComplexT>;
 
     SECTION("Test invalid arguments without parameters") {
         const size_t num_qubits = 4;
