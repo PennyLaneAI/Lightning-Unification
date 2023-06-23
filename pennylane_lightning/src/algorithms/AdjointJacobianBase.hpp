@@ -35,6 +35,12 @@ template <class StateVectorT, class Derived> class AdjointJacobianBase {
     using PrecisionT = typename StateVectorT::PrecisionT;
 
   protected:
+    AdjointJacobianBase() = default;
+    AdjointJacobianBase(const AdjointJacobianBase &) = default;
+    AdjointJacobianBase(AdjointJacobianBase &&) noexcept = default;
+    AdjointJacobianBase &operator=(const AdjointJacobianBase &) = default;
+    AdjointJacobianBase &operator=(AdjointJacobianBase &&) noexcept = default;
+
     /**
      * @brief Apply all operations from given
      * `%OpsData<StateVectorT>` object to `%UpdatedStateVectorT`.
