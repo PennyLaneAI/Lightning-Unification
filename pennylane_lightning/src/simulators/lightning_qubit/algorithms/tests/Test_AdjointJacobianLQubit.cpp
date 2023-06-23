@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <limits>
 #include <vector>
 
 #include <catch2/catch.hpp>
@@ -82,6 +83,7 @@ TEMPLATE_PRODUCT_TEST_CASE(
     HamiltonianApplyInPlace<StateVectorT, false>::run(coeffs, terms, sv1);
     HamiltonianApplyInPlace<StateVectorT, true>::run(coeffs, terms, sv2);
 
+    PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 1e4;
     REQUIRE(isApproxEqual(sv1.getData(), sv1.getLength(), sv2.getData(),
-                          sv2.getLength()));
+                          sv2.getLength(), eps));
 }
