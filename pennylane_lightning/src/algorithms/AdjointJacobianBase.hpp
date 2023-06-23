@@ -109,5 +109,8 @@ template <class StateVectorT, class Derived> class AdjointJacobianBase {
         return static_cast<Derived *>(this)->adjointJacobian(jac, jd,
                                                              apply_operations);
     }
+
+  public:
+    ~AdjointJacobianBase() = default;
 };
 } // namespace Pennylane::Algorithms
