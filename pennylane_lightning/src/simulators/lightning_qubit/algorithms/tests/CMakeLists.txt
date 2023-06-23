@@ -29,7 +29,7 @@ target_sources(lightning_qubit_algorithms_tests INTERFACE runner_lightning_qubit
 # Define targets
 ################################################################################
 set(TEST_SOURCES    Test_AdjointJacobianLQubit.cpp
-                    Test_StatevectorJP.cpp
+                    Test_VectorJacobianProduct.cpp
                     )
 
 add_executable(lightning_qubit_algorithms_test_runner ${TEST_SOURCES})

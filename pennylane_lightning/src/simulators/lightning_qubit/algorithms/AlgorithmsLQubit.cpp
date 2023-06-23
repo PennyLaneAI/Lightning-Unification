@@ -16,7 +16,7 @@
 #include "JacobianData.hpp"
 #include "StateVectorLQubitManaged.hpp"
 #include "StateVectorLQubitRaw.hpp"
-#include "StatevectorJP.hpp"
+#include "VectorJacobianProduct.hpp"
 
 using namespace Pennylane::LightningQubit;
 
@@ -42,8 +42,10 @@ template class Algorithms::AdjointJacobian<StateVectorLQubitRaw<double>>;
 template class Algorithms::AdjointJacobian<StateVectorLQubitManaged<float>>;
 template class Algorithms::AdjointJacobian<StateVectorLQubitManaged<double>>;
 
-template class Algorithms::StatevectorJP<StateVectorLQubitRaw<float>>;
-template class Algorithms::StatevectorJP<StateVectorLQubitRaw<double>>;
+template class Algorithms::VectorJacobianProduct<StateVectorLQubitRaw<float>>;
+template class Algorithms::VectorJacobianProduct<StateVectorLQubitRaw<double>>;
 
-template class Algorithms::StatevectorJP<StateVectorLQubitManaged<float>>;
-template class Algorithms::StatevectorJP<StateVectorLQubitManaged<double>>;
+template class Algorithms::VectorJacobianProduct<
+    StateVectorLQubitManaged<float>>;
+template class Algorithms::VectorJacobianProduct<
+    StateVectorLQubitManaged<double>>;

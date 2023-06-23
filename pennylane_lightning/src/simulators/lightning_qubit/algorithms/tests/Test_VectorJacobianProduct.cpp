@@ -11,10 +11,10 @@
 #include "ObservablesLQubit.hpp"
 #include "StateVectorLQubitManaged.hpp"
 #include "StateVectorLQubitRaw.hpp"
-#include "StatevectorJP.hpp"
 #include "TestHelpers.hpp"      // randomIntVector
 #include "TestHelpersWires.hpp" // createWires
 #include "Util.hpp"             // TestVector
+#include "VectorJacobianProduct.hpp"
 
 // using namespace Pennylane;
 /// @cond DEV
@@ -83,7 +83,7 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVector VJP", "[Algorithms]",
     using std::sqrt;
 
     AdjointJacobian<StateVectorT> adj;
-    StatevectorJP<StateVectorT> sv_vjp;
+    VectorJacobianProduct<StateVectorT> vector_jacobian_product;
 
     constexpr static auto isqrt2 = INVSQRT2<PrecisionT>();
 
@@ -101,7 +101,7 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVector VJP", "[Algorithms]",
         std::vector<ComplexT> ini_st{
             {isqrt2, 0.0}, {0.0, 0.0}, {isqrt2, 0.0}, {0.0, 0.0}};
         JacobianData<StateVectorT> jd{1, 4, ini_st.data(), {}, ops_data, {}};
-        REQUIRE_NOTHROW(sv_vjp.statevectorJP(
+        REQUIRE_NOTHROW(vector_jacobian_product(
             std::span{vjp}, jd, std::span<const ComplexT>{dy}, true));
     }
 
@@ -134,8 +134,8 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVector VJP", "[Algorithms]",
                 std::fill(dy.begin(), dy.end(), ComplexT{0.0, 0.0});
                 dy[i] = {1.0, 0.0};
                 std::vector<ComplexT> vjp(1);
-                sv_vjp.statevectorJP(std::span{vjp}, jd,
-                                     std::span<const ComplexT>{dy}, true);
+                vector_jacobian_product(std::span{vjp}, jd,
+                                        std::span<const ComplexT>{dy}, true);
 
                 REQUIRE(vjp == approx(expected[i]).margin(1e-5));
             }
@@ -153,8 +153,8 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVector VJP", "[Algorithms]",
                 std::fill(dy.begin(), dy.end(), ComplexT{0.0, 0.0});
                 dy[i] = {1.0, 0.0};
                 std::vector<ComplexT> vjp(1);
-                sv_vjp.statevectorJP(std::span{vjp}, jd,
-                                     std::span<const ComplexT>{dy}, false);
+                vector_jacobian_product(std::span{vjp}, jd,
+                                        std::span<const ComplexT>{dy}, false);
 
                 REQUIRE(vjp == approx(expected[i]).margin(1e-5));
             }
@@ -201,8 +201,8 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVector VJP", "[Algorithms]",
                 std::fill(dy.begin(), dy.end(), ComplexT{0.0, 0.0});
                 dy[i] = {1.0, 0.0};
                 std::vector<ComplexT> vjp(2);
-                sv_vjp.statevectorJP(std::span{vjp}, jd,
-                                     std::span<const ComplexT>{dy}, true);
+                vector_jacobian_product(std::span{vjp}, jd,
+                                        std::span<const ComplexT>{dy}, true);
 
                 REQUIRE(vjp[0] == approx(expected_der0[i]).margin(1e-5));
                 REQUIRE(vjp[1] == approx(expected_der1[i]).margin(1e-5));
@@ -223,8 +223,8 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVector VJP", "[Algorithms]",
                 std::fill(dy.begin(), dy.end(), ComplexT{0.0, 0.0});
                 dy[i] = {1.0, 0.0};
                 std::vector<ComplexT> vjp(2);
-                sv_vjp.statevectorJP(std::span{vjp}, jd,
-                                     std::span<const ComplexT>{dy}, false);
+                vector_jacobian_product(std::span{vjp}, jd,
+                                        std::span<const ComplexT>{dy}, false);
 
                 REQUIRE(vjp[0] == approx(expected_der0[i]).margin(1e-5));
                 REQUIRE(vjp[1] == approx(expected_der1[i]).margin(1e-5));
@@ -263,11 +263,11 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVector VJP", "[Algorithms]",
         std::vector<ComplexT> vjp1(1);
         std::vector<ComplexT> vjp2(1);
 
-        sv_vjp.statevectorJP(std::span{vjp1}, jd1,
-                             std::span<const ComplexT>{dy1}, true);
+        vector_jacobian_product(std::span{vjp1}, jd1,
+                                std::span<const ComplexT>{dy1}, true);
 
-        sv_vjp.statevectorJP(std::span{vjp2}, jd2,
-                             std::span<const ComplexT>{dy2}, true);
+        vector_jacobian_product(std::span{vjp2}, jd2,
+                                std::span<const ComplexT>{dy2}, true);
 
         REQUIRE(vjp1[0] == approx(-std::conj(vjp2[0])));
     }
@@ -316,8 +316,9 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVector VJP", "[Algorithms]",
 
         std::vector<PrecisionT> grad_vjp = [&]() {
             std::vector<ComplexT> vjp(num_params);
-            sv_vjp.statevectorJP(std::span{vjp}, jd,
-                                 std::span<const ComplexT>{o_sv_data}, false);
+            vector_jacobian_product(std::span{vjp}, jd,
+                                    std::span<const ComplexT>{o_sv_data},
+                                    false);
             std::vector<PrecisionT> res(vjp.size());
             std::transform(vjp.begin(), vjp.end(), res.begin(),
                            [](const auto &x) { return 2 * std::real(x); });

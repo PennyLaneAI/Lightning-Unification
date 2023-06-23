@@ -38,13 +38,14 @@ using Pennylane::Util::log2PerfectPower;
 namespace Pennylane::LightningQubit::Algorithms {
 
 /**
- * @brief Vector Jacobian Product (VJP) class
+ * @brief Vector Jacobian Product (VJP) functor.
  *
  * @tparam StateVectorT State vector type.
  */
 template <class StateVectorT>
-class StatevectorJP final
-    : public AdjointJacobianBase<StateVectorT, StatevectorJP<StateVectorT>> {
+class VectorJacobianProduct final
+    : public AdjointJacobianBase<StateVectorT,
+                                 VectorJacobianProduct<StateVectorT>> {
   private:
     using ComplexT = typename StateVectorT::ComplexT;
     using PrecisionT = typename StateVectorT::PrecisionT;
@@ -78,10 +79,10 @@ class StatevectorJP final
      * @param apply_operations Assume the given state is an input state and
      * apply operations if true
      */
-    void statevectorJP(std::span<ComplexT> jac,
-                       const JacobianData<StateVectorT> &jd,
-                       std::span<const ComplexT> dy,
-                       bool apply_operations = false) {
+    void operator()(std::span<ComplexT> jac,
+                    const JacobianData<StateVectorT> &jd,
+                    std::span<const ComplexT> dy,
+                    bool apply_operations = false) {
 
         assert(dy.size() == jd.getSizeStateVec());
 
