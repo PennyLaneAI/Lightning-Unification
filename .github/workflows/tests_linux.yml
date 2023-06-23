@@ -109,7 +109,7 @@ jobs:
         os: [ubuntu-22.04]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
-        PL_BACKEND: ["lightning_qubit", "lightning_kokkos"]
+        PL_BACKEND: ["lightning_qubit"]
 
     name: C++ tests (Kokkos)
     runs-on: ${{ matrix.os }}

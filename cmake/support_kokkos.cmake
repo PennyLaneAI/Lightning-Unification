@@ -5,14 +5,14 @@
 # Include this file only once
 include_guard()
 
-set(KOKKOS_VERSION 3.7.00)
+set(KOKKOS_VERSION 4.0.01)
 
 # Macro to aid in finding Kokkos and Kokkos Kernels with 3 potential install options:
 # 1. Fully integrated Kokkos packages and CMake module files
 # 2. Statically compiled libraries and headers
 # 3. Not installed, so fall back to building from source.
 macro(FindKokkosAndKokkosKernels target_name)
-    find_package(Kokkos ${KOKKOS_VERSION}
+    find_package(Kokkos
     HINTS   ${CMAKE_SOURCE_DIR}/kokkos
             ${CMAKE_SOURCE_DIR}/Kokkos
             ${Kokkos_Core_DIR}
@@ -92,6 +92,7 @@ macro(FindKokkosAndKokkosKernels target_name)
             target_link_libraries(${target_name} PRIVATE kokkos kokkoskernels)
         else()
             message(STATUS "Building Kokkos from source. SERIAL device enabled.")
+            message(STATUS "Requested Kokkos and Kokkos Kernels libraries version: ${KOKKOS_VERSION}")
 
             option(Kokkos_ENABLE_SERIAL  "Enable Kokkos SERIAL device" ON)
             option(Kokkos_ENABLE_COMPLEX_ALIGN "Enable complex alignment in memory" OFF)
@@ -178,6 +179,7 @@ macro(FindKokkos target_name)
             target_link_libraries(${target_name} PRIVATE kokkos)
         else()
             message(STATUS "Building Kokkos from source. SERIAL device enabled.")
+            message(STATUS "Requested Kokkos library version: ${KOKKOS_VERSION}")
 
             # option(Kokkos_ENABLE_SERIAL  "Enable Kokkos SERIAL device" ON)
             option(Kokkos_ENABLE_SERIAL  "Enable Kokkos SERIAL device" ON)

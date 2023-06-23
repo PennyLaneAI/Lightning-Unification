@@ -11,14 +11,19 @@ include("${CMAKE_SOURCE_DIR}/cmake/support_tests.cmake")
 FetchAndIncludeCatch()
 
 ################################################################################
-# Define compile options and library
+# Define library
 ################################################################################
 
 add_library(algorithms_tests INTERFACE)
 target_link_libraries(algorithms_tests INTERFACE    Catch2::Catch2
-                                                    lightning_utils
                                                     lightning_algorithms
                                                     )
+
+# Create dependencies on the dynamically defined simulator/backend targets.
+target_link_libraries(algorithms_tests INTERFACE    ${PL_BACKEND}
+                                                    "${PL_BACKEND}_algorithms"
+                                                    "${PL_BACKEND}_observables"
+)
 
 ProcessTestOptions(algorithms_tests)
 
@@ -31,10 +36,8 @@ set(TEST_SOURCES    Test_AdjointJacobian.cpp
                     )
 
 add_executable(algorithms_test_runner ${TEST_SOURCES})
-target_link_libraries(algorithms_test_runner PRIVATE    algorithms_tests
-                                                        lightning_compile_options
-                                                        lightning_external_libs
-                                                        )
+target_link_libraries(algorithms_test_runner PRIVATE algorithms_tests)
+
 catch_discover_tests(algorithms_test_runner)
 
 install(TARGETS algorithms_test_runner DESTINATION bin)
