@@ -19,6 +19,12 @@ target_link_libraries(algorithms_tests INTERFACE    Catch2::Catch2
                                                     lightning_algorithms
                                                     )
 
+# Create dependencies on the dynamically defined simulator/backend targets.
+target_link_libraries(algorithms_tests INTERFACE    ${PL_BACKEND}
+                                                    "${PL_BACKEND}_algorithms"
+                                                    "${PL_BACKEND}_observables"
+)
+
 ProcessTestOptions(algorithms_tests)
 
 target_sources(algorithms_tests INTERFACE runner_algorithms.cpp)
