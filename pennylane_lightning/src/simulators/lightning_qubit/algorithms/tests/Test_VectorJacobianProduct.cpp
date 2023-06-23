@@ -16,19 +16,16 @@
 #include "Util.hpp"             // TestVector
 #include "VectorJacobianProduct.hpp"
 
-// using namespace Pennylane;
 /// @cond DEV
 namespace {
-// using namespace Pennylane;
 using namespace Pennylane::Algorithms;
 using namespace Pennylane::Util;
 
 using namespace Pennylane::LightningQubit::Algorithms;
 using namespace Pennylane::LightningQubit::Observables;
 using namespace Pennylane::LightningQubit::Util;
-// using namespace Pennylane::Simulators;
 } // namespace
-  /// @endcond
+/// @endcond
 
 #if !defined(_USE_MATH_DEFINES)
 #define _USE_MATH_DEFINES
