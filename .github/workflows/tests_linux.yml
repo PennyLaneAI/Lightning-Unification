@@ -227,9 +227,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        pl_backend: ["lightning_qubit"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+        pl_backend: ["lightning_qubit"]
 
     name: C++ tests (Kokkos)
     runs-on: ${{ matrix.os }}

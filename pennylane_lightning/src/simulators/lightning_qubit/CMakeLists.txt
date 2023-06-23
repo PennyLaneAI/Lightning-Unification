@@ -72,7 +72,8 @@ set_property(TARGET lightning_qubit PROPERTY POSITION_INDEPENDENT_CODE ON)
 ###############################################################################
 # Include subdirectories
 ###############################################################################
-set(COMPONENT_SUBDIRS   bindings
+set(COMPONENT_SUBDIRS   algorithms
+                        bindings
                         gates
                         measurements
                         observables

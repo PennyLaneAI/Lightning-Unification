@@ -41,7 +41,7 @@ help:
 .PHONY : clean
 clean:
 	find . -type d -name '__pycache__' -exec rm -r {} \+
-  rm -rf build Build BuildTests BuildTidy BuildGBench
+	rm -rf build Build BuildTests BuildTidy BuildGBench
 	rm -rf pennylane_lightning/pennylane_lightning_ops*
 
 test-builtin:
@@ -61,7 +61,6 @@ build:
 test-cpp:
 	rm -rf ./BuildTests
 	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_OPENMP=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
-
 ifdef target
 	cmake --build ./BuildTests $(VERBOSE) --target $(target)
 	./BuildTests/$(target)

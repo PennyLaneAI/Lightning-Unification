@@ -17,7 +17,7 @@ FetchAndIncludeCatch()
 add_library(measurements_tests INTERFACE)
 target_link_libraries(measurements_tests INTERFACE  Catch2::Catch2)
 
-# Create dependency on the dynamically defined simulator/backend target.
+# Create dependencies on the dynamically defined simulator/backend targets.
 target_link_libraries(measurements_tests INTERFACE  ${PL_BACKEND}
                                                     "${PL_BACKEND}_measurements"
                                                     "${PL_BACKEND}_observables"
