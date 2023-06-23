@@ -498,6 +498,38 @@ bool operator==(const std::vector<T, AllocA> &lhs,
     return true;
 }
 
+/**
+ * @brief Define linearly spaced data [start, end]
+ *
+ * @tparam T Data type.
+ * @param start Start position.
+ * @param end End position.
+ * @param num_points Number of data-points in range.
+ * @return std::vector<T>
+ */
+template <class T>
+auto linspace(T start, T end, size_t num_points) -> std::vector<T> {
+    std::vector<T> data(num_points);
+    T step = (end - start) / (num_points - 1);
+    for (size_t i = 0; i < num_points; i++) {
+        data[i] = start + (step * i);
+    }
+    return data;
+}
+
+template <typename RandomEngine>
+std::vector<int> randomIntVector(RandomEngine &re, size_t size, int min,
+                                 int max) {
+    std::uniform_int_distribution<int> dist(min, max);
+    std::vector<int> res;
+
+    res.reserve(size);
+    for (size_t i = 0; i < size; i++) {
+        res.emplace_back(dist(re));
+    }
+    return res;
+}
+
 #define PL_REQUIRE_THROWS_MATCHES(expr, type, message_match)                   \
     REQUIRE_THROWS_AS(expr, type);                                             \
     REQUIRE_THROWS_WITH(expr, Catch::Matchers::Contains(message_match));
