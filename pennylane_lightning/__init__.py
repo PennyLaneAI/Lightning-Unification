@@ -15,4 +15,6 @@
 
 from ._version import __version__
 
+from .lightning_base import CPP_BINARY_AVAILABLE, backend_info
+
 from .lightning_qubit import LightningQubit
