@@ -20,6 +20,7 @@
 
 #pragma once
 #include "CPUMemoryModel.hpp" // CPUMemoryModel, getMemoryModel, bestCPUMemoryModel, getAlignment
+#include "JacobianData.hpp"
 #include "Macros.hpp" // CPUArch
 #include "Memory.hpp" // alignedAlloc
 #include "Observables.hpp"
@@ -41,13 +42,15 @@
 #include <vector>
 
 #ifdef _ENABLE_PLQUBIT
-#include "LQubitBindings.hpp" // StateVectorBackends, registerBackendClassSpecificBindings, registerBackendSpecificMeasurements
+#include "AdjointJacobianLQubit.hpp"
+#include "LQubitBindings.hpp" // StateVectorBackends, registerBackendClassSpecificBindings, registerBackendSpecificMeasurements, registerBackendSpecificAlgorithms
 #include "MeasurementsLQubit.hpp"
 #include "ObservablesLQubit.hpp"
 
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
+using namespace Pennylane::LightningQubit::Algorithms;
 using namespace Pennylane::LightningQubit::Observables;
 using namespace Pennylane::LightningQubit::Measures;
 } // namespace
@@ -228,7 +231,7 @@ auto getCompileInfo() -> pybind11::dict {
 }
 
 /**
- * @brief Return basic information of runtime environment
+ * @brief Return basic information of runtime environment.
  */
 auto getRuntimeInfo() -> pybind11::dict {
     using Pennylane::Util::RuntimeInfo;
@@ -253,7 +256,7 @@ void registerInfo(py::module_ &m) {
 }
 
 /**
- * @brief Register Observable Classes
+ * @brief Register observable classes.
  *
  * @tparam StateVectorT
  * @param m Pybind module
@@ -380,7 +383,7 @@ template <class StateVectorT> void registerObservables(py::module_ &m) {
 }
 
 /**
- * @brief Register Agnostic Measurements Class functionalities
+ * @brief Register agnostic measurements class functionalities.
  *
  * @tparam StateVectorT
  * @tparam PyClass
@@ -436,6 +439,115 @@ void registerBackendAgnosticMeasurements(PyClass &pyclass) {
 }
 
 /**
+ * @brief Register the adjoint Jacobian method.
+ */
+template <class StateVectorT>
+auto registerAdjointJacobian(
+    AdjointJacobian<StateVectorT> &adjoint_jacobian, const StateVectorT &sv,
+    const std::vector<std::shared_ptr<Observable<StateVectorT>>> &observables,
+    const OpsData<StateVectorT> &operations,
+    const std::vector<size_t> &trainableParams)
+    -> py::array_t<typename StateVectorT::PrecisionT> {
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    std::vector<PrecisionT> jac(observables.size() * trainableParams.size(),
+                                PrecisionT{0.0});
+    const JacobianData<StateVectorT> jd{operations.getTotalNumParams(),
+                                        sv.getLength(),
+                                        sv.getData(),
+                                        observables,
+                                        operations,
+                                        trainableParams};
+
+    adjoint_jacobian.adjointJacobian(std::span{jac}, jd);
+
+    return py::array_t<PrecisionT>(py::cast(jac));
+}
+
+/**
+ * @brief Register agnostic algorithms.
+ *
+ * @tparam StateVectorT
+ * @param m Pybind module
+ */
+template <class StateVectorT>
+void registerBackendAgnosticAlgorithms(py::module_ &m) {
+    using PrecisionT =
+        typename StateVectorT::PrecisionT; // Statevector's precision
+    using ParamT = PrecisionT;             // Parameter's data precision
+
+    using np_arr_c = py::array_t<std::complex<ParamT>, py::array::c_style>;
+
+    const std::string bitsize =
+        std::to_string(sizeof(std::complex<PrecisionT>) * 8);
+
+    std::string class_name;
+
+    //***********************************************************************//
+    //                              Operations
+    //***********************************************************************//
+
+    class_name = "OpsStructC" + bitsize;
+    py::class_<OpsData<StateVectorT>>(m, class_name.c_str(), py::module_local())
+        .def(py::init<
+             const std::vector<std::string> &,
+             const std::vector<std::vector<ParamT>> &,
+             const std::vector<std::vector<size_t>> &,
+             const std::vector<bool> &,
+             const std::vector<std::vector<std::complex<PrecisionT>>> &>())
+        .def("__repr__", [](const OpsData<StateVectorT> &ops) {
+            using namespace Pennylane::Util;
+            std::ostringstream ops_stream;
+            for (size_t op = 0; op < ops.getSize(); op++) {
+                ops_stream << "{'name': " << ops.getOpsName()[op];
+                ops_stream << ", 'params': " << ops.getOpsParams()[op];
+                ops_stream << ", 'inv': " << ops.getOpsInverses()[op];
+                ops_stream << "}";
+                if (op < ops.getSize() - 1) {
+                    ops_stream << ",";
+                }
+            }
+            return "Operations: [" + ops_stream.str() + "]";
+        });
+
+    /**
+     * Create operation list.
+     * */
+    std::string function_name = "create_ops_listC" + bitsize;
+    m.def(
+        function_name.c_str(),
+        [](const std::vector<std::string> &ops_name,
+           const std::vector<std::vector<PrecisionT>> &ops_params,
+           const std::vector<std::vector<size_t>> &ops_wires,
+           const std::vector<bool> &ops_inverses,
+           const std::vector<np_arr_c> &ops_matrices) {
+            std::vector<std::vector<std::complex<PrecisionT>>> conv_matrices(
+                ops_matrices.size());
+            for (size_t op = 0; op < ops_name.size(); op++) {
+                const auto m_buffer = ops_matrices[op].request();
+                if (m_buffer.size) {
+                    const auto m_ptr =
+                        static_cast<const std::complex<ParamT> *>(m_buffer.ptr);
+                    conv_matrices[op] = std::vector<std::complex<ParamT>>{
+                        m_ptr, m_ptr + m_buffer.size};
+                }
+            }
+            return OpsData<StateVectorT>{ops_name, ops_params, ops_wires,
+                                         ops_inverses, conv_matrices};
+        },
+        "Create a list of operations from data.");
+
+    //***********************************************************************//
+    //                            Adjoint Jacobian
+    //***********************************************************************//
+    class_name = "AdjointJacobianC" + bitsize;
+    py::class_<AdjointJacobian<StateVectorT>>(m, class_name.c_str(),
+                                              py::module_local())
+        .def(py::init<>())
+        .def("__call__", &registerAdjointJacobian<StateVectorT>,
+             "Adjoint Jacobian method.");
+}
+
+/**
  * @brief Templated class to build lightning class bindings.
  *
  * @tparam StateVectorT State vector type
@@ -451,7 +563,6 @@ template <class StateVectorT> void lightningClassBindings(py::module_ &m) {
     //***********************************************************************//
     //                              StateVector
     //***********************************************************************//
-
     std::string class_name = "StateVectorC" + bitsize;
     auto pyclass =
         py::class_<StateVectorT>(m, class_name.c_str(), py::module_local());
@@ -477,6 +588,15 @@ template <class StateVectorT> void lightningClassBindings(py::module_ &m) {
     pyclass_measurements.def(py::init<const StateVectorT &>());
     registerBackendAgnosticMeasurements<StateVectorT>(pyclass_measurements);
     registerBackendSpecificMeasurements<StateVectorT>(pyclass_measurements);
+
+    //***********************************************************************//
+    //                           Algorithms
+    //***********************************************************************//
+    /* Algorithms submodule */
+    py::module_ alg_submodule = m.def_submodule(
+        "algorithms", "Submodule for the algorithms functionality.");
+    registerBackendAgnosticAlgorithms<StateVectorT>(alg_submodule);
+    registerBackendSpecificAlgorithms<StateVectorT>(alg_submodule);
 }
 
 template <typename TypeList>

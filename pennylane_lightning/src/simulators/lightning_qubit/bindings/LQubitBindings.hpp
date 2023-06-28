@@ -26,8 +26,8 @@
 #include "KokkosSparse.hpp"
 #include "MeasurementsLQubit.hpp"
 #include "StateVectorLQubitRaw.hpp"
-
 #include "TypeList.hpp"
+#include "VectorJacobianProduct.hpp"
 
 #include "pybind11/pybind11.h"
 
@@ -35,6 +35,7 @@
 namespace {
 using Pennylane::LightningQubit::StateVectorLQubitRaw;
 using namespace Pennylane::LightningQubit::Measures;
+using namespace Pennylane::LightningQubit::Algorithms;
 } // namespace
 /// @endcond
 
@@ -73,7 +74,7 @@ void registerMatrix(
 template <class StateVectorT, class PyClass>
 void registerGatesForStateVector(PyClass &pyclass) {
     using PrecisionT =
-        typename StateVectorT::PrecisionT; // Statevector's precision.
+        typename StateVectorT::PrecisionT; // Statevector's precision
     using ParamT = PrecisionT;             // Parameter's data precision
 
     using Gates::GateOperation;
@@ -98,12 +99,12 @@ void registerGatesForStateVector(PyClass &pyclass) {
 }
 
 /**
- * @brief Get a gate kernel map for a statevector
+ * @brief Get a gate kernel map for a statevector.
  */
 template <class StateVectorT>
 auto svKernelMap(const StateVectorT &sv) -> pybind11::dict {
     using PrecisionT =
-        typename StateVectorT::PrecisionT; // Statevector's precision.
+        typename StateVectorT::PrecisionT; // Statevector's precision
     pybind11::dict res_map;
     namespace Constant = Gates::Constant;
     using Pennylane::LightningQubit::Util::lookup;
@@ -137,7 +138,7 @@ auto svKernelMap(const StateVectorT &sv) -> pybind11::dict {
 }
 
 /**
- * @brief Get a gate kernel map for a statevector
+ * @brief Get a gate kernel map for a statevector.
  */
 template <class StateVectorT, class PyClass>
 void registerBackendClassSpecificBindings(PyClass &pyclass) {
@@ -149,7 +150,7 @@ void registerBackendClassSpecificBindings(PyClass &pyclass) {
 }
 
 /**
- * @brief Register Specific Measurements Class functionalities
+ * @brief Register backend specific measurements class functionalities.
  *
  * @tparam StateVectorT
  * @tparam PyClass
@@ -158,7 +159,7 @@ void registerBackendClassSpecificBindings(PyClass &pyclass) {
 template <class StateVectorT, class PyClass>
 void registerBackendSpecificMeasurements(PyClass &pyclass) {
     using PrecisionT =
-        typename StateVectorT::PrecisionT; // Statevector's precision.
+        typename StateVectorT::PrecisionT; // Statevector's precision
     using ParamT = PrecisionT;             // Parameter's data precision
 
     using np_arr_c = py::array_t<std::complex<ParamT>,
@@ -232,6 +233,69 @@ void registerBackendSpecificMeasurements(PyClass &pyclass) {
                      strides /* strides for each axis     */
                      ));
              });
+}
+
+/**
+ * @brief Register Vector Jacobian Product.
+ */
+template <class StateVectorT, class np_arr_c>
+auto registerVJP(VectorJacobianProduct<StateVectorT> &calculate_vjp,
+                 const StateVectorT &sv,
+                 const OpsData<StateVectorT> &operations, const np_arr_c &dy,
+                 const std::vector<size_t> &trainableParams)
+    -> py::array_t<std::complex<typename StateVectorT::PrecisionT>> {
+    /* Do not cast non-conforming array. Argument trainableParams
+     * should only contain indices for operations.
+     */
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    std::vector<std::complex<PrecisionT>> vjp(trainableParams.size(),
+                                              std::complex<PrecisionT>{});
+
+    const JacobianData<StateVectorT> jd{operations.getTotalNumParams(),
+                                        sv.getLength(),
+                                        sv.getData(),
+                                        {},
+                                        operations,
+                                        trainableParams};
+
+    const auto buffer = dy.request();
+
+    calculate_vjp(
+        std::span{vjp}, jd,
+        std::span{static_cast<const std::complex<PrecisionT> *>(buffer.ptr),
+                  static_cast<size_t>(buffer.size)});
+
+    return py::array_t<std::complex<PrecisionT>>(py::cast(vjp));
+}
+
+/**
+ * @brief Register backend specific adjoint Jacobian methods.
+ *
+ * @tparam StateVectorT
+ * @param m Pybind module
+ */
+template <class StateVectorT>
+void registerBackendSpecificAlgorithms(py::module_ &m) {
+    using PrecisionT =
+        typename StateVectorT::PrecisionT; // Statevector's precision
+    using ParamT = PrecisionT;             // Parameter's data precision
+
+    using np_arr_c = py::array_t<std::complex<ParamT>, py::array::c_style>;
+
+    const std::string bitsize =
+        std::to_string(sizeof(std::complex<PrecisionT>) * 8);
+
+    std::string class_name;
+
+    //***********************************************************************//
+    //                        Vector Jacobian Product
+    //***********************************************************************//
+    class_name = "VectorJacobianProductC" + bitsize;
+    py::class_<VectorJacobianProduct<StateVectorT>>(m, class_name.c_str(),
+                                                    py::module_local())
+        .def(py::init<>())
+        .def("__call__", &registerVJP<StateVectorT, np_arr_c>,
+             "Vector Jacobian Product method.");
 }
 
 /**
