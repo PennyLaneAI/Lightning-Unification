@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Test binary information of ``lightning.qubit``.
+Test binary information of Lightning devices.
 """
 import pytest
 
 try:
-    from pennylane_lightning.pennylane_lightning_ops import runtime_info, compile_info
+    from pennylane_lightning.pennylane_lightning_ops import runtime_info
 except (ImportError, ModuleNotFoundError):
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 

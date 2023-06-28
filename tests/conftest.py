@@ -20,6 +20,7 @@ import pytest
 import numpy as np
 
 import pennylane as qml
+from pennylane_lightning.lightning_base import backend_info
 
 # defaults
 TOL = 1e-6
@@ -84,10 +85,18 @@ def n_subsystems(request):
     return request.param
 
 
+# Device specification:
+# The device name will be provided by the binaries.
+device_name = backend_info()["NAME"]
+
+if device_name == "lightning.qubit":
+    from pennylane_lightning import LightningQubit as LightningDevice
+
+
 # General qubit_device fixture, for any number of wires.
 @pytest.fixture(scope="function", params=[np.complex64, np.complex128])
 def qubit_device(request):
     def _device(wires):
-        return qml.device("lightning.qubit", wires=wires, c_dtype=request.param)
+        return qml.device(device_name, wires=wires, c_dtype=request.param)
 
     return _device

@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Unit tests for operation decomposition.
+Unit tests for operation decomposition with Lightning devices.
 """
 import pytest
-import numpy as np
-import pennylane as qml
-from pennylane_lightning import LightningQubit
 
-from pennylane_lightning.lightning_qubit import CPP_BINARY_AVAILABLE
+import numpy as np
+
+import pennylane as qml
+from pennylane_lightning import CPP_BINARY_AVAILABLE
+
+from conftest import LightningDevice
 
 if not CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
@@ -40,4 +42,4 @@ class TestDenseMatrixDecompositionThreshold:
     def test_threshold(self, op, n_wires, condition):
         wires = np.linspace(0, n_wires - 1, n_wires, dtype=int)
         op = op(wires=wires)
-        assert LightningQubit.stopping_condition.__get__(op)(op) == condition
+        assert LightningDevice.stopping_condition.__get__(op)(op) == condition

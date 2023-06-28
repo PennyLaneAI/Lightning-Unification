@@ -14,17 +14,19 @@
 """
 Unit tests for Measurements in lightning.qubit.
 """
+import pytest
+
 import numpy as np
-import pennylane as qml
 import math
+
+import pennylane as qml
 from pennylane.measurements import (
     Variance,
     Expectation,
 )
+from pennylane_lightning import CPP_BINARY_AVAILABLE
 
-import pytest
-
-from pennylane_lightning.lightning_qubit import CPP_BINARY_AVAILABLE
+from conftest import device_name
 
 if not CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
@@ -33,7 +35,7 @@ if not CPP_BINARY_AVAILABLE:
 def test_no_measure(tol):
     """Test that failing to specify a measurement
     raises an exception"""
-    dev = qml.device("lightning.qubit", wires=2)
+    dev = qml.device(device_name, wires=2)
 
     @qml.qnode(dev)
     def circuit(x):
@@ -45,11 +47,11 @@ def test_no_measure(tol):
 
 
 class TestProbs:
-    """Test Probs in Lightning"""
+    """Test Probs in Lightning devices"""
 
     @pytest.fixture(params=[np.complex64, np.complex128])
     def dev(self, request):
-        return qml.device("lightning.qubit", wires=2, c_dtype=request.param)
+        return qml.device(device_name, wires=2, c_dtype=request.param)
 
     def test_probs_dtype64(self, dev):
         """Test if probs changes the state dtype"""
@@ -126,7 +128,7 @@ class TestProbs:
         """Test probs with a circuit on wires=[0] fails for out-of-order wires passed to probs."""
 
         x, y, z = [0.5, 0.3, -0.7]
-        dev = qml.device("lightning.qubit", wires=cases[1])
+        dev = qml.device(device_name, wires=cases[1])
 
         @qml.qnode(dev)
         def circuit():
@@ -152,7 +154,7 @@ class TestProbs:
         """Test probs with a circuit on wires=[0] passes if wires are sorted wrt device wires."""
 
         x, y, z = [0.5, 0.3, -0.7]
-        dev = qml.device("lightning.qubit", wires=cases[1])
+        dev = qml.device(device_name, wires=cases[1])
 
         @qml.qnode(dev)
         def circuit():
@@ -225,7 +227,7 @@ class TestExpval:
 
     @pytest.fixture(params=[np.complex64, np.complex128])
     def dev(self, request):
-        return qml.device("lightning.qubit", wires=2, c_dtype=request.param)
+        return qml.device(device_name, wires=2, c_dtype=request.param)
 
     def test_expval_dtype64(self, dev):
         """Test if expval changes the state dtype"""
@@ -360,7 +362,7 @@ class TestVar:
 
     @pytest.fixture(params=[np.complex64, np.complex128])
     def dev(self, request):
-        return qml.device("lightning.qubit", wires=2, c_dtype=request.param)
+        return qml.device(device_name, wires=2, c_dtype=request.param)
 
     def test_var_dtype64(self, dev):
         """Test if var changes the state dtype"""
@@ -462,7 +464,7 @@ class TestBetaStatisticsError:
     def test_not_an_observable(self, stat_func):
         """Test that a qml.QuantumFunctionError is raised if the provided
         argument is not an observable"""
-        dev = qml.device("lightning.qubit", wires=2)
+        dev = qml.device(device_name, wires=2)
 
         @qml.qnode(dev)
         def circuit():
@@ -492,10 +494,10 @@ class TestWiresInExpval:
     @pytest.mark.parametrize("C", [np.complex64, np.complex128])
     def test_wires_expval(self, wires1, wires2, C, tol):
         """Test that the expectation of a circuit is independent from the wire labels used."""
-        dev1 = qml.device("lightning.qubit", wires=wires1, c_dtype=C)
+        dev1 = qml.device(device_name, wires=wires1, c_dtype=C)
         dev1._state = dev1._asarray(dev1._state, C)
 
-        dev2 = qml.device("lightning.qubit", wires=wires2)
+        dev2 = qml.device(device_name, wires=wires2)
         dev2._state = dev2._asarray(dev2._state, C)
 
         n_wires = len(wires1)
@@ -533,10 +535,10 @@ class TestWiresInExpval:
     @pytest.mark.parametrize("C", [np.complex64, np.complex128])
     def test_wires_expval_hermitian(self, wires1, wires2, C, tol):
         """Test that the expectation of a circuit is independent from the wire labels used."""
-        dev1 = qml.device("lightning.qubit", wires=wires1, c_dtype=C)
+        dev1 = qml.device(device_name, wires=wires1, c_dtype=C)
         dev1._state = dev1._asarray(dev1._state, C)
 
-        dev2 = qml.device("lightning.qubit", wires=wires2)
+        dev2 = qml.device(device_name, wires=wires2)
         dev2._state = dev2._asarray(dev2._state, C)
         ob_mat = [
             [1.0, 2.0, 0.0, 1.0],
@@ -627,10 +629,10 @@ class TestWiresInVar:
     @pytest.mark.parametrize("C", [np.complex64, np.complex128])
     def test_wires_var(self, wires1, wires2, C, tol):
         """Test that the expectation of a circuit is independent from the wire labels used."""
-        dev1 = qml.device("lightning.qubit", wires=wires1)
+        dev1 = qml.device(device_name, wires=wires1)
         dev1._state = dev1._asarray(dev1._state, C)
 
-        dev2 = qml.device("lightning.qubit", wires=wires2)
+        dev2 = qml.device(device_name, wires=wires2)
         dev2._state = dev2._asarray(dev2._state, C)
 
         n_wires = len(wires1)

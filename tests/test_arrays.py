@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Unit tests for the :mod:`pennylane_lightning.LightningQubit` device.
+Array tests for Lightning devices.
 """
-import numpy as np
 import pytest
 
-from pennylane_lightning.lightning_qubit import CPP_BINARY_AVAILABLE
+import numpy as np
+
+from pennylane_lightning import CPP_BINARY_AVAILABLE
 
 try:
     from pennylane_lightning.pennylane_lightning_ops import allocate_aligned_array

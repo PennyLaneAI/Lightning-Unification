@@ -12,25 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Unit tests :mod:`pennylane_lightning.LightningQubit` device can be created.
+Unit tests for Lightning devices creation.
 """
 import pytest
-import numpy as np
-import pennylane as qml
 
-from pennylane_lightning.lightning_qubit import CPP_BINARY_AVAILABLE
+import numpy as np
+
+import pennylane as qml
+from pennylane_lightning import CPP_BINARY_AVAILABLE
+
+from conftest import device_name
 
 if not CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
 
 def test_create_device():
-    dev = qml.device("lightning.qubit", wires=1)
+    dev = qml.device(device_name, wires=1)
 
 
 @pytest.mark.parametrize("C", [np.complex64, np.complex128])
 def test_create_device_with_dtype(C):
-    dev = qml.device("lightning.qubit", wires=1, c_dtype=C)
+    dev = qml.device(device_name, wires=1, c_dtype=C)
 
 
 @pytest.mark.skipif(
@@ -38,4 +41,4 @@ def test_create_device_with_dtype(C):
 )
 def test_create_device_with_unsupported_dtype():
     with pytest.raises(TypeError, match="Unsupported complex Type:"):
-        dev = qml.device("lightning.qubit", wires=1, c_dtype=np.complex256)
+        dev = qml.device(device_name, wires=1, c_dtype=np.complex256)

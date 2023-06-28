@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Unit tests for the correct application of gates with lightning.qubit.
+Unit tests for the correct application of gates with a Lightning device.
 """
-import itertools
-
-import numpy as np
-import pennylane as qml
 import pytest
 
-from pennylane_lightning import LightningQubit
+import itertools
+import numpy as np
+
+import pennylane as qml
+
+from conftest import LightningDevice, device_name
 
 
 @pytest.fixture
@@ -80,7 +81,7 @@ def op(op_name):
     return ops_list.get(op_name)
 
 
-@pytest.mark.parametrize("op_name", LightningQubit.operations)
+@pytest.mark.parametrize("op_name", LightningDevice.operations)
 def test_gate_unitary_correct(op, op_name):
     """Test if lightning.qubit correctly applies gates by reconstructing the unitary matrix and
     comparing to the expected version"""
@@ -92,7 +93,7 @@ def test_gate_unitary_correct(op, op_name):
 
     wires = len(op[2]["wires"])
 
-    dev = qml.device("lightning.qubit", wires=wires)
+    dev = qml.device(device_name, wires=wires)
 
     @qml.qnode(dev)
     def output(input):
@@ -111,7 +112,7 @@ def test_gate_unitary_correct(op, op_name):
     assert np.allclose(unitary, unitary_expected)
 
 
-@pytest.mark.parametrize("op_name", LightningQubit.operations)
+@pytest.mark.parametrize("op_name", LightningDevice.operations)
 def test_inverse_unitary_correct(op, op_name):
     """Test if lightning.qubit correctly applies inverse gates by reconstructing the unitary matrix
     and comparing to the expected version"""
@@ -123,7 +124,7 @@ def test_inverse_unitary_correct(op, op_name):
 
     wires = len(op[2]["wires"])
 
-    dev = qml.device("lightning.qubit", wires=wires)
+    dev = qml.device(device_name, wires=wires)
 
     @qml.qnode(dev)
     def output(input):
@@ -176,7 +177,7 @@ def test_arbitrary_unitary_correct():
     """Test if lightning.qubit correctly applies an arbitrary unitary by reconstructing its
     matrix"""
     wires = 2
-    dev = qml.device("lightning.qubit", wires=wires)
+    dev = qml.device(device_name, wires=wires)
 
     @qml.qnode(dev)
     def output(input):
@@ -197,7 +198,7 @@ def test_arbitrary_inv_unitary_correct():
     """Test if lightning.qubit correctly applies the inverse of an arbitrary unitary by
     reconstructing its matrix"""
     wires = 2
-    dev = qml.device("lightning.qubit", wires=wires)
+    dev = qml.device(device_name, wires=wires)
 
     @qml.qnode(dev)
     def output(input):
@@ -215,25 +216,25 @@ def test_arbitrary_inv_unitary_correct():
     assert np.allclose(unitary, random_unitary_inv)
 
 
-# @pytest.mark.skipif(not LightningQubit._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
-# @pytest.mark.parametrize(
-#     "obs,has_rotation",
-#     [
-#         (qml.Hamiltonian([1], [qml.PauliY(0)]), False),
-#         (qml.sum(qml.PauliZ(0), qml.PauliX(1)), False),
-#         (qml.PauliX(0), True),
-#         (qml.sum(qml.PauliZ(0), qml.Hermitian(qml.PauliX(1).matrix(), 1)), True),
-#     ],
-# )
-# def test_get_diagonalizing_gates(obs, has_rotation):
-#     """Tests that _get_diagonalizing_gates filters measurements as expected."""
-#     dev = qml.device("lightning.qubit", wires=2)
-#     qs = qml.tape.QuantumScript(measurements=[qml.expval(obs)])
-#     actual = dev._get_diagonalizing_gates(qs)
-#     if has_rotation:
-#         expected = obs.diagonalizing_gates()
-#         assert len(actual) == len(expected)
-#         for rot_actual, rot_expected in zip(actual, expected):
-#             assert qml.equal(rot_actual, rot_expected)
-#     else:
-#         assert len(actual) == 0
+@pytest.mark.skipif(not LightningDevice._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
+@pytest.mark.parametrize(
+    "obs,has_rotation",
+    [
+        (qml.Hamiltonian([1], [qml.PauliY(0)]), False),
+        (qml.sum(qml.PauliZ(0), qml.PauliX(1)), False),
+        (qml.PauliX(0), True),
+        (qml.sum(qml.PauliZ(0), qml.Hermitian(qml.PauliX(1).matrix(), 1)), True),
+    ],
+)
+def test_get_diagonalizing_gates(obs, has_rotation):
+    """Tests that _get_diagonalizing_gates filters measurements as expected."""
+    dev = qml.device(device_name, wires=2)
+    qs = qml.tape.QuantumScript(measurements=[qml.expval(obs)])
+    actual = dev._get_diagonalizing_gates(qs)
+    if has_rotation:
+        expected = obs.diagonalizing_gates()
+        assert len(actual) == len(expected)
+        for rot_actual, rot_expected in zip(actual, expected):
+            assert qml.equal(rot_actual, rot_expected)
+    else:
+        assert len(actual) == 0
