@@ -9,6 +9,8 @@ target_link_libraries(lightning_base INTERFACE  lightning_compile_options
                                                 lightning_external_libs
                                                 )
 
+set_property(TARGET lightning_base PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 if (BUILD_TESTS)
     enable_testing()
     add_subdirectory("tests")

@@ -42,12 +42,16 @@ help:
 clean:
 	find . -type d -name '__pycache__' -exec rm -r {} \+
 	rm -rf build Build BuildTests BuildTidy BuildGBench
-	rm -rf pennylane_lightning/lightning_qubit_ops*
+	rm -rf pennylane_lightning/pennylane_lightning_ops*
 
 test-builtin:
 	$(PYTHON) -I $(TESTRUNNER)
 
-test-python: test-builtin
+test-suite:
+	pl-device-test --device lightning.qubit --skip-ops --shots=20000
+	pl-device-test --device lightning.qubit --shots=None --skip-ops
+
+test-python: test-builtin test-suite
 
 build:
 	rm -rf ./Build
@@ -56,7 +60,7 @@ build:
 
 test-cpp:
 	rm -rf ./BuildTests
-	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_OPENMP=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 ifdef target
 	cmake --build ./BuildTests $(VERBOSE) --target $(target)
 	./BuildTests/$(target)

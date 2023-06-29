@@ -17,6 +17,8 @@ target_link_libraries(lightning_qubit_observables PUBLIC    lightning_utils
                                                             lightning_qubit
                                                             )
 
+set_property(TARGET lightning_qubit_observables PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 if (BUILD_TESTS)
     enable_testing()
     add_subdirectory("tests")

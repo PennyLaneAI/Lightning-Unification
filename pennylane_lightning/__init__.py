@@ -11,15 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-Test something.
-"""
+"""Top level PennyLane-Lightning module."""
 
-import numpy as np
+from ._version import __version__
 
+from .lightning_base import CPP_BINARY_AVAILABLE, backend_info
 
-class TestSomething:
-    """---"""
-
-    def test_one_qubit_circuit(self):
-        assert 1 == 1
+from .lightning_qubit import LightningQubit

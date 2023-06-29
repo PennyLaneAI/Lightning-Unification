@@ -7,9 +7,7 @@ add_subdirectory(base)
 ###############################################################################
 # Determine simulator and include its directory
 ###############################################################################
-# Support macros to process simulators
 include("${CMAKE_SOURCE_DIR}/cmake/support_simulators.cmake")
-
 FIND_AND_ADD_SIMULATOR()
 
 if (BUILD_TESTS)

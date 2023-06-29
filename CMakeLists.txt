@@ -45,8 +45,15 @@ option(ENABLE_CLANG_TIDY "Enable clang-tidy build checks" OFF)
 option(ENABLE_COVERAGE "Enable code coverage" OFF)
 option(ENABLE_WARNINGS "Enable warnings" ON)
 option(ENABLE_NATIVE "Enable native CPU build tuning" OFF)
-option(ENABLE_OPENMP "Enable OpenMP" ON)
 option(ENABLE_PYTHON "Enable compilation of the Python module" ON)
+
+# OpenMP
+find_package(OpenMP)
+if (OpenMP_CXX_FOUND)
+    option(ENABLE_OPENMP "Enable OpenMP" ON)
+else()
+    option(ENABLE_OPENMP "Enable OpenMP" OFF)
+endif()
 
 # Other build options
 option(BUILD_TESTS "Build cpp tests" OFF)
@@ -86,16 +93,27 @@ target_include_directories(pennylane_lightning  INTERFACE "$<INSTALL_INTERFACE:$
 
 if(ENABLE_PYTHON)
     message(STATUS "ENABLE_PYTHON is ON.")
-    pybind11_add_module(lightning_qubit_ops "pennylane_lightning/src/bindings/Bindings.cpp")
+    pybind11_add_module(pennylane_lightning_ops "pennylane_lightning/src/bindings/Bindings.cpp")
 
-    target_link_libraries(lightning_qubit_ops PRIVATE lightning_compile_options
-                                                      lightning_external_libs
-                                                      lightning_utils
-                                                      )
+    target_link_libraries(pennylane_lightning_ops PRIVATE   lightning_compile_options
+                                                            lightning_external_libs
+                                                            )
 
-    set_target_properties(lightning_qubit_ops PROPERTIES CXX_VISIBILITY_PRESET hidden)
+    target_link_libraries(pennylane_lightning_ops PRIVATE   lightning_observables
+                                                            lightning_utils
+                                                            lightning_algorithms
+                                                            )
 
-    target_compile_definitions(lightning_qubit_ops PRIVATE VERSION_INFO=${VERSION_STRING})
+    target_link_libraries(pennylane_lightning_ops PRIVATE   ${PL_BACKEND} #simulator
+                                                            "${PL_BACKEND}_algorithms"
+                                                            "${PL_BACKEND}_observables"
+                                                            "${PL_BACKEND}_bindings"
+                                                            "${PL_BACKEND}_measurements"
+                                                            )
+
+    set_target_properties(pennylane_lightning_ops PROPERTIES CXX_VISIBILITY_PRESET hidden)
+
+    target_compile_definitions(pennylane_lightning_ops PRIVATE VERSION_INFO=${VERSION_STRING})
 endif()
 
 install(TARGETS pennylane_lightning
