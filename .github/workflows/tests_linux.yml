@@ -95,8 +95,7 @@ jobs:
       - name: Install backend device
         run: |
           cd main
-          python setup.py build_ext -i --define="PL_BACKEND=${{ matrix.pl_backend }};ENABLE_KOKKOS=OFF;ENABLE_PYTHON=ON;CMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)"
-          pip install -e .
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -199,8 +198,7 @@ jobs:
       - name: Install backend device
         run: |
           cd main
-          python setup.py build_ext -i --define="PL_BACKEND=${{ matrix.pl_backend }};ENABLE_BLAS=ON;ENABLE_KOKKOS=OFF;ENABLE_PYTHON=ON;CMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)"
-          pip install -e .
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -340,8 +338,7 @@ jobs:
       - name: Install backend device
         run: |
           cd main
-          python setup.py build_ext -i --define="PL_BACKEND=${{ matrix.pl_backend }};CMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos;ENABLE_KOKKOS=ON;ENABLE_PYTHON=ON;CMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)"
-          pip install -e .
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -475,8 +472,7 @@ jobs:
       - name: Install backend device
         run: |
           cd main
-          python setup.py build_ext -i --define="PL_BACKEND=${{ matrix.pl_backend }};ENABLE_BLAS=ON;ENABLE_KOKKOS=ON;DENABLE_PYTHON=ON;CMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos;CMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)"
-          pip install -e .
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |

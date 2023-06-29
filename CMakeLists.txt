@@ -45,8 +45,15 @@ option(ENABLE_CLANG_TIDY "Enable clang-tidy build checks" OFF)
 option(ENABLE_COVERAGE "Enable code coverage" OFF)
 option(ENABLE_WARNINGS "Enable warnings" ON)
 option(ENABLE_NATIVE "Enable native CPU build tuning" OFF)
-option(ENABLE_OPENMP "Enable OpenMP" ON)
 option(ENABLE_PYTHON "Enable compilation of the Python module" ON)
+
+# OpenMP
+find_package(OpenMP)
+if (OpenMP_CXX_FOUND)
+    option(ENABLE_OPENMP "Enable OpenMP" ON)
+else()
+    option(ENABLE_OPENMP "Enable OpenMP" OFF)
+endif()
 
 # Other build options
 option(BUILD_TESTS "Build cpp tests" OFF)
