@@ -57,7 +57,7 @@ if CPP_BINARY_AVAILABLE:
             wires (int): the number of wires to initialize the device with
             c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
             shots (int): How many times the circuit should be evaluated (or sampled) to estimate
-                the expectation values. Defaults to ``None`` if not specified. Setting
+                stochastic return values. Defaults to ``None`` if not specified. Setting
                 to ``None`` results in computing statistics like expectation values and
                 variances analytically.
             batch_obs (bool): Determine whether we process observables in parallel when computing the
@@ -94,7 +94,7 @@ if CPP_BINARY_AVAILABLE:
         @property
         def stopping_condition(self):
             """.BooleanFn: Returns the stopping condition for the device. The returned
-            function accepts a queuable object (including a PennyLane operation
+            function accepts a queueable object (including a PennyLane operation
             and observable) and returns ``True`` if supported by the device."""
 
             def accepts_obj(obj):

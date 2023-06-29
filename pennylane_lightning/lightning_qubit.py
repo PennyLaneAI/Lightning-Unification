@@ -54,7 +54,6 @@ if backend_info()["NAME"] == "lightning.qubit":
         StateVectorC64,
         MeasurementsC128,
         StateVectorC128,
-        backend_info,
     )
 
     from .pennylane_lightning_ops.algorithms import (
@@ -339,11 +338,9 @@ if backend_info()["NAME"] == "lightning.qubit":
             )
 
             # Skip over identity operations instead of performing
-            # matrix multiplication with the identity.
-            skipped_ops = ["Identity"]
-
+            # matrix multiplication with it.
             for o in operations:
-                if o.name in skipped_ops:
+                if o.name == "Identity":
                     continue
                 method = getattr(sim, o.name, None)
 
@@ -544,8 +541,7 @@ if backend_info()["NAME"] == "lightning.qubit":
                 return M.generate_mcmc_samples(
                     len(self.wires), self._kernel_name, self._num_burnin, self.shots
                 ).astype(int, copy=False)
-            else:
-                return M.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
+            return M.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
 
         @staticmethod
         def _check_adjdiff_supported_measurements(measurements: List[MeasurementProcess]):

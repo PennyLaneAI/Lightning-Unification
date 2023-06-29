@@ -31,9 +31,7 @@ from pennylane.operation import Tensor
 from pennylane.tape import QuantumTape
 from pennylane.math import unwrap
 
-# Remove after the next release of PL
-# Add from pennylane import matrix
-import pennylane as qml
+from pennylane import matrix
 
 try:
     from .pennylane_lightning_ops import (
@@ -81,7 +79,7 @@ def _serialize_hermitian_ob(o, wires_map: dict, use_csingle: bool):
         hermitian_obs = HermitianObsC128
 
     wires = [wires_map[w] for w in o.wires]
-    return hermitian_obs(qml.matrix(o).ravel().astype(ctype), wires)
+    return hermitian_obs(matrix(o).ravel().astype(ctype), wires)
 
 
 def _serialize_tensor_ob(ob, wires_map: dict, use_csingle: bool):
@@ -143,16 +141,16 @@ def _serialize_pauli_sentence(ob, wires_map: dict, use_csingle: bool):
 
 
 def _serialize_ob(ob, wires_map, use_csingle):
+    """Serialize a :class:`pennylane.operation.Observable` into an Observable."""
     if isinstance(ob, Tensor):
         return _serialize_tensor_ob(ob, wires_map, use_csingle)
-    elif ob.name == "Hamiltonian":
+    if ob.name == "Hamiltonian":
         return _serialize_hamiltonian(ob, wires_map, use_csingle)
-    elif isinstance(ob, (PauliX, PauliY, PauliZ, Identity, Hadamard)):
+    if isinstance(ob, (PauliX, PauliY, PauliZ, Identity, Hadamard)):
         return _serialize_named_obs(ob, wires_map, use_csingle)
-    elif ob._pauli_rep is not None:
+    if ob._pauli_rep is not None:
         return _serialize_pauli_sentence(ob._pauli_rep, wires_map, use_csingle)
-    else:
-        return _serialize_hermitian_ob(ob, wires_map, use_csingle)
+    return _serialize_hermitian_ob(ob, wires_map, use_csingle)
 
 
 def _serialize_observables(tape: QuantumTape, wires_map: dict, use_csingle: bool = False) -> List:
@@ -208,7 +206,7 @@ def _serialize_ops(
 
             if not hasattr(StateVectorC128, name):
                 params.append([])
-                mats.append(qml.matrix(single_op))
+                mats.append(matrix(single_op))
 
             else:
                 params.append(single_op.parameters)
