@@ -34,13 +34,13 @@ jobs:
 
       - name: Build and run unit tests for code coverage
         run: |
-            cmake ./pennylane_lightning/src -BBuild  -DBUILD_TESTS=ON -DENABLE_OPENMP=OFF -DENABLE_WARNINGS=OFF
+            cmake ./pennylane_lightning/src -BBuild -DBUILD_TESTS=ON -DENABLE_OPENMP=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_WARNINGS=OFF
             cmake --build ./Build --config Debug
             mkdir -p ./Build/tests/results
             $test_bins = Get-ChildItem -Include *.exe -Recurse -Path .\Build\tests\Debug
             foreach ($file in $test_bins)
             {
-              $file --order lex --reporter junit --out .\BuildTests\tests\results\report_$file__${{ github.job }}.xml
+              Invoke-Expression $file --order lex --reporter junit --out .\BuildTests\tests\results\report_$file__${{ github.job }}.xml
             }
             OpenCppCoverage --sources pennylane_lightning\src --export_type cobertura:coverage.xml Build\tests\Debug\pennylane_lightning_test_runner.exe
             Move-Item -Path .\coverage.xml -Destination .\coverage-${{ github.job }}.xml
@@ -213,13 +213,13 @@ jobs:
         run: |
             Subst Z: (pwd)
             Set-Location -Path "Z:\"
-            cmake ./pennylane_lightning/src -BBuild  -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DCMAKE_PREFIX_PATH=D:\a\pennylane-lightning\pennylane-lightning\Kokkos -DENABLE_OPENMP=OFF -DENABLE_WARNINGS=OFF -T clangcl
+            cmake ./pennylane_lightning/src -BBuild -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DCMAKE_PREFIX_PATH=D:\a\pennylane-lightning\pennylane-lightning\Kokkos -DENABLE_OPENMP=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_WARNINGS=OFF -T clangcl
             cmake --build ./Build --config Debug -- /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /p:MultiProcMaxCount=2
             mkdir -p ./Build/tests/results
             $test_bins = Get-ChildItem -Include *.exe -Recurse -Path .\Build\tests\Debug
             foreach ($file in $test_bins)
             {
-              $file --order lex --reporter junit --out .\BuildTests\tests\results\report_$file__${{ github.job }}.xml
+              Invoke-Expression $file --order lex --reporter junit --out .\BuildTests\tests\results\report_$file__${{ github.job }}.xml
             }
             OpenCppCoverage --sources pennylane_lightning\src --export_type cobertura:coverage.xml Build\tests\Debug\pennylane_lightning_test_runner.exe
             Move-Item -Path .\coverage.xml -Destination .\coverage-${{ github.job }}.xml
