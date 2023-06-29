@@ -91,6 +91,9 @@ device_name = backend_info()["NAME"]
 
 if device_name == "lightning.qubit":
     from pennylane_lightning import LightningQubit as LightningDevice
+else:
+    device_name = "lightning.qubit"
+    from pennylane_lightning import LightningQubit as LightningDevice
 
 
 # General qubit_device fixture, for any number of wires.

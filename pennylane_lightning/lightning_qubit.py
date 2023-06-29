@@ -17,20 +17,20 @@ This module contains the :class:`~.LightningQubit` class, a PennyLane simulator 
 interfaces with C++ for fast linear algebra calculations.
 """
 import numpy as np
+from warnings import warn
 
 from .lightning_base import backend_info, CPP_BINARY_AVAILABLE, LightningBase
-
-from .pennylane_lightning_ops import (
-    allocate_aligned_array,
-    get_alignment,
-    best_alignment,
-)
 
 if backend_info()["NAME"] == "lightning.qubit":
     from typing import List
     from itertools import islice, product
-    from warnings import warn
     from os import getenv
+
+    from .pennylane_lightning_ops import (
+        allocate_aligned_array,
+        get_alignment,
+        best_alignment,
+    )
 
     from pennylane import (
         math,
