@@ -33,7 +33,7 @@ class TestApply:
     that the proper errors are raised.
     """
 
-    from conftest import LightningDevice as ld
+    ld = LightningDevice
 
     test_data_no_parameters = [
         (qml.PauliX, [1, 0], np.array([0, 1])),

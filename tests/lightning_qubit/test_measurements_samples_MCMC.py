@@ -36,17 +36,16 @@ class TestMCMCSample:
         return qml.device("lightning.qubit", wires=2, shots=1000, mcmc=True, c_dtype=request.param)
 
     test_data_no_parameters = [
-        (10, 100, [0], qml.PauliZ(wires=[0]), 100),
-        (10, 110, [1], qml.PauliZ(wires=[1]), 110),
-        (10, 120, [0, 1], qml.PauliX(0) @ qml.PauliZ(1), 120),
+        (100, [0], qml.PauliZ(wires=[0]), 100),
+        (110, [1], qml.PauliZ(wires=[1]), 110),
+        (120, [0, 1], qml.PauliX(0) @ qml.PauliZ(1), 120),
     ]
 
-    @pytest.mark.parametrize("kernel", ["Local", "NonZeroRandom"])
     @pytest.mark.parametrize(
-        "num_burnin,num_shots,measured_wires,operation,shape", test_data_no_parameters
+        "num_shots,measured_wires,operation,shape", test_data_no_parameters
     )
     def test_mcmc_sample_dimensions(
-        self, dev, kernel, num_burnin, num_shots, measured_wires, operation, shape
+        self, dev, num_shots, measured_wires, operation, shape
     ):
         """Tests if the samples returned by sample have
         the correct dimensions

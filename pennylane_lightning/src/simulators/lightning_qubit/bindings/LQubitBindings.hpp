@@ -23,7 +23,6 @@
 #include "ConstantUtil.hpp" // lookup
 #include "DynamicDispatcher.hpp"
 #include "GateOperation.hpp"
-#include "KokkosSparse.hpp"
 #include "MeasurementsLQubit.hpp"
 #include "StateVectorLQubitRaw.hpp"
 #include "TypeList.hpp"

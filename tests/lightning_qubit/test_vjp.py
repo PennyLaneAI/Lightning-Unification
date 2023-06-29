@@ -113,7 +113,7 @@ class TestVectorJacobianProduct:
 
         assert np.allclose(vjp1, vjp2, atol=tol, rtol=0)
 
-    def test_wrong_dy_expval(self, tol, dev):
+    def test_wrong_dy_expval(self, dev):
         """Tests raise an exception when dy is incorrect"""
         x, y, z = [0.5, 0.3, -0.7]
 
@@ -244,7 +244,7 @@ class TestVectorJacobianProduct:
             assert np.allclose(fn2(tape), 0.0, atol=tol)
             assert np.allclose(fn3(tape), 0.0, atol=tol)
 
-    def test_wrong_dy_statevector(self, tol, dev):
+    def test_wrong_dy_statevector(self, dev):
         """Tests raise an exception when dy is incorrect"""
         x, y, z = [0.5, 0.3, -0.7]
 

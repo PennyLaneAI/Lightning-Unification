@@ -18,13 +18,8 @@ import pennylane as qml
 import numpy as np
 import pennylane_lightning
 
-from pennylane_lightning._serialize import (
-    _serialize_observables,
-    _serialize_ops,
-    _serialize_ob,
-)
+from pennylane_lightning._serialize import _serialize_observables
 import pytest
-from unittest import mock
 
 from pennylane_lightning import CPP_BINARY_AVAILABLE, backend_info
 
@@ -41,16 +36,14 @@ class TestSerializeObs:
     wires_dict = {i: i for i in range(10)}
 
     @pytest.mark.parametrize("use_csingle", [True, False])
-    @pytest.mark.parametrize("ObsChunk", list(range(1, 5)))
-    def test_chunk_obs(self, use_csingle, ObsChunk):
+    @pytest.mark.parametrize("obs_chunk", list(range(1, 5)))
+    def test_chunk_obs(self, use_csingle, obs_chunk):
         """Test chunking of observable array"""
         with qml.tape.QuantumTape() as tape:
             qml.expval(qml.PauliZ(0) @ qml.PauliX(1))
             qml.expval(qml.PauliY(wires=1))
             qml.expval(qml.PauliX(0) @ qml.Hermitian([[0, 1], [1, 0]], wires=3) @ qml.Hadamard(2))
             qml.expval(qml.Hermitian(qml.PauliZ.compute_matrix(), wires=0) @ qml.Identity(1))
-
         s = _serialize_observables(tape, self.wires_dict, use_csingle=use_csingle)
-
-        obtained_chunks = pennylane_lightning.lightning_qubit._chunk_iterable(s, ObsChunk)
-        assert len(list(obtained_chunks)) == int(np.ceil(len(s) / ObsChunk))
+        obtained_chunks = pennylane_lightning.lightning_qubit._chunk_iterable(s, obs_chunk)
+        assert len(list(obtained_chunks)) == int(np.ceil(len(s) / obs_chunk))

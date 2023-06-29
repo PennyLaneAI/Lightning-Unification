@@ -188,9 +188,8 @@ if backend_info()["NAME"] == "lightning.qubit":
             kernel_name="Local",
             num_burnin=100,
             batch_obs=False,
-            analytic=None,
         ):
-            super().__init__(wires, shots=shots, c_dtype=c_dtype, analytic=analytic)
+            super().__init__(wires, shots=shots, c_dtype=c_dtype)
 
             # Create the initial state. Internally, we store the
             # state as an array of dimension [2]*wires.
@@ -425,7 +424,7 @@ if backend_info()["NAME"] == "lightning.qubit":
                 else MeasurementsC128(state_vector)
             )
             if observable.name == "SparseHamiltonian":
-                if backend_info()["USE_KOKKOS"] == True:
+                if backend_info()["USE_KOKKOS"]:
                     # ensuring CSR sparse representation.
 
                     CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
@@ -492,7 +491,7 @@ if backend_info()["NAME"] == "lightning.qubit":
             )
 
             if observable.name == "SparseHamiltonian":
-                if backend_info()["USE_KOKKOS"] == True:
+                if backend_info()["USE_KOKKOS"]:
                     # ensuring CSR sparse representation.
 
                     CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(

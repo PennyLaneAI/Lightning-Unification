@@ -99,7 +99,7 @@ class TestAdjointJacobian:
         ):
             dev.adjoint_jacobian(tape)
 
-    def test_empty_measurements(self, tol, dev):
+    def test_empty_measurements(self, dev):
         """Tests if an empty array is returned when the measurements of the tape is empty."""
 
         with qml.tape.QuantumTape() as tape:

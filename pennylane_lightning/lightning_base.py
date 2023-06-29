@@ -76,7 +76,6 @@ if CPP_BINARY_AVAILABLE:
             c_dtype=np.complex128,
             shots=None,
             batch_obs=False,
-            analytic=None,
         ):
             if c_dtype is np.complex64:
                 r_dtype = np.float32
@@ -86,9 +85,7 @@ if CPP_BINARY_AVAILABLE:
                 self.use_csingle = False
             else:
                 raise TypeError(f"Unsupported complex Type: {c_dtype}")
-            super().__init__(
-                wires, shots=shots, r_dtype=r_dtype, c_dtype=c_dtype, analytic=analytic
-            )
+            super().__init__(wires, shots=shots, r_dtype=r_dtype, c_dtype=c_dtype)
             self._batch_obs = batch_obs
 
         @property

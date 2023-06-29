@@ -37,7 +37,7 @@ class TestSparseExpval:
         return qml.device("lightning.qubit", wires=2, c_dtype=request.param)
 
     @pytest.mark.skipif(
-        backend_info()["USE_KOKKOS"] == True, reason="Kokkos and Kokkos Kernels are present."
+        backend_info()["USE_KOKKOS"], reason="Kokkos and Kokkos Kernels are present."
     )
     def test_create_device_with_unsupported_dtype(self, dev):
         @qml.qnode(dev, diff_method="parameter-shift")
@@ -69,7 +69,7 @@ class TestSparseExpval:
         ],
     )
     @pytest.mark.skipif(
-        backend_info()["USE_KOKKOS"] == False, reason="Requires Kokkos and Kokkos Kernels."
+        not backend_info()["USE_KOKKOS"], reason="Requires Kokkos and Kokkos Kernels."
     )
     def test_sparse_Pauli_words(self, cases, tol, dev):
         """Test expval of some simple sparse Hamiltonian"""
@@ -124,7 +124,7 @@ class TestSparseExpvalQChem:
         ],
     )
     @pytest.mark.skipif(
-        backend_info()["USE_KOKKOS"] == False, reason="Requires Kokkos and Kokkos Kernels."
+        not backend_info()["USE_KOKKOS"], reason="Requires Kokkos and Kokkos Kernels."
     )
     def test_sparse_Pauli_words(self, qubits, wires, H_sparse, hf_state, excitations, tol, dev):
         """Test expval of some simple sparse Hamiltonian"""
@@ -133,7 +133,7 @@ class TestSparseExpvalQChem:
         def circuit():
             qml.BasisState(hf_state, wires=range(qubits))
 
-            for i, excitation in enumerate(excitations):
+            for excitation in excitations:
                 if len(excitation) == 4:
                     qml.DoubleExcitation(1, wires=excitation)
                 elif len(excitation) == 2:
@@ -147,7 +147,7 @@ class TestSparseExpvalQChem:
         def circuit_default():
             qml.BasisState(hf_state, wires=range(qubits))
 
-            for i, excitation in enumerate(excitations):
+            for excitation in excitations:
                 if len(excitation) == 4:
                     qml.DoubleExcitation(1, wires=excitation)
                 elif len(excitation) == 2:

@@ -150,8 +150,8 @@ info = {
         ],
     },
     "description": "PennyLane-Lightning plugin",
-    "long_description": open("README.rst").read(),
-    "long_description_content_type": "text/x-rst",
+    "long_description": open("README.md").read(),
+    "long_description_content_type": "text/markdown",
     "provides": ["pennylane_lightning"],
     "install_requires": requirements,
     "ext_modules": []

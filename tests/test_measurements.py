@@ -32,7 +32,7 @@ if not CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
 
-def test_no_measure(tol):
+def test_no_measure():
     """Test that failing to specify a measurement
     raises an exception"""
     dev = qml.device(device_name, wires=2)
@@ -124,7 +124,7 @@ class TestProbs:
             [[1, 0], [0, 1]],
         ],
     )
-    def test_fail_probs_tape_unordered_wires(self, cases, tol):
+    def test_fail_probs_tape_unordered_wires(self, cases):
         """Test probs with a circuit on wires=[0] fails for out-of-order wires passed to probs."""
 
         x, y, z = [0.5, 0.3, -0.7]
