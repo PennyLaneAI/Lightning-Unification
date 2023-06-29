@@ -34,7 +34,7 @@ jobs:
 
       - name: Build and run unit tests for code coverage
         run: |
-            cmake -BBuild -DBUILD_TESTS=ON -DENABLE_OPENMP=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_WARNINGS=OFF
+            cmake -BBuild -DBUILD_TESTS=ON -DENABLE_OPENMP=OFF -DENABLE_KOKKOS=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_WARNINGS=OFF
             cmake --build ./Build --config Debug
             mkdir -p ./Build/tests/results
             $test_bins = Get-ChildItem -Include *.exe -Recurse -Path .\Build\tests\Debug
