@@ -41,12 +41,8 @@ class TestMCMCSample:
         (120, [0, 1], qml.PauliX(0) @ qml.PauliZ(1), 120),
     ]
 
-    @pytest.mark.parametrize(
-        "num_shots,measured_wires,operation,shape", test_data_no_parameters
-    )
-    def test_mcmc_sample_dimensions(
-        self, dev, num_shots, measured_wires, operation, shape
-    ):
+    @pytest.mark.parametrize("num_shots,measured_wires,operation,shape", test_data_no_parameters)
+    def test_mcmc_sample_dimensions(self, dev, num_shots, measured_wires, operation, shape):
         """Tests if the samples returned by sample have
         the correct dimensions
         """
