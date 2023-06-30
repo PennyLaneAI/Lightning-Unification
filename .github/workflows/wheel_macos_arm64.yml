@@ -15,7 +15,7 @@ on:
 
 env:
   ARCHS: 'arm64'
-  PYTHON3_MIN_VERSION: "8"
+  PYTHON3_MIN_VERSION: "9"
   PYTHON3_MAX_VERSION: "11"
 
 jobs:
