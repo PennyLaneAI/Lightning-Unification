@@ -112,8 +112,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        pl_backend: ["lightning_qubit"]
         arch: [x86_64]
+        pl_backend: ["lightning_qubit"]
         cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
@@ -206,20 +206,20 @@ jobs:
           name: ${{ runner.os }}-wheels-${{ matrix.pl_backend }}-${{ matrix.arch }}.zip
           path: ./wheelhouse/*.whl
 
-  upload-pypi:
-    needs: linux-wheels-x86-64
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: Linux-wheels-x86_64.zip
-          path: dist
+  # Refine and uncomment before merging to pennylane-lightning repository
+  # upload-pypi:
+  #   needs: linux-wheels-x86-64
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
+  #   steps:
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: Linux-wheels-x86_64.zip
+  #         path: dist
 
-      # uncomment before merging to pennylane-lightning repository
-      # - name: Upload wheels to PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
-      #   with:
-      #     user: __token__
-      #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      #     repository_url: https://test.pypi.org/legacy/
+  #     - name: Upload wheels to PyPI
+  #       uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         user: __token__
+  #         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+  #         repository_url: https://test.pypi.org/legacy/

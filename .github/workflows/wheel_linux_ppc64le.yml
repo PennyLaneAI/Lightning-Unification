@@ -1,20 +1,16 @@
-name: Wheel::MacOS::Intel
+name: Wheel::Linux::PowerPC
 
-# **What it does**: Builds python wheels for MacOS (10.15) architecture x86_64 and store it as artifacts.
+# **What it does**: Builds python wheels for Linux (ubuntu-latest) architecture PowerPC 64 and store it as artifacts.
 #                   Python versions: 3.8, 3.9, 3.10, 3.11.
 # **Why we have it**: To build wheels for pennylane-lightning installation.
 # **Who does it impact**: Wheels to be uploaded to PyPI.
 
 on:
-  pull_request:
   push:
     branches:
       - master
   release:
     types: [published]
-
-env:
-  MACOSX_DEPLOYMENT_TARGET: 10.15
 
 jobs:
   set_wheel_build_matrix:
@@ -27,10 +23,11 @@ jobs:
     needs: [set_wheel_build_matrix]
     strategy:
       matrix:
-        os: [macos-12]
-        arch: [x86_64]
+        os: [ubuntu-latest]
+        arch: [ppc64le]
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
+        container_img: ["quay.io/pypa/manylinux2014_ppc64le"]
 
     name: Kokkos core & kernels (${{ matrix.exec_model }}::${{ matrix.arch }} )
     runs-on: ${{ matrix.os }}
@@ -45,12 +42,8 @@ jobs:
         id: kokkos-cache
         uses: actions/cache@v3
         with:
-          path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
-          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
-
-      - name: Install clang
-        run: |
-          brew install libomp
+          path: ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}
+          key: ${{ matrix.container_img }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
 
       - name: Clone Kokkos libs
         if: steps.kokkos-cache.outputs.cache-hit != 'true'
@@ -65,61 +58,71 @@ jobs:
           git checkout ${{ matrix.kokkos_version }}
           cd -
 
-      - uses: actions/setup-python@v4
-        name: Install Python
-        with:
-          python-version: '3.8'
+      - uses: docker/setup-qemu-action@v2
+        name: Set up QEMU
 
       - name: Build Kokkos core library
         if: steps.kokkos-cache.outputs.cache-hit != 'true'
         run: |
-          mkdir -p ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
+          mkdir -p ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}
           cd kokkos
-          python -m pip install cmake ninja
-
-          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
-                          -DKokkos_ENABLE_COMPLEX_ALIGN=OFF \
-                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
-                          -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
-                          -DCMAKE_CXX_STANDARD=20 \
-                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                          -DCMAKE_CXX_COMPILER=g++ \
-                          -G Ninja
-          cmake --build ./Build --verbose
-          cmake --install ./Build
+          docker run --platform linux/ppc64le \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v `pwd`:/io \
+            -v ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}:/install \
+            -i ${{ matrix.container_img }} \
+            bash -c "git config --global --add safe.directory /io && \
+            cd /io && \
+            python3.8 -m pip install ninja && \
+            ln -s /opt/python/cp38-cp38/bin/ninja /usr/bin/ninja && \
+            cmake -BBuild . -DCMAKE_INSTALL_PREFIX=/install \
+                            -DKokkos_ENABLE_COMPLEX_ALIGN=OFF \
+                            -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
+                            -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
+                            -DCMAKE_CXX_STANDARD=20 \
+                            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+                            -G Ninja && \
+            cmake --build ./Build --verbose && \
+            cmake --install ./Build; "
           cd -
-
       - name: Build Kokkos kernels library
         if: steps.kokkos-cache.outputs.cache-hit != 'true'
         run: |
           cd kokkos-kernels
-          python -m pip install cmake ninja
-
-          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
-                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
-                          -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
-                          -DCMAKE_CXX_STANDARD=20 \
-                          -DCMAKE_PREFIX_PATH=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
-                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                          -DCMAKE_CXX_COMPILER=g++ \
-                          -G Ninja
-          cmake --build ./Build --verbose
-          cmake --install ./Build
+          docker run --platform linux/ppc64le \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v `pwd`:/io \
+            -v ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}:/install \
+            -i ${{ matrix.container_img }} \
+            bash -c "git config --global --add safe.directory /io && \
+            cd /io && \
+            python3.8 -m pip install ninja && \
+            ln -s /opt/python/cp38-cp38/bin/ninja /usr/bin/ninja && \
+            cmake -BBuild . -DCMAKE_INSTALL_PREFIX=/install \
+                            -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
+                            -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
+                            -DCMAKE_CXX_STANDARD=20 \
+                            -DCMAKE_PREFIX_PATH=/install \
+                            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+                            -G Ninja && \
+            cmake --build ./Build --verbose && \
+            cmake --install ./Build; "
           cd -
 
-  mac-wheels-x86:
+  linux-wheels-ppc64le:
     needs: [set_wheel_build_matrix, build_dependencies]
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12]
+        os: [ubuntu-latest]
+        arch: [ppc64le]
         pl_backend: ["lightning_qubit"]
-        arch: [x86_64]
         cibw_build: ${{fromJson(needs.set_wheel_build_matrix.outputs.python_version)}}
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
+        container_img: ["quay.io/pypa/manylinux2014_ppc64le"]
 
-    name: ${{ matrix.os }} - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp38-*":"3.8","cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
+    name: ${{ matrix.os }}::${{ matrix.arch }} - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp38-*":"3.8","cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -134,54 +137,43 @@ jobs:
         id: kokkos-cache
         uses: actions/cache@v3
         with:
-          path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
-          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+          path: ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}
+          key: ${{ matrix.container_img }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
 
       - name: Copy cached libraries
         run: |
           mkdir Kokkos
           cp -rf ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
 
-      - uses: actions/setup-python@v4
-        name: Install Python
-        with:
-          python-version: '3.8'
-
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel~=2.11.0
+        run: python3 -m pip install cibuildwheel~=2.11.0
+
+      - uses: docker/setup-qemu-action@v2
+        name: Set up QEMU
 
       - name: Build wheels
         env:
+          CIBW_ARCHS_LINUX: ${{matrix.arch}}
+
           CIBW_BUILD: ${{ matrix.cibw_build }}
 
-          # MacOS specific build settings
-          CIBW_BEFORE_ALL_MACOS: |
-            brew uninstall --force oclint
-            brew install libomp
+          CIBW_SKIP: "*-musllinux*"
 
           # Python build settings
           CIBW_BEFORE_BUILD: |
-            python -m pip install pybind11 ninja cmake~=3.24.0 setuptools
+            cat /etc/yum.conf | sed "s/\[main\]/\[main\]\ntimeout=5/g" > /etc/yum.conf
+            pip install ninja cmake~=3.24.0
 
-          # Testing of built wheels
-          CIBW_TEST_REQUIRES: pytest pytest-cov pytest-mock flaky
+          CIBW_MANYLINUX_PPC64LE_IMAGE: manylinux2014
 
-          CIBW_BEFORE_TEST: python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+          CIBW_BUILD_VERBOSITY: 3
 
-          CIBW_TEST_COMMAND: |
-            pl-device-test --device=lightning.qubit --skip-ops -x --tb=short --no-flaky-report
-
-          CIBW_BUILD_VERBOSITY: 1
-
-          CIBW_ARCHS_MACOS: ${{matrix.arch}}
-
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+        run: python3 -m cibuildwheel --output-dir wheelhouse
 
       - name: Validate wheels
         run: |
-          python -m pip install twine
-          python -m twine check ./wheelhouse/*.whl
+          python3 -m pip install twine
+          python3 -m twine check ./wheelhouse/*.whl
 
       - uses: actions-ecosystem/action-regex-match@v2
         id: rc_build
@@ -198,13 +190,13 @@ jobs:
 
   # Refine and uncomment before merging to pennylane-lightning repository
   # upload-pypi:
-  #   needs: mac-wheels-x86
+  #   needs: linux-wheels-ppc64le
   #   runs-on: ubuntu-latest
-  #   if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' }}
+  #   if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
   #   steps:
   #     - uses: actions/download-artifact@v2
   #       with:
-  #         name: macOS-wheels-x86_64.zip
+  #         name: Linux-wheels-ppc64le.zip
   #         path: dist
 
   #     - name: Upload wheels to PyPI
