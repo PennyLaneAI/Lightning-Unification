@@ -25,12 +25,16 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Random.hpp>
 
+#include "StateVectorBase.hpp"
 #include "Error.hpp"
 #include "GateFunctors.hpp"
+#include "Util.hpp"
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::Lightning_Kokkos::Util;
+using Pennylane::Util::exp2;
+using Pennylane::Util::log2;
+// using namespace Pennylane::Lightning_Kokkos::Util;
 using namespace Pennylane::Lightning_Kokkos::Functors;
 } // namespace
 /// @endcond
@@ -106,21 +110,26 @@ template <typename Precision> struct initZerosFunctor {
  *
  * @tparam Precision Floating-point precision type.
  */
-template <class Precision> class StateVectorKokkos {
+template <class Precision = double>
+class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKokkos<Precision>> {
+
+  private:
+    using BaseType = StateVectorBase<Precision, StateVectorKokkos<Precision>>;
 
   public:
+    using ComplexT = Kokkos::complex<Precision>;
     using KokkosExecSpace = Kokkos::DefaultExecutionSpace;
-    using KokkosVector = Kokkos::View<Kokkos::complex<Precision> *>;
+    using KokkosVector = Kokkos::View<ComplexT *>;
     using KokkosSizeTVector = Kokkos::View<size_t *>;
     using KokkosRangePolicy = Kokkos::RangePolicy<KokkosExecSpace>;
     using UnmanagedComplexHostView =
-        Kokkos::View<Kokkos::complex<Precision> *, Kokkos::HostSpace,
+        Kokkos::View<ComplexT *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using UnmanagedSizeTHostView =
         Kokkos::View<size_t *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using UnmanagedConstComplexHostView =
-        Kokkos::View<const Kokkos::complex<Precision> *, Kokkos::HostSpace,
+        Kokkos::View<const ComplexT *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using UnmanagedConstSizeTHostView =
         Kokkos::View<const size_t *, Kokkos::HostSpace,
@@ -128,7 +137,7 @@ template <class Precision> class StateVectorKokkos {
 
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits, const Kokkos::InitializationSettings &kokkos_args = {})
-        : gates_{
+        : BaseType{num_qubits}, gates_{
                 //Identity
                  {"PauliX", 
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
@@ -451,7 +460,7 @@ template <class Precision> class StateVectorKokkos {
             }
     {
         num_qubits_ = num_qubits;
-        length_ = Pennylane::Lightning_Kokkos::Util::exp2(num_qubits);
+        length_ = exp2(num_qubits);
 
         {
             const std::lock_guard<std::mutex> lock(init_mutex_);
@@ -462,7 +471,7 @@ template <class Precision> class StateVectorKokkos {
 
         if (num_qubits > 0) {
             data_ = std::make_unique<KokkosVector>(
-                "data_", Lightning_Kokkos::Util::exp2(num_qubits));
+                "data_", exp2(num_qubits));
             Kokkos::parallel_for(length_, InitView(*data_));
         }
     };
@@ -491,7 +500,7 @@ template <class Precision> class StateVectorKokkos {
      * @param indices Indices of the target elements.
      */
     void setStateVector(const std::vector<std::size_t> &indices,
-                        const std::vector<Kokkos::complex<Precision>> &values) {
+                        const std::vector<ComplexT> &values) {
 
         initZeros();
 
@@ -526,9 +535,9 @@ template <class Precision> class StateVectorKokkos {
      *
      * @param num_qubits Number of qubits
      */
-    StateVectorKokkos(Kokkos::complex<Precision> *hostdata_, size_t length,
+    StateVectorKokkos(ComplexT *hostdata_, size_t length,
                       const Kokkos::InitializationSettings &kokkos_args = {})
-        : StateVectorKokkos(Lightning_Kokkos::Util::log2(length), kokkos_args) {
+        : StateVectorKokkos(log2(length), kokkos_args) {
         HostToDevice(hostdata_, length);
     }
 
@@ -601,7 +610,7 @@ template <class Precision> class StateVectorKokkos {
     void applyOperation_std(
         const std::string &opName, const std::vector<size_t> &wires,
         bool adjoint = false, const std::vector<Precision> &params = {0.0},
-        [[maybe_unused]] const std::vector<Kokkos::complex<Precision>>
+        [[maybe_unused]] const std::vector<ComplexT>
             &gate_matrix = {}) {
 
         if (opName == "Identity") {
@@ -694,17 +703,17 @@ template <class Precision> class StateVectorKokkos {
     void applySingleQubitOp(const KokkosVector &matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
-        auto &&num_qubits = getNumQubits();
+        auto &&num_qubits = this->getNumQubits();
         if (!inverse) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits - 1)),
+                    0, exp2(num_qubits - 1)),
                 singleQubitOpFunctor<Precision, false>(*data_, num_qubits,
                                                        matrix, wires));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits - 1)),
+                    0, exp2(num_qubits - 1)),
                 singleQubitOpFunctor<Precision, true>(*data_, num_qubits,
                                                       matrix, wires));
         }
@@ -721,17 +730,17 @@ template <class Precision> class StateVectorKokkos {
                          const std::vector<size_t> &wires,
                          bool inverse = false) {
 
-        auto &&num_qubits = getNumQubits();
+        auto &&num_qubits = this->getNumQubits();
         if (!inverse) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits - 2)),
+                    0, exp2(num_qubits - 2)),
                 twoQubitOpFunctor<Precision, false>(*data_, num_qubits, matrix,
                                                     wires));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits - 2)),
+                    0, exp2(num_qubits - 2)),
                 twoQubitOpFunctor<Precision, true>(*data_, num_qubits, matrix,
                                                    wires));
         }
@@ -747,7 +756,7 @@ template <class Precision> class StateVectorKokkos {
     void applyMultiQubitOp(const KokkosVector &matrix,
                            const std::vector<size_t> &wires,
                            bool inverse = false) {
-        auto &&num_qubits = getNumQubits();
+        auto &&num_qubits = this->getNumQubits();
         if (wires.size() == 1) {
             applySingleQubitOp(matrix, wires, inverse);
         } else if (wires.size() == 2) {
@@ -764,14 +773,14 @@ template <class Precision> class StateVectorKokkos {
             if (!inverse) {
                 Kokkos::parallel_for(
                     Kokkos::RangePolicy<KokkosExecSpace>(
-                        0, Lightning_Kokkos::Util::exp2(num_qubits_ -
+                        0, exp2(num_qubits_ -
                                                         wires.size())),
                     multiQubitOpFunctor<Precision, false>(*data_, num_qubits,
                                                           matrix, wires_view));
             } else {
                 Kokkos::parallel_for(
                     Kokkos::RangePolicy<KokkosExecSpace>(
-                        0, Lightning_Kokkos::Util::exp2(num_qubits_ -
+                        0, exp2(num_qubits_ -
                                                         wires.size())),
                     multiQubitOpFunctor<Precision, true>(*data_, num_qubits,
                                                          matrix, wires_view));
@@ -792,17 +801,17 @@ template <class Precision> class StateVectorKokkos {
     void applyGateFunctor(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
+        auto &&num_qubits = this->getNumQubits();
         PL_ASSERT(wires.size() == nqubits);
         if (!inverse) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits - nqubits)),
+                    0, exp2(num_qubits - nqubits)),
                 functor_t<Precision, false>(*data_, num_qubits, wires, params));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits - nqubits)),
+                    0, exp2(num_qubits - nqubits)),
                 functor_t<Precision, true>(*data_, num_qubits, wires, params));
         }
     }
@@ -1206,18 +1215,18 @@ template <class Precision> class StateVectorKokkos {
     void
     applyMultiRZ(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
+        auto &&num_qubits = this->getNumQubits();
 
         if (!inverse) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits)),
+                    0, exp2(num_qubits)),
                 multiRZFunctor<Precision, false>(*data_, num_qubits, wires,
                                                  params));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits)),
+                    0, exp2(num_qubits)),
                 multiRZFunctor<Precision, true>(*data_, num_qubits, wires,
                                                 params));
         }
@@ -1545,18 +1554,18 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
+        auto &&num_qubits = this->getNumQubits();
 
         if (inverse == false) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits)),
+                    0, exp2(num_qubits)),
                 generatorMultiRZFunctor<Precision, false>(*data_, num_qubits,
                                                           wires));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits)),
+                    0, exp2(num_qubits)),
                 generatorMultiRZFunctor<Precision, true>(*data_, num_qubits,
                                                          wires));
         }
@@ -1599,7 +1608,7 @@ template <class Precision> class StateVectorKokkos {
      * @brief Copy data from the host space to the device space.
      *
      */
-    inline void HostToDevice(Kokkos::complex<Precision> *sv, size_t length) {
+    inline void HostToDevice(ComplexT *sv, size_t length) {
         Kokkos::deep_copy(*data_, UnmanagedComplexHostView(sv, length));
     }
 
@@ -1607,7 +1616,7 @@ template <class Precision> class StateVectorKokkos {
      * @brief Copy data from the device space to the host space.
      *
      */
-    inline void DeviceToHost(Kokkos::complex<Precision> *sv, size_t length) {
+    inline void DeviceToHost(ComplexT *sv, size_t length) {
         Kokkos::deep_copy(UnmanagedComplexHostView(sv, length), *data_);
     }
 

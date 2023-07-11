@@ -225,26 +225,6 @@ inline constexpr auto INVSQRT2() -> ComplexT<T> {
 }
 
 /**
- * @brief Calculates 2^n for some integer n > 0 using bitshifts.
- *
- * @param n the exponent
- * @return value of 2^n
- */
-inline auto exp2(const size_t &n) -> size_t {
-    return static_cast<size_t>(1) << n;
-}
-
-/**
- * @brief Log2 calculation.
- *
- * @param value Value to calculate for.
- * @return size_t
- */
-inline auto log2(size_t value) -> size_t {
-    return static_cast<size_t>(std::log2(value));
-}
-
-/**
  * @brief Calculates the decimal value for a qubit, assuming a big-endian
  * convention.
  *

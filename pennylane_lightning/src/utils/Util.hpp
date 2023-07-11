@@ -21,6 +21,7 @@
 #include "TypeTraits.hpp" // remove_complex_t
 
 #include <cassert> // assert
+#include <cmath>
 #include <complex>
 #include <numbers> // sqrt2_v
 #include <numeric> // transform_reduce
@@ -139,6 +140,16 @@ template <class T> inline static constexpr auto INVSQRT2() -> T {
  */
 inline auto exp2(const size_t &n) -> size_t {
     return static_cast<size_t>(1) << n;
+}
+
+/**
+ * @brief Log2 calculation.
+ *
+ * @param value Value to calculate for.
+ * @return size_t
+ */
+inline auto log2(size_t value) -> size_t {
+    return static_cast<size_t>(std::log2(value));
 }
 
 /**
