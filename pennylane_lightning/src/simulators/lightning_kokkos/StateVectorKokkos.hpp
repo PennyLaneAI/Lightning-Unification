@@ -45,47 +45,47 @@ namespace Pennylane {
  * @brief Kokkos functor for initializing the state vector to the \f$\ket{0}\f$
  * state
  *
- * @tparam Precision Floating point precision of underlying statevector data
+ * @tparam PrecisionT Floating point precision of underlying statevector data
  */
-template <typename Precision> struct InitView {
-    Kokkos::View<Kokkos::complex<Precision> *> a;
-    InitView(Kokkos::View<Kokkos::complex<Precision> *> a_) : a(a_) {}
+template <typename PrecisionT> struct InitView {
+    Kokkos::View<Kokkos::complex<PrecisionT> *> a;
+    InitView(Kokkos::View<Kokkos::complex<PrecisionT> *> a_) : a(a_) {}
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t i) const {
-        a(i) = Kokkos::complex<Precision>((i == 0) * 1.0, 0.0);
+        a(i) = Kokkos::complex<PrecisionT>((i == 0) * 1.0, 0.0);
     }
 };
 
 /**
  * @brief Kokkos functor for setting the basis state
  *
- * @tparam Precision Floating point precision of underlying statevector data
+ * @tparam PrecisionT Floating point precision of underlying statevector data
  */
-template <typename Precision> struct setBasisStateFunctor {
-    Kokkos::View<Kokkos::complex<Precision> *> a;
+template <typename PrecisionT> struct setBasisStateFunctor {
+    Kokkos::View<Kokkos::complex<PrecisionT> *> a;
     const std::size_t index;
-    setBasisStateFunctor(Kokkos::View<Kokkos::complex<Precision> *> a_,
+    setBasisStateFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> a_,
                          const std::size_t index_)
         : a(a_), index(index_) {}
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t i) const {
-        a(i) = Kokkos::complex<Precision>((i == index) * 1.0, 0.0);
+        a(i) = Kokkos::complex<PrecisionT>((i == index) * 1.0, 0.0);
     }
 };
 
 /**
  * @brief Kokkos functor for setting the state vector
  *
- * @tparam Precision Floating point precision of underlying statevector data
+ * @tparam PrecisionT Floating point precision of underlying statevector data
  */
-template <typename Precision> struct setStateVectorFunctor {
-    Kokkos::View<Kokkos::complex<Precision> *> a;
+template <typename PrecisionT> struct setStateVectorFunctor {
+    Kokkos::View<Kokkos::complex<PrecisionT> *> a;
     Kokkos::View<size_t *> indices;
-    Kokkos::View<Kokkos::complex<Precision> *> values;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> values;
     setStateVectorFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> a_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> a_,
         const Kokkos::View<size_t *> indices_,
-        const Kokkos::View<Kokkos::complex<Precision> *> values_)
+        const Kokkos::View<Kokkos::complex<PrecisionT> *> values_)
         : a(a_), indices(indices_), values(values_) {}
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t i) const { a(indices[i]) = values[i]; }
@@ -94,30 +94,30 @@ template <typename Precision> struct setStateVectorFunctor {
 /**
  * @brief Kokkos functor for initializing zeros to the state vector.
  *
- * @tparam Precision Floating point precision of underlying statevector data
+ * @tparam PrecisionT Floating point precision of underlying statevector data
  */
-template <typename Precision> struct initZerosFunctor {
-    Kokkos::View<Kokkos::complex<Precision> *> a;
-    initZerosFunctor(Kokkos::View<Kokkos::complex<Precision> *> a_) : a(a_) {}
+template <typename PrecisionT> struct initZerosFunctor {
+    Kokkos::View<Kokkos::complex<PrecisionT> *> a;
+    initZerosFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> a_) : a(a_) {}
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t i) const {
-        a(i) = Kokkos::complex<Precision>(0.0, 0.0);
+        a(i) = Kokkos::complex<PrecisionT>(0.0, 0.0);
     }
 };
 
 /**
  * @brief  Kokkos state vector class
  *
- * @tparam Precision Floating-point precision type.
+ * @tparam PrecisionT Floating-point precision type.
  */
-template <class Precision = double>
-class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKokkos<Precision>> {
+template <class PrecisionT = double>
+class StateVectorKokkos final : public StateVectorBase<PrecisionT, StateVectorKokkos<PrecisionT>> {
 
   private:
-    using BaseType = StateVectorBase<Precision, StateVectorKokkos<Precision>>;
+    using BaseType = StateVectorBase<PrecisionT, StateVectorKokkos<PrecisionT>>;
 
   public:
-    using ComplexT = Kokkos::complex<Precision>;
+    using ComplexT = Kokkos::complex<PrecisionT>;
     using KokkosExecSpace = Kokkos::DefaultExecutionSpace;
     using KokkosVector = Kokkos::View<ComplexT *>;
     using KokkosSizeTVector = Kokkos::View<size_t *>;
@@ -583,7 +583,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void applyOperation(const std::string &opName,
                         const std::vector<size_t> &wires, bool adjoint = false,
-                        const std::vector<Precision> &params = {0.0},
+                        const std::vector<PrecisionT> &params = {0.0},
                         [[maybe_unused]] const KokkosVector &gate_matrix = {}) {
         if (opName == "Identity") {
             // No op
@@ -609,7 +609,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void applyOperation_std(
         const std::string &opName, const std::vector<size_t> &wires,
-        bool adjoint = false, const std::vector<Precision> &params = {0.0},
+        bool adjoint = false, const std::vector<PrecisionT> &params = {0.0},
         [[maybe_unused]] const std::vector<ComplexT>
             &gate_matrix = {}) {
 
@@ -628,7 +628,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
 
     /**
      * @brief Multi-op variant of execute(const std::string &opName, const
-     std::vector<int> &wires, bool adjoint = false, const std::vector<Precision>
+     std::vector<int> &wires, bool adjoint = false, const std::vector<PrecisionT>
      &params)
      *
      * @param opNames Name of gates to apply.
@@ -639,7 +639,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
     void applyOperation(const std::vector<std::string> &opNames,
                         const std::vector<std::vector<size_t>> &wires,
                         const std::vector<bool> &adjoints,
-                        const std::vector<std::vector<Precision>> &params) {
+                        const std::vector<std::vector<PrecisionT>> &params) {
         PL_ABORT_IF(opNames.size() != wires.size(),
                     "Incompatible number of ops and wires");
         PL_ABORT_IF(opNames.size() != adjoints.size(),
@@ -653,7 +653,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
 
     /**
      * @brief Multi-op variant of execute(const std::string &opName, const
-     std::vector<int> &wires, bool adjoint = false, const std::vector<Precision>
+     std::vector<int> &wires, bool adjoint = false, const std::vector<PrecisionT>
      &params)
      *
      * @param opNames Name of gates to apply.
@@ -685,8 +685,8 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGenerator(const std::string &opName,
                         const std::vector<size_t> &wires, bool adjoint = false,
-                        const std::vector<Precision> &params = {0.0})
-        -> Precision {
+                        const std::vector<PrecisionT> &params = {0.0})
+        -> PrecisionT {
         const auto it = generator_.find(opName);
         PL_ABORT_IF(it == generator_.end(),
                     std::string("Generator does not exist for ") + opName);
@@ -708,13 +708,13 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits - 1)),
-                singleQubitOpFunctor<Precision, false>(*data_, num_qubits,
+                singleQubitOpFunctor<PrecisionT, false>(*data_, num_qubits,
                                                        matrix, wires));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits - 1)),
-                singleQubitOpFunctor<Precision, true>(*data_, num_qubits,
+                singleQubitOpFunctor<PrecisionT, true>(*data_, num_qubits,
                                                       matrix, wires));
         }
     }
@@ -735,13 +735,13 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits - 2)),
-                twoQubitOpFunctor<Precision, false>(*data_, num_qubits, matrix,
+                twoQubitOpFunctor<PrecisionT, false>(*data_, num_qubits, matrix,
                                                     wires));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits - 2)),
-                twoQubitOpFunctor<Precision, true>(*data_, num_qubits, matrix,
+                twoQubitOpFunctor<PrecisionT, true>(*data_, num_qubits, matrix,
                                                    wires));
         }
     }
@@ -775,14 +775,14 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
                     Kokkos::RangePolicy<KokkosExecSpace>(
                         0, exp2(num_qubits_ -
                                                         wires.size())),
-                    multiQubitOpFunctor<Precision, false>(*data_, num_qubits,
+                    multiQubitOpFunctor<PrecisionT, false>(*data_, num_qubits,
                                                           matrix, wires_view));
             } else {
                 Kokkos::parallel_for(
                     Kokkos::RangePolicy<KokkosExecSpace>(
                         0, exp2(num_qubits_ -
                                                         wires.size())),
-                    multiQubitOpFunctor<Precision, true>(*data_, num_qubits,
+                    multiQubitOpFunctor<PrecisionT, true>(*data_, num_qubits,
                                                          matrix, wires_view));
             }
         }
@@ -800,19 +800,19 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
     template <template <class, bool> class functor_t, int nqubits>
     void applyGateFunctor(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         auto &&num_qubits = this->getNumQubits();
         PL_ASSERT(wires.size() == nqubits);
         if (!inverse) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits - nqubits)),
-                functor_t<Precision, false>(*data_, num_qubits, wires, params));
+                functor_t<PrecisionT, false>(*data_, num_qubits, wires, params));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits - nqubits)),
-                functor_t<Precision, true>(*data_, num_qubits, wires, params));
+                functor_t<PrecisionT, true>(*data_, num_qubits, wires, params));
         }
     }
 
@@ -825,7 +825,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void
     applyPauliX(const std::vector<size_t> &wires, bool inverse = false,
-                [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<pauliXFunctor, 1>(wires, inverse, params);
     }
 
@@ -838,7 +838,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void
     applyPauliY(const std::vector<size_t> &wires, bool inverse = false,
-                [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<pauliYFunctor, 1>(wires, inverse, params);
     }
 
@@ -852,7 +852,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
 
     void
     applyPauliZ(const std::vector<size_t> &wires, bool inverse = false,
-                [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<pauliZFunctor, 1>(wires, inverse, params);
     }
 
@@ -865,7 +865,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void
     applyHadamard(const std::vector<size_t> &wires, bool inverse = false,
-                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                  [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<hadamardFunctor, 1>(wires, inverse, params);
     }
 
@@ -877,7 +877,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyS(const std::vector<size_t> &wires, bool inverse = false,
-                [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<sFunctor, 1>(wires, inverse, params);
     }
 
@@ -889,7 +889,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyT(const std::vector<size_t> &wires, bool inverse = false,
-                [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<tFunctor, 1>(wires, inverse, params);
     }
 
@@ -901,7 +901,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyRX(const std::vector<size_t> &wires, bool inverse,
-                 [[maybe_unused]] const std::vector<Precision> &params) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params) {
         applyGateFunctor<rxFunctor, 1>(wires, inverse, params);
     }
 
@@ -913,7 +913,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyRY(const std::vector<size_t> &wires, bool inverse,
-                 [[maybe_unused]] const std::vector<Precision> &params) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params) {
         applyGateFunctor<ryFunctor, 1>(wires, inverse, params);
     }
 
@@ -925,7 +925,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyRZ(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<rzFunctor, 1>(wires, inverse, params);
     }
 
@@ -938,7 +938,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void applyPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<phaseShiftFunctor, 1>(wires, inverse, params);
     }
 
@@ -950,7 +950,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyRot(const std::vector<size_t> &wires, bool inverse,
-                  const std::vector<Precision> &params) {
+                  const std::vector<PrecisionT> &params) {
         applyGateFunctor<rotFunctor, 1>(wires, inverse, params);
     }
 
@@ -962,7 +962,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyCY(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<cyFunctor, 2>(wires, inverse, params);
     }
 
@@ -974,7 +974,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyCZ(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<czFunctor, 2>(wires, inverse, params);
     }
 
@@ -986,7 +986,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyCNOT(const std::vector<size_t> &wires, bool inverse = false,
-                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                   [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<cnotFunctor, 2>(wires, inverse, params);
     }
 
@@ -998,7 +998,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applySWAP(const std::vector<size_t> &wires, bool inverse = false,
-                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                   [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<swapFunctor, 2>(wires, inverse, params);
     }
 
@@ -1012,7 +1012,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void applyControlledPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<controlledPhaseShiftFunctor, 2>(wires, inverse,
                                                          params);
     }
@@ -1025,7 +1025,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyCRX(const std::vector<size_t> &wires, bool inverse = false,
-                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                  [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<crxFunctor, 2>(wires, inverse, params);
     }
 
@@ -1037,7 +1037,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyCRY(const std::vector<size_t> &wires, bool inverse = false,
-                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                  [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<cryFunctor, 2>(wires, inverse, params);
     }
 
@@ -1049,7 +1049,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyCRZ(const std::vector<size_t> &wires, bool inverse = false,
-                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                  [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<crzFunctor, 2>(wires, inverse, params);
     }
 
@@ -1061,7 +1061,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      * @param params parameters for this gate
      */
     void applyCRot(const std::vector<size_t> &wires, bool inverse,
-                   [[maybe_unused]] const std::vector<Precision> &params) {
+                   [[maybe_unused]] const std::vector<PrecisionT> &params) {
         applyGateFunctor<cRotFunctor, 2>(wires, inverse, params);
     }
 
@@ -1074,7 +1074,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void
     applyIsingXX(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<isingXXFunctor, 2>(wires, inverse, params);
     }
 
@@ -1087,7 +1087,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void
     applyIsingXY(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<isingXYFunctor, 2>(wires, inverse, params);
     }
 
@@ -1100,7 +1100,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void
     applyIsingYY(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<isingYYFunctor, 2>(wires, inverse, params);
     }
 
@@ -1113,7 +1113,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void
     applyIsingZZ(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<isingZZFunctor, 2>(wires, inverse, params);
     }
 
@@ -1127,7 +1127,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void applySingleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<singleExcitationFunctor, 2>(wires, inverse, params);
     }
 
@@ -1141,7 +1141,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void applySingleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<singleExcitationMinusFunctor, 2>(wires, inverse,
                                                           params);
     }
@@ -1156,7 +1156,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void applySingleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<singleExcitationPlusFunctor, 2>(wires, inverse,
                                                          params);
     }
@@ -1171,7 +1171,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void applyDoubleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<doubleExcitationFunctor, 4>(wires, inverse, params);
     }
 
@@ -1185,7 +1185,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void applyDoubleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<doubleExcitationMinusFunctor, 4>(wires, inverse,
                                                           params);
     }
@@ -1200,7 +1200,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void applyDoubleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<doubleExcitationPlusFunctor, 4>(wires, inverse,
                                                          params);
     }
@@ -1214,20 +1214,20 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void
     applyMultiRZ(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         auto &&num_qubits = this->getNumQubits();
 
         if (!inverse) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits)),
-                multiRZFunctor<Precision, false>(*data_, num_qubits, wires,
+                multiRZFunctor<PrecisionT, false>(*data_, num_qubits, wires,
                                                  params));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits)),
-                multiRZFunctor<Precision, true>(*data_, num_qubits, wires,
+                multiRZFunctor<PrecisionT, true>(*data_, num_qubits, wires,
                                                 params));
         }
     }
@@ -1241,7 +1241,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void
     applyCSWAP(const std::vector<size_t> &wires, bool inverse = false,
-               [[maybe_unused]] const std::vector<Precision> &params = {}) {
+               [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<cSWAPFunctor, 3>(wires, inverse, params);
     }
 
@@ -1254,7 +1254,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     void
     applyToffoli(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+                 [[maybe_unused]] const std::vector<PrecisionT> &params = {}) {
         applyGateFunctor<toffoliFunctor, 3>(wires, inverse, params);
     }
 
@@ -1267,10 +1267,10 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorPhaseShiftFunctor, 1>(wires, inverse, params);
-        return static_cast<Precision>(1.0);
+        return static_cast<PrecisionT>(1.0);
     }
 
     /**
@@ -1282,10 +1282,10 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorIsingXX(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorIsingXXFunctor, 2>(wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1297,10 +1297,10 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorIsingXY(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorIsingXYFunctor, 2>(wires, inverse, params);
-        return static_cast<Precision>(0.5);
+        return static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1312,10 +1312,10 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorIsingYY(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorIsingYYFunctor, 2>(wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1327,10 +1327,10 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorIsingZZ(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorIsingZZFunctor, 2>(wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1343,11 +1343,11 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorSingleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorSingleExcitationFunctor, 2>(wires, inverse,
                                                               params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1360,11 +1360,11 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorSingleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorSingleExcitationMinusFunctor, 2>(
             wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1377,11 +1377,11 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorSingleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorSingleExcitationPlusFunctor, 2>(
             wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1394,11 +1394,11 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorDoubleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorDoubleExcitationFunctor, 4>(wires, inverse,
                                                               params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1411,11 +1411,11 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorDoubleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorDoubleExcitationMinusFunctor, 4>(
             wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1428,11 +1428,11 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorDoubleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorDoubleExcitationPlusFunctor, 4>(
             wires, inverse, params);
-        return static_cast<Precision>(0.5);
+        return static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1444,10 +1444,10 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto
     applyGeneratorRX(const std::vector<size_t> &wires, bool inverse = false,
-                     [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+                     [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyPauliX(wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1459,10 +1459,10 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto
     applyGeneratorRY(const std::vector<size_t> &wires, bool inverse = false,
-                     [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+                     [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyPauliY(wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1474,10 +1474,10 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto
     applyGeneratorRZ(const std::vector<size_t> &wires, bool inverse = false,
-                     [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+                     [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyPauliZ(wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1490,11 +1490,11 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorControlledPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorControlledPhaseShiftFunctor, 2>(
             wires, inverse, params);
-        return static_cast<Precision>(1);
+        return static_cast<PrecisionT>(1);
     }
 
     /**
@@ -1506,11 +1506,11 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorCRX(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
 
-        -> Precision {
+        -> PrecisionT {
         applyGateFunctor<generatorCRXFunctor, 2>(wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1522,10 +1522,10 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorCRY(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorCRYFunctor, 2>(wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1537,10 +1537,10 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorCRZ(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         applyGateFunctor<generatorCRZFunctor, 2>(wires, inverse, params);
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1552,24 +1552,24 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     auto applyGeneratorMultiRZ(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<Precision> &params = {})
-        -> Precision {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {})
+        -> PrecisionT {
         auto &&num_qubits = this->getNumQubits();
 
         if (inverse == false) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits)),
-                generatorMultiRZFunctor<Precision, false>(*data_, num_qubits,
+                generatorMultiRZFunctor<PrecisionT, false>(*data_, num_qubits,
                                                           wires));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits)),
-                generatorMultiRZFunctor<Precision, true>(*data_, num_qubits,
+                generatorMultiRZFunctor<PrecisionT, true>(*data_, num_qubits,
                                                          wires));
         }
-        return -static_cast<Precision>(0.5);
+        return -static_cast<PrecisionT>(0.5);
     }
 
     /**
@@ -1586,7 +1586,7 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
      */
     size_t getLength() const { return length_; }
 
-    void updateData(const StateVectorKokkos<Precision> &other) {
+    void updateData(const StateVectorKokkos<PrecisionT> &other) {
         Kokkos::deep_copy(*data_, other.getData());
     }
 
@@ -1630,12 +1630,12 @@ class StateVectorKokkos final : public StateVectorBase<Precision, StateVectorKok
 
   private:
     using GateFunc = std::function<void(const std::vector<size_t> &, bool,
-                                        const std::vector<Precision> &)>;
+                                        const std::vector<PrecisionT> &)>;
     using GateMap = std::unordered_map<std::string, GateFunc>;
     const GateMap gates_;
 
-    using GeneratorFunc = std::function<Precision(
-        const std::vector<size_t> &, bool, const std::vector<Precision> &)>;
+    using GeneratorFunc = std::function<PrecisionT(
+        const std::vector<size_t> &, bool, const std::vector<PrecisionT> &)>;
     using GeneratorMap = std::unordered_map<std::string, GeneratorFunc>;
     const GeneratorMap generator_;
 
