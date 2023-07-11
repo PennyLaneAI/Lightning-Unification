@@ -5,7 +5,7 @@
 
 #include "UtilKokkos.hpp"
 
-namespace Pennylane::Functors {
+namespace Pennylane::Lightning_Kokkos::Functors {
 /**
  * @brief Compute probability distribution from StateVector.
  *
@@ -209,4 +209,4 @@ template <class Precision> struct getTransposedFunctor {
     }
 };
 
-} // namespace Pennylane::Functors
+} // namespace Pennylane::Lightning_Kokkos::Functors

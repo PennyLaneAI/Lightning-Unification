@@ -28,7 +28,7 @@ using namespace Util;
 } // namespace
 /// @endcond
 
-namespace Pennylane::Gates {
+namespace Pennylane::Lightning_Kokkos::Gates {
 
 /**
  * @brief Create a matrix representation of the PauliX gate data in row-major
@@ -1374,4 +1374,4 @@ static constexpr auto getGeneratorIsingZZ() -> std::vector<ComplexT<T>> {
     };
 }
 
-} // namespace Pennylane::Gates
+} // namespace Pennylane::Lightning_Kokkos::Gates

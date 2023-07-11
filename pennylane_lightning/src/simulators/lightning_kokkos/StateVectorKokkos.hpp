@@ -31,7 +31,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::Lightning_Kokkos::Util;
-using namespace Pennylane::Functors;
+using namespace Pennylane::Lightning_Kokkos::Functors;
 } // namespace
 /// @endcond
 

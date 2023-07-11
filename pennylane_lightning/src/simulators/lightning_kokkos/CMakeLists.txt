@@ -73,6 +73,9 @@ target_link_libraries(${PL_BACKEND} PUBLIC   lightning_compile_options
                                                 )
 target_include_directories(${PL_BACKEND} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_property(TARGET ${PL_BACKEND} PROPERTY POSITION_INDEPENDENT_CODE ON)
+if(PLKOKKOS_ENABLE_NATIVE)
+    target_compile_options(${PL_BACKEND} PRIVATE -march=native)
+endif()
 
 ###############################################################################
 # Include subdirectories

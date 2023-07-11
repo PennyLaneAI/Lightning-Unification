@@ -13,7 +13,7 @@
 #include "TestHelpers.hpp"
 
 using namespace Pennylane;
-using namespace Pennylane::Gates;
+using namespace Pennylane::Lightning_Kokkos::Gates;
 namespace {} // namespace
 
 TEMPLATE_TEST_CASE("StateVectorKokkos::CopyConstructor",

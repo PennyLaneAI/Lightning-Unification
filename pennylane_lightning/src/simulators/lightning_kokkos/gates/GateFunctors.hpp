@@ -10,7 +10,7 @@ using namespace Pennylane::Lightning_Kokkos::Util;
 namespace KE = Kokkos::Experimental;
 } // namespace
 
-namespace Pennylane::Functors {
+namespace Pennylane::Lightning_Kokkos::Functors {
 
 template <class Precision, bool inverse = false> struct singleQubitOpFunctor {
 
@@ -3162,4 +3162,4 @@ template <class Precision, bool inverse = false> struct rotFunctor {
     }
 };
 
-} // namespace Pennylane::Functors
+} // namespace Pennylane::Lightning_Kokkos::Functors

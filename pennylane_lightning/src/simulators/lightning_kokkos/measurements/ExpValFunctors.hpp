@@ -8,7 +8,7 @@ namespace {
 using namespace Pennylane::Lightning_Kokkos::Util;
 }
 
-namespace Pennylane::Functors {
+namespace Pennylane::Lightning_Kokkos::Functors {
 
 template <class Precision> struct getExpectationValueIdentityFunctor {
 
@@ -341,4 +341,4 @@ template <class Precision> struct getExpectationValueSparseFunctor {
     }
 };
 
-} // namespace Pennylane::Functors
+} // namespace Pennylane::Lightning_Kokkos::Functors
