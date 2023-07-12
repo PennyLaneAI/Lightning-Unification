@@ -11,13 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 /**
- * @file
- * StateVector explicit instantiation.
+ * @file KernelType.hpp
+ * Defines possible kernel types as enum and define python export.
  */
+#pragma once
+#include "Error.hpp"
+#include "Util.hpp"
 
-#include "StateVectorKokkos.hpp"
+#include <array>
 
-template class Pennylane::Lightning_Kokkos::StateVectorKokkos<float>;
-template class Pennylane::Lightning_Kokkos::StateVectorKokkos<double>;
+namespace Pennylane::LightningQubit::Gates {
+/**
+ * @brief Define kernel id for each implementation.
+ */
+enum class KernelType { PI, LM, AVX2, AVX512, None };
+} // namespace Pennylane::LightningQubit::Gates
