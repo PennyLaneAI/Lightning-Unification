@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(${PL_BACKEND}_observables LANGUAGES CXX)
 
-set(OBSERVABLES_FILES ObservablesKokkos.hpp CACHE INTERNAL "" FORCE)
+set(OBSERVABLES_FILES ObservablesKokkos.cpp CACHE INTERNAL "" FORCE)
 add_library(${PL_BACKEND}_observables STATIC ${OBSERVABLES_FILES})
 
 target_include_directories(${PL_BACKEND}_observables INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

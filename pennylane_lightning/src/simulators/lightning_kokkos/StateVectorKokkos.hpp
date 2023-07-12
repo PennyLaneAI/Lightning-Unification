@@ -25,9 +25,9 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Random.hpp>
 
-#include "StateVectorBase.hpp"
 #include "Error.hpp"
 #include "GateFunctors.hpp"
+#include "StateVectorBase.hpp"
 #include "Util.hpp"
 
 /// @cond DEV
@@ -82,10 +82,9 @@ template <typename fp_t> struct setStateVectorFunctor {
     Kokkos::View<Kokkos::complex<fp_t> *> a;
     Kokkos::View<size_t *> indices;
     Kokkos::View<Kokkos::complex<fp_t> *> values;
-    setStateVectorFunctor(
-        Kokkos::View<Kokkos::complex<fp_t> *> a_,
-        const Kokkos::View<size_t *> indices_,
-        const Kokkos::View<Kokkos::complex<fp_t> *> values_)
+    setStateVectorFunctor(Kokkos::View<Kokkos::complex<fp_t> *> a_,
+                          const Kokkos::View<size_t *> indices_,
+                          const Kokkos::View<Kokkos::complex<fp_t> *> values_)
         : a(a_), indices(indices_), values(values_) {}
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t i) const { a(indices[i]) = values[i]; }
@@ -111,7 +110,8 @@ template <typename fp_t> struct initZerosFunctor {
  * @tparam fp_t Floating-point precision type.
  */
 template <class fp_t = double>
-class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<fp_t>> {
+class StateVectorKokkos final
+    : public StateVectorBase<fp_t, StateVectorKokkos<fp_t>> {
 
   private:
     using BaseType = StateVectorBase<fp_t, StateVectorKokkos<fp_t>>;
@@ -137,10 +137,11 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
     StateVectorKokkos() = delete;
-    StateVectorKokkos(size_t num_qubits, const Kokkos::InitializationSettings &kokkos_args = {})
-        : BaseType{num_qubits}, gates_{
-                //Identity
-                 {"PauliX", 
+    StateVectorKokkos(size_t num_qubits,
+                      const Kokkos::InitializationSettings &kokkos_args = {})
+        : BaseType{num_qubits},
+          gates_{// Identity
+                 {"PauliX",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
                       applyPauliX(std::forward<decltype(wires)>(wires),
                                   std::forward<decltype(adjoint)>(adjoint),
@@ -169,7 +170,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
                       applyS(std::forward<decltype(wires)>(wires),
                              std::forward<decltype(adjoint)>(adjoint),
                              std::forward<decltype(params)>(params));
-                 }},
+                  }},
                  {"T",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
                       applyT(std::forward<decltype(wires)>(wires),
@@ -258,30 +259,30 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
                  {"CRot",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
                       applyCRot(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},                  
-                  {"IsingXX",
+                                std::forward<decltype(adjoint)>(adjoint),
+                                std::forward<decltype(params)>(params));
+                  }},
+                 {"IsingXX",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
                       applyIsingXX(std::forward<decltype(wires)>(wires),
                                    std::forward<decltype(adjoint)>(adjoint),
                                    std::forward<decltype(params)>(params));
                   }},
-                  {"IsingXY",
+                 {"IsingXY",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
                       applyIsingXY(std::forward<decltype(wires)>(wires),
                                    std::forward<decltype(adjoint)>(adjoint),
                                    std::forward<decltype(params)>(params));
                   }},
 
-                  {"IsingYY",
+                 {"IsingYY",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
                       applyIsingYY(std::forward<decltype(wires)>(wires),
                                    std::forward<decltype(adjoint)>(adjoint),
                                    std::forward<decltype(params)>(params));
                   }},
 
-                  {"IsingZZ",
+                 {"IsingZZ",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
                       applyIsingZZ(std::forward<decltype(wires)>(wires),
                                    std::forward<decltype(adjoint)>(adjoint),
@@ -289,45 +290,51 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
                   }},
                  {"SingleExcitation",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitation(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
+                      applySingleExcitation(
+                          std::forward<decltype(wires)>(wires),
+                          std::forward<decltype(adjoint)>(adjoint),
+                          std::forward<decltype(params)>(params));
                   }},
                  {"SingleExcitationMinus",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitationMinus(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
+                      applySingleExcitationMinus(
+                          std::forward<decltype(wires)>(wires),
+                          std::forward<decltype(adjoint)>(adjoint),
+                          std::forward<decltype(params)>(params));
                   }},
                  {"SingleExcitationPlus",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitationPlus(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
+                      applySingleExcitationPlus(
+                          std::forward<decltype(wires)>(wires),
+                          std::forward<decltype(adjoint)>(adjoint),
+                          std::forward<decltype(params)>(params));
                   }},
                  {"DoubleExcitation",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitation(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
+                      applyDoubleExcitation(
+                          std::forward<decltype(wires)>(wires),
+                          std::forward<decltype(adjoint)>(adjoint),
+                          std::forward<decltype(params)>(params));
                   }},
                  {"DoubleExcitationMinus",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitationMinus(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
+                      applyDoubleExcitationMinus(
+                          std::forward<decltype(wires)>(wires),
+                          std::forward<decltype(adjoint)>(adjoint),
+                          std::forward<decltype(params)>(params));
                   }},
                  {"DoubleExcitationPlus",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitationPlus(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
+                      applyDoubleExcitationPlus(
+                          std::forward<decltype(wires)>(wires),
+                          std::forward<decltype(adjoint)>(adjoint),
+                          std::forward<decltype(params)>(params));
                   }},
                  {"MultiRZ",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
                       applyMultiRZ(std::forward<decltype(wires)>(wires),
-                                 std::forward<decltype(adjoint)>(adjoint),
-                                 std::forward<decltype(params)>(params));
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
                   }},
                  {"CSWAP",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
@@ -340,126 +347,142 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
                       applyToffoli(std::forward<decltype(wires)>(wires),
                                    std::forward<decltype(adjoint)>(adjoint),
                                    std::forward<decltype(params)>(params));
-                  }}
-                 },
-            generator_{
-                {"RX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorRX(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                {"RY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorRY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                {"RZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorRZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-		{"ControlledPhaseShift",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      return applyGeneratorControlledPhaseShift(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                {"CRX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorCRX(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"CRY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorCRY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"CRZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorCRZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"IsingXX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorIsingXX(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"IsingXY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorIsingXY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"IsingYY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorIsingYY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"IsingZZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorIsingZZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"SingleExcitation",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorSingleExcitation(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"SingleExcitationMinus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorSingleExcitationMinus(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"SingleExcitationPlus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorSingleExcitationPlus(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"DoubleExcitation",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorDoubleExcitation(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"DoubleExcitationMinus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorDoubleExcitationMinus(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"DoubleExcitationPlus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorDoubleExcitationPlus(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"PhaseShift",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorPhaseShift(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"MultiRZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorMultiRZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-            }
-    {
+                  }}},
+          generator_{
+              {"RX",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorRX(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"RY",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorRY(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"RZ",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorRZ(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"ControlledPhaseShift",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorControlledPhaseShift(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"CRX",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorCRX(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"CRY",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorCRY(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"CRZ",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorCRZ(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"IsingXX",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorIsingXX(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"IsingXY",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorIsingXY(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"IsingYY",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorIsingYY(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"IsingZZ",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorIsingZZ(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"SingleExcitation",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorSingleExcitation(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"SingleExcitationMinus",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorSingleExcitationMinus(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"SingleExcitationPlus",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorSingleExcitationPlus(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"DoubleExcitation",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorDoubleExcitation(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"DoubleExcitationMinus",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorDoubleExcitationMinus(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"DoubleExcitationPlus",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorDoubleExcitationPlus(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"PhaseShift",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorPhaseShift(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+              {"MultiRZ",
+               [&](auto &&wires, auto &&adjoint, auto &&params) {
+                   return applyGeneratorMultiRZ(
+                       std::forward<decltype(wires)>(wires),
+                       std::forward<decltype(adjoint)>(adjoint),
+                       std::forward<decltype(params)>(params));
+               }},
+          } {
         num_qubits_ = num_qubits;
         length_ = exp2(num_qubits);
 
@@ -471,8 +494,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
         }
 
         if (num_qubits > 0) {
-            data_ = std::make_unique<KokkosVector>(
-                "data_", exp2(num_qubits));
+            data_ = std::make_unique<KokkosVector>("data_", exp2(num_qubits));
             Kokkos::parallel_for(length_, InitView(*data_));
         }
     };
@@ -611,8 +633,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
     void applyOperation_std(
         const std::string &opName, const std::vector<size_t> &wires,
         bool adjoint = false, const std::vector<fp_t> &params = {0.0},
-        [[maybe_unused]] const std::vector<ComplexT>
-            &gate_matrix = {}) {
+        [[maybe_unused]] const std::vector<ComplexT> &gate_matrix = {}) {
 
         if (opName == "Identity") {
             // No op
@@ -686,8 +707,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGenerator(const std::string &opName,
                         const std::vector<size_t> &wires, bool adjoint = false,
-                        const std::vector<fp_t> &params = {0.0})
-        -> fp_t {
+                        const std::vector<fp_t> &params = {0.0}) -> fp_t {
         const auto it = generator_.find(opName);
         PL_ABORT_IF(it == generator_.end(),
                     std::string("Generator does not exist for ") + opName);
@@ -707,16 +727,14 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
         auto &&num_qubits = this->getNumQubits();
         if (!inverse) {
             Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, exp2(num_qubits - 1)),
-                singleQubitOpFunctor<fp_t, false>(*data_, num_qubits,
-                                                       matrix, wires));
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 1)),
+                singleQubitOpFunctor<fp_t, false>(*data_, num_qubits, matrix,
+                                                  wires));
         } else {
             Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, exp2(num_qubits - 1)),
-                singleQubitOpFunctor<fp_t, true>(*data_, num_qubits,
-                                                      matrix, wires));
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 1)),
+                singleQubitOpFunctor<fp_t, true>(*data_, num_qubits, matrix,
+                                                 wires));
         }
     }
 
@@ -734,16 +752,14 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
         auto &&num_qubits = this->getNumQubits();
         if (!inverse) {
             Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, exp2(num_qubits - 2)),
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 2)),
                 twoQubitOpFunctor<fp_t, false>(*data_, num_qubits, matrix,
-                                                    wires));
+                                               wires));
         } else {
             Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, exp2(num_qubits - 2)),
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 2)),
                 twoQubitOpFunctor<fp_t, true>(*data_, num_qubits, matrix,
-                                                   wires));
+                                              wires));
         }
     }
 
@@ -774,19 +790,28 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
             if (!inverse) {
                 Kokkos::parallel_for(
                     Kokkos::RangePolicy<KokkosExecSpace>(
-                        0, exp2(num_qubits_ -
-                                                        wires.size())),
-                    multiQubitOpFunctor<fp_t, false>(*data_, num_qubits,
-                                                          matrix, wires_view));
+                        0, exp2(num_qubits_ - wires.size())),
+                    multiQubitOpFunctor<fp_t, false>(*data_, num_qubits, matrix,
+                                                     wires_view));
             } else {
                 Kokkos::parallel_for(
                     Kokkos::RangePolicy<KokkosExecSpace>(
-                        0, exp2(num_qubits_ -
-                                                        wires.size())),
-                    multiQubitOpFunctor<fp_t, true>(*data_, num_qubits,
-                                                         matrix, wires_view));
+                        0, exp2(num_qubits_ - wires.size())),
+                    multiQubitOpFunctor<fp_t, true>(*data_, num_qubits, matrix,
+                                                    wires_view));
             }
         }
+    }
+
+    inline void applyMatrix(const std::vector<ComplexT> matrix,
+                            const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        size_t n = 1U << wires.size();
+        KokkosVector matrix_("matrix_", n);
+        for (size_t i = 0; i < n; i++) {
+            matrix_(i) = matrix[i];
+        }
+        applyMultiQubitOp(matrix_, wires, inverse);
     }
 
     /**
@@ -799,9 +824,9 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param params parameters for this gate
      */
     template <template <class, bool> class functor_t, int nqubits>
-    void applyGateFunctor(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void
+    applyGateFunctor(const std::vector<size_t> &wires, bool inverse = false,
+                     [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         auto &&num_qubits = this->getNumQubits();
         PL_ASSERT(wires.size() == nqubits);
         if (!inverse) {
@@ -824,9 +849,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params Parameters for this gate
      */
-    void
-    applyPauliX(const std::vector<size_t> &wires, bool inverse = false,
-                [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyPauliX(const std::vector<size_t> &wires, bool inverse = false,
+                     [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<pauliXFunctor, 1>(wires, inverse, params);
     }
 
@@ -837,9 +861,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params Parameters for this gate
      */
-    void
-    applyPauliY(const std::vector<size_t> &wires, bool inverse = false,
-                [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyPauliY(const std::vector<size_t> &wires, bool inverse = false,
+                     [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<pauliYFunctor, 1>(wires, inverse, params);
     }
 
@@ -851,9 +874,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param params Parameters for this gate
      */
 
-    void
-    applyPauliZ(const std::vector<size_t> &wires, bool inverse = false,
-                [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyPauliZ(const std::vector<size_t> &wires, bool inverse = false,
+                     [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<pauliZFunctor, 1>(wires, inverse, params);
     }
 
@@ -864,9 +886,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    void
-    applyHadamard(const std::vector<size_t> &wires, bool inverse = false,
-                  [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyHadamard(const std::vector<size_t> &wires, bool inverse = false,
+                       [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<hadamardFunctor, 1>(wires, inverse, params);
     }
 
@@ -937,9 +958,9 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    void applyPhaseShift(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void
+    applyPhaseShift(const std::vector<size_t> &wires, bool inverse = false,
+                    [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<phaseShiftFunctor, 1>(wires, inverse, params);
     }
 
@@ -1073,9 +1094,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    void
-    applyIsingXX(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyIsingXX(const std::vector<size_t> &wires, bool inverse = false,
+                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<isingXXFunctor, 2>(wires, inverse, params);
     }
 
@@ -1086,9 +1106,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    void
-    applyIsingXY(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyIsingXY(const std::vector<size_t> &wires, bool inverse = false,
+                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<isingXYFunctor, 2>(wires, inverse, params);
     }
 
@@ -1099,9 +1118,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    void
-    applyIsingYY(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyIsingYY(const std::vector<size_t> &wires, bool inverse = false,
+                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<isingYYFunctor, 2>(wires, inverse, params);
     }
 
@@ -1112,9 +1130,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    void
-    applyIsingZZ(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyIsingZZ(const std::vector<size_t> &wires, bool inverse = false,
+                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<isingZZFunctor, 2>(wires, inverse, params);
     }
 
@@ -1213,23 +1230,18 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    void
-    applyMultiRZ(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyMultiRZ(const std::vector<size_t> &wires, bool inverse = false,
+                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         auto &&num_qubits = this->getNumQubits();
 
         if (!inverse) {
             Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, exp2(num_qubits)),
-                multiRZFunctor<fp_t, false>(*data_, num_qubits, wires,
-                                                 params));
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits)),
+                multiRZFunctor<fp_t, false>(*data_, num_qubits, wires, params));
         } else {
             Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, exp2(num_qubits)),
-                multiRZFunctor<fp_t, true>(*data_, num_qubits, wires,
-                                                params));
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits)),
+                multiRZFunctor<fp_t, true>(*data_, num_qubits, wires, params));
         }
     }
 
@@ -1240,9 +1252,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    void
-    applyCSWAP(const std::vector<size_t> &wires, bool inverse = false,
-               [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyCSWAP(const std::vector<size_t> &wires, bool inverse = false,
+                    [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<cSWAPFunctor, 3>(wires, inverse, params);
     }
 
@@ -1253,9 +1264,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    void
-    applyToffoli(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<fp_t> &params = {}) {
+    void applyToffoli(const std::vector<size_t> &wires, bool inverse = false,
+                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
         applyGateFunctor<toffoliFunctor, 3>(wires, inverse, params);
     }
 
@@ -1268,8 +1278,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorPhaseShiftFunctor, 1>(wires, inverse, params);
         return static_cast<fp_t>(1.0);
     }
@@ -1283,8 +1292,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorIsingXX(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorIsingXXFunctor, 2>(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
     }
@@ -1298,8 +1306,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorIsingXY(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorIsingXYFunctor, 2>(wires, inverse, params);
         return static_cast<fp_t>(0.5);
     }
@@ -1313,8 +1320,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorIsingYY(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorIsingYYFunctor, 2>(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
     }
@@ -1328,8 +1334,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorIsingZZ(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorIsingZZFunctor, 2>(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
     }
@@ -1344,8 +1349,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorSingleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorSingleExcitationFunctor, 2>(wires, inverse,
                                                               params);
         return -static_cast<fp_t>(0.5);
@@ -1361,8 +1365,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorSingleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorSingleExcitationMinusFunctor, 2>(
             wires, inverse, params);
         return -static_cast<fp_t>(0.5);
@@ -1378,8 +1381,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorSingleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorSingleExcitationPlusFunctor, 2>(
             wires, inverse, params);
         return -static_cast<fp_t>(0.5);
@@ -1395,8 +1397,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorDoubleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorDoubleExcitationFunctor, 4>(wires, inverse,
                                                               params);
         return -static_cast<fp_t>(0.5);
@@ -1412,8 +1413,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorDoubleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorDoubleExcitationMinusFunctor, 4>(
             wires, inverse, params);
         return -static_cast<fp_t>(0.5);
@@ -1429,8 +1429,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorDoubleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorDoubleExcitationPlusFunctor, 4>(
             wires, inverse, params);
         return static_cast<fp_t>(0.5);
@@ -1443,9 +1442,9 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    auto
-    applyGeneratorRX(const std::vector<size_t> &wires, bool inverse = false,
-                     [[maybe_unused]] const std::vector<fp_t> &params = {})
+    auto applyGeneratorRX(const std::vector<size_t> &wires,
+                          bool inverse = false,
+                          [[maybe_unused]] const std::vector<fp_t> &params = {})
         -> fp_t {
         applyPauliX(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
@@ -1458,9 +1457,9 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    auto
-    applyGeneratorRY(const std::vector<size_t> &wires, bool inverse = false,
-                     [[maybe_unused]] const std::vector<fp_t> &params = {})
+    auto applyGeneratorRY(const std::vector<size_t> &wires,
+                          bool inverse = false,
+                          [[maybe_unused]] const std::vector<fp_t> &params = {})
         -> fp_t {
         applyPauliY(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
@@ -1473,9 +1472,9 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    auto
-    applyGeneratorRZ(const std::vector<size_t> &wires, bool inverse = false,
-                     [[maybe_unused]] const std::vector<fp_t> &params = {})
+    auto applyGeneratorRZ(const std::vector<size_t> &wires,
+                          bool inverse = false,
+                          [[maybe_unused]] const std::vector<fp_t> &params = {})
         -> fp_t {
         applyPauliZ(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
@@ -1491,8 +1490,7 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorControlledPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         applyGateFunctor<generatorControlledPhaseShiftFunctor, 2>(
             wires, inverse, params);
         return static_cast<fp_t>(1);
@@ -1505,9 +1503,9 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    auto applyGeneratorCRX(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
+    auto
+    applyGeneratorCRX(const std::vector<size_t> &wires, bool inverse = false,
+                      [[maybe_unused]] const std::vector<fp_t> &params = {})
 
         -> fp_t {
         applyGateFunctor<generatorCRXFunctor, 2>(wires, inverse, params);
@@ -1521,9 +1519,9 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    auto applyGeneratorCRY(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
+    auto
+    applyGeneratorCRY(const std::vector<size_t> &wires, bool inverse = false,
+                      [[maybe_unused]] const std::vector<fp_t> &params = {})
         -> fp_t {
         applyGateFunctor<generatorCRYFunctor, 2>(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
@@ -1536,9 +1534,9 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    auto applyGeneratorCRZ(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
+    auto
+    applyGeneratorCRZ(const std::vector<size_t> &wires, bool inverse = false,
+                      [[maybe_unused]] const std::vector<fp_t> &params = {})
         -> fp_t {
         applyGateFunctor<generatorCRZFunctor, 2>(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
@@ -1553,22 +1551,18 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
      */
     auto applyGeneratorMultiRZ(
         const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
+        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
         auto &&num_qubits = this->getNumQubits();
 
         if (inverse == false) {
             Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, exp2(num_qubits)),
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits)),
                 generatorMultiRZFunctor<fp_t, false>(*data_, num_qubits,
-                                                          wires));
+                                                     wires));
         } else {
             Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, exp2(num_qubits)),
-                generatorMultiRZFunctor<fp_t, true>(*data_, num_qubits,
-                                                         wires));
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits)),
+                generatorMultiRZFunctor<fp_t, true>(*data_, num_qubits, wires));
         }
         return -static_cast<fp_t>(0.5);
     }
@@ -1635,8 +1629,8 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
     using GateMap = std::unordered_map<std::string, GateFunc>;
     const GateMap gates_;
 
-    using GeneratorFunc = std::function<fp_t(
-        const std::vector<size_t> &, bool, const std::vector<fp_t> &)>;
+    using GeneratorFunc = std::function<fp_t(const std::vector<size_t> &, bool,
+                                             const std::vector<fp_t> &)>;
     using GeneratorMap = std::unordered_map<std::string, GeneratorFunc>;
     const GeneratorMap generator_;
 
@@ -1647,4 +1641,4 @@ class StateVectorKokkos final : public StateVectorBase<fp_t, StateVectorKokkos<f
     inline static bool is_exit_reg_ = false;
 };
 
-}; // namespace Pennylane
+}; // namespace Pennylane::Lightning_Kokkos

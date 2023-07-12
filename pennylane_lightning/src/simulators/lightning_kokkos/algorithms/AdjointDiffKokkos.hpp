@@ -7,7 +7,7 @@
 
 /// @cond DEV
 namespace {
-namespace Simulators = Pennylane::Lightning_Kokkos::Simulators;
+namespace Simulators = Pennylane::Lightning_Kokkos::Observables;
 using namespace Simulators;
 } // namespace
 /// @endcond

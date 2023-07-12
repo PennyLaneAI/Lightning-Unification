@@ -21,7 +21,7 @@
 #include <string>
 #include <utility>
 
-namespace Pennylane::LightningQubit::Gates {
+namespace Pennylane::Lightning_Kokkos::Gates {
 /**
  * @brief Enum class for all gate operations
  */
@@ -110,4 +110,4 @@ enum class MatrixOperation : uint32_t {
     /* END (placeholder) */
     END
 };
-} // namespace Pennylane::LightningQubit::Gates
+} // namespace Pennylane::Lightning_Kokkos::Gates

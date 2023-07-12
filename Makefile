@@ -55,12 +55,12 @@ test-python: test-builtin test-suite
 
 build:
 	rm -rf ./Build
-	cmake -G Ninja -BBuild -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+	cmake -BBuild -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 	cmake --build ./Build $(VERBOSE)
 
 test-cpp:
 	rm -rf ./BuildTests
-	cmake -G Ninja -BBuildTests -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_OPENMP=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_OPENMP=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 ifdef target
 	cmake --build ./BuildTests $(VERBOSE) --target $(target)
 	./BuildTests/$(target)
@@ -71,7 +71,7 @@ endif
 
 test-cpp-blas:
 	rm -rf ./BuildTests
-	cmake -G Ninja -BBuildTests -DBUILD_TESTS=ON -DENABLE_BLAS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_BLAS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 	cmake --build ./BuildTests $(VERBOSE)
 	cmake --build ./BuildTests $(VERBOSE) --target test
 
@@ -87,7 +87,7 @@ format-python:
 .PHONY: check-tidy
 check-tidy:
 	rm -rf ./BuildTidy
-	cmake -G Ninja -BBuildTidy -DENABLE_CLANG_TIDY=ON -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+	cmake -BBuildTidy -DENABLE_CLANG_TIDY=ON -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 ifdef target
 	cmake --build ./BuildTidy $(VERBOSE) --target $(target)
 else
