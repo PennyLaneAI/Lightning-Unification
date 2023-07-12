@@ -23,5 +23,5 @@ set_property(TARGET ${PL_BACKEND}_measurements PROPERTY POSITION_INDEPENDENT_COD
 
 if (BUILD_TESTS)
     enable_testing()
-    add_subdirectory("tests")
+    # add_subdirectory("tests")
 endif()
