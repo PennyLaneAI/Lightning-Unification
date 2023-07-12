@@ -1,4 +1,5 @@
 #pragma once
+#include "AdjointJacobianBase.hpp"
 #include "LinearAlgebraKokkos.hpp"
 #include "ObservablesKokkos.hpp"
 #include "StateVectorKokkos.hpp"
@@ -7,10 +8,20 @@
 
 /// @cond DEV
 namespace {
-namespace Simulators = Pennylane::Lightning_Kokkos::Observables;
-using namespace Simulators;
+using namespace Pennylane::Lightning_Kokkos::Observables;
+using namespace Pennylane::Algorithms;
+// using Pennylane::LightningQubit::Util::innerProdC;
+// using Pennylane::LightningQubit::Util::Transpose;
 } // namespace
 /// @endcond
+
+// using namespace Pennylane;
+/// @cond DEV
+namespace {
+
+} // namespace
+/// @endcond
+
 
 namespace Pennylane::Lightning_Kokkos::Algorithms {
 
@@ -176,12 +187,16 @@ template <class T> class OpsData {
  * @brief Kokkos-enabled adjoint Jacobian evaluator following the method of
  * arXiV:2009.02823
  *
- * @tparam T Floating-point precision.
+ * @tparam StateVectorT State vector type.
  */
-template <class T = double> class AdjointJacobianKokkos {
+template <class StateVectorT>
+class AdjointJacobian final
+    : public AdjointJacobianBase<StateVectorT, AdjointJacobian<StateVectorT>> {
   private:
-    using CFP_t = Kokkos::complex<T>;
-    using scalar_type_t = T;
+    using ComplexT = typename StateVectorT::ComplexT;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using BaseType =
+        AdjointJacobianBase<StateVectorT, AdjointJacobian<StateVectorT>>;
 
     /**
      * @brief Utility method to update the Jacobian at a given index by
@@ -194,29 +209,29 @@ template <class T = double> class AdjointJacobianKokkos {
      * @param obs_index Observable index position of Jacobian to update.
      * @param param_index Parameter index position of Jacobian to update.
      */
-    inline void updateJacobian(StateVectorKokkos<T> &sv1,
-                               StateVectorKokkos<T> &sv2,
-                               std::vector<std::vector<T>> &jac,
-                               T scaling_coeff, size_t obs_index,
+    inline void updateJacobian(StateVectorT &sv1,
+                               StateVectorT &sv2,
+                               std::vector<std::vector<PrecisionT>> &jac,
+                               PrecisionT scaling_coeff, size_t obs_index,
                                size_t param_index) {
         jac[obs_index][param_index] =
             -2 * scaling_coeff *
-            Pennylane::Lightning_Kokkos::Util::getImagOfComplexInnerProduct<T>(
+            Pennylane::Lightning_Kokkos::Util::getImagOfComplexInnerProduct<PrecisionT>(
                 sv1.getData(), sv2.getData());
     }
 
     /**
      * @brief Utility method to apply all operations from given
-     * `%Pennylane::Lightning_Kokkos::Algorithms::OpsData<T>` object to
-     * `%StateVectorKokkos<T>`
+     * `%Pennylane::Lightning_Kokkos::Algorithms::OpsData<PrecisionT>` object to
+     * `%StateVectorT`
      *
      * @param state Statevector to be updated.
      * @param operations Operations to apply.
      * @param adj Take the adjoint of the given operations.
      */
     inline void applyOperations(
-        StateVectorKokkos<T> &state,
-        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<T> &operations,
+        StateVectorT &state,
+        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<PrecisionT> &operations,
         bool adj = false) {
         for (size_t op_idx = 0; op_idx < operations.getOpsName().size();
              op_idx++) {
@@ -229,16 +244,16 @@ template <class T = double> class AdjointJacobianKokkos {
 
     /**
      * @brief Utility method to apply the adjoint indexed operation from
-     * `%Pennylane::Lightning_Kokkos::Algorithms::OpsData<T>` object to
-     * `%StateVectorKokkos<T>`.
+     * `%Pennylane::Lightning_Kokkos::Algorithms::OpsData<PrecisionT>` object to
+     * `%StateVectorT`.
      *
      * @param state Statevector to be updated.
      * @param operations Operations to apply.
      * @param op_idx Adjointed operation index to apply.
      */
     inline void applyOperationAdj(
-        StateVectorKokkos<T> &state,
-        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<T> &operations,
+        StateVectorT &state,
+        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<PrecisionT> &operations,
         size_t op_idx) {
         state.applyOperation(operations.getOpsName()[op_idx],
                              operations.getOpsWires()[op_idx],
@@ -248,14 +263,14 @@ template <class T = double> class AdjointJacobianKokkos {
 
     /**
      * @brief Utility method to apply a given operations from given
-     * `%Pennylane::Lightning_Kokkos::Algorithms::ObsDatum<T>` object to
-     * `%StateVectorKokkos<T>`
+     * `%Pennylane::Lightning_Kokkos::Algorithms::ObsDatum<PrecisionT>` object to
+     * `%StateVectorT`
      *
      * @param state Statevector to be updated.
      * @param observable Observable to apply.
      */
-    inline void applyObservable(StateVectorKokkos<T> &state,
-                                const ObservableKokkos<T> &observable) {
+    inline void applyObservable(StateVectorT &state,
+                                const Observable<StateVectorT> &observable) {
         using namespace Pennylane::Lightning_Kokkos::Util;
         observable.applyInPlace(state);
     }
@@ -269,9 +284,9 @@ template <class T = double> class AdjointJacobianKokkos {
      * @param observables Vector of observables to apply to each statevector.
      */
     inline void applyObservables(
-        std::vector<StateVectorKokkos<T>> &states,
-        const StateVectorKokkos<T> &reference_state,
-        const std::vector<std::shared_ptr<ObservableKokkos<T>>> &observables) {
+        std::vector<StateVectorT> &states,
+        const StateVectorT &reference_state,
+        const std::vector<std::shared_ptr<Observable<StateVectorT>>> &observables) {
         // clang-format off
         // Globally scoped exception value to be captured within OpenMP block.
         // See the following for OpenMP design decisions:
@@ -302,8 +317,8 @@ template <class T = double> class AdjointJacobianKokkos {
      * adjoint of.
      */
     inline void applyOperationsAdj(
-        std::vector<StateVectorKokkos<T>> &states,
-        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<T> &operations,
+        std::vector<StateVectorT> &states,
+        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<PrecisionT> &operations,
         size_t op_idx) {
         // clang-format off
         // Globally scoped exception value to be captured within OpenMP block.
@@ -345,17 +360,17 @@ template <class T = double> class AdjointJacobianKokkos {
      * @param op_name Name of parametric gate.
      * @param wires Wires to operate upon.
      * @param adj Indicate whether to take the adjoint of the operation.
-     * @return T Generator scaling coefficient.
+     * @return PrecisionT Generator scaling coefficient.
      */
-    inline auto applyGenerator(StateVectorKokkos<T> &sv,
+    inline auto applyGenerator(StateVectorT &sv,
                                const std::string &op_name,
                                const std::vector<size_t> &wires, const bool adj)
-        -> T {
+        -> PrecisionT {
         return sv.applyGenerator(op_name, wires, adj);
     }
 
   public:
-    AdjointJacobianKokkos() = default;
+    AdjointJacobian() = default;
 
     /**
      * @brief Utility to create a given operations object.
@@ -366,15 +381,15 @@ template <class T = double> class AdjointJacobianKokkos {
      * @param ops_inverses Indicate whether to take adjoint of each operation in
      * ops_name.
      * @param ops_matrices Matrix definition of an operation if unsupported.
-     * @return const Pennylane::Lightning_Kokkos::Algorithms::OpsData<T>
+     * @return const Pennylane::Lightning_Kokkos::Algorithms::OpsData<PrecisionT>
      */
     auto createOpsData(
         const std::vector<std::string> &ops_name,
-        const std::vector<std::vector<T>> &ops_params,
+        const std::vector<std::vector<PrecisionT>> &ops_params,
         const std::vector<std::vector<size_t>> &ops_wires,
         const std::vector<bool> &ops_inverses,
-        const std::vector<std::vector<std::complex<T>>> &ops_matrices = {{}})
-        -> Pennylane::Lightning_Kokkos::Algorithms::OpsData<T> {
+        const std::vector<std::vector<std::complex<PrecisionT>>> &ops_matrices = {{}})
+        -> Pennylane::Lightning_Kokkos::Algorithms::OpsData<PrecisionT> {
         return {ops_name, ops_params, ops_wires, ops_inverses, ops_matrices};
     }
 
@@ -383,7 +398,7 @@ template <class T = double> class AdjointJacobianKokkos {
      * of parametric gates.
      *
      * For the statevector data associated with `psi` of length `num_elements`,
-     * we make internal copies to a `%StateVectorKokkos<T>` object, with
+     * we make internal copies to a `%StateVectorT` object, with
      * one per required observable. The `operations` will be applied to the
      * internal statevector copies, with the operation indices participating in
      * the gradient calculations given in `trainableParams`, and the overall
@@ -402,9 +417,9 @@ template <class T = double> class AdjointJacobianKokkos {
      * to calculation.
      */
     void adjointJacobian(
-        const StateVectorKokkos<T> &ref_data, std::vector<std::vector<T>> &jac,
-        const std::vector<std::shared_ptr<ObservableKokkos<T>>> &obs,
-        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<T> &ops,
+        const StateVectorT &ref_data, std::vector<std::vector<PrecisionT>> &jac,
+        const std::vector<std::shared_ptr<Observable<StateVectorT>>> &obs,
+        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<PrecisionT> &ops,
         const std::vector<size_t> &trainableParams,
         bool apply_operations = false) {
         PL_ABORT_IF(trainableParams.empty(),
@@ -424,7 +439,7 @@ template <class T = double> class AdjointJacobianKokkos {
         const auto tp_rend = trainableParams.rend();
 
         // Create $U_{1:p}\vert \lambda \rangle$
-        StateVectorKokkos<T> lambda(ref_data.getNumQubits());
+        StateVectorT lambda(ref_data.getNumQubits());
         lambda.DeviceToDevice(ref_data.getData());
 
         // Apply given operations to statevector if requested
@@ -433,11 +448,11 @@ template <class T = double> class AdjointJacobianKokkos {
         }
 
         // Create observable-applied state-vectors
-        std::vector<StateVectorKokkos<T>> H_lambda(
-            num_observables, StateVectorKokkos<T>(lambda.getNumQubits()));
+        std::vector<StateVectorT> H_lambda(
+            num_observables, StateVectorT(lambda.getNumQubits()));
         applyObservables(H_lambda, lambda, obs);
 
-        StateVectorKokkos<T> mu(lambda.getNumQubits());
+        StateVectorT mu(lambda.getNumQubits());
 
         for (int op_idx = static_cast<int>(ops_name.size() - 1); op_idx >= 0;
              op_idx--) {
@@ -456,7 +471,7 @@ template <class T = double> class AdjointJacobianKokkos {
 
             if (ops.hasParams(op_idx)) {
                 if (current_param_idx == *tp_it) {
-                    const T scalingFactor =
+                    const PrecisionT scalingFactor =
                         applyGenerator(mu, ops.getOpsName()[op_idx],
                                        ops.getOpsWires()[op_idx],
                                        !ops.getOpsInverses()[op_idx]) *
