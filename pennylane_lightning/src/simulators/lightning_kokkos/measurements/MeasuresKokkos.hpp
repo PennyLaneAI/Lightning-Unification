@@ -5,40 +5,59 @@
 
 #include "ExpValFunctors.hpp"
 #include "LinearAlgebraKokkos.hpp"
+#include "MeasurementsBase.hpp"
 #include "MeasuresFunctors.hpp"
-#include "ObservablesKokkos.hpp"
+#include "Observables.hpp"
 #include "StateVectorKokkos.hpp"
+#include "Util.hpp"
 
-namespace Pennylane::Lightning_Kokkos::Simulators {
+/// @cond DEV
+namespace {
+using namespace Pennylane::Measures;
+using namespace Pennylane::Observables;
+// using namespace Pennylane::LightningQubit::Util;
+using Pennylane::Util::exp2;
 
-template <class Precision> class MeasuresKokkos {
+using Pennylane::Lightning_Kokkos::StateVectorKokkos;
+} // namespace
+/// @endcond
+
+
+namespace Pennylane::Lightning_Kokkos::Measures {
+
+template <class StateVectorT>
+class Measurements final
+    : public MeasurementsBase<StateVectorT, Measurements<StateVectorT>> {
 
   private:
+    using PrecisionT = StateVectorT::PrecisionT;
+    using ComplexT = StateVectorT::ComplexT;
+    using BaseType = MeasurementsBase<StateVectorT, Measurements<StateVectorT>>;
     using KokkosExecSpace = Kokkos::DefaultExecutionSpace;
-    using KokkosVector = Kokkos::View<Kokkos::complex<Precision> *>;
+    using KokkosVector = Kokkos::View<ComplexT *>;
     using KokkosSizeTVector = Kokkos::View<size_t *>;
     using UnmanagedSizeTHostView =
         Kokkos::View<size_t *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using UnmanagedPrecisionHostView =
-        Kokkos::View<Precision *, Kokkos::HostSpace,
+        Kokkos::View<PrecisionT *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using UnmanagedConstComplexHostView =
-        Kokkos::View<const Kokkos::complex<Precision> *, Kokkos::HostSpace,
+        Kokkos::View<const ComplexT *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using UnmanagedConstSizeTHostView =
         Kokkos::View<const size_t *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
-    using ExpValFunc = std::function<Precision(const std::vector<size_t> &,
-                                               const std::vector<Precision> &)>;
+    using ExpValFunc = std::function<PrecisionT(const std::vector<size_t> &,
+                                               const std::vector<PrecisionT> &)>;
     using ExpValMap = std::unordered_map<std::string, ExpValFunc>;
 
-    const StateVectorKokkos<Precision> &original_sv;
+    // const StateVectorT &this->_statevector;
     ExpValMap expval_funcs;
 
   public:
-    explicit MeasuresKokkos(const StateVectorKokkos<Precision> &state_vector)
-        : original_sv{state_vector},
+    explicit Measurements(const StateVectorT &statevector)
+        : BaseType{statevector},
           expval_funcs{{"Identity",
                         [&](auto &&wires, auto &&params) {
                             return getExpectationValueIdentity(
@@ -79,9 +98,9 @@ template <class Precision> class MeasuresKokkos {
      */
     auto getExpectationValue(
         const std::string &obsName, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params = {0.0},
-        const std::vector<Kokkos::complex<Precision>> &gate_matrix = {}) {
-        auto &&par = (params.empty()) ? std::vector<Precision>{0.0} : params;
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0},
+        const std::vector<ComplexT> &gate_matrix = {}) {
+        auto &&par = (params.empty()) ? std::vector<PrecisionT>{0.0} : params;
         auto &&local_wires =
             (gate_matrix.empty())
                 ? wires
@@ -111,9 +130,9 @@ template <class Precision> class MeasuresKokkos {
      */
     auto getExpectationValue(
         const std::vector<size_t> &wires,
-        const std::vector<Kokkos::complex<Precision>> &gate_matrix) {
+        const std::vector<ComplexT> &gate_matrix) {
 
-        auto &&par = std::vector<Precision>{0.0};
+        auto &&par = std::vector<PrecisionT>{0.0};
         KokkosVector matrix("gate_matrix", gate_matrix.size());
         Kokkos::deep_copy(matrix, UnmanagedConstComplexHostView(
                                       gate_matrix.data(), gate_matrix.size()));
@@ -130,12 +149,12 @@ template <class Precision> class MeasuresKokkos {
      * @param gate_matrix optional matrix
      */
     auto
-    getExpectationValue(const std::vector<Kokkos::complex<Precision>> &data,
+    getExpectationValue(const std::vector<ComplexT> &data,
                         const std::vector<size_t> &indices,
                         const std::vector<size_t> &index_ptr) {
-        const Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        Precision expval = 0;
+        const Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        PrecisionT expval = 0;
         KokkosSizeTVector kok_indices("indices", indices.size());
         KokkosSizeTVector kok_index_ptr("index_ptr", index_ptr.size());
         KokkosVector kok_data("data", data.size());
@@ -150,7 +169,7 @@ template <class Precision> class MeasuresKokkos {
 
         Kokkos::parallel_reduce(
             index_ptr.size() - 1,
-            getExpectationValueSparseFunctor<Precision>(
+            getExpectationValueSparseFunctor<PrecisionT>(
                 arr_data, kok_data, kok_indices, kok_index_ptr),
             expval);
         return expval;
@@ -166,13 +185,13 @@ template <class Precision> class MeasuresKokkos {
      */
     auto getExpectationValueIdentity(
         const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params = {0.0}) {
-        const size_t num_qubits = original_sv.getNumQubits();
-        const Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        Precision expval = 0;
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
+        const size_t num_qubits = this->_statevector.getNumQubits();
+        const Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        PrecisionT expval = 0;
         Kokkos::parallel_reduce(
-            Lightning_Kokkos::Util::exp2(num_qubits),
+            exp2(num_qubits),
             getExpectationValueIdentityFunctor(arr_data, num_qubits, wires),
             expval);
         return expval;
@@ -189,13 +208,13 @@ template <class Precision> class MeasuresKokkos {
      */
     auto getExpectationValuePauliX(
         const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params = {0.0}) {
-        const size_t num_qubits = original_sv.getNumQubits();
-        const Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        Precision expval = 0;
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
+        const size_t num_qubits = this->_statevector.getNumQubits();
+        const Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        PrecisionT expval = 0;
         Kokkos::parallel_reduce(
-            Lightning_Kokkos::Util::exp2(num_qubits - 1),
+            exp2(num_qubits - 1),
             getExpectationValuePauliXFunctor(arr_data, num_qubits, wires),
             expval);
         return expval;
@@ -212,13 +231,13 @@ template <class Precision> class MeasuresKokkos {
      */
     auto getExpectationValuePauliY(
         const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params = {0.0}) {
-        const size_t num_qubits = original_sv.getNumQubits();
-        const Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        Precision expval = 0;
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
+        const size_t num_qubits = this->_statevector.getNumQubits();
+        const Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        PrecisionT expval = 0;
         Kokkos::parallel_reduce(
-            Lightning_Kokkos::Util::exp2(num_qubits - 1),
+            exp2(num_qubits - 1),
             getExpectationValuePauliYFunctor(arr_data, num_qubits, wires),
             expval);
         return expval;
@@ -235,13 +254,13 @@ template <class Precision> class MeasuresKokkos {
      */
     auto getExpectationValuePauliZ(
         const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params = {0.0}) {
-        const size_t num_qubits = original_sv.getNumQubits();
-        const Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        Precision expval = 0;
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
+        const size_t num_qubits = this->_statevector.getNumQubits();
+        const Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        PrecisionT expval = 0;
         Kokkos::parallel_reduce(
-            Lightning_Kokkos::Util::exp2(num_qubits - 1),
+            exp2(num_qubits - 1),
             getExpectationValuePauliZFunctor(arr_data, num_qubits, wires),
             expval);
         return expval;
@@ -258,13 +277,13 @@ template <class Precision> class MeasuresKokkos {
      */
     auto getExpectationValueHadamard(
         const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params = {0.0}) {
-        const size_t num_qubits = original_sv.getNumQubits();
-        const Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        Precision expval = 0;
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
+        const size_t num_qubits = this->_statevector.getNumQubits();
+        const Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        PrecisionT expval = 0;
         Kokkos::parallel_reduce(
-            Lightning_Kokkos::Util::exp2(num_qubits - 1),
+            exp2(num_qubits - 1),
             getExpectationValueHadamardFunctor(arr_data, num_qubits, wires),
             expval);
         return expval;
@@ -282,14 +301,14 @@ template <class Precision> class MeasuresKokkos {
      */
     auto getExpectationValueSingleQubitOp(
         const KokkosVector &matrix, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params = {0.0}) {
-        const size_t num_qubits = original_sv.getNumQubits();
-        Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        Precision expval = 0;
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
+        const size_t num_qubits = this->_statevector.getNumQubits();
+        Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        PrecisionT expval = 0;
         Kokkos::parallel_reduce(
-            Lightning_Kokkos::Util::exp2(num_qubits - 1),
-            getExpectationValueSingleQubitOpFunctor<Precision>(
+            exp2(num_qubits - 1),
+            getExpectationValueSingleQubitOpFunctor<PrecisionT>(
                 arr_data, num_qubits, matrix, wires),
             expval);
         return expval;
@@ -307,13 +326,13 @@ template <class Precision> class MeasuresKokkos {
      */
     auto getExpectationValueTwoQubitOp(
         const KokkosVector &matrix, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params = {0.0}) {
-        const size_t num_qubits = original_sv.getNumQubits();
-        Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        Precision expval = 0;
-        Kokkos::parallel_reduce(Lightning_Kokkos::Util::exp2(num_qubits - 2),
-                                getExpectationValueTwoQubitOpFunctor<Precision>(
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
+        const size_t num_qubits = this->_statevector.getNumQubits();
+        Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        PrecisionT expval = 0;
+        Kokkos::parallel_reduce(exp2(num_qubits - 2),
+                                getExpectationValueTwoQubitOpFunctor<PrecisionT>(
                                     arr_data, num_qubits, matrix, wires),
                                 expval);
         return expval;
@@ -331,7 +350,7 @@ template <class Precision> class MeasuresKokkos {
      */
     auto getExpectationValueMultiQubitOp(
         const KokkosVector &matrix, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params = {0.0}) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         if (wires.size() == 1) {
             return getExpectationValueSingleQubitOp(matrix, wires, params);
         } else if (wires.size() == 2) {
@@ -340,16 +359,16 @@ template <class Precision> class MeasuresKokkos {
             Kokkos::View<const size_t *, Kokkos::HostSpace,
                          Kokkos::MemoryTraits<Kokkos::Unmanaged>>
                 wires_host(wires.data(), wires.size());
-            const size_t num_qubits = original_sv.getNumQubits();
-            const Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-                original_sv.getData();
+            const size_t num_qubits = this->_statevector.getNumQubits();
+            const Kokkos::View<ComplexT *> arr_data =
+                this->_statevector.getData();
 
             Kokkos::View<size_t *> wires_view("wires_view", wires.size());
             Kokkos::deep_copy(wires_view, wires_host);
-            Precision expval = 0;
+            PrecisionT expval = 0;
             Kokkos::parallel_reduce(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits - wires.size())),
+                    0, exp2(num_qubits - wires.size())),
                 getExpectationValueMultiQubitOpFunctor(arr_data, num_qubits,
                                                        matrix, wires_view),
                 expval);
@@ -363,12 +382,12 @@ template <class Precision> class MeasuresKokkos {
      * @param ob Observable.
      * @return Expectation value with respect to the given observable.
      */
-    auto expval(const ObservableKokkos<Precision> &ob) {
-        StateVectorKokkos<Precision> ob_sv(original_sv.getNumQubits());
-        ob_sv.DeviceToDevice(original_sv.getData());
+    auto expval(const Observable<StateVectorT> &ob) {
+        StateVectorT ob_sv(this->_statevector.getNumQubits());
+        ob_sv.DeviceToDevice(this->_statevector.getData());
         ob.applyInPlace(ob_sv);
         return Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-            original_sv.getData(), ob_sv.getData());
+            this->_statevector.getData(), ob_sv.getData());
     }
 
     /**
@@ -377,17 +396,17 @@ template <class Precision> class MeasuresKokkos {
      * @param ob Observable.
      * @return Variance with respect to the given observable.
      */
-    auto var(const ObservableKokkos<Precision> &ob) -> Precision {
-        StateVectorKokkos<Precision> ob_sv(original_sv.getNumQubits());
-        ob_sv.DeviceToDevice(original_sv.getData());
+    auto var(const Observable<StateVectorT> &ob) -> PrecisionT {
+        StateVectorT ob_sv(this->_statevector.getNumQubits());
+        ob_sv.DeviceToDevice(this->_statevector.getData());
         ob.applyInPlace(ob_sv);
 
-        const Precision mean_square =
+        const PrecisionT mean_square =
             Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
                 ob_sv.getData(), ob_sv.getData());
-        const Precision squared_mean = static_cast<Precision>(std::pow(
+        const PrecisionT squared_mean = static_cast<PrecisionT>(std::pow(
             Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-                original_sv.getData(), ob_sv.getData()),
+                this->_statevector.getData(), ob_sv.getData()),
             2));
         return (mean_square - squared_mean);
     }
@@ -398,20 +417,20 @@ template <class Precision> class MeasuresKokkos {
      * @return Floating point std::vector with probabilities
      * in lexicographic order.
      */
-    auto probs() -> std::vector<Precision> {
-        const size_t N = original_sv.getLength();
+    auto probs() -> std::vector<PrecisionT> {
+        const size_t N = this->_statevector.getLength();
 
-        Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        Kokkos::View<Precision *> d_probability("d_probability", N);
+        Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        Kokkos::View<PrecisionT *> d_probability("d_probability", N);
 
         // Compute probability distribution from StateVector using
         // Kokkos::parallel_for
         Kokkos::parallel_for(
             Kokkos::RangePolicy<KokkosExecSpace>(0, N),
-            getProbFunctor<Precision>(arr_data, d_probability));
+            getProbFunctor<PrecisionT>(arr_data, d_probability));
 
-        std::vector<Precision> probabilities(N, 0);
+        std::vector<PrecisionT> probabilities(N, 0);
 
         Kokkos::deep_copy(UnmanagedPrecisionHostView(probabilities.data(),
                                                      probabilities.size()),
@@ -432,9 +451,9 @@ template <class Precision> class MeasuresKokkos {
             Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left>>;
 
         //  Determining probabilities for the sorted wires.
-        const Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        const size_t num_qubits = original_sv.getNumQubits();
+        const Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        const size_t num_qubits = this->_statevector.getNumQubits();
 
         std::vector<size_t> sorted_ind_wires(wires);
         const bool is_sorted_wires =
@@ -457,7 +476,7 @@ template <class Precision> class MeasuresKokkos {
                                                                  num_qubits),
                 num_qubits);
 
-        Kokkos::View<Precision *> d_probabilities("d_probabilities",
+        Kokkos::View<PrecisionT *> d_probabilities("d_probabilities",
                                                   all_indices.size());
 
         Kokkos::View<size_t *> d_sorted_ind_wires("d_sorted_ind_wires",
@@ -486,10 +505,10 @@ template <class Precision> class MeasuresKokkos {
 
         Kokkos::parallel_for(
             "Set_Prob", mdpolicy_2d0,
-            getSubProbFunctor<Precision>(arr_data, d_probabilities,
+            getSubProbFunctor<PrecisionT>(arr_data, d_probabilities,
                                          d_all_indices, d_all_offsets));
 
-        std::vector<Precision> probabilities(all_indices.size(), 0);
+        std::vector<PrecisionT> probabilities(all_indices.size(), 0);
 
         if (is_sorted_wires) {
             Kokkos::deep_copy(UnmanagedPrecisionHostView(probabilities.data(),
@@ -497,7 +516,7 @@ template <class Precision> class MeasuresKokkos {
                               d_probabilities);
             return probabilities;
         } else {
-            Kokkos::View<Precision *> transposed_tensor("transposed_tensor",
+            Kokkos::View<PrecisionT *> transposed_tensor("transposed_tensor",
                                                         all_indices.size());
 
             Kokkos::View<size_t *> d_trans_index("d_trans_index",
@@ -517,7 +536,7 @@ template <class Precision> class MeasuresKokkos {
             Kokkos::parallel_for(
                 "Transpose",
                 Kokkos::RangePolicy<KokkosExecSpace>(0, num_trans_tensor),
-                getTransposedFunctor<Precision>(
+                getTransposedFunctor<PrecisionT>(
                     transposed_tensor, d_probabilities, d_trans_index));
 
             Kokkos::deep_copy(UnmanagedPrecisionHostView(probabilities.data(),
@@ -541,30 +560,30 @@ template <class Precision> class MeasuresKokkos {
      */
     auto generate_samples(size_t num_samples) -> std::vector<size_t> {
 
-        const size_t num_qubits = original_sv.getNumQubits();
-        const size_t N = original_sv.getLength();
+        const size_t num_qubits = this->_statevector.getNumQubits();
+        const size_t N = this->_statevector.getLength();
 
-        Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-            original_sv.getData();
-        Kokkos::View<Precision *> probability("probability", N);
+        Kokkos::View<ComplexT *> arr_data =
+            this->_statevector.getData();
+        Kokkos::View<PrecisionT *> probability("probability", N);
         Kokkos::View<size_t *> samples("num_samples", num_samples * num_qubits);
 
         // Compute probability distribution from StateVector using
         // Kokkos::parallel_for
         Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
-                             getProbFunctor<Precision>(arr_data, probability));
+                             getProbFunctor<PrecisionT>(arr_data, probability));
 
         // Convert probability distribution to cumulative distribution using
         // Kokkos:: parallel_scan
         Kokkos::parallel_scan(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
-                              getCDFFunctor<Precision>(probability));
+                              getCDFFunctor<PrecisionT>(probability));
 
         // Sampling using Random_XorShift64_Pool
         Kokkos::Random_XorShift64_Pool<> rand_pool(5374857);
 
         Kokkos::parallel_for(
             Kokkos::RangePolicy<KokkosExecSpace>(0, num_samples),
-            Sampler<Precision, Kokkos::Random_XorShift64_Pool>(
+            Sampler<PrecisionT, Kokkos::Random_XorShift64_Pool>(
                 samples, probability, rand_pool, num_qubits, N));
 
         std::vector<size_t> samples_h(num_samples * num_qubits);
