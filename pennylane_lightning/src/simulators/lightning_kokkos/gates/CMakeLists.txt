@@ -10,5 +10,5 @@ target_link_libraries(${PL_BACKEND}_gates INTERFACE  ${PL_BACKEND}_utils)
 
 if (BUILD_TESTS)
     enable_testing()
-    # add_subdirectory("tests")
+    add_subdirectory("tests")
 endif()

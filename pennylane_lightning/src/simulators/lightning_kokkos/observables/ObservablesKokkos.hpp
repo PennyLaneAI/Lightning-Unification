@@ -145,7 +145,6 @@ class HermitianObs final : public HermitianObsBase<StateVectorT> {
         : BaseType{matrix, wires} {}
 };
 
-
 /**
  * @brief Final class for TensorProdObs observables
  *
@@ -191,7 +190,6 @@ class TensorProdObs final : public TensorProdObsBase<StateVectorT> {
             new TensorProdObs(std::move(obs))};
     }
 };
-
 
 /**
  * @brief Final class for a general Hamiltonian representation as a sum of

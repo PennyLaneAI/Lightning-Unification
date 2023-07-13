@@ -25,6 +25,7 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Random.hpp>
 
+#include "BitUtil.hpp" // isPerfectPowerOf2
 #include "Error.hpp"
 #include "GateFunctors.hpp"
 #include "StateVectorBase.hpp"
@@ -33,8 +34,8 @@
 /// @cond DEV
 namespace {
 using Pennylane::Util::exp2;
+using Pennylane::Util::isPerfectPowerOf2;
 using Pennylane::Util::log2;
-// using namespace Pennylane::Lightning_Kokkos::Util;
 using namespace Pennylane::Lightning_Kokkos::Functors;
 } // namespace
 /// @endcond
@@ -561,6 +562,8 @@ class StateVectorKokkos final
     StateVectorKokkos(ComplexT *hostdata_, size_t length,
                       const Kokkos::InitializationSettings &kokkos_args = {})
         : StateVectorKokkos(log2(length), kokkos_args) {
+        PL_ABORT_IF_NOT(isPerfectPowerOf2(length),
+                        "The size of provided data must be a power of 2.");
         HostToDevice(hostdata_, length);
     }
 
@@ -697,6 +700,62 @@ class StateVectorKokkos final
     }
 
     /**
+     * @brief Apply multiple gates to the state-vector.
+     *
+     * @param ops Vector of gate names to be applied in order.
+     * @param ops_wires Vector of wires on which to apply index-matched gate
+     * name.
+     * @param ops_inverse Indicates whether gate at matched index is to be
+     * inverted.
+     */
+    void applyOperations(const std::vector<std::string> &ops,
+                         const std::vector<std::vector<size_t>> &ops_wires,
+                         const std::vector<bool> &ops_inverse) {
+        const size_t numOperations = ops.size();
+        if (numOperations != ops_wires.size()) {
+            PL_ABORT(
+                "Invalid arguments: number of operations, wires, and inverses "
+                "must all be equal");
+        }
+        if (numOperations != ops_inverse.size()) {
+            PL_ABORT(
+                "Invalid arguments: number of operations, wires and inverses"
+                "must all be equal");
+        }
+        applyOperation(ops, ops_wires, ops_inverse, {});
+    }
+
+    /**
+     * @brief Apply multiple gates to the state-vector.
+     *
+     * @param ops Vector of gate names to be applied in order.
+     * @param ops_wires Vector of wires on which to apply index-matched gate
+     * name.
+     * @param ops_inverse Indicates whether gate at matched index is to be
+     * inverted.
+     * @param ops_params Optional parameter data for index matched gates.
+     */
+    void applyOperations(const std::vector<std::string> &ops,
+                         const std::vector<std::vector<size_t>> &ops_wires,
+                         const std::vector<bool> &ops_inverse,
+                         const std::vector<std::vector<fp_t>> &ops_params) {
+        const size_t numOperations = ops.size();
+        PL_ABORT_IF(
+            numOperations != ops_wires.size(),
+            "Invalid arguments: number of operations, wires, inverses, and "
+            "parameters must all be equal");
+        PL_ABORT_IF(
+            numOperations != ops_inverse.size(),
+            "Invalid arguments: number of operations, wires, inverses, and "
+            "parameters must all be equal");
+        PL_ABORT_IF(
+            numOperations != ops_params.size(),
+            "Invalid arguments: number of operations, wires, inverses, and "
+            "parameters must all be equal");
+        applyOperation(ops, ops_wires, ops_inverse, ops_params);
+    }
+
+    /**
      * @brief Apply a single generator to the state vector using the given
      * kernel.
      *
@@ -803,15 +862,73 @@ class StateVectorKokkos final
         }
     }
 
-    inline void applyMatrix(const std::vector<ComplexT> matrix,
+    /**
+     * @brief Apply a multi qubit operator to the state vector using a matrix
+     *
+     * @param matrix Kokkos gate matrix in the device space
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicates whether to use adjoint of gate.
+     */
+    inline void applyMatrix(const KokkosVector &matrix,
+                     const std::vector<size_t> &wires, bool inverse = false) {
+        applyMultiQubitOp(matrix, wires, inverse = inverse);
+    }
+
+    /**
+     * @brief Apply a given matrix directly to the statevector using a
+     * raw matrix pointer vector.
+     *
+     * @param matrix Pointer to the array data (in row-major format).
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicate whether inverse should be taken.
+     */
+    inline void applyMatrix(ComplexT *matrix, const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
+        size_t n = 1U << wires.size();
+        KokkosVector matrix_(matrix, n);
+        applyMultiQubitOp(matrix_, wires, inverse = inverse);
+    }
+
+    /**
+     * @brief Apply a given matrix directly to the statevector.
+     *
+     * @param matrix Matrix data (in row-major format).
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicate whether inverse should be taken.
+     */
+    inline void applyMatrix(std::vector<ComplexT> &matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
+        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
+        PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
+                    "The size of matrix does not match with the given "
+                    "number of wires");
+        size_t n = 1U << wires.size();
+        KokkosVector matrix_(matrix.data(), n);
+        applyMultiQubitOp(matrix_, wires, inverse = inverse);
+    }
+
+    /**
+     * @brief Apply a given matrix directly to the statevector.
+     *
+     * @param matrix Matrix data (in row-major format).
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicate whether inverse should be taken.
+     */
+    inline void applyMatrix(const std::vector<ComplexT> &matrix,
+                            const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
+        PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
+                    "The size of matrix does not match with the given "
+                    "number of wires");
         size_t n = 1U << wires.size();
         KokkosVector matrix_("matrix_", n);
         for (size_t i = 0; i < n; i++) {
             matrix_(i) = matrix[i];
         }
-        applyMultiQubitOp(matrix_, wires, inverse);
+        applyMultiQubitOp(matrix_, wires, inverse = inverse);
     }
 
     /**

@@ -58,7 +58,7 @@ using namespace Pennylane::Util;
 
 /// @endcond
 
-namespace Pennylane::LightningQubit::Util {
+namespace Pennylane::Util {
 /**
  * @brief Transpose enum class
  */
@@ -912,4 +912,4 @@ void scaleAndAdd(std::complex<T> a, const std::vector<std::complex<T>> &x,
     }
     scaleAndAdd(x.size(), a, x.data(), y.data());
 }
-} // namespace Pennylane::LightningQubit::Util
+} // namespace Pennylane::Util

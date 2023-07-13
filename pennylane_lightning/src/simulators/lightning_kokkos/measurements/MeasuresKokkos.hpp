@@ -22,7 +22,6 @@ using Pennylane::Lightning_Kokkos::StateVectorKokkos;
 } // namespace
 /// @endcond
 
-
 namespace Pennylane::Lightning_Kokkos::Measures {
 
 template <class StateVectorT>
@@ -48,8 +47,8 @@ class Measurements final
     using UnmanagedConstSizeTHostView =
         Kokkos::View<const size_t *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
-    using ExpValFunc = std::function<PrecisionT(const std::vector<size_t> &,
-                                               const std::vector<PrecisionT> &)>;
+    using ExpValFunc = std::function<PrecisionT(
+        const std::vector<size_t> &, const std::vector<PrecisionT> &)>;
     using ExpValMap = std::unordered_map<std::string, ExpValFunc>;
 
     // const StateVectorT &this->_statevector;
@@ -128,9 +127,8 @@ class Measurements final
      * @param params parameters for the observable
      * @param gate_matrix optional matrix
      */
-    auto getExpectationValue(
-        const std::vector<size_t> &wires,
-        const std::vector<ComplexT> &gate_matrix) {
+    auto getExpectationValue(const std::vector<size_t> &wires,
+                             const std::vector<ComplexT> &gate_matrix) {
 
         auto &&par = std::vector<PrecisionT>{0.0};
         KokkosVector matrix("gate_matrix", gate_matrix.size());
@@ -148,12 +146,10 @@ class Measurements final
      * @param params parameters for the observable
      * @param gate_matrix optional matrix
      */
-    auto
-    getExpectationValue(const std::vector<ComplexT> &data,
-                        const std::vector<size_t> &indices,
-                        const std::vector<size_t> &index_ptr) {
-        const Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+    auto getExpectationValue(const std::vector<ComplexT> &data,
+                             const std::vector<size_t> &indices,
+                             const std::vector<size_t> &index_ptr) {
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         PrecisionT expval = 0;
         KokkosSizeTVector kok_indices("indices", indices.size());
         KokkosSizeTVector kok_index_ptr("index_ptr", index_ptr.size());
@@ -187,8 +183,7 @@ class Measurements final
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        const Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits),
@@ -210,8 +205,7 @@ class Measurements final
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        const Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
@@ -233,8 +227,7 @@ class Measurements final
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        const Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
@@ -256,8 +249,7 @@ class Measurements final
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        const Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
@@ -279,8 +271,7 @@ class Measurements final
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        const Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
@@ -303,8 +294,7 @@ class Measurements final
         const KokkosVector &matrix, const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+        Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
@@ -328,13 +318,13 @@ class Measurements final
         const KokkosVector &matrix, const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+        Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         PrecisionT expval = 0;
-        Kokkos::parallel_reduce(exp2(num_qubits - 2),
-                                getExpectationValueTwoQubitOpFunctor<PrecisionT>(
-                                    arr_data, num_qubits, matrix, wires),
-                                expval);
+        Kokkos::parallel_reduce(
+            exp2(num_qubits - 2),
+            getExpectationValueTwoQubitOpFunctor<PrecisionT>(
+                arr_data, num_qubits, matrix, wires),
+            expval);
         return expval;
     }
 
@@ -420,8 +410,7 @@ class Measurements final
     auto probs() -> std::vector<PrecisionT> {
         const size_t N = this->_statevector.getLength();
 
-        Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+        Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         Kokkos::View<PrecisionT *> d_probability("d_probability", N);
 
         // Compute probability distribution from StateVector using
@@ -451,8 +440,7 @@ class Measurements final
             Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left>>;
 
         //  Determining probabilities for the sorted wires.
-        const Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         const size_t num_qubits = this->_statevector.getNumQubits();
 
         std::vector<size_t> sorted_ind_wires(wires);
@@ -477,7 +465,7 @@ class Measurements final
                 num_qubits);
 
         Kokkos::View<PrecisionT *> d_probabilities("d_probabilities",
-                                                  all_indices.size());
+                                                   all_indices.size());
 
         Kokkos::View<size_t *> d_sorted_ind_wires("d_sorted_ind_wires",
                                                   sorted_ind_wires.size());
@@ -506,7 +494,7 @@ class Measurements final
         Kokkos::parallel_for(
             "Set_Prob", mdpolicy_2d0,
             getSubProbFunctor<PrecisionT>(arr_data, d_probabilities,
-                                         d_all_indices, d_all_offsets));
+                                          d_all_indices, d_all_offsets));
 
         std::vector<PrecisionT> probabilities(all_indices.size(), 0);
 
@@ -517,7 +505,7 @@ class Measurements final
             return probabilities;
         } else {
             Kokkos::View<PrecisionT *> transposed_tensor("transposed_tensor",
-                                                        all_indices.size());
+                                                         all_indices.size());
 
             Kokkos::View<size_t *> d_trans_index("d_trans_index",
                                                  all_indices.size());
@@ -563,8 +551,7 @@ class Measurements final
         const size_t num_qubits = this->_statevector.getNumQubits();
         const size_t N = this->_statevector.getLength();
 
-        Kokkos::View<ComplexT *> arr_data =
-            this->_statevector.getData();
+        Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
         Kokkos::View<PrecisionT *> probability("probability", N);
         Kokkos::View<size_t *> samples("num_samples", num_samples * num_qubits);
 
@@ -600,4 +587,4 @@ class Measurements final
     }
 };
 
-} // namespace Pennylane::Lightning_Kokkos::Simulators
+} // namespace Pennylane::Lightning_Kokkos::Measures
