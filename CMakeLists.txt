@@ -57,6 +57,7 @@ endif()
 
 # Other build options
 option(BUILD_TESTS "Build cpp tests" OFF)
+option(BUILD_TESTS_SELECT "Build cpp tests" OFF)
 option(BUILD_BENCHMARKS "Enable cpp benchmarks" OFF)
 
 # Backend

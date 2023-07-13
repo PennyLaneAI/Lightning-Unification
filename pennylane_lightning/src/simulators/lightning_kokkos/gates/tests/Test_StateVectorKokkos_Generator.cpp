@@ -10,7 +10,6 @@
 
 #include "StateVectorKokkos.hpp"
 
-using namespace Pennylane;
 /**
  * @file
  *  Tests for functionality:

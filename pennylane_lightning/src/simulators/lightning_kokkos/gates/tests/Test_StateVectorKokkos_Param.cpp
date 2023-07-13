@@ -27,7 +27,6 @@ using Pennylane::Util::exp2;
 } // namespace
 /// @endcond
 
-
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXY",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
@@ -110,19 +109,19 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRX",
         std::vector<TestType> angles = {0.1, 0.6};
         std::vector<std::vector<ComplexT>> expected_results{
             std::vector<ComplexT>{ComplexT{0.9987502603949663, 0.0},
-                              ComplexT{0.0, -0.04997916927067834}},
+                                  ComplexT{0.0, -0.04997916927067834}},
             std::vector<ComplexT>{ComplexT{0.9553364891256061, 0.0},
-                              ComplexT{0, -0.2955202066613395}},
+                                  ComplexT{0, -0.2955202066613395}},
             std::vector<ComplexT>{ComplexT{0.49757104789172696, 0.0},
-                              ComplexT{0, -0.867423225594017}}};
+                                  ComplexT{0, -0.867423225594017}}};
 
         std::vector<std::vector<ComplexT>> expected_results_adj{
             std::vector<ComplexT>{ComplexT{0.9987502603949663, 0.0},
-                              ComplexT{0.0, 0.04997916927067834}},
+                                  ComplexT{0.0, 0.04997916927067834}},
             std::vector<ComplexT>{ComplexT{0.9553364891256061, 0.0},
-                              ComplexT{0, 0.2955202066613395}},
+                                  ComplexT{0, 0.2955202066613395}},
             std::vector<ComplexT>{ComplexT{0.49757104789172696, 0.0},
-                              ComplexT{0, 0.867423225594017}}};
+                                  ComplexT{0, 0.867423225594017}}};
 
         SECTION("Apply directly") {
             for (size_t index = 0; index < angles.size(); index++) {
@@ -168,21 +167,21 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRY",
         const std::vector<TestType> angles{0.2, 0.7, 2.9};
         std::vector<std::vector<ComplexT>> expected_results{
             std::vector<ComplexT>{{0.8731983044562817, 0.04786268954660339},
-                              {0.0876120655431924, -0.47703040785184303}},
+                                  {0.0876120655431924, -0.47703040785184303}},
             std::vector<ComplexT>{{0.8243771119105122, 0.16439396602553008},
-                              {0.3009211363333468, -0.45035926880694604}},
+                                  {0.3009211363333468, -0.45035926880694604}},
             std::vector<ComplexT>{{0.10575112905629831, 0.47593196040758534},
-                              {0.8711876098966215, -0.0577721051072477}}};
+                                  {0.8711876098966215, -0.0577721051072477}}};
         std::vector<std::vector<ComplexT>> expected_results_adj{
             std::vector<ComplexT>{{0.8731983044562817, -0.04786268954660339},
-                              {-0.0876120655431924, -0.47703040785184303}},
+                                  {-0.0876120655431924, -0.47703040785184303}},
             std::vector<ComplexT>{{0.8243771119105122, -0.16439396602553008},
-                              {-0.3009211363333468, -0.45035926880694604}},
+                                  {-0.3009211363333468, -0.45035926880694604}},
             std::vector<ComplexT>{{0.10575112905629831, -0.47593196040758534},
-                              {-0.8711876098966215, -0.0577721051072477}}};
+                                  {-0.8711876098966215, -0.0577721051072477}}};
 
         std::vector<ComplexT> ini_st{{0.8775825618903728, 0.0},
-                                 {0.0, -0.47942553860420306}};
+                                     {0.0, -0.47942553860420306}};
 
         SECTION("Apply directly") {
             for (size_t index = 0; index < angles.size(); index++) {
@@ -478,8 +477,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyCRot",
 
     const std::vector<TestType> angles{0.3, 0.8, 2.4};
     std::vector<ComplexT> expected_results(8);
-    const auto rot_mat = getRot<Kokkos::complex, TestType>(
-        angles[0], angles[1], angles[2]);
+    const auto rot_mat =
+        getRot<Kokkos::complex, TestType>(angles[0], angles[1], angles[2]);
     expected_results[0b1 << (num_qubits - 1)] = rot_mat[0];
     expected_results[(0b1 << num_qubits) - 2] = rot_mat[2];
 
@@ -526,8 +525,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXX",
     const std::vector<TestType> angles{0.3, 0.8};
 
     std::vector<std::vector<ComplexT>> expected_results{
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits),
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits)};
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits)};
     expected_results[0][0] = ComplexT{0.9887710779360422, 0.0};
     expected_results[0][6] = ComplexT{0.0, -0.14943813247359922};
 
@@ -541,8 +542,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXX",
     expected_results[3][5] = ComplexT{0.0, -0.3894183423086505};
 
     std::vector<std::vector<ComplexT>> expected_results_adj{
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits),
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits)};
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits)};
 
     expected_results_adj[0][0] = ComplexT{0.9887710779360422, 0.0};
     expected_results_adj[0][6] = ComplexT{0.0, 0.14943813247359922};
@@ -650,8 +653,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingYY",
     const std::vector<TestType> angles{0.3, 0.8};
 
     std::vector<std::vector<ComplexT>> expected_results{
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits),
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits)};
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits)};
     expected_results[0][0] = ComplexT{0.9887710779360422, 0.0};
     expected_results[0][6] = ComplexT{0.0, 0.14943813247359922};
 
@@ -665,8 +670,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingYY",
     expected_results[3][5] = ComplexT{0.0, 0.3894183423086505};
 
     std::vector<std::vector<ComplexT>> expected_results_adj{
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits),
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits)};
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits)};
 
     expected_results_adj[0][0] = ComplexT{0.9887710779360422, 0.0};
     expected_results_adj[0][6] = ComplexT{0.0, -0.14943813247359922};
@@ -780,9 +787,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingZZ",
     expected_results[1][0] = ComplexT{0.9210609940028851, -0.3894183423086505};
 
     std::vector<std::vector<ComplexT>> expected_results_adj{
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits)};
-    expected_results_adj[0][0] = ComplexT{0.9887710779360422, 0.14943813247359922};
-    expected_results_adj[1][0] = ComplexT{0.9210609940028851, 0.3894183423086505};
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits)};
+    expected_results_adj[0][0] =
+        ComplexT{0.9887710779360422, 0.14943813247359922};
+    expected_results_adj[1][0] =
+        ComplexT{0.9210609940028851, 0.3894183423086505};
 
     SECTION("Apply directly adjoint=false") {
         SECTION("IsingZZ 0,1") {
@@ -874,14 +884,18 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyMultiRZ",
     const std::vector<TestType> angles{0.3, 0.8};
 
     std::vector<std::vector<ComplexT>> expected_results{
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits)};
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits)};
     expected_results[0][0] = ComplexT{0.9887710779360422, -0.14943813247359922};
     expected_results[1][0] = ComplexT{0.9210609940028851, -0.3894183423086505};
 
     std::vector<std::vector<ComplexT>> expected_results_adj{
-        std::vector<ComplexT>(1 << num_qubits), std::vector<ComplexT>(1 << num_qubits)};
-    expected_results_adj[0][0] = ComplexT{0.9887710779360422, 0.14943813247359922};
-    expected_results_adj[1][0] = ComplexT{0.9210609940028851, 0.3894183423086505};
+        std::vector<ComplexT>(1 << num_qubits),
+        std::vector<ComplexT>(1 << num_qubits)};
+    expected_results_adj[0][0] =
+        ComplexT{0.9887710779360422, 0.14943813247359922};
+    expected_results_adj[1][0] =
+        ComplexT{0.9210609940028851, 0.3894183423086505};
 
     SECTION("Apply directly adjoint=false") {
         SECTION("MultiRZ 0,1") {
