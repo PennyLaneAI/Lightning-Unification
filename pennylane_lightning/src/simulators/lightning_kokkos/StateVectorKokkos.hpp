@@ -574,8 +574,7 @@ class StateVectorKokkos final
      */
     StateVectorKokkos(std::vector<ComplexT> hostdata_,
                       const Kokkos::InitializationSettings &kokkos_args = {})
-        : StateVectorKokkos(hostdata_.data(), hostdata_.size(),
-                            kokkos_args) {}
+        : StateVectorKokkos(hostdata_.data(), hostdata_.size(), kokkos_args) {}
 
     /**
      * @brief Copy constructor
@@ -915,8 +914,26 @@ class StateVectorKokkos final
         PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
                     "The size of matrix does not match with the given "
                     "number of wires");
+        applyMatrix(matrix.data(), wires, inverse = inverse);
+    }
+
+    /**
+     * @brief Apply a given matrix directly to the statevector using a
+     * raw matrix pointer vector.
+     *
+     * @param matrix Pointer to the array data (in row-major format).
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicate whether inverse should be taken.
+     */
+    inline void applyMatrix(const ComplexT *matrix,
+                            const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
         size_t n = 1U << wires.size();
-        KokkosVector matrix_(matrix.data(), n);
+        KokkosVector matrix_("matrix_", n);
+        for (size_t i = 0; i < n; i++) {
+            matrix_(i) = matrix[i];
+        }
         applyMultiQubitOp(matrix_, wires, inverse = inverse);
     }
 
@@ -934,12 +951,7 @@ class StateVectorKokkos final
         PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
                     "The size of matrix does not match with the given "
                     "number of wires");
-        size_t n = 1U << wires.size();
-        KokkosVector matrix_("matrix_", n);
-        for (size_t i = 0; i < n; i++) {
-            matrix_(i) = matrix[i];
-        }
-        applyMultiQubitOp(matrix_, wires, inverse = inverse);
+        applyMatrix(matrix.data(), wires, inverse = inverse);
     }
 
     /**
@@ -1733,7 +1745,7 @@ class StateVectorKokkos final
      * @param new_data data pointer to new data.
      * @param new_size size of underlying data storage.
      */
-    void updateData(ComplexT * new_data, size_t new_size) {
+    void updateData(ComplexT *new_data, size_t new_size) {
         updateData(KokkosVector(new_data, new_size));
     }
 
