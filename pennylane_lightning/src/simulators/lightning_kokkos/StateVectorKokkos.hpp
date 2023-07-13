@@ -568,6 +568,16 @@ class StateVectorKokkos final
     }
 
     /**
+     * @brief Create a new state vector from data on the host.
+     *
+     * @param num_qubits Number of qubits
+     */
+    StateVectorKokkos(std::vector<ComplexT> hostdata_,
+                      const Kokkos::InitializationSettings &kokkos_args = {})
+        : StateVectorKokkos(hostdata_.data(), hostdata_.size(),
+                            kokkos_args) {}
+
+    /**
      * @brief Copy constructor
      *
      * @param other Another state vector
@@ -870,7 +880,8 @@ class StateVectorKokkos final
      * @param inverse Indicates whether to use adjoint of gate.
      */
     inline void applyMatrix(const KokkosVector &matrix,
-                     const std::vector<size_t> &wires, bool inverse = false) {
+                            const std::vector<size_t> &wires,
+                            bool inverse = false) {
         applyMultiQubitOp(matrix, wires, inverse = inverse);
     }
 
@@ -1698,8 +1709,41 @@ class StateVectorKokkos final
      */
     size_t getLength() const { return length_; }
 
+    /**
+     * @brief Update data of the class
+     *
+     * @param other Kokkos View
+     */
+    void updateData(const KokkosVector &other) {
+        Kokkos::deep_copy(*data_, other);
+    }
+
+    /**
+     * @brief Update data of the class
+     *
+     * @param other State vector
+     */
     void updateData(const StateVectorKokkos<fp_t> &other) {
-        Kokkos::deep_copy(*data_, other.getData());
+        updateData(other.getData());
+    }
+
+    /**
+     * @brief Update data of the class
+     *
+     * @param new_data data pointer to new data.
+     * @param new_size size of underlying data storage.
+     */
+    void updateData(ComplexT * new_data, size_t new_size) {
+        updateData(KokkosVector(new_data, new_size));
+    }
+
+    /**
+     * @brief Update data of the class
+     *
+     * @param other STL vector of type ComplexT
+     */
+    void updateData(std::vector<ComplexT> &other) {
+        updateData(other.data(), other.size());
     }
 
     /**
@@ -1715,6 +1759,21 @@ class StateVectorKokkos final
      * @return The pointer to the data of state vector
      */
     [[nodiscard]] auto getData() -> KokkosVector & { return *data_; }
+
+    /**
+     * @brief Get underlying data vector
+     */
+    [[nodiscard]] auto getDataVector() -> std::vector<ComplexT> {
+        std::vector<ComplexT> data_(getData().data(),
+                                    getData().data() + getData().size());
+        return data_;
+    }
+
+    [[nodiscard]] auto getDataVector() const -> const std::vector<ComplexT> {
+        const std::vector<ComplexT> data_(getData().data(),
+                                          getData().data() + getData().size());
+        return data_;
+    }
 
     /**
      * @brief Copy data from the host space to the device space.

@@ -103,7 +103,7 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a std::vector",
 }
 
 TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
-                           "[applyMatrix]", (StateVectorKokkos), (double)) {
+                           "[applyMatrix]", (StateVectorKokkos), (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
     using ComplexT = typename StateVectorT::ComplexT;
@@ -129,8 +129,11 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
     //         VectorT st_data_1 =
     //             createRandomStateVectorData<PrecisionT>(re, num_qubits);
     //         VectorT st_data_2 = st_data_1;
-    //         KokkosVector st_view_1(reinterpret_cast<ComplexT*>(st_data_1.data()), st_data_1.size());
-    //         KokkosVector st_view_2(reinterpret_cast<ComplexT*>(st_data_2.data()), st_data_2.size());
+    //         KokkosVector
+    //         st_view_1(reinterpret_cast<ComplexT*>(st_data_1.data()),
+    //         st_data_1.size()); KokkosVector
+    //         st_view_2(reinterpret_cast<ComplexT*>(st_data_2.data()),
+    //         st_data_2.size());
     //         // KokkosVector st_view_1("st_view_1", st_data_1.size());
     //         // KokkosVector st_view_2("st_view_2", st_data_2.size());
     //         // for (size_t i = 0; i < st_data_1.size(); i++) {
@@ -166,8 +169,8 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
     //         }
     //         printf("---------------\n");
 
-    //         PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
-    //         REQUIRE(isApproxEqual(state_vector_1.getData().data(),
+    //         PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() *
+    //         10E3; REQUIRE(isApproxEqual(state_vector_1.getData().data(),
     //                               state_vector_1.getLength(),
     //                               state_vector_2.getData().data(),
     //                               state_vector_2.getLength(), eps));
@@ -224,5 +227,70 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyOperations",
             state_vector.applyOperations({"RX", "RY"}, {{0}, {1}},
                                          {false, false}, {{0.0}}),
             LightningException, "must all be equal"); // invalid parameters
+    }
+}
+
+TEMPLATE_TEST_CASE("StateVectorKokkos::StateVectorKokkos",
+                   "[StateVectorKokkos]", float, double) {
+    using PrecisionT = TestType;
+    using ComplexT = typename StateVectorKokkos<PrecisionT>::ComplexT;
+
+    SECTION("StateVectorKokkos<TestType> {size_t}") {
+        REQUIRE(std::is_constructible_v<StateVectorKokkos<TestType>, size_t>);
+        const size_t num_qubits = 4;
+        StateVectorKokkos<PrecisionT> sv(num_qubits);
+
+        REQUIRE(sv.getNumQubits() == 4);
+        REQUIRE(sv.getLength() == 16);
+        REQUIRE(sv.getDataVector().size() == 16);
+    }
+
+    SECTION("StateVectorKokkos<TestType> {ComplexT *, size_t}") {
+        using TestVectorT = TestVector<std::complex<PrecisionT>>;
+        REQUIRE(std::is_constructible_v<StateVectorKokkos<TestType>, ComplexT *,
+                                        size_t>);
+        const size_t num_qubits = 5;
+        TestVectorT st_data =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
+        StateVectorKokkos<PrecisionT> sv(
+            reinterpret_cast<ComplexT *>(st_data.data()), st_data.size());
+
+        REQUIRE(sv.getNumQubits() == 5);
+        REQUIRE(sv.getLength() == 32);
+        REQUIRE(sv.getDataVector().size() == 32);
+    }
+
+    SECTION("StateVectorKokkos<TestType> {ComplexT *, size_t}") {
+        using TestVectorT = TestVector<std::complex<PrecisionT>>;
+        REQUIRE(std::is_constructible_v<StateVectorKokkos<TestType>, std::vector<ComplexT>>);
+        const size_t num_qubits = 5;
+        TestVectorT st_data =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
+        std::vector<ComplexT> data_(st_data.data(), st_data.data()+st_data.size());
+        StateVectorKokkos<PrecisionT> sv(data_);
+
+        REQUIRE(sv.getNumQubits() == 5);
+        REQUIRE(sv.getLength() == 32);
+        REQUIRE(sv.getDataVector().size() == 32);
+    }
+
+    SECTION("StateVectorKokkos<TestType> {const "
+            "StateVectorKokkos<TestType>&}") {
+        REQUIRE(std::is_constructible_v<StateVectorKokkos<TestType>,
+                                        const StateVectorKokkos<TestType> &>);
+    }
+
+    SECTION("updateData") {
+        using TestVectorT = TestVector<std::complex<PrecisionT>>;
+        const size_t num_qubits = 3;
+        StateVectorKokkos<PrecisionT> sv(num_qubits);
+
+        TestVectorT st_data =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
+        std::vector<ComplexT> data_(st_data.data(), st_data.data()+st_data.size());
+        sv.updateData(data_);
+
+        REQUIRE(sv.getDataVector() == data_);
+        // REQUIRE(sv.getDataVector() == approx(st_data));
     }
 }
