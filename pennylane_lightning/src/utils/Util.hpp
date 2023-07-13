@@ -83,6 +83,26 @@ inline static constexpr auto ConstSum(std::complex<U> a, std::complex<T> b)
 }
 
 /**
+ * @brief Return complex value 0.5+0i in the given precision.
+ *
+ * @tparam T Floating point precision type. Accepts `double` and `float`.
+ * @return constexpr std::complex<T>{0.5,0}
+ */
+template <class T> inline static constexpr auto HALF() -> std::complex<T> {
+    return {0.5, 0};
+}
+
+/**
+ * @brief Return complex value -1+0i in the given precision.
+ *
+ * @tparam T Floating point precision type. Accepts `double` and `float`.
+ * @return constexpr std::complex<T>{-1,0}
+ */
+template <class T> inline static constexpr auto NEGONE() -> std::complex<T> {
+    return {-1, 0};
+}
+
+/**
  * @brief Return complex value 1+0i in the given precision.
  *
  * @tparam T Floating point precision type. Accepts `double` and `float`.

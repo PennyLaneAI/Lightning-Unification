@@ -2,12 +2,12 @@
 #include <cstdio>
 #include <vector>
 
+#include <catch2/catch.hpp>
+
 #include "LinearAlgebraKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"
 #include "Util.hpp" // exp2
-
-#include <catch2/catch.hpp>
 
 /**
  * @file

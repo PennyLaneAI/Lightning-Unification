@@ -8,37 +8,48 @@
 
 #include <catch2/catch.hpp>
 
-#include "GatesHost.hpp"
 #include "StateVectorKokkos.hpp"
-#include "TestHelpers.hpp"
 
 using namespace Pennylane;
+/**
+ * @file
+ *  Tests for functionality:
+ *      - defined in the intermediate base class StateVectorKokkos.
+ *      - shared between all child classes.
+ */
+
+/// @cond DEV
+namespace {
+using namespace Pennylane::Lightning_Kokkos;
+using namespace Pennylane::Util;
+} // namespace
+/// @endcond
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorPhaseShift",
-                   "[StateVectorKokkosManaged_Generator]", float, double) {
+                   "[StateVectorKokkosManaged_Generator]", double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -46,12 +57,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorPhaseShift",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -68,7 +79,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorPhaseShift",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -89,12 +100,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorPhaseShift",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -112,7 +123,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorPhaseShift",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -133,28 +144,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorPhaseShift",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXX",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -162,12 +173,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXX",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -184,7 +195,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXX",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -205,12 +216,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXX",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -228,7 +239,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXX",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -249,28 +260,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXX",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXY",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -278,12 +289,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXY",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -300,7 +311,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXY",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -321,12 +332,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXY",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -344,7 +355,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXY",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -365,28 +376,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingYY",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -394,12 +405,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingYY",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -416,7 +427,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingYY",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -437,12 +448,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingYY",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -460,7 +471,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingYY",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -481,28 +492,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingYY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingZZ",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -510,12 +521,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingZZ",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -532,7 +543,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingZZ",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -553,12 +564,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingZZ",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -576,7 +587,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingZZ",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -598,28 +609,28 @@ TEMPLATE_TEST_CASE(
     "StateVectorKokkosManaged::applyGeneratorControlledPhaseShift",
     "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -627,12 +638,12 @@ TEMPLATE_TEST_CASE(
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -650,7 +661,7 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -671,12 +682,12 @@ TEMPLATE_TEST_CASE(
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -694,7 +705,7 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -715,28 +726,28 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRX",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -744,12 +755,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRX",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -766,7 +777,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRX",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -787,12 +798,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRX",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -809,7 +820,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRX",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -830,28 +841,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRX",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRY",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -859,12 +870,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRY",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -881,7 +892,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRY",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -902,12 +913,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRY",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -924,7 +935,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRY",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -945,28 +956,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRZ",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -974,12 +985,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRZ",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -996,7 +1007,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRZ",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1017,12 +1028,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRZ",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1039,7 +1050,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRZ",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1060,28 +1071,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRZ",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorMultiRZ",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -1089,12 +1100,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorMultiRZ",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1111,7 +1122,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorMultiRZ",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1132,12 +1143,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorMultiRZ",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1154,7 +1165,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorMultiRZ",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1175,28 +1186,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorMultiRZ",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRX",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -1204,12 +1215,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRX",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1226,7 +1237,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRX",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1247,12 +1258,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRX",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1269,7 +1280,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRX",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
 
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
@@ -1291,28 +1302,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRX",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRY",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -1320,12 +1331,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRY",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1342,7 +1353,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRY",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1363,12 +1374,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRY",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1385,7 +1396,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRY",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1406,28 +1417,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRZ",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -1435,12 +1446,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRZ",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1457,7 +1468,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRZ",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1478,12 +1489,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRZ",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1500,7 +1511,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRZ",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1521,28 +1532,28 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRZ",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorSingleExcitation",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -1550,12 +1561,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorSingleExcitation",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1573,7 +1584,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorSingleExcitation",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1594,12 +1605,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorSingleExcitation",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1617,7 +1628,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorSingleExcitation",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1639,28 +1650,28 @@ TEMPLATE_TEST_CASE(
     "StateVectorKokkosManaged::applyGeneratorSingleExcitationMinus",
     "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -1668,12 +1679,12 @@ TEMPLATE_TEST_CASE(
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1691,7 +1702,7 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1712,12 +1723,12 @@ TEMPLATE_TEST_CASE(
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1735,7 +1746,7 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1757,28 +1768,28 @@ TEMPLATE_TEST_CASE(
     "StateVectorKokkosManaged::applyGeneratorSingleExcitationPlus",
     "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -1786,12 +1797,12 @@ TEMPLATE_TEST_CASE(
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1809,7 +1820,7 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1830,12 +1841,12 @@ TEMPLATE_TEST_CASE(
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1853,7 +1864,7 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1873,28 +1884,28 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorDoubleExcitation",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -1902,12 +1913,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorDoubleExcitation",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1925,7 +1936,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorDoubleExcitation",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1946,12 +1957,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorDoubleExcitation",
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -1969,7 +1980,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorDoubleExcitation",
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -1991,28 +2002,28 @@ TEMPLATE_TEST_CASE(
     "StateVectorKokkosManaged::applyGeneratorDoubleExcitationMinus",
     "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -2020,12 +2031,12 @@ TEMPLATE_TEST_CASE(
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -2045,7 +2056,7 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -2066,12 +2077,12 @@ TEMPLATE_TEST_CASE(
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -2091,7 +2102,7 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -2113,28 +2124,28 @@ TEMPLATE_TEST_CASE(
     "StateVectorKokkosManaged::applyGeneratorDoubleExcitationPlus",
     "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
-        const std::size_t num_qubits = 4;
+        using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+        const size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
 
-        std::vector<cp_t> ini_st{
-            cp_t{0.267462841882, 0.010768564798},
-            cp_t{0.228575129706, 0.010564590956},
-            cp_t{0.099492749900, 0.260849823392},
-            cp_t{0.093690204310, 0.189847108173},
-            cp_t{0.033390732374, 0.203836830144},
-            cp_t{0.226979395737, 0.081852150975},
-            cp_t{0.031235505729, 0.176933497281},
-            cp_t{0.294287602843, 0.145156781198},
-            cp_t{0.152742706049, 0.111628061129},
-            cp_t{0.012553863703, 0.120027860480},
-            cp_t{0.237156555364, 0.154658769755},
-            cp_t{0.117001120872, 0.228059505033},
-            cp_t{0.041495873225, 0.065934827444},
-            cp_t{0.089653239407, 0.221581340372},
-            cp_t{0.217892322429, 0.291261296999},
-            cp_t{0.292993251871, 0.186570798697},
+        std::vector<ComplexT> ini_st{
+            ComplexT{0.267462841882, 0.010768564798},
+            ComplexT{0.228575129706, 0.010564590956},
+            ComplexT{0.099492749900, 0.260849823392},
+            ComplexT{0.093690204310, 0.189847108173},
+            ComplexT{0.033390732374, 0.203836830144},
+            ComplexT{0.226979395737, 0.081852150975},
+            ComplexT{0.031235505729, 0.176933497281},
+            ComplexT{0.294287602843, 0.145156781198},
+            ComplexT{0.152742706049, 0.111628061129},
+            ComplexT{0.012553863703, 0.120027860480},
+            ComplexT{0.237156555364, 0.154658769755},
+            ComplexT{0.117001120872, 0.228059505033},
+            ComplexT{0.041495873225, 0.065934827444},
+            ComplexT{0.089653239407, 0.221581340372},
+            ComplexT{0.217892322429, 0.291261296999},
+            ComplexT{0.292993251871, 0.186570798697},
         };
 
         SECTION("Apply directly") {
@@ -2142,12 +2153,12 @@ TEMPLATE_TEST_CASE(
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -2167,7 +2178,7 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -
@@ -2188,12 +2199,12 @@ TEMPLATE_TEST_CASE(
             StateVectorKokkos<TestType> kokkos_gate_svp{num_qubits};
             StateVectorKokkos<TestType> kokkos_gate_svm{num_qubits};
 
-            std::vector<cp_t> result_gntr_sv(kokkos_gntr_sv.getLength(),
-                                             {0, 0});
-            std::vector<cp_t> result_gate_svp(kokkos_gate_svp.getLength(),
-                                              {0, 0});
-            std::vector<cp_t> result_gate_svm(kokkos_gate_svm.getLength(),
-                                              {0, 0});
+            std::vector<ComplexT> result_gntr_sv(kokkos_gntr_sv.getLength(),
+                                                 {0, 0});
+            std::vector<ComplexT> result_gate_svp(kokkos_gate_svp.getLength(),
+                                                  {0, 0});
+            std::vector<ComplexT> result_gate_svm(kokkos_gate_svm.getLength(),
+                                                  {0, 0});
 
             kokkos_gntr_sv.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
@@ -2213,7 +2224,7 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svm.DeviceToHost(result_gate_svm.data(),
                                          result_gate_svm.size());
 
-            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            for (size_t j = 0; j < exp2(num_qubits); j++) {
                 CHECK(-scale * imag(result_gntr_sv[j]) ==
                       Approx(0.5 *
                              (real(result_gate_svp[j]) -

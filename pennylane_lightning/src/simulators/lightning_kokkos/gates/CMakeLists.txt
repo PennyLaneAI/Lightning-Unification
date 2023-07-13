@@ -8,7 +8,7 @@ target_include_directories(${PL_BACKEND}_gates INTERFACE ${CMAKE_CURRENT_SOURCE_
 
 target_link_libraries(${PL_BACKEND}_gates INTERFACE  ${PL_BACKEND}_utils)
 
-if (BUILD_TESTS)
+if (BUILD_TESTS_SELECT)
     enable_testing()
     add_subdirectory("tests")
 endif()

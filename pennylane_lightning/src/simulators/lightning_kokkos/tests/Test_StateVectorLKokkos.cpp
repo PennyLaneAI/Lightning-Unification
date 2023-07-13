@@ -1,7 +1,3 @@
-#include "LinearAlgebra.hpp" //randomUnitary
-#include "StateVectorKokkos.hpp"
-#include "TestHelpers.hpp" // createRandomStateVectorData
-
 #include <algorithm>
 #include <complex>
 #include <limits> // numeric_limits
@@ -10,6 +6,10 @@
 #include <vector>
 
 #include <catch2/catch.hpp>
+
+#include "LinearAlgebra.hpp" //randomUnitary
+#include "StateVectorKokkos.hpp"
+#include "TestHelpers.hpp" // createRandomStateVectorData
 
 /**
  * @file
