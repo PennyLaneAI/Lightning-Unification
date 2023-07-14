@@ -29,9 +29,7 @@ target_sources(${PL_BACKEND}_measurements_tests INTERFACE runner_${PL_BACKEND}_m
 ################################################################################
 # Define targets
 ################################################################################
-set(TEST_SOURCES    Test_StateVectorKokkos_Expval.cpp 
-#  Test_StateVectorKokkos_Var.cpp
-)
+set(TEST_SOURCES Test_ObservablesKokkos.cpp)
 
 add_executable(${PL_BACKEND}_measurements_test_runner ${TEST_SOURCES})
 target_link_libraries(${PL_BACKEND}_measurements_test_runner PRIVATE ${PL_BACKEND}_measurements_tests)
