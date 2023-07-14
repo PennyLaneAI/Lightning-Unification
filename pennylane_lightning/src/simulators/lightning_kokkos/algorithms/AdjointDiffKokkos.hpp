@@ -10,14 +10,7 @@
 namespace {
 using namespace Pennylane::Lightning_Kokkos::Observables;
 using namespace Pennylane::Algorithms;
-// using Pennylane::LightningQubit::Util::innerProdC;
-// using Pennylane::LightningQubit::Util::Transpose;
 } // namespace
-/// @endcond
-
-// using namespace Pennylane;
-/// @cond DEV
-namespace {} // namespace
 /// @endcond
 
 namespace Pennylane::Lightning_Kokkos::Algorithms {

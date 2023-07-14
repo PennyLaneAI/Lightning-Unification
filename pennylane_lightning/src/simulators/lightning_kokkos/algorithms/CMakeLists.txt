@@ -1,16 +1,22 @@
+cmake_minimum_required(VERSION 3.20)
+
 project(${PL_BACKEND}_algorithms LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
 
+set(ALGORITHMS_FILES AlgorithmsKokkos.cpp CACHE INTERNAL "" FORCE)
+add_library(${PL_BACKEND}_algorithms STATIC ${ALGORITHMS_FILES})
 
-set(Kokkos_ALGORITHM_FILES  AdjointDiffKokkos.hpp
-                            AdjointDiffKokkos.cpp
-                            CACHE INTERNAL "" FORCE)
-add_library(${PL_BACKEND}_algorithms STATIC ${Kokkos_ALGORITHM_FILES})
+target_include_directories(${PL_BACKEND}_algorithms INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${PL_BACKEND}_algorithms PRIVATE      lightning_compile_options
+                                                            lightning_external_libs
+                                                            )
 
-target_include_directories(${PL_BACKEND}_algorithms PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
-target_link_libraries(${PL_BACKEND}_algorithms PUBLIC   lightning_algorithms
-                                                        ${PL_BACKEND}
-                                                        ${PL_BACKEND}_utils
-                                                        ${PL_BACKEND}_observables)
-set_property(TARGET ${PL_BACKEND}_algorithms PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(${PL_BACKEND}_algorithms PUBLIC       ${PL_BACKEND}_utils
+                                                            lightning_algorithms
+                                                            ${PL_BACKEND}
+                                                            ${PL_BACKEND}_observables
+                                                            )
 
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory("tests")
+endif()

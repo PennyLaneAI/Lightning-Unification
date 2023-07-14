@@ -15,25 +15,29 @@
 #include "TestHelpers.hpp"
 #include "UtilKokkos.hpp"
 
+/// @cond DEV
+namespace {
 using namespace Pennylane::Lightning_Kokkos::Algorithms;
+} // namespace
+/// @endcond
 
 /**
  * @brief Tests the constructability of the AdjointDiff.hpp classes.
  *
  */
-TEMPLATE_TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos",
-                   "[AdjointJacobianKokkos]", float, double) {
-    SECTION("AdjointJacobianKokkos") {
-        REQUIRE(std::is_constructible<AdjointJacobianKokkos<>>::value);
-    }
-    SECTION("AdjointJacobianKokkos<TestType> {}") {
-        REQUIRE(std::is_constructible<AdjointJacobianKokkos<TestType>>::value);
+TEMPLATE_TEST_CASE("AdjointJacobian::AdjointJacobian", "[AdjointJacobian]",
+                   float, double) {
+    SECTION("AdjointJacobian<TestType> {}") {
+        REQUIRE(std::is_constructible<
+                AdjointJacobian<StateVectorKokkos<TestType>>>::value);
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Op=RX, Obs=Z",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+TEST_CASE("AdjointJacobian::AdjointJacobian Op=RX, Obs=Z",
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
 
     const auto num_threads_2 =
@@ -41,13 +45,12 @@ TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Op=RX, Obs=Z",
     const size_t num_qubits = 1;
     const size_t num_params = 3;
     const size_t num_obs = 1;
-    auto obs = std::make_shared<NamedObsKokkos<double>>("PauliZ",
+    auto obs = std::make_shared<NamedObs<StateVectorT>>("PauliZ",
                                                         std::vector<size_t>{0});
     std::vector<std::vector<double>> jacobian(
         num_obs, std::vector<double>(num_params, 0));
-    std::vector<StateVectorKokkos<double>> st_vecs = {
-        StateVectorKokkos<double>{num_qubits},
-        StateVectorKokkos<double>{num_qubits, num_threads_2}};
+    std::vector<StateVectorT> st_vecs = {
+        StateVectorT{num_qubits}, StateVectorT{num_qubits, num_threads_2}};
     for (auto &psi : st_vecs) {
         for (const auto &p : param) {
             auto ops = adj.createOpsData({"RX"}, {{p}}, {{0}}, {false});
@@ -58,19 +61,21 @@ TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Op=RX, Obs=Z",
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=RY, Obs=X",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+TEST_CASE("AdjointJacobian::adjointJacobian Op=RY, Obs=X",
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     const size_t num_qubits = 1;
     const size_t num_params = 3;
     const size_t num_obs = 1;
 
-    auto obs = std::make_shared<NamedObsKokkos<double>>("PauliX",
+    auto obs = std::make_shared<NamedObs<StateVectorT>>("PauliX",
                                                         std::vector<size_t>{0});
     std::vector<std::vector<double>> jacobian(
         num_obs, std::vector<double>(num_params, 0));
-    StateVectorKokkos<double> psi(num_qubits);
+    StateVectorT psi(num_qubits);
     for (const auto &p : param) {
         auto ops = adj.createOpsData({"RY"}, {{p}}, {{0}}, {false});
         psi.resetStateVector();
@@ -79,9 +84,10 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=RY, Obs=X",
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=RX, Obs=[Z,Z]",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+TEST_CASE("AdjointJacobian::adjointJacobian Op=RX, Obs=[Z,Z]",
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     {
         const size_t num_qubits = 2;
@@ -90,11 +96,11 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=RX, Obs=[Z,Z]",
         std::vector<std::vector<double>> jacobian(
             num_obs, std::vector<double>(num_params, 0));
 
-        StateVectorKokkos<double> psi(num_qubits);
+        StateVectorT psi(num_qubits);
 
-        auto obs1 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs1 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{0});
-        auto obs2 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs2 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{1});
 
         auto ops = adj.createOpsData({"RX"}, {{param[0]}}, {{0}}, {false});
@@ -107,9 +113,10 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=RX, Obs=[Z,Z]",
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=[RX,RX,RX], Obs=[Z,Z,Z]",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+TEST_CASE("AdjointJacobian::adjointJacobian Op=[RX,RX,RX], Obs=[Z,Z,Z]",
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     {
         const size_t num_qubits = 3;
@@ -118,13 +125,13 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=[RX,RX,RX], Obs=[Z,Z,Z]",
         std::vector<std::vector<double>> jacobian(
             num_obs, std::vector<double>(num_params, 0));
 
-        StateVectorKokkos<double> psi(num_qubits);
+        StateVectorT psi(num_qubits);
 
-        auto obs1 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs1 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{0});
-        auto obs2 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs2 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{1});
-        auto obs3 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs3 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{2});
 
         auto ops = adj.createOpsData({"RX", "RX", "RX"},
@@ -141,10 +148,11 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=[RX,RX,RX], Obs=[Z,Z,Z]",
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=[RX,RX,RX], Obs=[Z,Z,Z],"
+TEST_CASE("AdjointJacobian::adjointJacobian Op=[RX,RX,RX], Obs=[Z,Z,Z],"
           "TParams=[0,2]",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     {
         const size_t num_qubits = 3;
@@ -154,13 +162,13 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=[RX,RX,RX], Obs=[Z,Z,Z],"
             num_obs, std::vector<double>(num_params, 0));
         std::vector<size_t> t_params{0, 2};
 
-        StateVectorKokkos<double> psi(num_qubits);
+        StateVectorT psi(num_qubits);
 
-        auto obs1 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs1 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{0});
-        auto obs2 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs2 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{1});
-        auto obs3 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs3 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{2});
 
         auto ops = adj.createOpsData({"RX", "RX", "RX"},
@@ -177,9 +185,10 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=[RX,RX,RX], Obs=[Z,Z,Z],"
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=[RX,RX,RX], Obs=[ZZZ]",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+TEST_CASE("AdjointJacobian::adjointJacobian Op=[RX,RX,RX], Obs=[ZZZ]",
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     {
         const size_t num_qubits = 3;
@@ -188,14 +197,14 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=[RX,RX,RX], Obs=[ZZZ]",
         std::vector<std::vector<double>> jacobian(
             num_obs, std::vector<double>(num_params, 0));
 
-        StateVectorKokkos<double> psi(num_qubits);
+        StateVectorT psi(num_qubits);
 
-        auto obs = std::make_shared<TensorProdObsKokkos<double>>(
-            std::make_shared<NamedObsKokkos<double>>("PauliZ",
+        auto obs = std::make_shared<TensorProdObs<StateVectorT>>(
+            std::make_shared<NamedObs<StateVectorT>>("PauliZ",
                                                      std::vector<size_t>{0}),
-            std::make_shared<NamedObsKokkos<double>>("PauliZ",
+            std::make_shared<NamedObs<StateVectorT>>("PauliZ",
                                                      std::vector<size_t>{1}),
-            std::make_shared<NamedObsKokkos<double>>("PauliZ",
+            std::make_shared<NamedObs<StateVectorT>>("PauliZ",
                                                      std::vector<size_t>{2}));
         auto ops = adj.createOpsData({"RX", "RX", "RX"},
                                      {{param[0]}, {param[1]}, {param[2]}},
@@ -211,9 +220,10 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=[RX,RX,RX], Obs=[ZZZ]",
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=Mixed, Obs=[XXX]",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+TEST_CASE("AdjointJacobian::adjointJacobian Op=Mixed, Obs=[XXX]",
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     {
         const size_t num_qubits = 3;
@@ -222,14 +232,14 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=Mixed, Obs=[XXX]",
         std::vector<std::vector<double>> jacobian(
             num_obs, std::vector<double>(num_params, 0));
 
-        StateVectorKokkos<double> psi(num_qubits);
+        StateVectorT psi(num_qubits);
 
-        auto obs = std::make_shared<TensorProdObsKokkos<double>>(
-            std::make_shared<NamedObsKokkos<double>>("PauliX",
+        auto obs = std::make_shared<TensorProdObs<StateVectorT>>(
+            std::make_shared<NamedObs<StateVectorT>>("PauliX",
                                                      std::vector<size_t>{0}),
-            std::make_shared<NamedObsKokkos<double>>("PauliX",
+            std::make_shared<NamedObs<StateVectorT>>("PauliX",
                                                      std::vector<size_t>{1}),
-            std::make_shared<NamedObsKokkos<double>>("PauliX",
+            std::make_shared<NamedObs<StateVectorT>>("PauliX",
                                                      std::vector<size_t>{2}));
 
         auto ops = adj.createOpsData(
@@ -259,10 +269,11 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Op=Mixed, Obs=[XXX]",
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::adjointJacobian Decomposed Rot gate, non "
+TEST_CASE("AdjointJacobian::adjointJacobian Decomposed Rot gate, non "
           "computational basis state",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     {
         const size_t num_params = 3;
@@ -292,9 +303,9 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Decomposed Rot gate, non "
                                                               double>()}};
             std::vector<Kokkos::complex<double>> new_data{cdata.begin(),
                                                           cdata.end()};
-            StateVectorKokkos<double> psi(new_data.data(), new_data.size());
+            StateVectorT psi(new_data.data(), new_data.size());
 
-            auto obs = std::make_shared<NamedObsKokkos<double>>(
+            auto obs = std::make_shared<NamedObs<StateVectorT>>(
                 "PauliZ", std::vector<size_t>{0});
             auto ops = adj.createOpsData(
                 {"RZ", "RY", "RZ"},
@@ -316,9 +327,10 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Decomposed Rot gate, non "
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::adjointJacobian Mixed Ops, Obs and TParams",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+TEST_CASE("AdjointJacobian::adjointJacobian Mixed Ops, Obs and TParams",
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     {
         const std::vector<size_t> t_params{1, 2, 3};
@@ -342,12 +354,12 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Mixed Ops, Obs and TParams",
                                                      double>()}};
         std::vector<Kokkos::complex<double>> new_data{cdata.begin(),
                                                       cdata.end()};
-        StateVectorKokkos<double> psi(new_data.data(), new_data.size());
+        StateVectorT psi(new_data.data(), new_data.size());
 
-        const auto obs = std::make_shared<TensorProdObsKokkos<double>>(
-            std::make_shared<NamedObsKokkos<double>>("PauliX",
+        const auto obs = std::make_shared<TensorProdObs<StateVectorT>>(
+            std::make_shared<NamedObs<StateVectorT>>("PauliX",
                                                      std::vector<size_t>{0}),
-            std::make_shared<NamedObsKokkos<double>>("PauliZ",
+            std::make_shared<NamedObs<StateVectorT>>("PauliZ",
                                                      std::vector<size_t>{1}));
         auto ops =
             adj.createOpsData({"Hadamard", "RX", "CNOT", "RZ", "RY", "RZ", "RZ",
@@ -390,7 +402,8 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Mixed Ops, Obs and TParams",
 }
 
 TEST_CASE("Algorithms::adjointJacobian Op=RX, Obs=Ham[Z0+Z1]", "[Algorithms]") {
-    AdjointJacobianKokkos<double> adj;
+    using StateVectorT = StateVectorKokkos<double>;
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     std::vector<size_t> tp{0};
     {
@@ -399,16 +412,17 @@ TEST_CASE("Algorithms::adjointJacobian Op=RX, Obs=Ham[Z0+Z1]", "[Algorithms]") {
         std::vector<std::vector<double>> jacobian(
             num_obs, std::vector<double>(tp.size(), 0));
 
-        StateVectorKokkos<double> psi(num_qubits);
+        StateVectorT psi(num_qubits);
 
-        const auto obs1 = std::make_shared<NamedObsKokkos<double>>(
+        const auto obs1 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{0});
-        const auto obs2 = std::make_shared<NamedObsKokkos<double>>(
+        const auto obs2 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{1});
 
-        auto ham = HamiltonianKokkos<double>::create({0.3, 0.7}, {obs1, obs2});
+        auto ham = Hamiltonian<StateVectorT>::create({0.3, 0.7}, {obs1, obs2});
 
-        auto ops = OpsData<double>({"RX"}, {{param[0]}}, {{0}}, {false});
+        auto ops = Pennylane::Lightning_Kokkos::Algorithms::OpsData<double>(
+            {"RX"}, {{param[0]}}, {{0}}, {false});
 
         adj.adjointJacobian(psi, jacobian, {ham}, ops, tp, true);
 
@@ -417,11 +431,12 @@ TEST_CASE("Algorithms::adjointJacobian Op=RX, Obs=Ham[Z0+Z1]", "[Algorithms]") {
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Op=[RX,RX,RX], "
+TEST_CASE("AdjointJacobian::AdjointJacobian Op=[RX,RX,RX], "
           "Obs=Ham[Z0+Z1+Z2], "
           "TParams=[0,2]",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     std::vector<size_t> t_params{0, 2};
     {
@@ -430,16 +445,16 @@ TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Op=[RX,RX,RX], "
         std::vector<std::vector<double>> jacobian(
             num_obs, std::vector<double>(t_params.size(), 0));
 
-        StateVectorKokkos<double> psi(num_qubits);
+        StateVectorT psi(num_qubits);
 
-        auto obs1 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs1 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{0});
-        auto obs2 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs2 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{1});
-        auto obs3 = std::make_shared<NamedObsKokkos<double>>(
+        auto obs3 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{2});
 
-        auto ham = HamiltonianKokkos<double>::create({0.47, 0.32, 0.96},
+        auto ham = Hamiltonian<StateVectorT>::create({0.47, 0.32, 0.96},
                                                      {obs1, obs2, obs3});
 
         auto ops = adj.createOpsData({"RX", "RX", "RX"},
@@ -454,9 +469,11 @@ TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Op=[RX,RX,RX], "
     }
 }
 
-TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Test HermitianObs",
-          "[AdjointJacobianKokkos]") {
-    AdjointJacobianKokkos<double> adj;
+TEST_CASE("AdjointJacobian::AdjointJacobian Test HermitianObs",
+          "[AdjointJacobian]") {
+    using StateVectorT = StateVectorKokkos<double>;
+    using ComplexT = StateVectorT::ComplexT;
+    AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     std::vector<size_t> t_params{0, 2};
     {
@@ -468,16 +485,16 @@ TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Test HermitianObs",
         std::vector<std::vector<double>> jacobian2(
             num_obs, std::vector<double>(t_params.size(), 0));
 
-        StateVectorKokkos<double> psi(num_qubits);
+        StateVectorT psi(num_qubits);
 
-        auto obs1 = std::make_shared<TensorProdObsKokkos<double>>(
-            std::make_shared<NamedObsKokkos<double>>("PauliZ",
+        auto obs1 = std::make_shared<TensorProdObs<StateVectorT>>(
+            std::make_shared<NamedObs<StateVectorT>>("PauliZ",
                                                      std::vector<size_t>{0}),
-            std::make_shared<NamedObsKokkos<double>>("PauliZ",
+            std::make_shared<NamedObs<StateVectorT>>("PauliZ",
                                                      std::vector<size_t>{1}));
-        auto obs2 = std::make_shared<HermitianObsKokkos<double>>(
-            std::vector<std::complex<double>>{1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1,
-                                              0, 0, 0, 0, 1},
+        auto obs2 = std::make_shared<HermitianObs<StateVectorT>>(
+            std::vector<ComplexT>{1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0,
+                                  1},
             std::vector<size_t>{0, 1});
 
         auto ops = adj.createOpsData({"RX", "RX", "RX"},
