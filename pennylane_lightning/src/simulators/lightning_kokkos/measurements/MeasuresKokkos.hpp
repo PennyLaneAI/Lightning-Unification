@@ -381,6 +381,97 @@ class Measurements final
     }
 
     /**
+     * @brief Expected value of an observable.
+     *
+     * @param matrix Square matrix in row-major order.
+     * @param wires Wires where to apply the operator.
+     * @return Floating point expected value of the observable.
+     */
+    PrecisionT expval(const std::vector<ComplexT> &matrix,
+                      const std::vector<size_t> &wires) {
+        StateVectorT ob_sv(this->_statevector.getNumQubits());
+        ob_sv.DeviceToDevice(this->_statevector.getData());
+        ob_sv.applyMatrix(matrix, wires);
+        // using kv = StateVectorT::KokkosVector;
+        // kv matrix_("tmp", matrix.size());
+        // for (size_t i = 0; i < matrix.size(); i++) {
+        //     matrix_(i) = matrix[i];
+        // }
+        // ob_sv.applyMultiQubitOp(matrix_, wires);
+        return Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
+            this->_statevector.getData(), ob_sv.getData());
+    };
+
+    /**
+     * @brief Expected value of an observable.
+     *
+     * @param operation String with the operator name.
+     * @param wires Wires where to apply the operator.
+     * @return Floating point expected value of the observable.
+     */
+    PrecisionT expval(const std::string &operation,
+                      const std::vector<size_t> &wires) {
+        StateVectorT ob_sv(this->_statevector.getNumQubits());
+        ob_sv.DeviceToDevice(this->_statevector.getData());
+        ob_sv.applyOperation(operation, wires);
+        return Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
+            this->_statevector.getData(), ob_sv.getData());
+    };
+
+    /**
+     * @brief Expected value for a list of observables.
+     *
+     * @tparam op_type Operation type.
+     * @param operations_list List of operations to measure.
+     * @param wires_list List of wires where to apply the operators.
+     * @return Floating point std::vector with expected values for the
+     * observables.
+     */
+    template <typename op_type>
+    std::vector<PrecisionT>
+    expval(const std::vector<op_type> &operations_list,
+           const std::vector<std::vector<size_t>> &wires_list) {
+        PL_ABORT_IF(
+            (operations_list.size() != wires_list.size()),
+            "The lengths of the list of operations and wires do not match.");
+        std::vector<PrecisionT> expected_value_list;
+
+        for (size_t index = 0; index < operations_list.size(); index++) {
+            expected_value_list.emplace_back(
+                expval(operations_list[index], wires_list[index]));
+        }
+
+        return expected_value_list;
+    }
+
+    /**
+     * @brief Expected value of a Sparse Hamiltonian.
+     *
+     * @tparam index_type integer type used as indices of the sparse matrix.
+     * @param row_map_ptr   row_map array pointer.
+     *                      The j element encodes the number of non-zeros
+     above
+     * row j.
+     * @param row_map_size  row_map array size.
+     * @param entries_ptr   pointer to an array with column indices of the
+     * non-zero elements.
+     * @param values_ptr    pointer to an array with the non-zero elements.
+     * @param numNNZ        number of non-zero elements.
+     * @return Floating point expected value of the observable.
+     */
+    template <class index_type>
+    PrecisionT expval(const index_type *row_map_ptr,
+                      const index_type row_map_size,
+                      const index_type *entries_ptr, const ComplexT *values_ptr,
+                      const index_type numNNZ) {
+        const std::vector<size_t> index_ptr(row_map_ptr,
+                                            row_map_ptr + row_map_size);
+        const std::vector<size_t> indices(entries_ptr, entries_ptr + numNNZ);
+        const std::vector<ComplexT> data(values_ptr, values_ptr + numNNZ);
+        return getExpectationValue(data, indices, index_ptr);
+    };
+
+    /**
      * @brief Calculate variance of a general Observable.
      *
      * @param ob Observable.
@@ -400,6 +491,80 @@ class Measurements final
             2));
         return (mean_square - squared_mean);
     }
+
+    /**
+     * @brief Variance of an observable.
+     *
+     * @param operation String with the operator name.
+     * @param wires Wires where to apply the operator.
+     * @return Floating point with the variance of the observable.
+     */
+    PrecisionT var(const std::string &operation,
+                   const std::vector<size_t> &wires) {
+        StateVectorT ob_sv(this->_statevector.getNumQubits());
+        ob_sv.DeviceToDevice(this->_statevector.getData());
+        ob_sv.applyOperation(operation, wires);
+
+        const PrecisionT mean_square =
+            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
+                ob_sv.getData(), ob_sv.getData());
+        const PrecisionT squared_mean = static_cast<PrecisionT>(std::pow(
+            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
+                this->_statevector.getData(), ob_sv.getData()),
+            2));
+        return (mean_square - squared_mean);
+    };
+
+    /**
+     * @brief Variance of an observable.
+     *
+     * @param matrix Square matrix in row-major order.
+     * @param wires Wires where to apply the operator.
+     * @return Floating point with the variance of the observable.
+     */
+    PrecisionT var(const std::vector<ComplexT> &matrix,
+                   const std::vector<size_t> &wires) {
+        StateVectorT ob_sv(this->_statevector.getNumQubits());
+        ob_sv.DeviceToDevice(this->_statevector.getData());
+        ob_sv.applyMatrix(matrix, wires);
+
+        const PrecisionT mean_square =
+            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
+                ob_sv.getData(), ob_sv.getData());
+        const PrecisionT squared_mean = static_cast<PrecisionT>(std::pow(
+            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
+                this->_statevector.getData(), ob_sv.getData()),
+            2));
+        return (mean_square - squared_mean);
+    };
+
+    /**
+     * @brief Variance for a list of observables.
+     *
+     * @tparam op_type Operation type.
+     * @param operations_list List of operations to measure.
+     * Square matrix in row-major order or string with the operator name.
+     * @param wires_list List of wires where to apply the operators.
+     * @return Floating point std::vector with the variance of the
+     observables.
+     */
+    template <typename op_type>
+    std::vector<PrecisionT>
+    var(const std::vector<op_type> &operations_list,
+        const std::vector<std::vector<size_t>> &wires_list) {
+        PL_ABORT_IF(
+            (operations_list.size() != wires_list.size()),
+            "The lengths of the list of operations and wires do not match.");
+
+        std::vector<PrecisionT> expected_value_list;
+
+        for (size_t index = 0; index < operations_list.size(); index++) {
+            expected_value_list.emplace_back(
+                var(operations_list[index], wires_list[index]));
+        }
+
+        return expected_value_list;
+    };
 
     /**
      * @brief Probabilities of each computational basis state.

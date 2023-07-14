@@ -11,8 +11,7 @@ using Pennylane::Util::LightningException;
 } // namespace
 /// @endcond
 
-TEMPLATE_PRODUCT_TEST_CASE("NamedObs", "[Observables]",
-                           (StateVectorKokkos),
+TEMPLATE_PRODUCT_TEST_CASE("NamedObs", "[Observables]", (StateVectorKokkos),
                            (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
@@ -55,8 +54,7 @@ TEMPLATE_PRODUCT_TEST_CASE("NamedObs", "[Observables]",
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("HermitianObs", "[Observables]",
-                           (StateVectorKokkos),
+TEMPLATE_PRODUCT_TEST_CASE("HermitianObs", "[Observables]", (StateVectorKokkos),
                            (float, double)) {
     using StateVectorT = TestType;
     using ComplexT = typename StateVectorT::ComplexT;
@@ -82,8 +80,7 @@ TEMPLATE_PRODUCT_TEST_CASE("HermitianObs", "[Observables]",
 }
 
 TEMPLATE_PRODUCT_TEST_CASE("TensorProdObs", "[Observables]",
-                           (StateVectorKokkos),
-                           (float, double)) {
+                           (StateVectorKokkos), (float, double)) {
     using StateVectorT = TestType;
     using TensorProdObsT = TensorProdObs<StateVectorT>;
     using NamedObsT = NamedObs<StateVectorT>;
@@ -108,8 +105,7 @@ TEMPLATE_PRODUCT_TEST_CASE("TensorProdObs", "[Observables]",
         REQUIRE(std::is_move_constructible_v<TensorProdObsT>);
     }
 }
-TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian", "[Observables]",
-                           (StateVectorKokkos),
+TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian", "[Observables]", (StateVectorKokkos),
                            (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
@@ -146,8 +142,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian", "[Observables]",
 }
 
 TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian::ApplyInPlace", "[Observables]",
-                           (StateVectorKokkos),
-                           (float, double)) {
+                           (StateVectorKokkos), (float, double)) {
     using StateVectorT = TestType;
     using PrecisionT = typename StateVectorT::PrecisionT;
     using ComplexT = typename StateVectorT::ComplexT;
@@ -169,7 +164,8 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian::ApplyInPlace", "[Observables]",
     SECTION("ApplyInPlace", "[Apply Method]") {
         SECTION("Hamiltonian applies correctly to |+->") {
             auto st_data = createProductState<PrecisionT>("+-");
-            std::vector<ComplexT> data_(st_data.data(), st_data.data() + st_data.size());
+            std::vector<ComplexT> data_(st_data.data(),
+                                        st_data.data() + st_data.size());
             StateVectorT state_vector(data_.data(), data_.size());
 
             ham->applyInPlace(state_vector);
@@ -188,7 +184,8 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian::ApplyInPlace", "[Observables]",
 
         SECTION("Hamiltonian applies correctly to |01>") {
             auto st_data = createProductState<PrecisionT>("01");
-            std::vector<ComplexT> data_(st_data.data(), st_data.data() + st_data.size());
+            std::vector<ComplexT> data_(st_data.data(),
+                                        st_data.data() + st_data.size());
             StateVectorT state_vector(data_.data(), data_.size());
 
             ham->applyInPlace(state_vector);

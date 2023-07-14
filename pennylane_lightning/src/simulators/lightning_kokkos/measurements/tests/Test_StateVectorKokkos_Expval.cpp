@@ -15,17 +15,13 @@
 /**
  * @file
  *  Tests for functionality:
- *      - defined in the intermediate base class StateVectorKokkos.
- *      - shared between all child classes.
+ *      - expectation values.
  */
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::Lightning_Kokkos;
 using namespace Pennylane::Lightning_Kokkos::Measures;
 using namespace Pennylane::Lightning_Kokkos::Observables;
-using namespace Pennylane::Lightning_Kokkos;
-using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 
@@ -480,28 +476,51 @@ TEMPLATE_TEST_CASE("Test expectation value of TensorProdObs",
     }
 }
 
-// TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
-//                    "[StateVectorKokkos_Expval]", float, double) {
-//     using cp_t = Kokkos::complex<TestType>;
-//     SECTION("GetExpectationSparse") {
-//         std::vector<cp_t> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
-//                                      {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
-//                                      {0.3, 0.4}, {0.4, 0.5}};
-//         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
-//                                               init_state.size()};
-//         auto m = Measurements(kokkos_sv);
+TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
+                   "[StateVectorKokkos_Expval]", float, double) {
+    using ComplexT = StateVectorKokkos<TestType>::ComplexT;
+    SECTION("GetExpectationSparse") {
+        std::vector<ComplexT> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
+                                         {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
+                                         {0.3, 0.4}, {0.4, 0.5}};
+        StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
+                                              init_state.size()};
+        auto m = Measurements(kokkos_sv);
 
-//         std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
-//         std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
-//                                        4, 7, 5, 6, 5, 6, 4, 7};
-//         std::vector<Kokkos::complex<TestType>> values = {
-//             {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
-//             {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0},
-//             {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
-//             {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0}};
+        std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
+        std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
+                                       4, 7, 5, 6, 5, 6, 4, 7};
+        std::vector<Kokkos::complex<TestType>> values = {
+            {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
+            {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0},
+            {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
+            {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0}};
 
-//         auto result = m.getExpectationValue(values, indices, index_ptr);
-//         auto expected = TestType(3.1415);
-//         CHECK(expected == Approx(result).epsilon(1e-7));
-//     }
-// }
+        auto result = m.getExpectationValue(values, indices, index_ptr);
+        auto expected = TestType(3.1415);
+        CHECK(expected == Approx(result).epsilon(1e-7));
+    }
+
+    SECTION("Sparse expval") {
+        std::vector<ComplexT> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
+                                         {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
+                                         {0.3, 0.4}, {0.4, 0.5}};
+        StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
+                                              init_state.size()};
+        auto m = Measurements(kokkos_sv);
+
+        std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
+        std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
+                                       4, 7, 5, 6, 5, 6, 4, 7};
+        std::vector<ComplexT> values = {
+            {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
+            {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0},
+            {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
+            {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0}};
+
+        auto result = m.expval(index_ptr.data(), index_ptr.size(),
+                               indices.data(), values.data(), values.size());
+        auto expected = TestType(3.1415);
+        CHECK(expected == Approx(result).epsilon(1e-7));
+    }
+}

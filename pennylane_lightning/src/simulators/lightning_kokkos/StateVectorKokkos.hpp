@@ -881,7 +881,7 @@ class StateVectorKokkos final
     inline void applyMatrix(const KokkosVector &matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
-        applyMultiQubitOp(matrix, wires, inverse = inverse);
+        applyMultiQubitOp(matrix, wires, inverse);
     }
 
     /**
@@ -896,8 +896,8 @@ class StateVectorKokkos final
                             bool inverse = false) {
         PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
         size_t n = 1U << wires.size();
-        KokkosVector matrix_(matrix, n);
-        applyMultiQubitOp(matrix_, wires, inverse = inverse);
+        KokkosVector matrix_(matrix, n * n);
+        applyMultiQubitOp(matrix_, wires, inverse);
     }
 
     /**
@@ -914,7 +914,7 @@ class StateVectorKokkos final
         PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
                     "The size of matrix does not match with the given "
                     "number of wires");
-        applyMatrix(matrix.data(), wires, inverse = inverse);
+        applyMatrix(matrix.data(), wires, inverse);
     }
 
     /**
@@ -930,11 +930,11 @@ class StateVectorKokkos final
                             bool inverse = false) {
         PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
         size_t n = 1U << wires.size();
-        KokkosVector matrix_("matrix_", n);
-        for (size_t i = 0; i < n; i++) {
+        KokkosVector matrix_("matrix_", n * n);
+        for (size_t i = 0; i < n * n; i++) {
             matrix_(i) = matrix[i];
         }
-        applyMultiQubitOp(matrix_, wires, inverse = inverse);
+        applyMultiQubitOp(matrix_, wires, inverse);
     }
 
     /**
@@ -951,7 +951,7 @@ class StateVectorKokkos final
         PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
                     "The size of matrix does not match with the given "
                     "number of wires");
-        applyMatrix(matrix.data(), wires, inverse = inverse);
+        applyMatrix(matrix.data(), wires, inverse);
     }
 
     /**

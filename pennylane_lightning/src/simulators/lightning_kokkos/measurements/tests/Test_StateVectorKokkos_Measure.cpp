@@ -8,13 +8,170 @@
 
 #include <catch2/catch.hpp>
 
-#include "MeasuresFunctors.hpp"
-#include "MeasuresKokkos.hpp"
+#include "MeasuresKokkos.hpp" // Measurements
 #include "StateVectorKokkos.hpp"
-#include "TestHelpers.hpp"
+#include "TestHelpersKokkos.hpp" // Initializing_StateVector
 
-using namespace Pennylane;
-namespace {} // namespace
+/// @cond DEV
+namespace {
+using namespace Pennylane::Lightning_Kokkos::Measures; // Measurements
+using Pennylane::Lightning_Kokkos::TestHelpers::Initializing_StateVector;
+}; // namespace
+/// @endcond
+
+TEMPLATE_PRODUCT_TEST_CASE("Expected Values", "[Measurements]",
+                           (StateVectorKokkos), (float, double)) {
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexT = typename StateVectorT::ComplexT;
+
+    // Defining the statevector that will be measured.
+    StateVectorT statevector = Initializing_StateVector<PrecisionT>();
+
+    // Initializing the Measurements class.
+    // This object attaches to the statevector allowing several measures.
+    Measurements<StateVectorT> Measurer(statevector);
+
+    SECTION("Testing single operation defined by a matrix:") {
+        std::vector<ComplexT> PauliX = {0, 1, 1, 0};
+        std::vector<size_t> wires_single = {0};
+        PrecisionT exp_value = Measurer.expval(PauliX, wires_single);
+        PrecisionT exp_values_ref = 0.492725;
+        REQUIRE(exp_value == Approx(exp_values_ref).margin(1e-6));
+    }
+
+    SECTION("Testing single operation defined by its name:") {
+        std::vector<size_t> wires_single = {0};
+        PrecisionT exp_value = Measurer.expval("PauliX", wires_single);
+        PrecisionT exp_values_ref = 0.492725;
+        REQUIRE(exp_value == Approx(exp_values_ref).margin(1e-6));
+    }
+
+    SECTION("Testing list of operators defined by a matrix:") {
+        std::vector<ComplexT> PauliX = {0, 1, 1, 0};
+        std::vector<ComplexT> PauliY = {0, {0, -1}, {0, 1}, 0};
+        std::vector<ComplexT> PauliZ = {1, 0, 0, -1};
+
+        std::vector<PrecisionT> exp_values;
+        std::vector<PrecisionT> exp_values_ref;
+        std::vector<std::vector<size_t>> wires_list = {{0}, {1}, {2}};
+        std::vector<std::vector<ComplexT>> operations_list;
+
+        operations_list = {PauliX, PauliX, PauliX};
+        exp_values = Measurer.expval(operations_list, wires_list);
+        exp_values_ref = {0.49272486, 0.42073549, 0.28232124};
+        REQUIRE_THAT(exp_values, Catch::Approx(exp_values_ref).margin(1e-6));
+
+        operations_list = {PauliY, PauliY, PauliY};
+        exp_values = Measurer.expval(operations_list, wires_list);
+        exp_values_ref = {-0.64421768, -0.47942553, -0.29552020};
+        REQUIRE_THAT(exp_values, Catch::Approx(exp_values_ref).margin(1e-6));
+
+        operations_list = {PauliZ, PauliZ, PauliZ};
+        exp_values = Measurer.expval(operations_list, wires_list);
+        exp_values_ref = {0.58498357, 0.77015115, 0.91266780};
+        REQUIRE_THAT(exp_values, Catch::Approx(exp_values_ref).margin(1e-6));
+    }
+
+    SECTION("Testing list of operators defined by its name:") {
+        std::vector<PrecisionT> exp_values;
+        std::vector<PrecisionT> exp_values_ref;
+        std::vector<std::vector<size_t>> wires_list = {{0}, {1}, {2}};
+        std::vector<std::string> operations_list;
+
+        operations_list = {"PauliX", "PauliX", "PauliX"};
+        exp_values = Measurer.expval(operations_list, wires_list);
+        exp_values_ref = {0.49272486, 0.42073549, 0.28232124};
+        REQUIRE_THAT(exp_values, Catch::Approx(exp_values_ref).margin(1e-6));
+
+        operations_list = {"PauliY", "PauliY", "PauliY"};
+        exp_values = Measurer.expval(operations_list, wires_list);
+        exp_values_ref = {-0.64421768, -0.47942553, -0.29552020};
+        REQUIRE_THAT(exp_values, Catch::Approx(exp_values_ref).margin(1e-6));
+
+        operations_list = {"PauliZ", "PauliZ", "PauliZ"};
+        exp_values = Measurer.expval(operations_list, wires_list);
+        exp_values_ref = {0.58498357, 0.77015115, 0.91266780};
+        REQUIRE_THAT(exp_values, Catch::Approx(exp_values_ref).margin(1e-6));
+    }
+}
+
+TEMPLATE_PRODUCT_TEST_CASE("Variances", "[Measurements]", (StateVectorKokkos),
+                           (float, double)) {
+    using StateVectorT = TestType;
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexT = typename StateVectorT::ComplexT;
+
+    // Defining the State Vector that will be measured.
+    StateVectorT statevector = Initializing_StateVector<PrecisionT>();
+
+    // Initializing the measurements class.
+    // This object attaches to the statevector allowing several measurements.
+    Measurements<StateVectorT> Measurer(statevector);
+
+    SECTION("Testing single operation defined by a matrix:") {
+        std::vector<ComplexT> PauliX = {0, 1, 1, 0};
+        std::vector<size_t> wires_single = {0};
+        PrecisionT variance = Measurer.var(PauliX, wires_single);
+        PrecisionT variances_ref = 0.7572222;
+        REQUIRE(variance == Approx(variances_ref).margin(1e-6));
+    }
+
+    SECTION("Testing single operation defined by its name:") {
+        std::vector<size_t> wires_single = {0};
+        PrecisionT variance = Measurer.var("PauliX", wires_single);
+        PrecisionT variances_ref = 0.7572222;
+        REQUIRE(variance == Approx(variances_ref).margin(1e-6));
+    }
+
+    SECTION("Testing list of operators defined by a matrix:") {
+        std::vector<ComplexT> PauliX = {{0, 0}, {1, 0}, {1, 0}, {0, 0}};
+        std::vector<ComplexT> PauliY = {{0, 0}, {0, -1}, {0, 1}, {0, 0}};
+        std::vector<ComplexT> PauliZ = {{1, 0}, {0, 0}, {0, 0}, {-1, 0}};
+
+        std::vector<PrecisionT> variances;
+        std::vector<PrecisionT> variances_ref;
+        std::vector<std::vector<size_t>> wires_list = {{0}, {1}, {2}};
+        std::vector<std::vector<ComplexT>> operations_list;
+
+        operations_list = {PauliX, PauliX, PauliX};
+        variances = Measurer.var(operations_list, wires_list);
+        variances_ref = {0.7572222, 0.8229816, 0.9202947};
+        REQUIRE_THAT(variances, Catch::Approx(variances_ref).margin(1e-6));
+
+        operations_list = {PauliY, PauliY, PauliY};
+        variances = Measurer.var(operations_list, wires_list);
+        variances_ref = {0.5849835, 0.7701511, 0.9126678};
+        REQUIRE_THAT(variances, Catch::Approx(variances_ref).margin(1e-6));
+
+        operations_list = {PauliZ, PauliZ, PauliZ};
+        variances = Measurer.var(operations_list, wires_list);
+        variances_ref = {0.6577942, 0.4068672, 0.1670374};
+        REQUIRE_THAT(variances, Catch::Approx(variances_ref).margin(1e-6));
+    }
+
+    SECTION("Testing list of operators defined by its name:") {
+        std::vector<PrecisionT> variances;
+        std::vector<PrecisionT> variances_ref;
+        std::vector<std::vector<size_t>> wires_list = {{0}, {1}, {2}};
+        std::vector<std::string> operations_list;
+
+        operations_list = {"PauliX", "PauliX", "PauliX"};
+        variances = Measurer.var(operations_list, wires_list);
+        variances_ref = {0.7572222, 0.8229816, 0.9202947};
+        REQUIRE_THAT(variances, Catch::Approx(variances_ref).margin(1e-6));
+
+        operations_list = {"PauliY", "PauliY", "PauliY"};
+        variances = Measurer.var(operations_list, wires_list);
+        variances_ref = {0.5849835, 0.7701511, 0.9126678};
+        REQUIRE_THAT(variances, Catch::Approx(variances_ref).margin(1e-6));
+
+        operations_list = {"PauliZ", "PauliZ", "PauliZ"};
+        variances = Measurer.var(operations_list, wires_list);
+        variances_ref = {0.6577942, 0.4068672, 0.1670374};
+        REQUIRE_THAT(variances, Catch::Approx(variances_ref).margin(1e-6));
+    }
+}
 
 TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
     // Probabilities calculated with Pennylane default_qbit:
@@ -50,8 +207,7 @@ TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
     auto measure_sv = Initializing_StateVector<TestType>(num_qubits);
 
     SECTION("Looping over different wire configurations:") {
-        auto m =
-            Lightning_Kokkos::Simulators::MeasuresKokkos<TestType>(measure_sv);
+        auto m = Measurements(measure_sv);
         for (const auto &term : input) {
             auto probabilities = m.probs(term.first);
             REQUIRE_THAT(term.second,

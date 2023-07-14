@@ -388,7 +388,7 @@ auto createNonTrivialState(size_t num_qubits = 3)
     size_t data_size = Util::exp2(num_qubits);
 
     std::vector<ComplexT> arr(data_size, {0, 0});
-    arr[0] = {1, 0};
+    arr[0] = ComplexT(1, 0);
     StateVectorT Measured_StateVector(arr.data(), data_size);
 
     std::vector<std::string> gates;
