@@ -21,7 +21,7 @@
 #include "KernelType.hpp"
 #include "TypeList.hpp"
 
-namespace Pennylane::Lightning_Kokkos::Gates::Constant {
+namespace Pennylane::LightningKokkos::Gates::Constant {
 /**
  * @brief List of multi-qubit gates
  */
@@ -266,4 +266,4 @@ namespace Pennylane::Lightning_Kokkos::Gates::Constant {
     std::pair<GateOperation, size_t>{GateOperation::CSWAP, 0},
     std::pair<GateOperation, size_t>{GateOperation::MultiRZ, 1},
 };
-} // namespace Pennylane::Lightning_Kokkos::Gates::Constant
+} // namespace Pennylane::LightningKokkos::Gates::Constant

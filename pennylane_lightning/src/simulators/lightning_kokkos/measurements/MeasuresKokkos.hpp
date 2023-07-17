@@ -15,13 +15,13 @@
 namespace {
 using namespace Pennylane::Measures;
 using namespace Pennylane::Observables;
-using Pennylane::Lightning_Kokkos::StateVectorKokkos;
-using Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct;
+using Pennylane::LightningKokkos::StateVectorKokkos;
+using Pennylane::LightningKokkos::Util::getRealOfComplexInnerProduct;
 using Pennylane::Util::exp2;
 } // namespace
 /// @endcond
 
-namespace Pennylane::Lightning_Kokkos::Measures {
+namespace Pennylane::LightningKokkos::Measures {
 
 template <class StateVectorT>
 class Measurements final
@@ -764,4 +764,4 @@ class Measurements final
     }
 };
 
-} // namespace Pennylane::Lightning_Kokkos::Measures
+} // namespace Pennylane::LightningKokkos::Measures

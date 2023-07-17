@@ -1,7 +1,7 @@
 #include "AdjointDiffKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
-using namespace Pennylane::Lightning_Kokkos;
+using namespace Pennylane::LightningKokkos;
 
 // explicit instantiation
 template class Algorithms::AdjointJacobian<StateVectorKokkos<float>>;

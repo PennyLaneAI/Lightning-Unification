@@ -17,11 +17,11 @@
 namespace {
 using namespace Pennylane::Util;
 using namespace Pennylane::Observables;
-using Pennylane::Lightning_Kokkos::StateVectorKokkos;
+using Pennylane::LightningKokkos::StateVectorKokkos;
 } // namespace
 /// @endcond
 
-namespace Pennylane::Lightning_Kokkos::Observables {
+namespace Pennylane::LightningKokkos::Observables {
 
 /**
  * @brief A base class for all observable classes.
@@ -106,9 +106,9 @@ class NamedObs final : public NamedObsBase<StateVectorT> {
     NamedObs(std::string obs_name, std::vector<size_t> wires,
              std::vector<PrecisionT> params = {})
         : BaseType{obs_name, wires, params} {
-        using Pennylane::Lightning_Kokkos::Gates::Constant::gate_names;
-        using Pennylane::Lightning_Kokkos::Gates::Constant::gate_num_params;
-        using Pennylane::Lightning_Kokkos::Gates::Constant::gate_wires;
+        using Pennylane::LightningKokkos::Gates::Constant::gate_names;
+        using Pennylane::LightningKokkos::Gates::Constant::gate_num_params;
+        using Pennylane::LightningKokkos::Gates::Constant::gate_wires;
         using Pennylane::Util::lookup;
         using Pennylane::Util::reverse_pairs;
 
@@ -244,7 +244,7 @@ class Hamiltonian final : public HamiltonianBase<StateVectorT> {
         for (size_t term_idx = 0; term_idx < this->coeffs_.size(); term_idx++) {
             StateVectorT tmp(sv);
             this->obs_[term_idx]->applyInPlace(tmp);
-            Lightning_Kokkos::Util::axpy_Kokkos<PrecisionT>(
+            LightningKokkos::Util::axpy_Kokkos<PrecisionT>(
                 ComplexT{this->coeffs_[term_idx], 0.0}, tmp.getData(),
                 buffer.getData(), tmp.getLength());
         }
@@ -338,7 +338,7 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
 
         StateVectorKokkos<T> d_sv_prime(sv.getNumQubits());
 
-        Lightning_Kokkos::Util::SparseMV_Kokkos<T>(
+        LightningKokkos::Util::SparseMV_Kokkos<T>(
             sv.getData(), d_sv_prime.getData(), data_, indices_, indptr_);
 
         sv.updateData(d_sv_prime);
@@ -366,4 +366,4 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
     };
 };
 
-} // namespace Pennylane::Lightning_Kokkos::Observables
+} // namespace Pennylane::LightningKokkos::Observables

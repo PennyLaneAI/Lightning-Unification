@@ -20,7 +20,7 @@
 
 #include <Kokkos_Core.hpp>
 
-namespace Pennylane::Lightning_Kokkos::Util {
+namespace Pennylane::LightningKokkos::Util {
 
 /**
  * @brief @rst
@@ -235,4 +235,4 @@ getImagOfComplexInnerProduct(Kokkos::View<Kokkos::complex<Precision> *> x,
     return inner;
 }
 
-} // namespace Pennylane::Lightning_Kokkos::Util
+} // namespace Pennylane::LightningKokkos::Util

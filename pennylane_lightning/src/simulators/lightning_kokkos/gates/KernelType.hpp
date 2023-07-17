@@ -21,9 +21,9 @@
 
 #include <array>
 
-namespace Pennylane::Lightning_Kokkos::Gates {
+namespace Pennylane::LightningKokkos::Gates {
 /**
  * @brief Define kernel id for each implementation.
  */
 enum class KernelType { PI, LM, AVX2, AVX512, None };
-} // namespace Pennylane::Lightning_Kokkos::Gates
+} // namespace Pennylane::LightningKokkos::Gates

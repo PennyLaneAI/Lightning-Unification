@@ -6,7 +6,7 @@
 // using namespace Pennylane;
 /// @cond DEV
 namespace {
-using namespace Pennylane::Lightning_Kokkos::Observables;
+using namespace Pennylane::LightningKokkos::Observables;
 using Pennylane::Util::LightningException;
 } // namespace
 /// @endcond

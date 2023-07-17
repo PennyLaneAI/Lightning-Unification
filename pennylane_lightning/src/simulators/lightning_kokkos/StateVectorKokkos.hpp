@@ -36,11 +36,11 @@ namespace {
 using Pennylane::Util::exp2;
 using Pennylane::Util::isPerfectPowerOf2;
 using Pennylane::Util::log2;
-using namespace Pennylane::Lightning_Kokkos::Functors;
+using namespace Pennylane::LightningKokkos::Functors;
 } // namespace
 /// @endcond
 
-namespace Pennylane::Lightning_Kokkos {
+namespace Pennylane::LightningKokkos {
 
 /**
  * @brief Kokkos functor for setting the state vector
@@ -1677,4 +1677,4 @@ class StateVectorKokkos final
     inline static bool is_exit_reg_ = false;
 };
 
-}; // namespace Pennylane::Lightning_Kokkos
+}; // namespace Pennylane::LightningKokkos

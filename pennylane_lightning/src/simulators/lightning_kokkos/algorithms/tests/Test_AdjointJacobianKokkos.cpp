@@ -18,7 +18,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::Util;
-using namespace Pennylane::Lightning_Kokkos::Algorithms;
+using namespace Pennylane::LightningKokkos::Algorithms;
 } // namespace
 /// @endcond
 

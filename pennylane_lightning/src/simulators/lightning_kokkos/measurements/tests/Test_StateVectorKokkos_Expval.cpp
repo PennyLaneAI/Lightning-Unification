@@ -20,8 +20,8 @@
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::Lightning_Kokkos::Measures;
-using namespace Pennylane::Lightning_Kokkos::Observables;
+using namespace Pennylane::LightningKokkos::Measures;
+using namespace Pennylane::LightningKokkos::Observables;
 } // namespace
 /// @endcond
 

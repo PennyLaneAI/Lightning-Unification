@@ -4,13 +4,13 @@
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::Lightning_Kokkos::Observables;
+using namespace Pennylane::LightningKokkos::Observables;
 using namespace Pennylane::Algorithms;
-using Pennylane::Lightning_Kokkos::Util::getImagOfComplexInnerProduct;
+using Pennylane::LightningKokkos::Util::getImagOfComplexInnerProduct;
 } // namespace
 /// @endcond
 
-namespace Pennylane::Lightning_Kokkos::Algorithms {
+namespace Pennylane::LightningKokkos::Algorithms {
 
 /**
  * @brief Kokkos-enabled adjoint Jacobian evaluator following the method of
@@ -317,4 +317,4 @@ class AdjointJacobian final
     }
 };
 
-} // namespace Pennylane::Lightning_Kokkos::Algorithms
+} // namespace Pennylane::LightningKokkos::Algorithms

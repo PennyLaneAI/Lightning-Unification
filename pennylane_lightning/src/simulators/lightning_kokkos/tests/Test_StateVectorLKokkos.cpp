@@ -20,7 +20,7 @@
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::Lightning_Kokkos;
+using namespace Pennylane::LightningKokkos;
 using namespace Pennylane::Util;
 
 using Pennylane::Util::isApproxEqual;

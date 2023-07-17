@@ -21,8 +21,8 @@
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::Lightning_Kokkos;
-using namespace Pennylane::Lightning_Kokkos::Gates;
+using namespace Pennylane::LightningKokkos;
+using namespace Pennylane::LightningKokkos::Gates;
 using Pennylane::Util::exp2;
 } // namespace
 /// @endcond

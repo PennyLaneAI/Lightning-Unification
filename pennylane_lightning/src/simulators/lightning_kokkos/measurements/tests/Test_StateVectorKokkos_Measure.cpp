@@ -14,7 +14,7 @@
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::Lightning_Kokkos::Measures; // Measurements
+using namespace Pennylane::LightningKokkos::Measures; // Measurements
 using Pennylane::Util::createNonTrivialStateCore;
 }; // namespace
 /// @endcond

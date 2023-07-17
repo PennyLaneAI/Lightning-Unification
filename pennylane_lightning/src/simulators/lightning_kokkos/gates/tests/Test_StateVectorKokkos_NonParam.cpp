@@ -20,8 +20,8 @@
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::Lightning_Kokkos;
-using namespace Pennylane::Lightning_Kokkos::Gates; // getHadamard, getCNOT,
+using namespace Pennylane::LightningKokkos;
+using namespace Pennylane::LightningKokkos::Gates; // getHadamard, getCNOT,
                                                     // getToffoli
 using namespace Pennylane::Util;
 } // namespace

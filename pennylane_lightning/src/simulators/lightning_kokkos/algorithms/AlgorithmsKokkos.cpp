@@ -16,8 +16,8 @@
 #include "JacobianData.hpp"
 
 // using namespace Pennylane;
-using namespace Pennylane::Lightning_Kokkos::Algorithms;
-using Pennylane::Lightning_Kokkos::StateVectorKokkos;
+using namespace Pennylane::LightningKokkos::Algorithms;
+using Pennylane::LightningKokkos::StateVectorKokkos;
 
 // explicit instantiation
 template class Pennylane::Algorithms::OpsData<StateVectorKokkos<float>>;

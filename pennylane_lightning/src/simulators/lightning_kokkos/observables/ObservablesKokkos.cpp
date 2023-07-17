@@ -15,7 +15,7 @@
 #include "ObservablesKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
-using namespace Pennylane::Lightning_Kokkos;
+using namespace Pennylane::LightningKokkos;
 
 template class Observables::NamedObs<StateVectorKokkos<float>>;
 template class Observables::NamedObs<StateVectorKokkos<double>>;
