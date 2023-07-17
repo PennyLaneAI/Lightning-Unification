@@ -110,7 +110,7 @@ template <class PrecisionT, class Derived> class StateVectorBase {
      * @param ops Vector of gate names to be applied in order.
      * @param ops_wires Vector of wires on which to apply index-matched gate
      * name.
-     * @param ops_inverse Indicates whether gate at matched index is to be
+     * @param ops_adjoint Indicates whether gate at matched index is to be
      * inverted.
      * @param ops_params Optional parameter data for index matched gates.
      */
@@ -119,8 +119,50 @@ template <class PrecisionT, class Derived> class StateVectorBase {
                     const std::vector<std::vector<size_t>> &ops_wires,
                     const std::vector<bool> &ops_adjoint,
                     const std::vector<std::vector<PrecisionT>> &ops_params) {
-        return static_cast<Derived *>(this)->applyOperations(
-            ops, ops_wires, ops_adjoint, ops_params);
+        const size_t numOperations = ops.size();
+        PL_ABORT_IF(
+            numOperations != ops_wires.size(),
+            "Invalid arguments: number of operations, wires, inverses, and "
+            "parameters must all be equal");
+        PL_ABORT_IF(
+            numOperations != ops_adjoint.size(),
+            "Invalid arguments: number of operations, wires, inverses, and "
+            "parameters must all be equal");
+        PL_ABORT_IF(
+            numOperations != ops_params.size(),
+            "Invalid arguments: number of operations, wires, inverses, and "
+            "parameters must all be equal");
+        for (size_t i = 0; i < numOperations; i++) {
+            this->applyOperation(ops[i], ops_wires[i], ops_adjoint[i], ops_params[i]);
+        }
+    }
+
+    /**
+     * @brief Apply multiple gates to the state-vector.
+     *
+     * @param ops Vector of gate names to be applied in order.
+     * @param ops_wires Vector of wires on which to apply index-matched gate
+     * name.
+     * @param ops_adjoint Indicates whether gate at matched index is to be
+     * inverted.
+     */
+    void applyOperations(const std::vector<std::string> &ops,
+                         const std::vector<std::vector<size_t>> &ops_wires,
+                         const std::vector<bool> &ops_adjoint) {
+        const size_t numOperations = ops.size();
+        if (numOperations != ops_wires.size()) {
+            PL_ABORT(
+                "Invalid arguments: number of operations, wires, and inverses "
+                "must all be equal");
+        }
+        if (numOperations != ops_adjoint.size()) {
+            PL_ABORT(
+                "Invalid arguments: number of operations, wires and inverses"
+                "must all be equal");
+        }
+        for (size_t i = 0; i < numOperations; i++) {
+            this->applyOperation(ops[i], ops_wires[i], ops_adjoint[i], {});
+        }
     }
 
     /**

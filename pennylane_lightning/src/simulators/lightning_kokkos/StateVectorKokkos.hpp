@@ -709,62 +709,6 @@ class StateVectorKokkos final
     }
 
     /**
-     * @brief Apply multiple gates to the state-vector.
-     *
-     * @param ops Vector of gate names to be applied in order.
-     * @param ops_wires Vector of wires on which to apply index-matched gate
-     * name.
-     * @param ops_inverse Indicates whether gate at matched index is to be
-     * inverted.
-     */
-    void applyOperations(const std::vector<std::string> &ops,
-                         const std::vector<std::vector<size_t>> &ops_wires,
-                         const std::vector<bool> &ops_inverse) {
-        const size_t numOperations = ops.size();
-        if (numOperations != ops_wires.size()) {
-            PL_ABORT(
-                "Invalid arguments: number of operations, wires, and inverses "
-                "must all be equal");
-        }
-        if (numOperations != ops_inverse.size()) {
-            PL_ABORT(
-                "Invalid arguments: number of operations, wires and inverses"
-                "must all be equal");
-        }
-        applyOperation(ops, ops_wires, ops_inverse, {});
-    }
-
-    /**
-     * @brief Apply multiple gates to the state-vector.
-     *
-     * @param ops Vector of gate names to be applied in order.
-     * @param ops_wires Vector of wires on which to apply index-matched gate
-     * name.
-     * @param ops_inverse Indicates whether gate at matched index is to be
-     * inverted.
-     * @param ops_params Optional parameter data for index matched gates.
-     */
-    void applyOperations(const std::vector<std::string> &ops,
-                         const std::vector<std::vector<size_t>> &ops_wires,
-                         const std::vector<bool> &ops_inverse,
-                         const std::vector<std::vector<fp_t>> &ops_params) {
-        const size_t numOperations = ops.size();
-        PL_ABORT_IF(
-            numOperations != ops_wires.size(),
-            "Invalid arguments: number of operations, wires, inverses, and "
-            "parameters must all be equal");
-        PL_ABORT_IF(
-            numOperations != ops_inverse.size(),
-            "Invalid arguments: number of operations, wires, inverses, and "
-            "parameters must all be equal");
-        PL_ABORT_IF(
-            numOperations != ops_params.size(),
-            "Invalid arguments: number of operations, wires, inverses, and "
-            "parameters must all be equal");
-        applyOperation(ops, ops_wires, ops_inverse, ops_params);
-    }
-
-    /**
      * @brief Apply a single generator to the state vector using the given
      * kernel.
      *
