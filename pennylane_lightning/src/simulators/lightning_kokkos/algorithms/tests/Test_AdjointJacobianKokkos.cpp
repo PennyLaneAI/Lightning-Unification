@@ -421,7 +421,7 @@ TEST_CASE("Algorithms::adjointJacobian Op=RX, Obs=Ham[Z0+Z1]", "[Algorithms]") {
 
         auto ham = Hamiltonian<StateVectorT>::create({0.3, 0.7}, {obs1, obs2});
 
-        auto ops = Pennylane::Lightning_Kokkos::Algorithms::OpsData<double>(
+        auto ops = Pennylane::Algorithms::OpsData<StateVectorT>(
             {"RX"}, {{param[0]}}, {{0}}, {false});
 
         adj.adjointJacobian(psi, jacobian, {ham}, ops, tp, true);

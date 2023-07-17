@@ -13,13 +13,18 @@
 // limitations under the License.
 
 #include "AdjointDiffKokkos.hpp"
-#include "StateVectorKokkos.hpp"
+#include "JacobianData.hpp"
 
-using namespace Pennylane::Lightning_Kokkos;
+// using namespace Pennylane;
+using namespace Pennylane::Lightning_Kokkos::Algorithms;
+using Pennylane::Lightning_Kokkos::StateVectorKokkos;
 
 // explicit instantiation
-template class Algorithms::OpsData<float>;
-template class Algorithms::OpsData<double>;
+template class Pennylane::Algorithms::OpsData<StateVectorKokkos<float>>;
+template class Pennylane::Algorithms::OpsData<StateVectorKokkos<double>>;
 
-template class Algorithms::AdjointJacobian<StateVectorKokkos<float>>;
-template class Algorithms::AdjointJacobian<StateVectorKokkos<double>>;
+template class Pennylane::Algorithms::JacobianData<StateVectorKokkos<float>>;
+template class Pennylane::Algorithms::JacobianData<StateVectorKokkos<double>>;
+
+template class AdjointJacobian<StateVectorKokkos<float>>;
+template class AdjointJacobian<StateVectorKokkos<double>>;

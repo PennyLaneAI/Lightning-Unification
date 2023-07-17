@@ -13,10 +13,6 @@
 // limitations under the License.
 #pragma once
 
-#include "Macros.hpp"
-#include "Observables.hpp"
-#include "Util.hpp"
-
 #include <cstring>
 #include <memory>
 #include <stdexcept>
@@ -24,11 +20,14 @@
 #include <utility>
 #include <vector>
 
+#include "Macros.hpp"
+#include "Observables.hpp"
+#include "Util.hpp"
+
 // using namespace Pennylane;
 /// @cond DEV
 namespace {
 using Pennylane::Observables::Observable;
-
 } // namespace
 /// @endcond
 
