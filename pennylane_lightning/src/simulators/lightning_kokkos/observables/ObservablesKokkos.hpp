@@ -17,7 +17,6 @@
 namespace {
 using namespace Pennylane::Util;
 using namespace Pennylane::Observables;
-
 using Pennylane::Lightning_Kokkos::StateVectorKokkos;
 } // namespace
 /// @endcond
@@ -346,7 +345,6 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
     }
 
     [[nodiscard]] auto getObsName() const -> std::string override {
-        using Pennylane::Lightning_Kokkos::Util::operator<<;
         std::ostringstream ss;
         ss << "SparseHamiltonian: {\n'data' : ";
         for (const auto &d : data_)

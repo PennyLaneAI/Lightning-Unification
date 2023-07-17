@@ -3,8 +3,6 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_StdAlgorithms.hpp>
 
-#include "UtilKokkos.hpp"
-
 namespace Pennylane::Lightning_Kokkos::Functors {
 /**
  * @brief Compute probability distribution from StateVector.

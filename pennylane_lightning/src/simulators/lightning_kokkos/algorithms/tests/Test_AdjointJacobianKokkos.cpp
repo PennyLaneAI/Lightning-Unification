@@ -13,10 +13,11 @@
 #include "AdjointDiffKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"
-#include "UtilKokkos.hpp"
+#include "Util.hpp"
 
 /// @cond DEV
 namespace {
+using namespace Pennylane::Util;
 using namespace Pennylane::Lightning_Kokkos::Algorithms;
 } // namespace
 /// @endcond
@@ -279,8 +280,7 @@ TEST_CASE("AdjointJacobian::adjointJacobian Decomposed Rot gate, non "
         const size_t num_params = 3;
         const size_t num_obs = 1;
 
-        const auto thetas =
-            Pennylane::Lightning_Kokkos::Util::linspace(-2 * M_PI, 2 * M_PI, 7);
+        const auto thetas = linspace(-2 * M_PI, 2 * M_PI, 7);
         std::unordered_map<double, std::vector<double>> expec_results{
             {thetas[0], {0, -9.90819496e-01, 0}},
             {thetas[1], {-8.18996553e-01, 1.62526544e-01, 0}},
@@ -297,9 +297,9 @@ TEST_CASE("AdjointJacobian::adjointJacobian Decomposed Rot gate, non "
                 num_obs, std::vector<double>(num_params, 0));
 
             std::vector<Kokkos::complex<double>> cdata{
-                {Pennylane::Lightning_Kokkos::Util::INVSQRT2<Kokkos::complex,
+                {INVSQRT2<Kokkos::complex,
                                                              double>()},
-                {-Pennylane::Lightning_Kokkos::Util::INVSQRT2<Kokkos::complex,
+                {-INVSQRT2<Kokkos::complex,
                                                               double>()}};
             std::vector<Kokkos::complex<double>> new_data{cdata.begin(),
                                                           cdata.end()};
@@ -336,8 +336,7 @@ TEST_CASE("AdjointJacobian::adjointJacobian Mixed Ops, Obs and TParams",
         const std::vector<size_t> t_params{1, 2, 3};
         const size_t num_obs = 1;
 
-        const auto thetas =
-            Pennylane::Lightning_Kokkos::Util::linspace(-2 * M_PI, 2 * M_PI, 8);
+        const auto thetas = linspace(-2 * M_PI, 2 * M_PI, 8);
 
         std::vector<double> local_params{0.543, 0.54, 0.1,  0.5, 1.3,
                                          -2.3,  0.5,  -0.5, 0.5};
@@ -345,12 +344,12 @@ TEST_CASE("AdjointJacobian::adjointJacobian Mixed Ops, Obs and TParams",
             num_obs, std::vector<double>(t_params.size(), 0));
 
         std::vector<Kokkos::complex<double>> cdata{
-            {Pennylane::Lightning_Kokkos::Util::ONE<Kokkos::complex, double>()},
-            {Pennylane::Lightning_Kokkos::Util::ZERO<Kokkos::complex,
+            {ONE<Kokkos::complex, double>()},
+            {ZERO<Kokkos::complex,
                                                      double>()},
-            {Pennylane::Lightning_Kokkos::Util::ZERO<Kokkos::complex,
+            {ZERO<Kokkos::complex,
                                                      double>()},
-            {Pennylane::Lightning_Kokkos::Util::ZERO<Kokkos::complex,
+            {ZERO<Kokkos::complex,
                                                      double>()}};
         std::vector<Kokkos::complex<double>> new_data{cdata.begin(),
                                                       cdata.end()};

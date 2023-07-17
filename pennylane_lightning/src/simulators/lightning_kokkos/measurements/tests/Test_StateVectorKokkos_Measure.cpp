@@ -10,12 +10,12 @@
 
 #include "MeasuresKokkos.hpp" // Measurements
 #include "StateVectorKokkos.hpp"
-#include "TestHelpersKokkos.hpp" // Initializing_StateVector
+#include "TestHelpers.hpp"
 
 /// @cond DEV
 namespace {
 using namespace Pennylane::Lightning_Kokkos::Measures; // Measurements
-using Pennylane::Lightning_Kokkos::TestHelpers::Initializing_StateVector;
+using Pennylane::Util::createNonTrivialStateCore;
 }; // namespace
 /// @endcond
 
@@ -26,7 +26,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values", "[Measurements]",
     using ComplexT = typename StateVectorT::ComplexT;
 
     // Defining the statevector that will be measured.
-    StateVectorT statevector = Initializing_StateVector<PrecisionT>();
+    StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
 
     // Initializing the Measurements class.
     // This object attaches to the statevector allowing several measures.
@@ -103,7 +103,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Variances", "[Measurements]", (StateVectorKokkos),
     using ComplexT = typename StateVectorT::ComplexT;
 
     // Defining the State Vector that will be measured.
-    StateVectorT statevector = Initializing_StateVector<PrecisionT>();
+    StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
 
     // Initializing the measurements class.
     // This object attaches to the statevector allowing several measurements.
@@ -204,7 +204,8 @@ TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
 
     // Defining the State Vector that will be measured.
     const std::size_t num_qubits = 3;
-    auto measure_sv = Initializing_StateVector<TestType>(num_qubits);
+    auto measure_sv =
+        createNonTrivialStateCore<StateVectorKokkos<TestType>>(num_qubits);
 
     SECTION("Looping over different wire configurations:") {
         auto m = Measurements(measure_sv);

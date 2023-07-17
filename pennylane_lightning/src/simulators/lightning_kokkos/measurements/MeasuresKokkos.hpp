@@ -4,7 +4,7 @@
 #include <Kokkos_Random.hpp>
 
 #include "ExpValFunctors.hpp"
-#include "LinearAlgebraKokkos.hpp"
+#include "LinearAlgebraKokkos.hpp" // getRealOfComplexInnerProduct
 #include "MeasurementsBase.hpp"
 #include "MeasuresFunctors.hpp"
 #include "Observables.hpp"
@@ -15,10 +15,9 @@
 namespace {
 using namespace Pennylane::Measures;
 using namespace Pennylane::Observables;
-// using namespace Pennylane::LightningQubit::Util;
-using Pennylane::Util::exp2;
-
 using Pennylane::Lightning_Kokkos::StateVectorKokkos;
+using Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct;
+using Pennylane::Util::exp2;
 } // namespace
 /// @endcond
 
@@ -376,8 +375,8 @@ class Measurements final
         StateVectorT ob_sv(this->_statevector.getNumQubits());
         ob_sv.DeviceToDevice(this->_statevector.getData());
         ob.applyInPlace(ob_sv);
-        return Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-            this->_statevector.getData(), ob_sv.getData());
+        return getRealOfComplexInnerProduct(this->_statevector.getData(),
+                                            ob_sv.getData());
     }
 
     /**
@@ -398,8 +397,8 @@ class Measurements final
         //     matrix_(i) = matrix[i];
         // }
         // ob_sv.applyMultiQubitOp(matrix_, wires);
-        return Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-            this->_statevector.getData(), ob_sv.getData());
+        return getRealOfComplexInnerProduct(this->_statevector.getData(),
+                                            ob_sv.getData());
     };
 
     /**
@@ -414,8 +413,8 @@ class Measurements final
         StateVectorT ob_sv(this->_statevector.getNumQubits());
         ob_sv.DeviceToDevice(this->_statevector.getData());
         ob_sv.applyOperation(operation, wires);
-        return Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-            this->_statevector.getData(), ob_sv.getData());
+        return getRealOfComplexInnerProduct(this->_statevector.getData(),
+                                            ob_sv.getData());
     };
 
     /**
@@ -483,12 +482,11 @@ class Measurements final
         ob.applyInPlace(ob_sv);
 
         const PrecisionT mean_square =
-            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-                ob_sv.getData(), ob_sv.getData());
-        const PrecisionT squared_mean = static_cast<PrecisionT>(std::pow(
-            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-                this->_statevector.getData(), ob_sv.getData()),
-            2));
+            getRealOfComplexInnerProduct(ob_sv.getData(), ob_sv.getData());
+        const PrecisionT squared_mean = static_cast<PrecisionT>(
+            std::pow(getRealOfComplexInnerProduct(this->_statevector.getData(),
+                                                  ob_sv.getData()),
+                     2));
         return (mean_square - squared_mean);
     }
 
@@ -506,12 +504,11 @@ class Measurements final
         ob_sv.applyOperation(operation, wires);
 
         const PrecisionT mean_square =
-            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-                ob_sv.getData(), ob_sv.getData());
-        const PrecisionT squared_mean = static_cast<PrecisionT>(std::pow(
-            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-                this->_statevector.getData(), ob_sv.getData()),
-            2));
+            getRealOfComplexInnerProduct(ob_sv.getData(), ob_sv.getData());
+        const PrecisionT squared_mean = static_cast<PrecisionT>(
+            std::pow(getRealOfComplexInnerProduct(this->_statevector.getData(),
+                                                  ob_sv.getData()),
+                     2));
         return (mean_square - squared_mean);
     };
 
@@ -529,12 +526,11 @@ class Measurements final
         ob_sv.applyMatrix(matrix, wires);
 
         const PrecisionT mean_square =
-            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-                ob_sv.getData(), ob_sv.getData());
-        const PrecisionT squared_mean = static_cast<PrecisionT>(std::pow(
-            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
-                this->_statevector.getData(), ob_sv.getData()),
-            2));
+            getRealOfComplexInnerProduct(ob_sv.getData(), ob_sv.getData());
+        const PrecisionT squared_mean = static_cast<PrecisionT>(
+            std::pow(getRealOfComplexInnerProduct(this->_statevector.getData(),
+                                                  ob_sv.getData()),
+                     2));
         return (mean_square - squared_mean);
     };
 
@@ -614,18 +610,18 @@ class Measurements final
         std::vector<size_t> sorted_wires(wires);
 
         if (!is_sorted_wires) {
-            sorted_ind_wires = Lightning_Kokkos::Util::sorting_indices(wires);
+            sorted_ind_wires = Pennylane::Util::sorting_indices(wires);
             for (size_t pos = 0; pos < wires.size(); pos++)
                 sorted_wires[pos] = wires[sorted_ind_wires[pos]];
         }
 
         std::vector<size_t> all_indices =
-            Lightning_Kokkos::Util::generateBitsPatterns(sorted_wires,
+            Pennylane::Util::generateBitsPatterns(sorted_wires,
                                                          num_qubits);
 
         std::vector<size_t> all_offsets =
-            Lightning_Kokkos::Util::generateBitsPatterns(
-                Lightning_Kokkos::Util::getIndicesAfterExclusion(sorted_wires,
+            Pennylane::Util::generateBitsPatterns(
+                Pennylane::Util::getIndicesAfterExclusion(sorted_wires,
                                                                  num_qubits),
                 num_qubits);
 

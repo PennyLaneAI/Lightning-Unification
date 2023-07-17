@@ -18,13 +18,13 @@
 #include <complex>
 #include <vector>
 
-#include "UtilKokkos.hpp"
 #include <Kokkos_Core.hpp>
+
+#include "Util.hpp"
 
 /// @cond DEV
 namespace {
-namespace Util = Pennylane::Lightning_Kokkos::Util;
-using namespace Util;
+using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 
@@ -40,8 +40,8 @@ namespace Pennylane::Lightning_Kokkos::Gates {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getIdentity() -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>()};
+    return {ONE<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>()};
 }
 
 /**
@@ -54,8 +54,8 @@ static constexpr auto getIdentity() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getPauliX() -> std::vector<ComplexT<T>> {
-    return {Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(), Util::ZERO<ComplexT, T>()};
+    return {ZERO<ComplexT, T>(), ONE<ComplexT, T>(), ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>()};
 }
 
 /**
@@ -68,8 +68,8 @@ static constexpr auto getPauliX() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getPauliY() -> std::vector<ComplexT<T>> {
-    return {Util::ZERO<ComplexT, T>(), -Util::IMAG<ComplexT, T>(),
-            Util::IMAG<ComplexT, T>(), Util::ZERO<ComplexT, T>()};
+    return {ZERO<ComplexT, T>(), -IMAG<ComplexT, T>(), IMAG<ComplexT, T>(),
+            ZERO<ComplexT, T>()};
 }
 
 /**
@@ -82,8 +82,8 @@ static constexpr auto getPauliY() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getPauliZ() -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), -Util::ONE<ComplexT, T>()};
+    return {ONE<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            -ONE<ComplexT, T>()};
 }
 
 /**
@@ -96,8 +96,8 @@ static constexpr auto getPauliZ() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getHadamard() -> std::vector<ComplexT<T>> {
-    return {Util::INVSQRT2<ComplexT, T>(), Util::INVSQRT2<ComplexT, T>(),
-            Util::INVSQRT2<ComplexT, T>(), -Util::INVSQRT2<ComplexT, T>()};
+    return {INVSQRT2<ComplexT, T>(), INVSQRT2<ComplexT, T>(),
+            INVSQRT2<ComplexT, T>(), -INVSQRT2<ComplexT, T>()};
 }
 
 /**
@@ -109,8 +109,8 @@ static constexpr auto getHadamard() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getS() -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::IMAG<ComplexT, T>()};
+    return {ONE<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            IMAG<ComplexT, T>()};
 }
 
 /**
@@ -122,12 +122,9 @@ static constexpr auto getS() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getT() -> std::vector<ComplexT<T>> {
-    return {
-        Util::ONE<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(),
-        Util::ConstMult(Util::SQRT2<decltype(Util::ONE<ComplexT, T>().x)>() / 2,
-                        Util::ConstSum(Util::ONE<ComplexT, T>(),
-                                       -Util::IMAG<ComplexT, T>()))};
+    return {ONE<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ConstMult(SQRT2<decltype(ONE<ComplexT, T>().x)>() / 2,
+                      ConstSum(ONE<ComplexT, T>(), -IMAG<ComplexT, T>()))};
 }
 
 /**
@@ -140,14 +137,12 @@ static constexpr auto getT() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getCNOT() -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>()};
+    return {ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>()};
 }
 
 /**
@@ -160,14 +155,12 @@ static constexpr auto getCNOT() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getSWAP() -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>()};
+    return {ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>()};
 }
 
 /**
@@ -180,14 +173,12 @@ static constexpr auto getSWAP() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getCY() -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), -Util::IMAG<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::IMAG<ComplexT, T>(), Util::ZERO<ComplexT, T>()};
+    return {ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), -IMAG<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), IMAG<ComplexT, T>(),
+            ZERO<ComplexT, T>()};
 }
 
 /**
@@ -200,14 +191,12 @@ static constexpr auto getCY() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getCZ() -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), -Util::ONE<ComplexT, T>()};
+    return {ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            -ONE<ComplexT, T>()};
 }
 
 /**
@@ -220,38 +209,28 @@ static constexpr auto getCZ() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getCSWAP() -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>()};
+    return {ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>()};
 }
 
 /**
@@ -264,38 +243,28 @@ static constexpr auto getCSWAP() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getToffoli() -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>()};
+    return {ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>()};
 }
 
 /**
@@ -310,9 +279,9 @@ static constexpr auto getToffoli() -> std::vector<ComplexT<T>> {
  */
 template <template <typename...> class ComplexT, typename T>
 static auto getPhaseShift(T angle) -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+    return {ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             {std::cos(angle), std::sin(angle)}};
 }
 
@@ -404,8 +373,8 @@ static auto getRY(const std::vector<T> &params) -> std::vector<ComplexT<T>> {
 template <template <typename...> class ComplexT, typename T>
 static auto getRZ(T angle) -> std::vector<ComplexT<T>> {
     return {{std::cos(-angle / 2), std::sin(-angle / 2)},
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             {std::cos(angle / 2), std::sin(angle / 2)}};
 }
 
@@ -488,20 +457,20 @@ static auto getRot(const std::vector<T> &params) -> std::vector<ComplexT<T>> {
 template <template <typename...> class ComplexT, typename T>
 static auto getCRX(T angle) -> std::vector<ComplexT<T>> {
     const auto rx{getRX<ComplexT<T>>(angle)};
-    return {Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+    return {ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             rx[0],
             rx[1],
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             rx[2],
             rx[3]};
 }
@@ -532,20 +501,20 @@ static auto getCRX(const std::vector<T> &params) -> std::vector<ComplexT<T>> {
 template <template <typename...> class ComplexT, typename T>
 static auto getCRY(T angle) -> std::vector<ComplexT<T>> {
     const auto ry{getRY<ComplexT<T>>(angle)};
-    return {Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+    return {ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             ry[0],
             ry[1],
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             ry[2],
             ry[3]};
 }
@@ -577,20 +546,20 @@ template <template <typename...> class ComplexT, typename T>
 static auto getCRZ(T angle) -> std::vector<ComplexT<T>> {
     const ComplexT<T> first{std::cos(-angle / 2), std::sin(-angle / 2)};
     const ComplexT<T> second{std::cos(angle / 2), std::sin(angle / 2)};
-    return {Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+    return {ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             first,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             second};
 }
 
@@ -617,20 +586,20 @@ row-major format.
 template <template <typename...> class ComplexT, typename T>
 static auto getCRot(T phi, T theta, T omega) -> std::vector<ComplexT<T>> {
     const auto rot{std::move(getRot<ComplexT<T>>(phi, theta, omega))};
-    return {Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+    return {ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             rot[0],
             rot[1],
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             rot[2],
             rot[3]};
 }
@@ -654,14 +623,14 @@ data in row-major format.
  */
 template <template <typename...> class ComplexT, typename T>
 static auto getControlledPhaseShift(T angle) -> std::vector<ComplexT<T>> {
-    return {Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(), {std::cos(angle), std::sin(angle)}};
+    return {ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(), {std::cos(angle), std::sin(angle)}};
 }
 
 /**
@@ -691,22 +660,22 @@ static auto getSingleExcitation(T angle) -> std::vector<ComplexT<T>> {
     const T p2 = angle / 2;
     const ComplexT<T> c{std::cos(p2), 0};
     const ComplexT<T> s{std::sin(p2), 0};
-    return {Util::ONE<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+    return {ONE<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             c,
             s,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             -s,
             c,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ONE<ComplexT, T>()};
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ONE<ComplexT, T>()};
 }
 
 /**
@@ -737,17 +706,17 @@ template <template <typename...> class ComplexT, typename T>
 static constexpr auto getGeneratorSingleExcitation()
     -> std::vector<ComplexT<T>> {
     return {
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::IMAG<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        IMAG<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), -Util::IMAG<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), -IMAG<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
     };
 }
 
@@ -769,20 +738,20 @@ static auto getSingleExcitationMinus(T angle) -> std::vector<ComplexT<T>> {
     const ComplexT<T> c{Kokkos::Experimental::cos(p2), 0};
     const ComplexT<T> s{Kokkos::Experimental::sin(p2), 0};
     return {e,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             c,
             s,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             -s,
             c,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             e};
 }
 
@@ -815,17 +784,17 @@ template <template <typename...> class ComplexT, typename T>
 static constexpr auto getGeneratorSingleExcitationMinus()
     -> std::vector<ComplexT<T>> {
     return {
-        Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::IMAG<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        IMAG<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), -Util::IMAG<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), -IMAG<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
     };
 }
 
@@ -847,20 +816,20 @@ static auto getSingleExcitationPlus(T angle) -> std::vector<ComplexT<T>> {
     const ComplexT<T> c{Kokkos::Experimental::cos(p2), 0};
     const ComplexT<T> s{Kokkos::Experimental::sin(p2), 0};
     return {e,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             c,
             s,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             -s,
             c,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             e};
 }
 
@@ -893,17 +862,17 @@ template <template <typename...> class ComplexT, typename T>
 static constexpr auto getGeneratorSingleExcitationPlus()
     -> std::vector<ComplexT<T>> {
     return {
-        -Util::ONE<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        -ONE<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::IMAG<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        IMAG<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), -Util::IMAG<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), -IMAG<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), -Util::ONE<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), -ONE<ComplexT, T>(),
     };
 }
 
@@ -922,25 +891,25 @@ static auto getDoubleExcitation(T angle) -> std::vector<ComplexT<T>> {
     const T p2 = angle / 2;
     const ComplexT<T> c{std::cos(p2), 0};
     const ComplexT<T> s{std::sin(p2), 0};
-    std::vector<ComplexT<T>> mat(256, Util::ZERO<ComplexT, T>());
-    mat[0] = Util::ONE<ComplexT, T>();
-    mat[17] = Util::ONE<ComplexT, T>();
-    mat[34] = Util::ONE<ComplexT, T>();
+    std::vector<ComplexT<T>> mat(256, ZERO<ComplexT, T>());
+    mat[0] = ONE<ComplexT, T>();
+    mat[17] = ONE<ComplexT, T>();
+    mat[34] = ONE<ComplexT, T>();
     mat[51] = c;
     mat[60] = s;
-    mat[68] = Util::ONE<ComplexT, T>();
-    mat[85] = Util::ONE<ComplexT, T>();
-    mat[102] = Util::ONE<ComplexT, T>();
-    mat[119] = Util::ONE<ComplexT, T>();
-    mat[136] = Util::ONE<ComplexT, T>();
-    mat[153] = Util::ONE<ComplexT, T>();
-    mat[170] = Util::ONE<ComplexT, T>();
-    mat[187] = Util::ONE<ComplexT, T>();
+    mat[68] = ONE<ComplexT, T>();
+    mat[85] = ONE<ComplexT, T>();
+    mat[102] = ONE<ComplexT, T>();
+    mat[119] = ONE<ComplexT, T>();
+    mat[136] = ONE<ComplexT, T>();
+    mat[153] = ONE<ComplexT, T>();
+    mat[170] = ONE<ComplexT, T>();
+    mat[187] = ONE<ComplexT, T>();
     mat[195] = -s;
     mat[204] = c;
-    mat[221] = Util::ONE<ComplexT, T>();
-    mat[238] = Util::ONE<ComplexT, T>();
-    mat[255] = Util::ONE<ComplexT, T>();
+    mat[221] = ONE<ComplexT, T>();
+    mat[238] = ONE<ComplexT, T>();
+    mat[255] = ONE<ComplexT, T>();
     return mat;
 }
 
@@ -971,9 +940,9 @@ static auto getDoubleExcitation(const std::vector<T> &params)
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getGeneratorDoubleExcitation()
     -> std::vector<ComplexT<T>> {
-    std::vector<ComplexT<T>> mat(256, Util::ZERO<ComplexT, T>());
-    mat[60] = Util::IMAG<ComplexT, T>();
-    mat[195] = -Util::IMAG<ComplexT, T>();
+    std::vector<ComplexT<T>> mat(256, ZERO<ComplexT, T>());
+    mat[60] = IMAG<ComplexT, T>();
+    mat[195] = -IMAG<ComplexT, T>();
     return mat;
 }
 
@@ -994,7 +963,7 @@ static auto getDoubleExcitationMinus(T angle) -> std::vector<ComplexT<T>> {
     const ComplexT<T> e = Kokkos::Experimental::exp(ComplexT<T>(0, -p2));
     const ComplexT<T> c{Kokkos::Experimental::cos(p2), 0};
     const ComplexT<T> s{Kokkos::Experimental::sin(p2), 0};
-    std::vector<ComplexT<T>> mat(256, Util::ZERO<ComplexT, T>());
+    std::vector<ComplexT<T>> mat(256, ZERO<ComplexT, T>());
     mat[0] = e;
     mat[17] = e;
     mat[34] = e;
@@ -1044,23 +1013,23 @@ static auto getDoubleExcitationMinus(const std::vector<T> &params)
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getGeneratorDoubleExcitationMinus()
     -> std::vector<ComplexT<T>> {
-    std::vector<ComplexT<T>> mat(256, Util::ZERO<ComplexT, T>());
-    mat[0] = Util::ONE<ComplexT, T>();
-    mat[17] = Util::ONE<ComplexT, T>();
-    mat[34] = Util::ONE<ComplexT, T>();
-    mat[60] = Util::IMAG<ComplexT, T>();
-    mat[68] = Util::ONE<ComplexT, T>();
-    mat[85] = Util::ONE<ComplexT, T>();
-    mat[102] = Util::ONE<ComplexT, T>();
-    mat[119] = Util::ONE<ComplexT, T>();
-    mat[136] = Util::ONE<ComplexT, T>();
-    mat[153] = Util::ONE<ComplexT, T>();
-    mat[170] = Util::ONE<ComplexT, T>();
-    mat[187] = Util::ONE<ComplexT, T>();
-    mat[195] = -Util::IMAG<ComplexT, T>();
-    mat[221] = Util::ONE<ComplexT, T>();
-    mat[238] = Util::ONE<ComplexT, T>();
-    mat[255] = Util::ONE<ComplexT, T>();
+    std::vector<ComplexT<T>> mat(256, ZERO<ComplexT, T>());
+    mat[0] = ONE<ComplexT, T>();
+    mat[17] = ONE<ComplexT, T>();
+    mat[34] = ONE<ComplexT, T>();
+    mat[60] = IMAG<ComplexT, T>();
+    mat[68] = ONE<ComplexT, T>();
+    mat[85] = ONE<ComplexT, T>();
+    mat[102] = ONE<ComplexT, T>();
+    mat[119] = ONE<ComplexT, T>();
+    mat[136] = ONE<ComplexT, T>();
+    mat[153] = ONE<ComplexT, T>();
+    mat[170] = ONE<ComplexT, T>();
+    mat[187] = ONE<ComplexT, T>();
+    mat[195] = -IMAG<ComplexT, T>();
+    mat[221] = ONE<ComplexT, T>();
+    mat[238] = ONE<ComplexT, T>();
+    mat[255] = ONE<ComplexT, T>();
     return mat;
 }
 
@@ -1081,7 +1050,7 @@ static auto getDoubleExcitationPlus(T angle) -> std::vector<ComplexT<T>> {
     const ComplexT<T> e = Kokkos::Experimental::exp(ComplexT<T>(0, p2));
     const ComplexT<T> c{Kokkos::Experimental::cos(p2), 0};
     const ComplexT<T> s{Kokkos::Experimental::sin(p2), 0};
-    std::vector<ComplexT<T>> mat(256, Util::ZERO<ComplexT, T>());
+    std::vector<ComplexT<T>> mat(256, ZERO<ComplexT, T>());
     mat[0] = e;
     mat[17] = e;
     mat[34] = e;
@@ -1131,23 +1100,23 @@ static auto getDoubleExcitationPlus(const std::vector<T> &params)
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getGeneratorDoubleExcitationPlus()
     -> std::vector<ComplexT<T>> {
-    std::vector<ComplexT<T>> mat(256, Util::ZERO<ComplexT, T>());
-    mat[0] = -Util::ONE<ComplexT, T>();
-    mat[17] = -Util::ONE<ComplexT, T>();
-    mat[34] = -Util::ONE<ComplexT, T>();
-    mat[60] = Util::IMAG<ComplexT, T>();
-    mat[68] = -Util::ONE<ComplexT, T>();
-    mat[85] = -Util::ONE<ComplexT, T>();
-    mat[102] = -Util::ONE<ComplexT, T>();
-    mat[119] = -Util::ONE<ComplexT, T>();
-    mat[136] = -Util::ONE<ComplexT, T>();
-    mat[153] = -Util::ONE<ComplexT, T>();
-    mat[170] = -Util::ONE<ComplexT, T>();
-    mat[187] = -Util::ONE<ComplexT, T>();
-    mat[195] = -Util::IMAG<ComplexT, T>();
-    mat[221] = -Util::ONE<ComplexT, T>();
-    mat[238] = -Util::ONE<ComplexT, T>();
-    mat[255] = -Util::ONE<ComplexT, T>();
+    std::vector<ComplexT<T>> mat(256, ZERO<ComplexT, T>());
+    mat[0] = -ONE<ComplexT, T>();
+    mat[17] = -ONE<ComplexT, T>();
+    mat[34] = -ONE<ComplexT, T>();
+    mat[60] = IMAG<ComplexT, T>();
+    mat[68] = -ONE<ComplexT, T>();
+    mat[85] = -ONE<ComplexT, T>();
+    mat[102] = -ONE<ComplexT, T>();
+    mat[119] = -ONE<ComplexT, T>();
+    mat[136] = -ONE<ComplexT, T>();
+    mat[153] = -ONE<ComplexT, T>();
+    mat[170] = -ONE<ComplexT, T>();
+    mat[187] = -ONE<ComplexT, T>();
+    mat[195] = -IMAG<ComplexT, T>();
+    mat[221] = -ONE<ComplexT, T>();
+    mat[238] = -ONE<ComplexT, T>();
+    mat[255] = -ONE<ComplexT, T>();
     return mat;
 }
 
@@ -1167,20 +1136,20 @@ static auto getIsingXX(T angle) -> std::vector<ComplexT<T>> {
     const ComplexT<T> c{std::cos(p2), 0};
     const ComplexT<T> neg_is{0, -std::sin(p2)};
     return {c,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             neg_is,
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             c,
             neg_is,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             neg_is,
             c,
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             neg_is,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             c};
 }
 
@@ -1211,17 +1180,17 @@ static auto getIsingXX(const std::vector<T> &params)
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getGeneratorIsingXX() -> std::vector<ComplexT<T>> {
     return {
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
     };
 }
 
@@ -1242,20 +1211,20 @@ static auto getIsingYY(T angle) -> std::vector<ComplexT<T>> {
     const ComplexT<T> pos_is{0, std::sin(p2)};
     const ComplexT<T> neg_is{0, -std::sin(p2)};
     return {c,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             pos_is,
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             c,
             neg_is,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             neg_is,
             c,
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             pos_is,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             c};
 }
 
@@ -1286,17 +1255,17 @@ static auto getIsingYY(const std::vector<T> &params)
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getGeneratorIsingYY() -> std::vector<ComplexT<T>> {
     return {
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), -Util::ONE<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), -ONE<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        -Util::ONE<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        -ONE<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
     };
 }
 
@@ -1316,20 +1285,20 @@ static auto getIsingZZ(T angle) -> std::vector<ComplexT<T>> {
     const ComplexT<T> neg_e = Kokkos::Experimental::exp(ComplexT<T>(0, -p2));
     const ComplexT<T> pos_e = Kokkos::Experimental::exp(ComplexT<T>(0, p2));
     return {neg_e,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             pos_e,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             pos_e,
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
-            Util::ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
+            ZERO<ComplexT, T>(),
             neg_e};
 }
 
@@ -1360,17 +1329,17 @@ static auto getIsingZZ(const std::vector<T> &params)
 template <template <typename...> class ComplexT, typename T>
 static constexpr auto getGeneratorIsingZZ() -> std::vector<ComplexT<T>> {
     return {
-        -Util::ONE<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        -ONE<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ONE<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ONE<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ONE<ComplexT, T>(),  Util::ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
 
-        Util::ZERO<ComplexT, T>(), Util::ZERO<ComplexT, T>(),
-        Util::ZERO<ComplexT, T>(), -Util::ONE<ComplexT, T>(),
+        ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
+        ZERO<ComplexT, T>(), -ONE<ComplexT, T>(),
     };
 }
 
