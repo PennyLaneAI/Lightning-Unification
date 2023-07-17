@@ -255,7 +255,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRZ",
         SECTION("Apply directly") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperation(
+                kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
                 kokkos_sv.applyRZ({index}, false, {angles[index]});
@@ -274,7 +274,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRZ",
         SECTION("Apply using dispatcher") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperation(
+                kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
                 kokkos_sv.applyOperation("RZ", {index}, false, {angles[index]});
@@ -326,7 +326,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyPhaseShift",
         for (size_t index = 0; index < num_qubits; index++) {
 
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            kokkos_sv.applyOperation({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
+            kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                      {{0}, {1}, {2}},
                                      {{false}, {false}, {false}});
             kokkos_sv.applyPhaseShift({index}, false, {angles[index]});
@@ -344,7 +344,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyPhaseShift",
     SECTION("Apply using dispatcher") {
         for (size_t index = 0; index < num_qubits; index++) {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            kokkos_sv.applyOperation({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
+            kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                      {{0}, {1}, {2}},
                                      {{false}, {false}, {false}});
             kokkos_sv.applyOperation("PhaseShift", {index}, false,
@@ -384,7 +384,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyControlledPhaseShift",
 
     SECTION("Apply directly") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-        kokkos_sv.applyOperation({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
+        kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
         kokkos_sv.applyControlledPhaseShift({0, 1}, false, {angles[0]});
         std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
@@ -399,7 +399,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyControlledPhaseShift",
     }
     SECTION("Apply using dispatcher") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-        kokkos_sv.applyOperation({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
+        kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
         kokkos_sv.applyOperation("ControlledPhaseShift", {1, 2}, false,
                                  {angles[1]});
@@ -1382,7 +1382,7 @@ TEMPLATE_TEST_CASE("Sample", "[StateVectorKokkosManaged_Param]", float,
         initial_phase -= 0.2;
     }
 
-    measure_sv.applyOperation(gates, wires, inv_op, phase);
+    measure_sv.applyOperations(gates, wires, inv_op, phase);
 
     std::vector<TestType> expected_probabilities = {
         0.67078706, 0.03062806, 0.0870997,  0.00397696,

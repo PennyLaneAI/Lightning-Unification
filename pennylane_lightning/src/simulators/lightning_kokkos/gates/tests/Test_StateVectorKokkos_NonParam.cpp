@@ -33,7 +33,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::CopyConstructor",
     {
         const std::size_t num_qubits = 3;
         StateVectorKokkos<TestType> kokkos_sv_1{num_qubits};
-        kokkos_sv_1.applyOperation({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
+        kokkos_sv_1.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                    {{0}, {1}, {2}},
                                    {{false}, {false}, {false}});
         StateVectorKokkos<TestType> kokkos_sv_2{kokkos_sv_1};
@@ -136,7 +136,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliY",
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
-        kokkos_sv.applyOperation({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
+        kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
         const auto p = ComplexT(HALF<TestType>()) *
@@ -152,7 +152,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliY",
         SECTION("Apply directly") {
             for (std::size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperation(
+                kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
 
@@ -174,7 +174,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliY",
         SECTION("Apply using dispatcher") {
             for (std::size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperation(
+                kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
 
@@ -203,7 +203,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliZ",
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
-        kokkos_sv.applyOperation({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
+        kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
         const auto p =
@@ -218,7 +218,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliZ",
         SECTION("Apply directly") {
             for (std::size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperation(
+                kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
 
@@ -239,7 +239,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliZ",
         SECTION("Apply using dispatcher") {
             for (std::size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperation(
+                kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
 
@@ -268,7 +268,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyS", "[StateVectorKokkos_Nonparam]",
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
-        kokkos_sv.applyOperation({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
+        kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
         auto r = ComplexT(HALF<TestType>()) * ComplexT(INVSQRT2<TestType>());
@@ -282,7 +282,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyS", "[StateVectorKokkos_Nonparam]",
         SECTION("Apply directly") {
             for (std::size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperation(
+                kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
                 kokkos_sv.applyS({index}, false);
@@ -302,7 +302,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyS", "[StateVectorKokkos_Nonparam]",
         SECTION("Apply using dispatcher") {
             for (std::size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperation(
+                kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
                 kokkos_sv.applyOperation("S", {index}, false);
@@ -330,7 +330,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyT", "[StateVectorKokkos_Nonparam]",
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
-        kokkos_sv.applyOperation({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
+        kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
         auto r = ComplexT(HALF<TestType>()) * ComplexT(INVSQRT2<TestType>());
@@ -345,7 +345,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyT", "[StateVectorKokkos_Nonparam]",
         SECTION("Apply directly") {
             for (std::size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperation(
+                kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
                 kokkos_sv.applyT({index}, false);
@@ -364,7 +364,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyT", "[StateVectorKokkos_Nonparam]",
         SECTION("Apply using dispatcher") {
             for (std::size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperation(
+                kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
                 kokkos_sv.applyOperation("T", {index}, false);
@@ -449,7 +449,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applySWAP",
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
-        kokkos_sv.applyOperation({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
+        kokkos_sv.applyOperations({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
                                  {{false}, {false}});
 
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
@@ -641,7 +641,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCZ", "[StateVectorKokkos_Nonparam]",
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
-        kokkos_sv.applyOperation({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
+        kokkos_sv.applyOperations({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
                                  {{false}, {false}});
 
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
@@ -831,7 +831,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyToffoli",
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
-        kokkos_sv.applyOperation({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
+        kokkos_sv.applyOperations({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
                                  {{false}, {false}});
 
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
@@ -1006,7 +1006,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCSWAP",
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
-        kokkos_sv.applyOperation({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
+        kokkos_sv.applyOperations({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
                                  {{false}, {false}});
 
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},

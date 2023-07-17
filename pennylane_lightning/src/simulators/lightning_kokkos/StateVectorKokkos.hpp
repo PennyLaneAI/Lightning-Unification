@@ -661,54 +661,6 @@ class StateVectorKokkos final
     }
 
     /**
-     * @brief Multi-op variant of execute(const std::string &opName, const
-     std::vector<int> &wires, bool adjoint = false, const std::vector<fp_t>
-     &params)
-     *
-     * @param opNames Name of gates to apply.
-     * @param wires Wires to apply gate to.
-     * @param adjoints Indicates whether to use adjoint of gate.
-     * @param params parameter list for parametric gates.
-     */
-    void applyOperation(const std::vector<std::string> &opNames,
-                        const std::vector<std::vector<size_t>> &wires,
-                        const std::vector<bool> &adjoints,
-                        const std::vector<std::vector<fp_t>> &params) {
-        PL_ABORT_IF(opNames.size() != wires.size(),
-                    "Incompatible number of ops and wires");
-        PL_ABORT_IF(opNames.size() != adjoints.size(),
-                    "Incompatible number of ops and adjoints");
-        const auto num_ops = opNames.size();
-        for (std::size_t op_idx = 0; op_idx < num_ops; op_idx++) {
-            applyOperation(opNames[op_idx], wires[op_idx], adjoints[op_idx],
-                           params[op_idx]);
-        }
-    }
-
-    /**
-     * @brief Multi-op variant of execute(const std::string &opName, const
-     std::vector<int> &wires, bool adjoint = false, const std::vector<fp_t>
-     &params)
-     *
-     * @param opNames Name of gates to apply.
-     * @param wires Wires to apply gate to.
-     * @param adjoints Indicates whether to use adjoint of gate.
-     * @param params parameter list for parametric gates.
-     */
-    void applyOperation(const std::vector<std::string> &opNames,
-                        const std::vector<std::vector<size_t>> &wires,
-                        const std::vector<bool> &adjoints) {
-        PL_ABORT_IF(opNames.size() != wires.size(),
-                    "Incompatible number of ops and wires");
-        PL_ABORT_IF(opNames.size() != adjoints.size(),
-                    "Incompatible number of ops and adjoints");
-        const auto num_ops = opNames.size();
-        for (std::size_t op_idx = 0; op_idx < num_ops; op_idx++) {
-            applyOperation(opNames[op_idx], wires[op_idx], adjoints[op_idx]);
-        }
-    }
-
-    /**
      * @brief Apply a single generator to the state vector using the given
      * kernel.
      *
