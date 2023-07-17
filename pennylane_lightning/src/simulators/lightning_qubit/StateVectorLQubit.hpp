@@ -238,7 +238,6 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
                                   params);
     }
 
-
     /**
      * @brief Apply a single generator to the state-vector using a given kernel.
      *

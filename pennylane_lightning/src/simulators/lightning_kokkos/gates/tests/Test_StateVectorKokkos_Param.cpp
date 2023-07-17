@@ -326,9 +326,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyPhaseShift",
         for (size_t index = 0; index < num_qubits; index++) {
 
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
-                                     {{0}, {1}, {2}},
-                                     {{false}, {false}, {false}});
+            kokkos_sv.applyOperations(
+                {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
+                {{false}, {false}, {false}});
             kokkos_sv.applyPhaseShift({index}, false, {angles[index]});
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
             kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
@@ -344,9 +344,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyPhaseShift",
     SECTION("Apply using dispatcher") {
         for (size_t index = 0; index < num_qubits; index++) {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
-                                     {{0}, {1}, {2}},
-                                     {{false}, {false}, {false}});
+            kokkos_sv.applyOperations(
+                {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
+                {{false}, {false}, {false}});
             kokkos_sv.applyOperation("PhaseShift", {index}, false,
                                      {angles[index]});
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
@@ -385,7 +385,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyControlledPhaseShift",
     SECTION("Apply directly") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
         kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
-                                 {{0}, {1}, {2}}, {{false}, {false}, {false}});
+                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
         kokkos_sv.applyControlledPhaseShift({0, 1}, false, {angles[0]});
         std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
         kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
@@ -400,7 +400,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyControlledPhaseShift",
     SECTION("Apply using dispatcher") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
         kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
-                                 {{0}, {1}, {2}}, {{false}, {false}, {false}});
+                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
         kokkos_sv.applyOperation("ControlledPhaseShift", {1, 2}, false,
                                  {angles[1]});
         std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});

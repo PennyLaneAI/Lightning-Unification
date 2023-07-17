@@ -297,10 +297,8 @@ TEST_CASE("AdjointJacobian::adjointJacobian Decomposed Rot gate, non "
                 num_obs, std::vector<double>(num_params, 0));
 
             std::vector<Kokkos::complex<double>> cdata{
-                {INVSQRT2<Kokkos::complex,
-                                                             double>()},
-                {-INVSQRT2<Kokkos::complex,
-                                                              double>()}};
+                {INVSQRT2<Kokkos::complex, double>()},
+                {-INVSQRT2<Kokkos::complex, double>()}};
             std::vector<Kokkos::complex<double>> new_data{cdata.begin(),
                                                           cdata.end()};
             StateVectorT psi(new_data.data(), new_data.size());
@@ -345,12 +343,9 @@ TEST_CASE("AdjointJacobian::adjointJacobian Mixed Ops, Obs and TParams",
 
         std::vector<Kokkos::complex<double>> cdata{
             {ONE<Kokkos::complex, double>()},
-            {ZERO<Kokkos::complex,
-                                                     double>()},
-            {ZERO<Kokkos::complex,
-                                                     double>()},
-            {ZERO<Kokkos::complex,
-                                                     double>()}};
+            {ZERO<Kokkos::complex, double>()},
+            {ZERO<Kokkos::complex, double>()},
+            {ZERO<Kokkos::complex, double>()}};
         std::vector<Kokkos::complex<double>> new_data{cdata.begin(),
                                                       cdata.end()};
         StateVectorT psi(new_data.data(), new_data.size());

@@ -94,7 +94,7 @@ class Measurements final
      * @param params parameters for the observable
      * @param gate_matrix optional matrix
      */
-    auto getExpectationValue(
+    PrecisionT getExpectationValue(
         const std::string &obsName, const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0},
         const std::vector<ComplexT> &gate_matrix = {}) {
@@ -121,13 +121,11 @@ class Measurements final
      * @brief Calculate the expectation value of a matrix. Typically,
      * this function will be used for dense Hamiltonians.
      *
-     * @param obsName observable name
      * @param wires wires the observable acts on
-     * @param params parameters for the observable
      * @param gate_matrix optional matrix
      */
-    auto getExpectationValue(const std::vector<size_t> &wires,
-                             const std::vector<ComplexT> &gate_matrix) {
+    PrecisionT getExpectationValue(const std::vector<size_t> &wires,
+                                   const std::vector<ComplexT> &gate_matrix) {
 
         auto &&par = std::vector<PrecisionT>{0.0};
         KokkosVector matrix("gate_matrix", gate_matrix.size());
@@ -140,34 +138,58 @@ class Measurements final
      * @brief Calculate the expectation value of a sparse Hamiltonian in CSR
      * format. Typically, this function will be used for dense hamiltonians.
      *
-     * @param obsName observable name
-     * @param wires wires the observable acts on
-     * @param params parameters for the observable
-     * @param gate_matrix optional matrix
+     * @tparam index_type integer type used as indices of the sparse matrix.
+     * @param row_map   row_map array pointer. The j element encodes the
+     * number of non-zeros above row j.
+     * @param row_map_size  row_map array size.
+     * @param indices   pointer to an array with column indices of the non-zero
+     * elements.
+     * @param data    pointer to an array with the non-zero elements.
+     * @param data_size        number of non-zero elements.
      */
-    auto getExpectationValue(const std::vector<ComplexT> &data,
-                             const std::vector<size_t> &indices,
-                             const std::vector<size_t> &index_ptr) {
+    template <class index_type>
+    PrecisionT getExpectationValue(const index_type *row_map,
+                                   index_type row_map_size,
+                                   const index_type *indices,
+                                   const ComplexT *data, index_type data_size) {
         const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
-        PrecisionT expval = 0;
-        KokkosSizeTVector kok_indices("indices", indices.size());
-        KokkosSizeTVector kok_index_ptr("index_ptr", index_ptr.size());
-        KokkosVector kok_data("data", data.size());
+        PrecisionT expval = 0.0;
+        KokkosSizeTVector kok_row_map("row_map", row_map_size);
+        KokkosSizeTVector kok_indices("indices", data_size);
+        KokkosVector kok_data("data", data_size);
 
-        Kokkos::deep_copy(
-            kok_data, UnmanagedConstComplexHostView(data.data(), data.size()));
-        Kokkos::deep_copy(kok_indices, UnmanagedConstSizeTHostView(
-                                           indices.data(), indices.size()));
-        Kokkos::deep_copy(
-            kok_index_ptr,
-            UnmanagedConstSizeTHostView(index_ptr.data(), index_ptr.size()));
+        Kokkos::deep_copy(kok_data,
+                          UnmanagedConstComplexHostView(data, data_size));
+        Kokkos::deep_copy(kok_indices,
+                          UnmanagedConstSizeTHostView(indices, data_size));
+        Kokkos::deep_copy(kok_row_map,
+                          UnmanagedConstSizeTHostView(row_map, row_map_size));
 
         Kokkos::parallel_reduce(
-            index_ptr.size() - 1,
+            row_map_size - 1,
             getExpectationValueSparseFunctor<PrecisionT>(
-                arr_data, kok_data, kok_indices, kok_index_ptr),
+                arr_data, kok_data, kok_indices, kok_row_map),
             expval);
         return expval;
+    }
+
+    /**
+     * @brief Calculate the expectation value of a sparse Hamiltonian in CSR
+     * format. Typically, this function will be used for dense hamiltonians.
+     *
+     * @tparam index_type integer type used as indices of the sparse matrix.
+     * @param data    array with the non-zero elements.
+     * @param indices   array with column indices of the non-zero
+     * elements.
+     * @param row_map   row_map array. The j element encodes the
+     * number of non-zeros above row j.
+     */
+    template <class index_type>
+    PrecisionT getExpectationValue(const std::vector<ComplexT> &data,
+                                   const std::vector<index_type> &indices,
+                                   const std::vector<index_type> &row_map) {
+        return getExpectationValue(row_map.data(), row_map.size(),
+                                   indices.data(), data.data(), data.size());
     }
 
     /**
@@ -463,11 +485,8 @@ class Measurements final
                       const index_type row_map_size,
                       const index_type *entries_ptr, const ComplexT *values_ptr,
                       const index_type numNNZ) {
-        const std::vector<size_t> index_ptr(row_map_ptr,
-                                            row_map_ptr + row_map_size);
-        const std::vector<size_t> indices(entries_ptr, entries_ptr + numNNZ);
-        const std::vector<ComplexT> data(values_ptr, values_ptr + numNNZ);
-        return getExpectationValue(data, indices, index_ptr);
+        return getExpectationValue(row_map_ptr, row_map_size, entries_ptr,
+                                   values_ptr, numNNZ);
     };
 
     /**
@@ -616,14 +635,11 @@ class Measurements final
         }
 
         std::vector<size_t> all_indices =
-            Pennylane::Util::generateBitsPatterns(sorted_wires,
-                                                         num_qubits);
+            Pennylane::Util::generateBitsPatterns(sorted_wires, num_qubits);
 
-        std::vector<size_t> all_offsets =
-            Pennylane::Util::generateBitsPatterns(
-                Pennylane::Util::getIndicesAfterExclusion(sorted_wires,
-                                                                 num_qubits),
-                num_qubits);
+        std::vector<size_t> all_offsets = Pennylane::Util::generateBitsPatterns(
+            Pennylane::Util::getIndicesAfterExclusion(sorted_wires, num_qubits),
+            num_qubits);
 
         Kokkos::View<PrecisionT *> d_probabilities("d_probabilities",
                                                    all_indices.size());

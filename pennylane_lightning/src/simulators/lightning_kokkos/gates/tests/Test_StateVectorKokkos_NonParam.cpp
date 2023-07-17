@@ -34,8 +34,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::CopyConstructor",
         const std::size_t num_qubits = 3;
         StateVectorKokkos<TestType> kokkos_sv_1{num_qubits};
         kokkos_sv_1.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
-                                   {{0}, {1}, {2}},
-                                   {{false}, {false}, {false}});
+                                    {{0}, {1}, {2}},
+                                    {{false}, {false}, {false}});
         StateVectorKokkos<TestType> kokkos_sv_2{kokkos_sv_1};
 
         CHECK(kokkos_sv_1.getLength() == kokkos_sv_2.getLength());
@@ -137,7 +137,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliY",
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
         kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
-                                 {{0}, {1}, {2}}, {{false}, {false}, {false}});
+                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
         const auto p = ComplexT(HALF<TestType>()) *
                        ComplexT(INVSQRT2<TestType>()) *
@@ -204,7 +204,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliZ",
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
         kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
-                                 {{0}, {1}, {2}}, {{false}, {false}, {false}});
+                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
         const auto p =
             ComplexT(HALF<TestType>()) * ComplexT(INVSQRT2<TestType>());
@@ -269,7 +269,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyS", "[StateVectorKokkos_Nonparam]",
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
         kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
-                                 {{0}, {1}, {2}}, {{false}, {false}, {false}});
+                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
         auto r = ComplexT(HALF<TestType>()) * ComplexT(INVSQRT2<TestType>());
         auto i = r * ComplexT(IMAG<TestType>());
@@ -331,7 +331,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyT", "[StateVectorKokkos_Nonparam]",
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
         kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
-                                 {{0}, {1}, {2}}, {{false}, {false}, {false}});
+                                  {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
         auto r = ComplexT(HALF<TestType>()) * ComplexT(INVSQRT2<TestType>());
         auto i = ComplexT(HALF<TestType>()) * ComplexT(HALF<TestType>()) *
@@ -450,7 +450,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applySWAP",
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
         kokkos_sv.applyOperations({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
-                                 {{false}, {false}});
+                                  {{false}, {false}});
 
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
                                                           kokkos_sv.getData());
@@ -642,7 +642,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCZ", "[StateVectorKokkos_Nonparam]",
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
         kokkos_sv.applyOperations({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
-                                 {{false}, {false}});
+                                  {{false}, {false}});
 
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
                                                           kokkos_sv.getData());
@@ -832,7 +832,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyToffoli",
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
         kokkos_sv.applyOperations({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
-                                 {{false}, {false}});
+                                  {{false}, {false}});
 
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
                                                           kokkos_sv.getData());
@@ -1007,7 +1007,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCSWAP",
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
         kokkos_sv.applyOperations({{"Hadamard"}, {"PauliX"}}, {{0}, {1}},
-                                 {{false}, {false}});
+                                  {{false}, {false}});
 
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
                                                           kokkos_sv.getData());

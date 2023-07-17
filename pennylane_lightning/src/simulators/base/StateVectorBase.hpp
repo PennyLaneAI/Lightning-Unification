@@ -133,7 +133,8 @@ template <class PrecisionT, class Derived> class StateVectorBase {
             "Invalid arguments: number of operations, wires, inverses, and "
             "parameters must all be equal");
         for (size_t i = 0; i < numOperations; i++) {
-            this->applyOperation(ops[i], ops_wires[i], ops_adjoint[i], ops_params[i]);
+            this->applyOperation(ops[i], ops_wires[i], ops_adjoint[i],
+                                 ops_params[i]);
         }
     }
 

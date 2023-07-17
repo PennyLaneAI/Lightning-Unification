@@ -395,7 +395,6 @@ inline auto sorting_indices(const std::vector<T> &vec) -> std::vector<size_t> {
     return sorting_indices(vec.data(), vec.size());
 }
 
-
 /**
  * @brief Generate indices for applying operations.
  *

@@ -269,8 +269,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueSingleQubitOp",
             const TestType js = std::sin(-theta / 2);
 
             opMat[0] = c;
-            opMat[1] = Kokkos::complex(static_cast<TestType>(0), js);
-            opMat[2] = Kokkos::complex(static_cast<TestType>(0), js);
+            opMat[1] = ComplexT(static_cast<TestType>(0), js);
+            opMat[2] = ComplexT(static_cast<TestType>(0), js);
             opMat[3] = c;
 
             Kokkos::deep_copy(opMatDevice, opMat);
@@ -490,7 +490,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
         std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
         std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
                                        4, 7, 5, 6, 5, 6, 4, 7};
-        std::vector<Kokkos::complex<TestType>> values = {
+        std::vector<ComplexT> values = {
             {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
             {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0},
             {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
