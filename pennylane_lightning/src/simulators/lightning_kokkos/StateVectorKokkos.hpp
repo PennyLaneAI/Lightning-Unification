@@ -43,38 +43,6 @@ using namespace Pennylane::Lightning_Kokkos::Functors;
 namespace Pennylane::Lightning_Kokkos {
 
 /**
- * @brief Kokkos functor for initializing the state vector to the \f$\ket{0}\f$
- * state
- *
- * @tparam fp_t Floating point precision of underlying statevector data
- */
-template <typename fp_t> struct InitView {
-    Kokkos::View<Kokkos::complex<fp_t> *> a;
-    InitView(Kokkos::View<Kokkos::complex<fp_t> *> a_) : a(a_) {}
-    KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t i) const {
-        a(i) = Kokkos::complex<fp_t>((i == 0) * 1.0, 0.0);
-    }
-};
-
-/**
- * @brief Kokkos functor for setting the basis state
- *
- * @tparam fp_t Floating point precision of underlying statevector data
- */
-template <typename fp_t> struct setBasisStateFunctor {
-    Kokkos::View<Kokkos::complex<fp_t> *> a;
-    const std::size_t index;
-    setBasisStateFunctor(Kokkos::View<Kokkos::complex<fp_t> *> a_,
-                         const std::size_t index_)
-        : a(a_), index(index_) {}
-    KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t i) const {
-        a(i) = Kokkos::complex<fp_t>((i == index) * 1.0, 0.0);
-    }
-};
-
-/**
  * @brief Kokkos functor for setting the state vector
  *
  * @tparam fp_t Floating point precision of underlying statevector data
@@ -89,20 +57,6 @@ template <typename fp_t> struct setStateVectorFunctor {
         : a(a_), indices(indices_), values(values_) {}
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t i) const { a(indices[i]) = values[i]; }
-};
-
-/**
- * @brief Kokkos functor for initializing zeros to the state vector.
- *
- * @tparam fp_t Floating point precision of underlying statevector data
- */
-template <typename fp_t> struct initZerosFunctor {
-    Kokkos::View<Kokkos::complex<fp_t> *> a;
-    initZerosFunctor(Kokkos::View<Kokkos::complex<fp_t> *> a_) : a(a_) {}
-    KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t i) const {
-        a(i) = Kokkos::complex<fp_t>(0.0, 0.0);
-    }
 };
 
 /**
@@ -496,7 +450,7 @@ class StateVectorKokkos final
 
         if (num_qubits > 0) {
             data_ = std::make_unique<KokkosVector>("data_", exp2(num_qubits));
-            Kokkos::parallel_for(length_, InitView(*data_));
+            setBasisState(0U);
         }
     };
 
@@ -504,7 +458,7 @@ class StateVectorKokkos final
      * @brief Init zeros for the state-vector on device.
      */
     void initZeros() {
-        Kokkos::parallel_for(getLength(), initZerosFunctor(getData()));
+        Kokkos::deep_copy(getData(), ComplexT(0.0, 0.0));
     }
 
     /**
@@ -513,8 +467,8 @@ class StateVectorKokkos final
      * @param index Index of the target element.
      */
     void setBasisState(const size_t index) {
-        Kokkos::parallel_for(getLength(),
-                             setBasisStateFunctor(getData(), index));
+        initZeros();
+        getData()(index) = ComplexT(1.0, 0.0);
     }
 
     /**
@@ -550,7 +504,7 @@ class StateVectorKokkos final
      */
     void resetStateVector() {
         if (length_ > 0) {
-            Kokkos::parallel_for(length_, InitView(*data_));
+            setBasisState(0U);
         }
     }
 
