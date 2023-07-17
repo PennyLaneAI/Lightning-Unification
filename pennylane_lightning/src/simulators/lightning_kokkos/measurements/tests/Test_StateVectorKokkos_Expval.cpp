@@ -8,7 +8,7 @@
 
 #include <catch2/catch.hpp>
 
-#include "MeasuresKokkos.hpp"
+#include "MeasurementsKokkos.hpp"
 #include "ObservablesKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 

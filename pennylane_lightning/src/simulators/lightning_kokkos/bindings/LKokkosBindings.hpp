@@ -20,7 +20,7 @@
 #include "AdjointDiffKokkos.hpp"
 #include "Error.hpp"         // LightningException
 #include "GetConfigInfo.hpp" // Kokkos configuration info
-#include "MeasuresKokkos.hpp"
+#include "MeasurementsKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
 #include "pybind11/complex.h"

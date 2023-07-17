@@ -1,4 +1,4 @@
-#include "MeasuresKokkos.hpp"
+#include "MeasurementsKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
 using namespace Pennylane::LightningKokkos;

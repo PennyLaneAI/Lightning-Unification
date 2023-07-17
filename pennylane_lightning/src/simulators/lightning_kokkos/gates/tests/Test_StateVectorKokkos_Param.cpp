@@ -9,7 +9,7 @@
 #include <catch2/catch.hpp>
 
 #include "GatesHost.hpp"
-#include "MeasuresKokkos.hpp"
+#include "MeasurementsKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
 /**
