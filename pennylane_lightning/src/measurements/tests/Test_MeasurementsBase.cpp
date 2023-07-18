@@ -22,6 +22,22 @@ using namespace Pennylane::LightningQubit::Observables;
 } // namespace
 /// @endcond
 
+#elif _ENABLE_PLKOKKOS == 1
+constexpr bool BACKEND_FOUND = true;
+
+#include "MeasurementsKokkos.hpp"
+#include "ObservablesKokkos.hpp"
+#include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
+#include "TestHelpersWires.hpp"
+
+/// @cond DEV
+namespace {
+using namespace Pennylane::LightningKokkos::Measures;
+using namespace Pennylane::LightningKokkos::Observables;
+using namespace Pennylane::LightningKokkos::Util;
+} // namespace
+/// @endcond
+
 #else
 constexpr bool BACKEND_FOUND = false;
 using TestStateVectorBackends = Pennylane::Util::TypeList<void>;
@@ -63,9 +79,7 @@ template <typename TypeList> void testProbabilities() {
                      {{2}, {0.9563339, 0.0436661}}};
 
         // Defining the Statevector that will be measured.
-        auto statevector_data = createNonTrivialState<StateVectorT>();
-        StateVectorT statevector(statevector_data.data(),
-                                 statevector_data.size());
+        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
 
         // Initializing the measurements class.
         // This object attaches to the statevector allowing several measures.
@@ -97,9 +111,7 @@ template <typename TypeList> void testNamedObsExpval() {
         using PrecisionT = typename StateVectorT::PrecisionT;
 
         // Defining the State Vector that will be measured.
-        auto statevector_data = createNonTrivialState<StateVectorT>();
-        StateVectorT statevector(statevector_data.data(),
-                                 statevector_data.size());
+        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
 
         // Initializing the measures class.
         // This object attaches to the statevector allowing several measures.
@@ -145,9 +157,7 @@ template <typename TypeList> void testHermitianObsExpval() {
         using MatrixT = std::vector<ComplexT>;
 
         // Defining the State Vector that will be measured.
-        auto statevector_data = createNonTrivialState<StateVectorT>();
-        StateVectorT statevector(statevector_data.data(),
-                                 statevector_data.size());
+        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
 
         // Initializing the measures class.
         // This object attaches to the statevector allowing several measures.
@@ -165,7 +175,7 @@ template <typename TypeList> void testHermitianObsExpval() {
                 0.644217687237691, 0.4794255386042027, 0.29552020666133955};
 
             MatrixT Hermitian_matrix{
-                real_term, {0, imag_term}, {0, -imag_term}, real_term};
+                ComplexT(real_term), ComplexT(0, imag_term), ComplexT(0, -imag_term), ComplexT(real_term)};
 
             for (size_t ind_wires = 0; ind_wires < wires_list.size();
                  ind_wires++) {
@@ -186,12 +196,12 @@ template <typename TypeList> void testHermitianObsExpval() {
                 0.5874490024807637, 0.44170554255359035, 0.3764821318486682};
 
             MatrixT Hermitian_matrix(16);
-            Hermitian_matrix[0] = real_term;
-            Hermitian_matrix[1] = {0, imag_term};
-            Hermitian_matrix[4] = {0, -imag_term};
-            Hermitian_matrix[5] = real_term;
-            Hermitian_matrix[10] = {1.0, 0};
-            Hermitian_matrix[15] = {1.0, 0};
+            Hermitian_matrix[0] =  ComplexT(real_term);
+            Hermitian_matrix[1] =  ComplexT(0, imag_term);
+            Hermitian_matrix[4] =  ComplexT(0, -imag_term);
+            Hermitian_matrix[5] =  ComplexT(real_term);
+            Hermitian_matrix[10] = ComplexT(1.0, 0);
+            Hermitian_matrix[15] = ComplexT(1.0, 0);
 
             for (size_t ind_wires = 0; ind_wires < wires_list.size();
                  ind_wires++) {
@@ -219,9 +229,7 @@ template <typename TypeList> void testNamedObsVar() {
         using PrecisionT = typename StateVectorT::PrecisionT;
 
         // Defining the State Vector that will be measured.
-        auto statevector_data = createNonTrivialState<StateVectorT>();
-        StateVectorT statevector(statevector_data.data(),
-                                 statevector_data.size());
+        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
 
         // Initializing the measures class.
         // This object attaches to the statevector allowing several measures.
@@ -263,12 +271,11 @@ template <typename TypeList> void testHermitianObsVar() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using StateVectorT = typename TypeList::Type;
         using PrecisionT = typename StateVectorT::PrecisionT;
-        using MatrixT = std::vector<std::complex<PrecisionT>>;
+        using ComplexT = typename StateVectorT::ComplexT;
+        using MatrixT = std::vector<ComplexT>;
 
         // Defining the State Vector that will be measured.
-        auto statevector_data = createNonTrivialState<StateVectorT>();
-        StateVectorT statevector(statevector_data.data(),
-                                 statevector_data.size());
+        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
 
         // Initializing the measures class.
         // This object attaches to the statevector allowing several measures.
@@ -286,7 +293,7 @@ template <typename TypeList> void testHermitianObsVar() {
                 0.5849835714501204, 0.7701511529340699, 0.9126678074548389};
 
             MatrixT Hermitian_matrix{
-                real_term, {0, imag_term}, {0, -imag_term}, real_term};
+                ComplexT(real_term), ComplexT(0, imag_term), ComplexT(0, -imag_term), ComplexT(real_term)};
 
             for (size_t ind_wires = 0; ind_wires < wires_list.size();
                  ind_wires++) {
@@ -307,12 +314,12 @@ template <typename TypeList> void testHermitianObsVar() {
                 0.6549036423585175, 0.8048961865516002, 0.8582611741038356};
 
             MatrixT Hermitian_matrix(16);
-            Hermitian_matrix[0] = real_term;
-            Hermitian_matrix[1] = {0, imag_term};
-            Hermitian_matrix[4] = {0, -imag_term};
-            Hermitian_matrix[5] = real_term;
-            Hermitian_matrix[10] = {1.0, 0};
-            Hermitian_matrix[15] = {1.0, 0};
+            Hermitian_matrix[0]  = ComplexT(real_term);
+            Hermitian_matrix[1]  = ComplexT(0, imag_term);
+            Hermitian_matrix[4]  = ComplexT(0, -imag_term);
+            Hermitian_matrix[5]  = ComplexT(real_term);
+            Hermitian_matrix[10] = ComplexT(1.0, 0);
+            Hermitian_matrix[15] = ComplexT(1.0, 0);
 
             for (size_t ind_wires = 0; ind_wires < wires_list.size();
                  ind_wires++) {
@@ -348,9 +355,7 @@ template <typename TypeList> void testSamples() {
             1U << 30U, 1U << 31U};
 
         // Defining the State Vector that will be measured.
-        auto statevector_data = createNonTrivialState<StateVectorT>();
-        StateVectorT statevector(statevector_data.data(),
-                                 statevector_data.size());
+        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
 
         // Initializing the measurements class.
         // This object attaches to the statevector allowing several

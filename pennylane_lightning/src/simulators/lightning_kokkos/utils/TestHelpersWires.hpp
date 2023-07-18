@@ -29,9 +29,8 @@
 #include "Error.hpp"
 #include "GateOperation.hpp"
 #include "Macros.hpp"
-#include "TestKernels.hpp"
 
-namespace Pennylane::LightningQubit::Util {
+namespace Pennylane::LightningKokkos::Util {
 
 inline auto createWires(Gates::GateOperation op, size_t num_qubits)
     -> std::vector<size_t> {
@@ -196,4 +195,4 @@ auto inline createAllWires(size_t n_qubits, Gates::GateOperation gate_op,
     return CombinationGenerator(n_qubits, n_wires).all_perms();
 }
 
-} // namespace Pennylane::LightningQubit::Util
+} // namespace Pennylane::LightningKokkos::Util
