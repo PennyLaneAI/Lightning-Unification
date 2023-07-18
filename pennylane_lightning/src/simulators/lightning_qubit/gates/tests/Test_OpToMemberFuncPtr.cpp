@@ -21,7 +21,7 @@ allGateOpsHelper([[maybe_unused]] std::integer_sequence<uint32_t, I...> dummy) {
 }
 
 template <typename EnumClass> constexpr auto allGateOps() {
-    return Util::tuple_to_array(allGateOpsHelper<EnumClass>(
+    return Pennylane::Util::tuple_to_array(allGateOpsHelper<EnumClass>(
         std::make_integer_sequence<uint32_t,
                                    static_cast<uint32_t>(EnumClass::END)>{}));
 }
@@ -194,13 +194,14 @@ template <typename PrecisionT, typename ParamT, class ValueClass, size_t op_idx>
 constexpr auto opFuncPtrPairsIter() {
     if constexpr (op_idx < ValueClass::value.size()) {
         constexpr auto op = ValueClass::value[op_idx];
-        if constexpr (Util::array_has_elem(ValueClass::ignore_list, op)) {
+        if constexpr (Pennylane::Util::array_has_elem(ValueClass::ignore_list,
+                                                      op)) {
             return opFuncPtrPairsIter<PrecisionT, ParamT, ValueClass,
                                       op_idx + 1>();
         } else {
             const auto elem = std::pair{
                 op, ValueClass::template func_ptr<PrecisionT, ParamT, op>};
-            return Util::prepend_to_tuple(
+            return Pennylane::Util::prepend_to_tuple(
                 elem, opFuncPtrPairsIter<PrecisionT, ParamT, ValueClass,
                                          op_idx + 1>());
         }
@@ -229,9 +230,9 @@ constexpr auto gateOpFuncPtrPairsWithNumParamsIter() {
                       decltype(gate_op_func_ptr_pairs<PrecisionT, ParamT>)>) {
         constexpr auto elem =
             std::get<tuple_idx>(gate_op_func_ptr_pairs<PrecisionT, ParamT>);
-        if constexpr (Util::lookup(Constant::gate_num_params, elem.first) ==
-                      num_params) {
-            return Util::prepend_to_tuple(
+        if constexpr (Pennylane::Util::lookup(Constant::gate_num_params,
+                                              elem.first) == num_params) {
+            return Pennylane::Util::prepend_to_tuple(
                 elem, gateOpFuncPtrPairsWithNumParamsIter<
                           PrecisionT, ParamT, num_params, tuple_idx + 1>());
         } else {
@@ -244,12 +245,12 @@ constexpr auto gateOpFuncPtrPairsWithNumParamsIter() {
 }
 
 template <typename PrecisionT, typename ParamT, size_t num_params>
-constexpr auto gate_op_func_ptr_with_params = Util::tuple_to_array(
+constexpr auto gate_op_func_ptr_with_params = Pennylane::Util::tuple_to_array(
     gateOpFuncPtrPairsWithNumParamsIter<PrecisionT, ParamT, num_params, 0>());
 
 template <typename PrecisionT, typename ParamT>
-constexpr auto generator_op_func_ptr =
-    Util::tuple_to_array(generator_op_func_ptr_pairs<PrecisionT, PrecisionT>);
+constexpr auto generator_op_func_ptr = Pennylane::Util::tuple_to_array(
+    generator_op_func_ptr_pairs<PrecisionT, PrecisionT>);
 
 template <typename T, typename U, size_t size>
 auto testUniqueness(const std::array<std::pair<T, U>, size> &pairs) {

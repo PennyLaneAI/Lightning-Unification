@@ -19,6 +19,7 @@ constexpr bool BACKEND_FOUND = true;
 namespace {
 using namespace Pennylane::LightningQubit::Measures;
 using namespace Pennylane::LightningQubit::Observables;
+using namespace Pennylane::LightningQubit::Util;
 } // namespace
 /// @endcond
 

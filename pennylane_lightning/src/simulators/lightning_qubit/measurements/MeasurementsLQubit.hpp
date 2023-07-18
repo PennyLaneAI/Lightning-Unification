@@ -152,9 +152,9 @@ class Measurements final
 
         operator_statevector.applyMatrix(matrix, wires);
 
-        ComplexT expected_value = innerProdC(
-            this->_statevector.getData(), operator_statevector.getData(),
-            this->_statevector.getLength());
+        ComplexT expected_value = innerProdC(this->_statevector.getData(),
+                                             operator_statevector.getData(),
+                                             this->_statevector.getLength());
         return std::real(expected_value);
     };
 
@@ -174,9 +174,9 @@ class Measurements final
 
         operator_statevector.applyOperation(operation, wires);
 
-        ComplexT expected_value = innerProdC(
-            this->_statevector.getData(), operator_statevector.getData(),
-            this->_statevector.getLength());
+        ComplexT expected_value = innerProdC(this->_statevector.getData(),
+                                             operator_statevector.getData(),
+                                             this->_statevector.getLength());
         return std::real(expected_value);
     };
 
@@ -208,9 +208,9 @@ class Measurements final
             static_cast<index_type>(this->_statevector.getLength()),
             row_map_ptr, row_map_size, entries_ptr, values_ptr, numNNZ);
 
-        ComplexT expected_value = innerProdC(
-            this->_statevector.getData(), operator_vector.data(),
-            this->_statevector.getLength());
+        ComplexT expected_value =
+            innerProdC(this->_statevector.getData(), operator_vector.data(),
+                       this->_statevector.getLength());
         return std::real(expected_value);
     };
 
@@ -311,8 +311,8 @@ class Measurements final
 
         PrecisionT mean_square =
             std::real(innerProdC(opsv_data, opsv_data, orgsv_len));
-        PrecisionT squared_mean = std::real(innerProdC(
-            this->_statevector.getData(), opsv_data, orgsv_len));
+        PrecisionT squared_mean = std::real(
+            innerProdC(this->_statevector.getData(), opsv_data, orgsv_len));
         squared_mean = static_cast<PrecisionT>(std::pow(squared_mean, 2));
         return (mean_square - squared_mean);
     };
@@ -339,8 +339,8 @@ class Measurements final
 
         PrecisionT mean_square =
             std::real(innerProdC(opsv_data, opsv_data, orgsv_len));
-        PrecisionT squared_mean = std::real(innerProdC(
-            this->_statevector.getData(), opsv_data, orgsv_len));
+        PrecisionT squared_mean = std::real(
+            innerProdC(this->_statevector.getData(), opsv_data, orgsv_len));
         squared_mean = static_cast<PrecisionT>(std::pow(squared_mean, 2));
         return (mean_square - squared_mean);
     };
@@ -461,13 +461,13 @@ class Measurements final
             static_cast<index_type>(this->_statevector.getLength()),
             row_map_ptr, row_map_size, entries_ptr, values_ptr, numNNZ);
 
-        const PrecisionT mean_square = std::real(
-            innerProdC(operator_vector.data(), operator_vector.data(),
-                             operator_vector.size()));
+        const PrecisionT mean_square =
+            std::real(innerProdC(operator_vector.data(), operator_vector.data(),
+                                 operator_vector.size()));
         const auto squared_mean = static_cast<PrecisionT>(
             std::pow(std::real(innerProdC(operator_vector.data(),
-                                                this->_statevector.getData(),
-                                                operator_vector.size())),
+                                          this->_statevector.getData(),
+                                          operator_vector.size())),
                      2));
         return (mean_square - squared_mean);
     };
@@ -595,7 +595,7 @@ class Measurements final
             innerProdC(bra.getData(), bra.getData(), bra.getLength()));
         auto squared_mean = static_cast<PrecisionT>(
             std::pow(std::real(innerProdC(bra.getData(), ket.getData(),
-                                                ket.getLength())),
+                                          ket.getLength())),
                      2));
         return (mean_square - squared_mean);
     }

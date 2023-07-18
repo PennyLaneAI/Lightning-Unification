@@ -22,7 +22,7 @@ TEST_CASE("Utility array and tuples", "[Util][ConstantUtil]") {
         std::pair(3, "Three"), std::pair(4, "Four"),
     };
 
-    REQUIRE(Util::reverse_pairs(test_pairs) ==
+    REQUIRE(reverse_pairs(test_pairs) ==
             std::array{
                 std::pair<std::string_view, int>("Zero", 0),
                 std::pair<std::string_view, int>("One", 1),
@@ -31,7 +31,7 @@ TEST_CASE("Utility array and tuples", "[Util][ConstantUtil]") {
                 std::pair<std::string_view, int>("Four", 4),
             });
 
-    REQUIRE(Util::reverse_pairs(test_pairs) !=
+    REQUIRE(reverse_pairs(test_pairs) !=
             std::array{
                 std::pair<std::string_view, int>("Zero", 0),
                 std::pair<std::string_view, int>("One", 1),
@@ -52,11 +52,11 @@ TEST_CASE("Test utility functions for constants", "[Util][ConstantUtil]") {
             std::pair{"QML"sv, "library"sv},
         };
 
-        REQUIRE(Util::lookup(test_pairs, "Pennylane"sv) == "-"sv);
-        REQUIRE(Util::lookup(test_pairs, "Lightning"sv) == "is"sv);
-        REQUIRE(Util::lookup(test_pairs, "the"sv) == "best"sv);
-        REQUIRE(Util::lookup(test_pairs, "QML"sv) == "library"sv);
-        REQUIRE_THROWS(Util::lookup(test_pairs, "bad"sv));
+        REQUIRE(lookup(test_pairs, "Pennylane"sv) == "-"sv);
+        REQUIRE(lookup(test_pairs, "Lightning"sv) == "is"sv);
+        REQUIRE(lookup(test_pairs, "the"sv) == "best"sv);
+        REQUIRE(lookup(test_pairs, "QML"sv) == "library"sv);
+        REQUIRE_THROWS(lookup(test_pairs, "bad"sv));
     }
 
     SECTION("count_unique") {
@@ -82,7 +82,7 @@ TEST_CASE("Test utility functions for constants", "[Util][ConstantUtil]") {
             std::pair{TestEnum::Two, uint32_t{2U}},
         };
 
-        static_assert(Util::lookup(test_pairs, TestEnum::One) == 1U);
-        static_assert(Util::lookup(test_pairs, TestEnum::Two) == 2U);
+        static_assert(lookup(test_pairs, TestEnum::One) == 1U);
+        static_assert(lookup(test_pairs, TestEnum::Two) == 2U);
     }
 }

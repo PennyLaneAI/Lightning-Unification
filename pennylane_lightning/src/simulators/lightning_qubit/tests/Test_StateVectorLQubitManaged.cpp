@@ -24,13 +24,9 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::Util;
-
 using Pennylane::Util::createRandomStateVectorData;
+using Pennylane::Util::randomUnitary;
 using Pennylane::Util::TestVector;
-
-using Pennylane::LightningQubit::Util::randomUnitary;
-
 std::mt19937_64 re{1337};
 } // namespace
 /// @endcond

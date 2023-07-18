@@ -9,7 +9,7 @@ template <typename T, size_t size1, size_t size2>
 constexpr auto are_mutually_disjoint(const std::array<T, size1> &arr1,
                                      const std::array<T, size2> &arr2) -> bool {
     return std::all_of(arr1.begin(), arr1.end(), [&arr2](const auto &elem) {
-        return !Util::array_has_elem(arr2, elem);
+        return !Pennylane::Util::array_has_elem(arr2, elem);
     });
 }
 

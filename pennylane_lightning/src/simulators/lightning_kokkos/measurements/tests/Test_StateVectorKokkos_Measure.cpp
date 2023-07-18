@@ -218,6 +218,11 @@ TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
 }
 
 TEST_CASE("Test tensor transposition", "[Measure]") {
+
+    // Init Kokkos creating a StateVectorKokkos
+    StateVectorKokkos<double> statevector =
+        createNonTrivialStateCore<StateVectorKokkos<double>>();
+
     // Transposition axes and expected result.
     std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> input = {
         {{0, 1, 2}, {0, 1, 2, 3, 4, 5, 6, 7}},

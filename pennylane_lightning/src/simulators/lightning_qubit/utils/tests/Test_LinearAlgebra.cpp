@@ -5,9 +5,8 @@
 #include <catch2/catch.hpp>
 
 #include "LinearAlgebra.hpp"
-#include "Util.hpp"
-
 #include "TestHelpers.hpp"
+#include "Util.hpp"
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4305)
@@ -15,8 +14,7 @@
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::Util;
-using namespace Pennylane::LightningQubit;
+using namespace Pennylane;
 } // namespace
 /// @endcond
 

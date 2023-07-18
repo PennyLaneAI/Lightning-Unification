@@ -40,8 +40,8 @@
 /// @cond DEV
 
 namespace {
-using Pennylane::Util::lookup;
 using Pennylane::Util::exp2;
+using Pennylane::Util::lookup;
 using Pennylane::Util::PairHash;
 } // namespace
 
@@ -445,8 +445,7 @@ template <typename PrecisionT> class DynamicDispatcher {
 
         if (iter == matrix_kernels_.end()) {
             throw std::invalid_argument(
-                std::string(
-                    lookup(Gates::Constant::matrix_names, mat_op)) +
+                std::string(lookup(Gates::Constant::matrix_names, mat_op)) +
                 " is not registered for the given kernel");
         }
         (iter->second)(data, num_qubits, matrix, wires, inverse);

@@ -253,7 +253,7 @@ class AdjointJacobian final
         }
 
         StateVectorKokkos<PrecisionT> ref_data(jd.getPtrStateVec(),
-            jd.getSizeStateVec());
+                                               jd.getSizeStateVec());
 
         PL_ABORT_IF_NOT(
             jac.size() == tp_size * num_observables,

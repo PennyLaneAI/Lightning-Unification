@@ -169,9 +169,8 @@ template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
             for (size_t term_idx = 0; term_idx < coeffs.size(); term_idx++) {
                 StateVectorT tmp(sv);
                 terms[term_idx]->applyInPlace(tmp);
-                scaleAndAdd(tmp.getLength(),
-                                  ComplexT{coeffs[term_idx], 0.0},
-                                  tmp.getData(), res.data());
+                scaleAndAdd(tmp.getLength(), ComplexT{coeffs[term_idx], 0.0},
+                            tmp.getData(), res.data());
             }
             sv.updateData(res);
         } else if constexpr (std::is_same_v<StateVectorLQubitRaw<PrecisionT>,
@@ -183,9 +182,8 @@ template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
                 StateVectorT tmp(tmp_data_storage.data(),
                                  tmp_data_storage.size());
                 terms[term_idx]->applyInPlace(tmp);
-                scaleAndAdd(tmp.getLength(),
-                                  ComplexT{coeffs[term_idx], 0.0},
-                                  tmp.getData(), res.data());
+                scaleAndAdd(tmp.getLength(), ComplexT{coeffs[term_idx], 0.0},
+                            tmp.getData(), res.data());
             }
             sv.updateData(res);
         }

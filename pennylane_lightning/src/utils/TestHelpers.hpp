@@ -360,8 +360,7 @@ auto createRandomStateVectorComplex(RandomEngine &re, size_t num_qubits)
         res[idx] = ComplexT(dist(re), dist(re));
     }
     auto norm = squaredNorm<PrecisionT>(res);
-    auto sqrt = std::sqrt(norm);
-    scaleVectorComplex(res, ComplexT(1.0, 0.0) / ComplexT(sqrt));
+    scaleVectorComplex(res, ComplexT(1.0, 0.0) / ComplexT(std::sqrt(norm)));
     return res;
 }
 
@@ -426,7 +425,7 @@ auto createNonTrivialStateCore(size_t num_qubits = 3) -> StateVectorT {
 
     size_t data_size = Util::exp2(num_qubits);
 
-    std::vector<ComplexT> arr(data_size, {0, 0});
+    std::vector<ComplexT> arr(data_size, ComplexT(0, 0));
     arr[0] = ComplexT(1, 0);
     StateVectorT Measured_StateVector(arr.data(), data_size);
 

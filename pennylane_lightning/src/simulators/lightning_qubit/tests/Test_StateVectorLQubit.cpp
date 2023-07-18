@@ -24,10 +24,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::Util;
-
-using Pennylane::LightningQubit::Util::randomUnitary;
-
+using Pennylane::Util::randomUnitary;
 std::mt19937_64 re{1337};
 } // namespace
 /// @endcond
@@ -174,7 +171,8 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorLQubit::applyOperations",
         PL_REQUIRE_THROWS_MATCHES(
             state_vector.applyOperations({"PauliX", "PauliY"}, {{0}},
                                          {false, false}),
-            LightningException, "must all be equal"); // invalid wires
+            LightningException,
+            "must all be equal"); // invalid wires
         PL_REQUIRE_THROWS_MATCHES(
             state_vector.applyOperations({"PauliX", "PauliY"}, {{0}, {1}},
                                          {false}),
