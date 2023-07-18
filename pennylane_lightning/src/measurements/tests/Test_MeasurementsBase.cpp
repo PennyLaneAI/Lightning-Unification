@@ -36,7 +36,7 @@ using namespace Pennylane::LightningKokkos::Measures;
 using namespace Pennylane::LightningKokkos::Observables;
 using namespace Pennylane::LightningKokkos::Util;
 } // namespace
-/// @endcond
+  /// @endcond
 
 #else
 constexpr bool BACKEND_FOUND = false;
@@ -175,7 +175,8 @@ template <typename TypeList> void testHermitianObsExpval() {
                 0.644217687237691, 0.4794255386042027, 0.29552020666133955};
 
             MatrixT Hermitian_matrix{
-                ComplexT(real_term), ComplexT(0, imag_term), ComplexT(0, -imag_term), ComplexT(real_term)};
+                ComplexT(real_term), ComplexT(0, imag_term),
+                ComplexT(0, -imag_term), ComplexT(real_term)};
 
             for (size_t ind_wires = 0; ind_wires < wires_list.size();
                  ind_wires++) {
@@ -196,10 +197,10 @@ template <typename TypeList> void testHermitianObsExpval() {
                 0.5874490024807637, 0.44170554255359035, 0.3764821318486682};
 
             MatrixT Hermitian_matrix(16);
-            Hermitian_matrix[0] =  ComplexT(real_term);
-            Hermitian_matrix[1] =  ComplexT(0, imag_term);
-            Hermitian_matrix[4] =  ComplexT(0, -imag_term);
-            Hermitian_matrix[5] =  ComplexT(real_term);
+            Hermitian_matrix[0] = ComplexT(real_term);
+            Hermitian_matrix[1] = ComplexT(0, imag_term);
+            Hermitian_matrix[4] = ComplexT(0, -imag_term);
+            Hermitian_matrix[5] = ComplexT(real_term);
             Hermitian_matrix[10] = ComplexT(1.0, 0);
             Hermitian_matrix[15] = ComplexT(1.0, 0);
 
@@ -293,7 +294,8 @@ template <typename TypeList> void testHermitianObsVar() {
                 0.5849835714501204, 0.7701511529340699, 0.9126678074548389};
 
             MatrixT Hermitian_matrix{
-                ComplexT(real_term), ComplexT(0, imag_term), ComplexT(0, -imag_term), ComplexT(real_term)};
+                ComplexT(real_term), ComplexT(0, imag_term),
+                ComplexT(0, -imag_term), ComplexT(real_term)};
 
             for (size_t ind_wires = 0; ind_wires < wires_list.size();
                  ind_wires++) {
@@ -314,10 +316,10 @@ template <typename TypeList> void testHermitianObsVar() {
                 0.6549036423585175, 0.8048961865516002, 0.8582611741038356};
 
             MatrixT Hermitian_matrix(16);
-            Hermitian_matrix[0]  = ComplexT(real_term);
-            Hermitian_matrix[1]  = ComplexT(0, imag_term);
-            Hermitian_matrix[4]  = ComplexT(0, -imag_term);
-            Hermitian_matrix[5]  = ComplexT(real_term);
+            Hermitian_matrix[0] = ComplexT(real_term);
+            Hermitian_matrix[1] = ComplexT(0, imag_term);
+            Hermitian_matrix[4] = ComplexT(0, -imag_term);
+            Hermitian_matrix[5] = ComplexT(real_term);
             Hermitian_matrix[10] = ComplexT(1.0, 0);
             Hermitian_matrix[15] = ComplexT(1.0, 0);
 

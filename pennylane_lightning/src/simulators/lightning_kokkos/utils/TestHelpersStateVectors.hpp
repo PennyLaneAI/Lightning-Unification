@@ -24,6 +24,7 @@ template <> struct StateVectorToName<StateVectorKokkos<double>> {
     constexpr static auto name = "StateVectorKokkos<double>";
 };
 
-using TestStateVectorBackends = Pennylane::Util::TypeList<
-    StateVectorKokkos<float>, StateVectorKokkos<double>, void>;
+using TestStateVectorBackends =
+    Pennylane::Util::TypeList<StateVectorKokkos<float>,
+                              StateVectorKokkos<double>, void>;
 } // namespace Pennylane::LightningKokkos::Util
