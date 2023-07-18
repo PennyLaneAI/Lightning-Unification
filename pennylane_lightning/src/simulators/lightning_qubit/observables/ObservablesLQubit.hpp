@@ -70,9 +70,9 @@ class NamedObs final : public NamedObsBase<StateVectorT> {
         using Pennylane::LightningQubit::Gates::Constant::gate_names;
         using Pennylane::LightningQubit::Gates::Constant::gate_num_params;
         using Pennylane::LightningQubit::Gates::Constant::gate_wires;
-        using Pennylane::LightningQubit::Util::lookup;
+        using Pennylane::Util::lookup;
 
-        const auto gate_op = lookup(Util::reverse_pairs(gate_names),
+        const auto gate_op = lookup(Pennylane::Util::reverse_pairs(gate_names),
                                     std::string_view{this->obs_name_});
         PL_ASSERT(lookup(gate_wires, gate_op) == this->wires_.size());
         PL_ASSERT(lookup(gate_num_params, gate_op) == this->params_.size());
@@ -151,7 +151,7 @@ class TensorProdObs final : public TensorProdObsBase<StateVectorT> {
 
 /// @cond DEV
 namespace detail {
-using Pennylane::LightningQubit::Util::scaleAndAdd;
+using Pennylane::Util::scaleAndAdd;
 
 // Default implementation
 template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
@@ -169,7 +169,7 @@ template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
             for (size_t term_idx = 0; term_idx < coeffs.size(); term_idx++) {
                 StateVectorT tmp(sv);
                 terms[term_idx]->applyInPlace(tmp);
-                Util::scaleAndAdd(tmp.getLength(),
+                scaleAndAdd(tmp.getLength(),
                                   ComplexT{coeffs[term_idx], 0.0},
                                   tmp.getData(), res.data());
             }
@@ -183,7 +183,7 @@ template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
                 StateVectorT tmp(tmp_data_storage.data(),
                                  tmp_data_storage.size());
                 terms[term_idx]->applyInPlace(tmp);
-                Util::scaleAndAdd(tmp.getLength(),
+                scaleAndAdd(tmp.getLength(),
                                   ComplexT{coeffs[term_idx], 0.0},
                                   tmp.getData(), res.data());
             }

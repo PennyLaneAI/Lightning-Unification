@@ -17,20 +17,20 @@
  */
 #pragma once
 
+#include <cassert>
+#include <span>
+
 #include "AdjointJacobianBase.hpp"
 #include "BitUtil.hpp" // log2PerfectPower
 #include "JacobianData.hpp"
 #include "LinearAlgebra.hpp" // innerProdC
 #include "StateVectorLQubitManaged.hpp"
 
-#include <cassert>
-#include <span>
-
 // using namespace Pennylane;
 /// @cond DEV
 namespace {
 using namespace Pennylane::Algorithms;
-using Pennylane::LightningQubit::Util::innerProdC;
+using Pennylane::Util::innerProdC;
 using Pennylane::Util::log2PerfectPower;
 } // namespace
 /// @endcond
