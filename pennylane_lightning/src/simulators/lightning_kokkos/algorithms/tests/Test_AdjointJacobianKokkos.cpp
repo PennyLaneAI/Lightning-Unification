@@ -10,7 +10,7 @@
 
 #include <catch2/catch.hpp>
 
-#include "AdjointDiffKokkos.hpp"
+#include "AdjointJacobianKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"
 #include "Util.hpp"

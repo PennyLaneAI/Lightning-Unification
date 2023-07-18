@@ -1,4 +1,4 @@
-#include "AdjointDiffKokkos.hpp"
+#include "AdjointJacobianKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
 using namespace Pennylane::LightningKokkos;

@@ -222,6 +222,65 @@ class AdjointJacobian final
      * of parametric gates.
      *
      * For the statevector data associated with `psi` of length `num_elements`,
+     * we make internal copies, one per required observable. The `operations`
+     * will be applied to the internal statevector copies, with the operation
+     * indices participating in the gradient calculations given in
+     * `trainableParams`, and the overall number of parameters for the gradient
+     * calculation provided within `num_params`. The resulting row-major ordered
+     * `jac` matrix representation will be of size `jd.getSizeStateVec() *
+     * jd.getObservables().size()`. OpenMP is used to enable independent
+     * operations to be offloaded to threads.
+     *
+     * @param jac Preallocated vector for Jacobian data results.
+     * @param jd JacobianData represents the QuantumTape to differentiate.
+     * @param apply_operations Indicate whether to apply operations to tape.psi
+     * prior to calculation.
+     */
+    void adjointJacobian(std::span<PrecisionT> jac,
+                         const JacobianData<StateVectorT> &jd,
+                         bool apply_operations = false) {
+        const OpsData<StateVectorT> &ops = jd.getOperations();
+        // const std::vector<std::string> &ops_name = ops.getOpsName();
+
+        const auto &obs = jd.getObservables();
+        const size_t num_observables = obs.size();
+
+        // We can assume the trainable params are sorted (from Python)
+        const std::vector<size_t> &tp = jd.getTrainableParams();
+        const size_t tp_size = tp.size();
+        // const size_t num_param_ops = ops.getNumParOps();
+
+        if (!jd.hasTrainableParams()) {
+            return;
+        }
+
+        StateVectorKokkos<PrecisionT> ref_data(jd.getPtrStateVec(),
+            jd.getSizeStateVec());
+
+        PL_ABORT_IF_NOT(
+            jac.size() == tp_size * num_observables,
+            "The size of preallocated jacobian must be same as "
+            "the number of trainable parameters times the number of "
+            "observables provided.");
+
+        // jac[obs_index][param_index] = -2 * scaling_coeff *
+        std::vector<std::vector<PrecisionT>> jac_data(
+            num_observables, std::vector<PrecisionT>(tp_size, 0.0));
+
+        adjointJacobian(ref_data, jac_data, obs, ops, tp, apply_operations);
+
+        for (size_t obs_idx = 0; obs_idx < num_observables; obs_idx++) {
+            const size_t mat_row_idx = obs_idx * tp_size;
+            for (size_t op_idx = 0; op_idx < tp_size; op_idx++) {
+                jac[mat_row_idx + op_idx] = jac_data[obs_idx][op_idx];
+            }
+        }
+    }
+    /**
+     * @brief Calculates the Jacobian for the statevector for the selected set
+     * of parametric gates.
+     *
+     * For the statevector data associated with `psi` of length `num_elements`,
      * we make internal copies to a `%StateVectorT` object, with
      * one per required observable. The `operations` will be applied to the
      * internal statevector copies, with the operation indices participating in

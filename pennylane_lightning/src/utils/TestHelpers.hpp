@@ -372,11 +372,9 @@ auto createRandomStateVectorComplex(RandomEngine &re, size_t num_qubits)
  * Note that the wire index starts from the left.
  */
 template <typename PrecisionT, typename ComplexT = std::complex<PrecisionT>>
-auto createProductState(std::string_view str)
-    -> TestVector<ComplexT> {
+auto createProductState(std::string_view str) -> TestVector<ComplexT> {
     using Pennylane::Util::INVSQRT2;
-    TestVector<ComplexT> st(
-        getBestAllocator<ComplexT>());
+    TestVector<ComplexT> st(getBestAllocator<ComplexT>());
     st.resize(1U << str.length());
 
     std::vector<PrecisionT> zero{1.0, 0.0};

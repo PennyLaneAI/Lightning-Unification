@@ -46,8 +46,7 @@ constexpr bool BACKEND_FOUND = true;
 namespace {
 using namespace Pennylane::LightningKokkos::Util;
 } // namespace
-/// @endcond
-
+  /// @endcond
 
 #else
 constexpr bool BACKEND_FOUND = false;
@@ -252,13 +251,15 @@ template <typename TypeList> void testTensorProdObsBase() {
             };
 
             SECTION("Test using |1+0>") {
-                VectorT st_data = createProductState<PrecisionT, ComplexT>("1+0");
+                VectorT st_data =
+                    createProductState<PrecisionT, ComplexT>("1+0");
 
                 StateVectorT state_vector(st_data.data(), st_data.size());
 
                 obs.applyInPlace(state_vector);
 
-                VectorT expected = createProductState<PrecisionT, ComplexT>("0+1");
+                VectorT expected =
+                    createProductState<PrecisionT, ComplexT>("0+1");
 
 #if _ENABLE_PLKOKKOS == 1
                 REQUIRE(isApproxEqual(state_vector.getData().data(),
@@ -272,13 +273,15 @@ template <typename TypeList> void testTensorProdObsBase() {
             }
 
             SECTION("Test using |+-01>") {
-                VectorT st_data = createProductState<PrecisionT, ComplexT>("+-01");
+                VectorT st_data =
+                    createProductState<PrecisionT, ComplexT>("+-01");
 
                 StateVectorT state_vector(st_data.data(), st_data.size());
 
                 obs.applyInPlace(state_vector);
 
-                VectorT expected = createProductState<PrecisionT, ComplexT>("+-11");
+                VectorT expected =
+                    createProductState<PrecisionT, ComplexT>("+-11");
 
 #if _ENABLE_PLKOKKOS == 1
                 REQUIRE(isApproxEqual(state_vector.getData().data(),

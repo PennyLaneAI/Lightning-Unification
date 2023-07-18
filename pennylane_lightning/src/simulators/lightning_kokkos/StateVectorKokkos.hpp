@@ -524,6 +524,20 @@ class StateVectorKokkos final
      *
      * @param num_qubits Number of qubits
      */
+    StateVectorKokkos(const ComplexT *hostdata_, size_t length,
+                      const Kokkos::InitializationSettings &kokkos_args = {})
+        : StateVectorKokkos(log2(length), kokkos_args) {
+        PL_ABORT_IF_NOT(isPerfectPowerOf2(length),
+                        "The size of provided data must be a power of 2.");
+        std::vector<ComplexT> hostdata_copy(hostdata_, hostdata_ + length);
+        HostToDevice(hostdata_copy.data(), length);
+    }
+
+    /**
+     * @brief Create a new state vector from data on the host.
+     *
+     * @param num_qubits Number of qubits
+     */
     StateVectorKokkos(std::vector<ComplexT> hostdata_,
                       const Kokkos::InitializationSettings &kokkos_args = {})
         : StateVectorKokkos(hostdata_.data(), hostdata_.size(), kokkos_args) {}

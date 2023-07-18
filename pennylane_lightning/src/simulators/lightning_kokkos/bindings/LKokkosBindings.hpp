@@ -17,7 +17,7 @@
 #include <variant>
 #include <vector>
 
-#include "AdjointDiffKokkos.hpp"
+#include "AdjointJacobianKokkos.hpp"
 #include "Error.hpp"         // LightningException
 #include "GetConfigInfo.hpp" // Kokkos configuration info
 #include "MeasurementsKokkos.hpp"
