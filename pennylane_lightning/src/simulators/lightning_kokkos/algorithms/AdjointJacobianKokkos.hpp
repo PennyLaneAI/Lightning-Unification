@@ -240,7 +240,6 @@ class AdjointJacobian final
                          const JacobianData<StateVectorT> &jd,
                          bool apply_operations = false) {
         const OpsData<StateVectorT> &ops = jd.getOperations();
-        // const std::vector<std::string> &ops_name = ops.getOpsName();
 
         const auto &obs = jd.getObservables();
         const size_t num_observables = obs.size();
@@ -248,7 +247,6 @@ class AdjointJacobian final
         // We can assume the trainable params are sorted (from Python)
         const std::vector<size_t> &tp = jd.getTrainableParams();
         const size_t tp_size = tp.size();
-        // const size_t num_param_ops = ops.getNumParOps();
 
         if (!jd.hasTrainableParams()) {
             return;
@@ -263,7 +261,6 @@ class AdjointJacobian final
             "the number of trainable parameters times the number of "
             "observables provided.");
 
-        // jac[obs_index][param_index] = -2 * scaling_coeff *
         std::vector<std::vector<PrecisionT>> jac_data(
             num_observables, std::vector<PrecisionT>(tp_size, 0.0));
 
