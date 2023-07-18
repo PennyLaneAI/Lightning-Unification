@@ -22,8 +22,6 @@ using namespace Pennylane::Util;
 
 #ifdef _ENABLE_PLQUBIT
 constexpr bool BACKEND_FOUND = true;
-constexpr bool PLQUBIT_FOUND = true;
-constexpr bool LKOKKOS_FOUND = false;
 
 #include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
 #include "TestHelpersWires.hpp"
@@ -36,8 +34,6 @@ using namespace Pennylane::LightningQubit::Util;
 
 #elif _ENABLE_PLKOKKOS == 1
 constexpr bool BACKEND_FOUND = true;
-constexpr bool PLQUBIT_FOUND = false;
-constexpr bool LKOKKOS_FOUND = true;
 
 #include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
 #include "TestHelpersWires.hpp"

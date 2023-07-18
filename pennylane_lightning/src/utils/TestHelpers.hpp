@@ -371,12 +371,12 @@ auto createRandomStateVectorComplex(RandomEngine &re, size_t num_qubits)
  * Example: createProductState("+01") will produce |+01> state.
  * Note that the wire index starts from the left.
  */
-template <typename PrecisionT>
+template <typename PrecisionT, typename ComplexT = std::complex<PrecisionT>>
 auto createProductState(std::string_view str)
-    -> TestVector<std::complex<PrecisionT>> {
+    -> TestVector<ComplexT> {
     using Pennylane::Util::INVSQRT2;
-    TestVector<std::complex<PrecisionT>> st(
-        getBestAllocator<std::complex<PrecisionT>>());
+    TestVector<ComplexT> st(
+        getBestAllocator<ComplexT>());
     st.resize(1U << str.length());
 
     std::vector<PrecisionT> zero{1.0, 0.0};
