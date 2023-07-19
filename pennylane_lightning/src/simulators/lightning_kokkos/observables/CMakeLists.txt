@@ -10,12 +10,13 @@ target_link_libraries(${PL_BACKEND}_observables PRIVATE   lightning_compile_opti
                                                             lightning_external_libs
                                                             )
 
-target_link_libraries(${PL_BACKEND}_observables PUBLIC    lightning_utils
-                                                            ${PL_BACKEND}_utils
-                                                            ${PL_BACKEND}_gates
-                                                            lightning_observables
-                                                            ${PL_BACKEND}
-                                                            )
+target_link_libraries(${PL_BACKEND}_observables PUBLIC  lightning_utils
+                                                        lightning_gates
+                                                        lightning_observables
+                                                        ${PL_BACKEND}_utils
+                                                        ${PL_BACKEND}_gates
+                                                        ${PL_BACKEND}
+                                                        )
 
 set_property(TARGET ${PL_BACKEND}_observables PROPERTY POSITION_INDEPENDENT_CODE ON)
 
