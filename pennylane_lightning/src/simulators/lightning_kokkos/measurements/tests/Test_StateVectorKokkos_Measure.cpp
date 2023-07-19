@@ -15,7 +15,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningKokkos::Measures; // Measurements
-using Pennylane::Util::createNonTrivialStateCore;
+using Pennylane::Util::createNonTrivialState;
 }; // namespace
 /// @endcond
 
@@ -26,7 +26,8 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values", "[Measurements]",
     using ComplexT = typename StateVectorT::ComplexT;
 
     // Defining the statevector that will be measured.
-    StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
+    auto statevector_data = createNonTrivialState<StateVectorT>();
+    StateVectorT statevector(statevector_data.data(), statevector_data.size());
 
     // Initializing the Measurements class.
     // This object attaches to the statevector allowing several measures.
@@ -103,7 +104,8 @@ TEMPLATE_PRODUCT_TEST_CASE("Variances", "[Measurements]", (StateVectorKokkos),
     using ComplexT = typename StateVectorT::ComplexT;
 
     // Defining the State Vector that will be measured.
-    StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
+    auto statevector_data = createNonTrivialState<StateVectorT>();
+    StateVectorT statevector(statevector_data.data(), statevector_data.size());
 
     // Initializing the measurements class.
     // This object attaches to the statevector allowing several measurements.
@@ -204,8 +206,10 @@ TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
 
     // Defining the State Vector that will be measured.
     const std::size_t num_qubits = 3;
-    auto measure_sv =
-        createNonTrivialStateCore<StateVectorKokkos<TestType>>(num_qubits);
+    auto statevector_data =
+        createNonTrivialState<StateVectorKokkos<TestType>>(num_qubits);
+    StateVectorKokkos<TestType> measure_sv(statevector_data.data(),
+                                           statevector_data.size());
 
     SECTION("Looping over different wire configurations:") {
         auto m = Measurements(measure_sv);
@@ -220,8 +224,9 @@ TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
 TEST_CASE("Test tensor transposition", "[Measure]") {
 
     // Init Kokkos creating a StateVectorKokkos
-    StateVectorKokkos<double> statevector =
-        createNonTrivialStateCore<StateVectorKokkos<double>>();
+    auto statevector_data = createNonTrivialState<StateVectorKokkos<double>>();
+    StateVectorKokkos<double> statevector(statevector_data.data(),
+                                          statevector_data.size());
 
     // Transposition axes and expected result.
     std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> input = {

@@ -80,7 +80,9 @@ template <typename TypeList> void testProbabilities() {
                      {{2}, {0.9563339, 0.0436661}}};
 
         // Defining the Statevector that will be measured.
-        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
+        auto statevector_data = createNonTrivialState<StateVectorT>();
+        StateVectorT statevector(statevector_data.data(),
+                                 statevector_data.size());
 
         // Initializing the measurements class.
         // This object attaches to the statevector allowing several measures.
@@ -112,7 +114,9 @@ template <typename TypeList> void testNamedObsExpval() {
         using PrecisionT = typename StateVectorT::PrecisionT;
 
         // Defining the State Vector that will be measured.
-        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
+        auto statevector_data = createNonTrivialState<StateVectorT>();
+        StateVectorT statevector(statevector_data.data(),
+                                 statevector_data.size());
 
         // Initializing the measures class.
         // This object attaches to the statevector allowing several measures.
@@ -158,7 +162,9 @@ template <typename TypeList> void testHermitianObsExpval() {
         using MatrixT = std::vector<ComplexT>;
 
         // Defining the State Vector that will be measured.
-        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
+        auto statevector_data = createNonTrivialState<StateVectorT>();
+        StateVectorT statevector(statevector_data.data(),
+                                 statevector_data.size());
 
         // Initializing the measures class.
         // This object attaches to the statevector allowing several measures.
@@ -231,7 +237,9 @@ template <typename TypeList> void testNamedObsVar() {
         using PrecisionT = typename StateVectorT::PrecisionT;
 
         // Defining the State Vector that will be measured.
-        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
+        auto statevector_data = createNonTrivialState<StateVectorT>();
+        StateVectorT statevector(statevector_data.data(),
+                                 statevector_data.size());
 
         // Initializing the measures class.
         // This object attaches to the statevector allowing several measures.
@@ -277,7 +285,9 @@ template <typename TypeList> void testHermitianObsVar() {
         using MatrixT = std::vector<ComplexT>;
 
         // Defining the State Vector that will be measured.
-        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
+        auto statevector_data = createNonTrivialState<StateVectorT>();
+        StateVectorT statevector(statevector_data.data(),
+                                 statevector_data.size());
 
         // Initializing the measures class.
         // This object attaches to the statevector allowing several measures.
@@ -358,7 +368,9 @@ template <typename TypeList> void testSamples() {
             1U << 30U, 1U << 31U};
 
         // Defining the State Vector that will be measured.
-        StateVectorT statevector = createNonTrivialStateCore<StateVectorT>();
+        auto statevector_data = createNonTrivialState<StateVectorT>();
+        StateVectorT statevector(statevector_data.data(),
+                                 statevector_data.size());
 
         // Initializing the measurements class.
         // This object attaches to the statevector allowing several
