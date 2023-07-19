@@ -35,7 +35,7 @@
 /// @cond DEV
 namespace {
 using Pennylane::Gates::GateOperation;
-}// namespace
+} // namespace
 /// @endcond
 
 namespace Pennylane::LightningQubit::Gates {

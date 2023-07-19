@@ -7,7 +7,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::Gates;
-}// namespace
+} // namespace
 /// @endcond
 
 namespace Pennylane::LightningQubit::Gates {
