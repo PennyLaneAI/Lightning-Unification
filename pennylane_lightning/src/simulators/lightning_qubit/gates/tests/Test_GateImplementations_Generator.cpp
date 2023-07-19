@@ -1,11 +1,3 @@
-#include "ConstantUtil.hpp" // lookup, array_has_elem, prepend_to_tuple, tuple_to_array
-#include "DynamicDispatcher.hpp"
-#include "TestHelpers.hpp"
-#include "TestHelpersWires.hpp"
-#include "Util.hpp"
-
-#include <catch2/catch.hpp>
-
 #include <algorithm>
 #include <complex>
 #include <iostream>
@@ -15,6 +7,14 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#include <catch2/catch.hpp>
+
+#include "ConstantUtil.hpp" // lookup, array_has_elem, prepend_to_tuple, tuple_to_array
+#include "DynamicDispatcher.hpp"
+#include "TestHelpers.hpp"
+#include "TestHelpersWires.hpp"
+#include "Util.hpp"
 
 /**
  * @file Test_GateImplementations_Generator.cpp
@@ -29,8 +29,8 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::LightningQubit::Util;
 using namespace Pennylane::LightningQubit::Gates;
+using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 

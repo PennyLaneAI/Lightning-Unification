@@ -1,15 +1,16 @@
+#include <catch2/catch.hpp>
+
 #include "ConstantUtil.hpp"  // array_has_elem
 #include "LinearAlgebra.hpp" // randomUnitary
 #include "TestHelpers.hpp"   // PrecisionToName
 #include "TestHelpersWires.hpp"
+#include "TestKernels.hpp"
 #include "Util.hpp"
-
-#include <catch2/catch.hpp>
 
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::LightningQubit::Util;
+using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 

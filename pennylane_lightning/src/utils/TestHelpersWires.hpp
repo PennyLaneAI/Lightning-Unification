@@ -30,16 +30,16 @@
 #include "GateOperation.hpp"
 #include "Macros.hpp"
 
-namespace Pennylane::LightningKokkos::Util {
+namespace Pennylane::Util {
 
-inline auto createWires(Gates::GateOperation op, size_t num_qubits)
+inline auto createWires(Pennylane::Gates::GateOperation op, size_t num_qubits)
     -> std::vector<size_t> {
-    if (array_has_elem(Gates::Constant::multi_qubit_gates, op)) {
+    if (array_has_elem(Pennylane::Gates::Constant::multi_qubit_gates, op)) {
         std::vector<size_t> wires(num_qubits);
         std::iota(wires.begin(), wires.end(), 0);
         return wires;
     }
-    switch (lookup(Gates::Constant::gate_wires, op)) {
+    switch (lookup(Pennylane::Gates::Constant::gate_wires, op)) {
     case 1:
         return {0};
     case 2:
@@ -55,8 +55,8 @@ inline auto createWires(Gates::GateOperation op, size_t num_qubits)
 }
 
 template <class PrecisionT>
-auto createParams(Gates::GateOperation op) -> std::vector<PrecisionT> {
-    switch (lookup(Gates::Constant::gate_num_params, op)) {
+auto createParams(Pennylane::Gates::GateOperation op) -> std::vector<PrecisionT> {
+    switch (lookup(Pennylane::Gates::Constant::gate_num_params, op)) {
     case 0:
         return {};
     case 1:
@@ -168,9 +168,9 @@ class PermutationGenerator : public WiresGenerator {
  * @param gate_op Gate operation
  * @param order Whether the ordering matters (if true, permutation is used)
  */
-auto inline createAllWires(size_t n_qubits, Gates::GateOperation gate_op,
+auto inline createAllWires(size_t n_qubits, Pennylane::Gates::GateOperation gate_op,
                            bool order) -> std::vector<std::vector<size_t>> {
-    if (array_has_elem(Gates::Constant::multi_qubit_gates, gate_op)) {
+    if (array_has_elem(Pennylane::Gates::Constant::multi_qubit_gates, gate_op)) {
         // make all possible 2^N permutations
         std::vector<std::vector<size_t>> res;
         res.reserve((1U << n_qubits) - 1);
@@ -188,11 +188,11 @@ auto inline createAllWires(size_t n_qubits, Gates::GateOperation gate_op,
         }
         return res;
     } // else
-    const size_t n_wires = lookup(Gates::Constant::gate_wires, gate_op);
+    const size_t n_wires = lookup(Pennylane::Gates::Constant::gate_wires, gate_op);
     if (order) {
         return PermutationGenerator(n_qubits, n_wires).all_perms();
     } // else
     return CombinationGenerator(n_qubits, n_wires).all_perms();
 }
 
-} // namespace Pennylane::LightningKokkos::Util
+} // namespace Pennylane::Util

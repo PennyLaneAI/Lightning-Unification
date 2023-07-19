@@ -11,8 +11,8 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::LightningQubit::Util;
 using namespace Pennylane::LightningQubit::KernelMap;
+using namespace Pennylane::Util;
 
 using Catch::Matchers::Contains;
 using Pennylane::Util::for_each_enum;

@@ -25,7 +25,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::LightningQubit::Util;
+using namespace Pennylane::Util;
 using namespace Pennylane::LightningQubit::Gates;
 } // namespace
 /// @endcond

@@ -1,12 +1,3 @@
-#include "CPUMemoryModel.hpp"
-#include "TestHelpers.hpp" // PrecisionToName, createProductState
-#include "TestHelpersWires.hpp"
-#include "Util.hpp" // INVSQRT2
-#include "cpu_kernels/GateImplementationsLM.hpp"
-#include "cpu_kernels/GateImplementationsPI.hpp"
-
-#include <catch2/catch.hpp>
-
 #include <algorithm>
 #include <complex>
 #include <iostream>
@@ -14,6 +5,14 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#include <catch2/catch.hpp>
+
+#include "CPUMemoryModel.hpp"
+#include "TestHelpers.hpp" // PrecisionToName, createProductState
+#include "TestHelpersWires.hpp"
+#include "TestKernels.hpp"
+#include "Util.hpp" // INVSQRT2
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4305)
@@ -27,9 +26,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::LightningQubit::Util;
-
-using Pennylane::Util::INVSQRT2;
+using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 
