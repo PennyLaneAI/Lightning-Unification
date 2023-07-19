@@ -142,7 +142,8 @@ void testGeneratorEqualsGateDerivativeForKernel(
 }
 
 template <typename PrecisionT, class RandomEngine>
-void testAllGeneratorsForKernel(RandomEngine &re, Pennylane::Gates::KernelType kernel) {
+void testAllGeneratorsForKernel(RandomEngine &re,
+                                Pennylane::Gates::KernelType kernel) {
     const auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
     const auto all_gntr_ops = dispatcher.registeredGeneratorsForKernel(kernel);
 

@@ -32,7 +32,7 @@
 #include <complex>
 #include <vector>
 
-namespace{
+namespace {
 using Pennylane::Gates::GateOperation;
 }
 

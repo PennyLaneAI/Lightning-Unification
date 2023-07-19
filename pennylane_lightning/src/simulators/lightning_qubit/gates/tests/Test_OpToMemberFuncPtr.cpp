@@ -28,7 +28,8 @@ template <typename EnumClass> constexpr auto allGateOps() {
 template <class PrecisionT, class ParamT, class GateImplemenation,
           uint32_t gate_idx>
 constexpr bool testAllGatesImplementedIter() {
-    if constexpr (gate_idx < static_cast<uint32_t>(Pennylane::Gates::GateOperation::END)) {
+    if constexpr (gate_idx <
+                  static_cast<uint32_t>(Pennylane::Gates::GateOperation::END)) {
         constexpr auto gate_op = static_cast<GateOperation>(gate_idx);
         static_cast<void>(
             GateOpToMemberFuncPtr<PrecisionT, ParamT, GateImplemenation,

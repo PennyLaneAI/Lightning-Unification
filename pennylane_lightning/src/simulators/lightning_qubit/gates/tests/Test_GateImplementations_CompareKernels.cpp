@@ -147,7 +147,8 @@ TEMPLATE_TEST_CASE("Test all kernels give the same results for gates",
     std::mt19937 re{1337};
     for_each_enum<GateOperation>([&](GateOperation gate_op) {
         const size_t min_num_qubits = [=] {
-            if (array_has_elem(Pennylane::Gates::Constant::multi_qubit_gates, gate_op)) {
+            if (array_has_elem(Pennylane::Gates::Constant::multi_qubit_gates,
+                               gate_op)) {
                 return size_t{1};
             }
             return lookup(Pennylane::Gates::Constant::gate_wires, gate_op);

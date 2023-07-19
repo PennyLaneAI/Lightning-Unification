@@ -4,7 +4,7 @@
 #include "GateOperation.hpp"
 #include "Util.hpp"
 
-namespace{
+namespace {
 using namespace Pennylane::Gates;
 }
 

@@ -24,10 +24,10 @@
 #include <complex>
 #include <vector>
 
-namespace{
+namespace {
 using namespace Pennylane::Gates;
 using Pennylane::Gates::GateOperation;
-}
+} // namespace
 
 namespace Pennylane::LightningQubit::Gates {
 

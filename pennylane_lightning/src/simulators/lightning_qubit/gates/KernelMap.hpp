@@ -40,9 +40,9 @@
 /// @cond DEV
 namespace {
 using Pennylane::Gates::KernelType;
+using Pennylane::Util::CPUMemoryModel;
 using Pennylane::Util::for_each_enum;
 using Pennylane::Util::PairHash;
-using Pennylane::Util::CPUMemoryModel;
 using Pennylane::Util::Threading;
 } // namespace
 /// @endcond
@@ -126,8 +126,8 @@ class PriorityDispatchSet {
     [[nodiscard]] bool
     conflict(uint32_t test_priority,
              const Util::IntegerInterval<size_t> &test_interval) const {
-        const auto test_elem = DispatchElement{KernelType::None,
-                                               test_priority, test_interval};
+        const auto test_elem =
+            DispatchElement{KernelType::None, test_priority, test_interval};
         const auto [b, e] =
             std::equal_range(ordered_vec_.begin(), ordered_vec_.end(),
                              test_elem, higher_priority);
@@ -226,14 +226,12 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
     OperationKernelMap()
         : allowed_kernels_{
               // LCOV_EXCL_START
-              {CPUMemoryModel::Unaligned,
-               {KernelType::LM, KernelType::PI}},
+              {CPUMemoryModel::Unaligned, {KernelType::LM, KernelType::PI}},
               {CPUMemoryModel::Aligned256,
-               {KernelType::LM, KernelType::PI,
-                KernelType::AVX2}},
+               {KernelType::LM, KernelType::PI, KernelType::AVX2}},
               {CPUMemoryModel::Aligned512,
-               {KernelType::LM, KernelType::PI,
-                KernelType::AVX2, KernelType::AVX512}},
+               {KernelType::LM, KernelType::PI, KernelType::AVX2,
+                KernelType::AVX512}},
               // LCOV_EXCL_STOP
           } {}
 

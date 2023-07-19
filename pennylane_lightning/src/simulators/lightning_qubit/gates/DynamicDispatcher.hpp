@@ -96,16 +96,15 @@ template <typename PrecisionT> class DynamicDispatcher {
     std::unordered_map<std::string, GateOperation> str_to_gates_;
     std::unordered_map<std::string, GeneratorOperation> str_to_gntrs_;
 
-    std::unordered_map<std::pair<GateOperation, KernelType>,
-                       GateFunc, PairHash>
+    std::unordered_map<std::pair<GateOperation, KernelType>, GateFunc, PairHash>
         gate_kernels_;
 
-    std::unordered_map<std::pair<GeneratorOperation, KernelType>,
-                       GeneratorFunc, PairHash>
+    std::unordered_map<std::pair<GeneratorOperation, KernelType>, GeneratorFunc,
+                       PairHash>
         generator_kernels_;
 
-    std::unordered_map<std::pair<MatrixOperation, KernelType>,
-                       MatrixFunc, PairHash>
+    std::unordered_map<std::pair<MatrixOperation, KernelType>, MatrixFunc,
+                       PairHash>
         matrix_kernels_;
 
     std::unordered_map<KernelType, std::string> kernel_names_;
@@ -114,7 +113,8 @@ template <typename PrecisionT> class DynamicDispatcher {
         constexpr static auto gntr_names_without_prefix =
             Internal::generatorNamesWithoutPrefix();
 
-        for (const auto &[gate_op, gate_name] : Pennylane::Gates::Constant::gate_names) {
+        for (const auto &[gate_op, gate_name] :
+             Pennylane::Gates::Constant::gate_names) {
             str_to_gates_.emplace(gate_name, gate_op);
         }
         for (const auto &[gntr_op, gntr_name] : gntr_names_without_prefix) {
@@ -140,8 +140,7 @@ template <typename PrecisionT> class DynamicDispatcher {
     /**
      * @brief Get all registered kernels
      */
-    [[nodiscard]] auto registeredKernels() const
-        -> std::vector<KernelType> {
+    [[nodiscard]] auto registeredKernels() const -> std::vector<KernelType> {
         std::vector<KernelType> kernels;
 
         kernels.reserve(kernel_names_.size());
@@ -173,8 +172,7 @@ template <typename PrecisionT> class DynamicDispatcher {
      *
      * @param kernel Kernel
      */
-    [[nodiscard]] auto getKernelName(KernelType kernel) const
-        -> std::string {
+    [[nodiscard]] auto getKernelName(KernelType kernel) const -> std::string {
         return kernel_names_.at(kernel);
     }
 
@@ -195,8 +193,7 @@ template <typename PrecisionT> class DynamicDispatcher {
         return gates;
     }
 
-    [[nodiscard]] auto
-    registeredGeneratorsForKernel(KernelType kernel) const
+    [[nodiscard]] auto registeredGeneratorsForKernel(KernelType kernel) const
         -> std::unordered_set<GeneratorOperation> {
         std::unordered_set<GeneratorOperation> gntrs;
 
@@ -208,8 +205,7 @@ template <typename PrecisionT> class DynamicDispatcher {
         return gntrs;
     }
 
-    [[nodiscard]] auto
-    registeredMatricesForKernel(KernelType kernel) const
+    [[nodiscard]] auto registeredMatricesForKernel(KernelType kernel) const
         -> std::unordered_set<MatrixOperation> {
         std::unordered_set<MatrixOperation> matrices;
 
@@ -246,8 +242,8 @@ template <typename PrecisionT> class DynamicDispatcher {
      * kernel
      */
     template <typename FunctionType>
-    void registerGateOperation(GateOperation gate_op,
-                               KernelType kernel, FunctionType &&func) {
+    void registerGateOperation(GateOperation gate_op, KernelType kernel,
+                               FunctionType &&func) {
         gate_kernels_.emplace(std::make_pair(gate_op, kernel),
                               std::forward<FunctionType>(func));
     }
@@ -258,8 +254,7 @@ template <typename PrecisionT> class DynamicDispatcher {
      */
     template <typename FunctionType>
     void registerGeneratorOperation(GeneratorOperation gntr_op,
-                                    KernelType kernel,
-                                    FunctionType &&func) {
+                                    KernelType kernel, FunctionType &&func) {
         generator_kernels_.emplace(std::make_pair(gntr_op, kernel),
                                    std::forward<FunctionType>(func));
     }
@@ -268,8 +263,8 @@ template <typename PrecisionT> class DynamicDispatcher {
      * @brief Register a new matrix operation. Can pass a custom
      * kernel
      */
-    void registerMatrixOperation(MatrixOperation mat_op,
-                                 KernelType kernel, MatrixFunc func) {
+    void registerMatrixOperation(MatrixOperation mat_op, KernelType kernel,
+                                 MatrixFunc func) {
         matrix_kernels_.emplace(std::make_pair(mat_op, kernel), func);
     }
 
@@ -280,8 +275,7 @@ template <typename PrecisionT> class DynamicDispatcher {
      * @param gate_op Gate operation
      * @param kernel Kernel
      */
-    bool isRegistered(GateOperation gate_op,
-                      KernelType kernel) const {
+    bool isRegistered(GateOperation gate_op, KernelType kernel) const {
         return gate_kernels_.find(std::make_pair(gate_op, kernel)) !=
                gate_kernels_.cend();
     }
@@ -293,8 +287,7 @@ template <typename PrecisionT> class DynamicDispatcher {
      * @param gntr_op Generator operation
      * @param kernel Kernel
      */
-    bool isRegistered(GeneratorOperation gntr_op,
-                      KernelType kernel) const {
+    bool isRegistered(GeneratorOperation gntr_op, KernelType kernel) const {
         return generator_kernels_.find(std::make_pair(gntr_op, kernel)) !=
                generator_kernels_.cend();
     }
@@ -306,8 +299,7 @@ template <typename PrecisionT> class DynamicDispatcher {
      * @param mat_op Matrix operation
      * @param kernel Kernel
      */
-    bool isRegistered(MatrixOperation mat_op,
-                      KernelType kernel) const {
+    bool isRegistered(MatrixOperation mat_op, KernelType kernel) const {
         return matrix_kernels_.find(std::make_pair(mat_op, kernel)) !=
                matrix_kernels_.cend();
     }
@@ -323,8 +315,8 @@ template <typename PrecisionT> class DynamicDispatcher {
      * @param inverse Indicates whether to use inverse of gate.
      * @param params Optional parameter list for parametric gates.
      */
-    void applyOperation(KernelType kernel, CFP_t *data,
-                        size_t num_qubits, const std::string &op_name,
+    void applyOperation(KernelType kernel, CFP_t *data, size_t num_qubits,
+                        const std::string &op_name,
                         const std::vector<size_t> &wires, bool inverse,
                         const std::vector<PrecisionT> &params = {}) const {
         const auto iter =
@@ -348,9 +340,9 @@ template <typename PrecisionT> class DynamicDispatcher {
      * @param inverse Indicates whether to use inverse of gate.
      * @param params Optional parameter list for parametric gates.
      */
-    void applyOperation(KernelType kernel, CFP_t *data,
-                        size_t num_qubits, GateOperation gate_op,
-                        const std::vector<size_t> &wires, bool inverse,
+    void applyOperation(KernelType kernel, CFP_t *data, size_t num_qubits,
+                        GateOperation gate_op, const std::vector<size_t> &wires,
+                        bool inverse,
                         const std::vector<PrecisionT> &params = {}) const {
         const auto iter = gate_kernels_.find(std::make_pair(gate_op, kernel));
         if (iter == gate_kernels_.cend()) {
@@ -400,8 +392,8 @@ template <typename PrecisionT> class DynamicDispatcher {
      * @param wires List of wires to apply each gate to.
      * @param inverse List of inverses
      */
-    void applyOperations(KernelType kernel, CFP_t *data,
-                         size_t num_qubits, const std::vector<std::string> &ops,
+    void applyOperations(KernelType kernel, CFP_t *data, size_t num_qubits,
+                         const std::vector<std::string> &ops,
                          const std::vector<std::vector<size_t>> &wires,
                          const std::vector<bool> &inverse) const {
         const size_t numOperations = ops.size();
@@ -447,7 +439,8 @@ template <typename PrecisionT> class DynamicDispatcher {
 
         if (iter == matrix_kernels_.end()) {
             throw std::invalid_argument(
-                std::string(lookup(Pennylane::Gates::Constant::matrix_names, mat_op)) +
+                std::string(
+                    lookup(Pennylane::Gates::Constant::matrix_names, mat_op)) +
                 " is not registered for the given kernel");
         }
         (iter->second)(data, num_qubits, matrix, wires, inverse);
@@ -485,8 +478,8 @@ template <typename PrecisionT> class DynamicDispatcher {
      * @param wires Wires to apply gate to.
      * @param adj Indicates whether to use adjoint of gate.
      */
-    auto applyGenerator(KernelType kernel, CFP_t *data,
-                        size_t num_qubits, GeneratorOperation gntr_op,
+    auto applyGenerator(KernelType kernel, CFP_t *data, size_t num_qubits,
+                        GeneratorOperation gntr_op,
                         const std::vector<size_t> &wires, bool adj) const
         -> PrecisionT {
         using Pennylane::Gates::Constant::generator_names;
@@ -510,8 +503,8 @@ template <typename PrecisionT> class DynamicDispatcher {
      * @param wires Wires to apply gate to.
      * @param adj Indicates whether to use adjoint of gate.
      */
-    auto applyGenerator(KernelType kernel, CFP_t *data,
-                        size_t num_qubits, const std::string &op_name,
+    auto applyGenerator(KernelType kernel, CFP_t *data, size_t num_qubits,
+                        const std::string &op_name,
                         const std::vector<size_t> &wires, bool adj) const
         -> PrecisionT {
         const auto iter = generator_kernels_.find(

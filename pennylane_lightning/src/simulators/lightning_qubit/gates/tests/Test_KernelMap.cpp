@@ -39,7 +39,8 @@ TEST_CASE("Test PriorityDispatchSet", "[PriorityDispatchSet]") {
 }
 
 TEST_CASE("Test default kernels for gates are well defined", "[KernelMap]") {
-    auto &instance = OperationKernelMap<Pennylane::Gates::GateOperation>::getInstance();
+    auto &instance =
+        OperationKernelMap<Pennylane::Gates::GateOperation>::getInstance();
     for_each_enum<Threading, CPUMemoryModel>(
         [&instance](Threading threading, CPUMemoryModel memory_model) {
             for (size_t num_qubits = 1; num_qubits < 27; num_qubits++) {
@@ -64,7 +65,8 @@ TEST_CASE("Test default kernels for generators are well defined",
 
 TEST_CASE("Test default kernels for matrix operation are well defined",
           "[KernelMap]") {
-    auto &instance = OperationKernelMap<Pennylane::Gates::MatrixOperation>::getInstance();
+    auto &instance =
+        OperationKernelMap<Pennylane::Gates::MatrixOperation>::getInstance();
     for_each_enum<Threading, CPUMemoryModel>(
         [&instance](Threading threading, CPUMemoryModel memory_model) {
             for (size_t num_qubits = 1; num_qubits < 27; num_qubits++) {
@@ -77,7 +79,8 @@ TEST_CASE("Test default kernels for matrix operation are well defined",
 TEST_CASE("Test unallowed kernel", "[KernelMap]") {
     using Pennylane::Gates::GateOperation;
     using Pennylane::Gates::KernelType;
-    auto &instance = OperationKernelMap<Pennylane::Gates::GateOperation>::getInstance();
+    auto &instance =
+        OperationKernelMap<Pennylane::Gates::GateOperation>::getInstance();
     REQUIRE_THROWS(instance.assignKernelForOp(
         Pennylane::Gates::GateOperation::PauliX, Threading::SingleThread,
         CPUMemoryModel::Unaligned, 0, Util::full_domain<size_t>(),
@@ -90,7 +93,8 @@ TEST_CASE("Test unallowed kernel", "[KernelMap]") {
 }
 
 TEST_CASE("Test several limiting cases of default kernels", "[KernelMap]") {
-    auto &instance = OperationKernelMap<Pennylane::Gates::GateOperation>::getInstance();
+    auto &instance =
+        OperationKernelMap<Pennylane::Gates::GateOperation>::getInstance();
     SECTION("Single thread, large number of qubits") {
         // For large N, single thread calls "LM" for all single- and two-qubit
         // gates. For k-qubit gates with k >= 3, we use PI.
@@ -100,11 +104,15 @@ TEST_CASE("Test several limiting cases of default kernels", "[KernelMap]") {
             [&gate_map](Pennylane::Gates::GateOperation gate_op) {
                 INFO(lookup(Pennylane::Gates::Constant::gate_names, gate_op));
                 if (gate_op == Pennylane::Gates::GateOperation::MultiRZ) {
-                    REQUIRE(gate_map[gate_op] == Pennylane::Gates::KernelType::LM);
-                } else if (lookup(Pennylane::Gates::Constant::gate_wires, gate_op) <= 2) {
-                    REQUIRE(gate_map[gate_op] == Pennylane::Gates::KernelType::LM);
+                    REQUIRE(gate_map[gate_op] ==
+                            Pennylane::Gates::KernelType::LM);
+                } else if (lookup(Pennylane::Gates::Constant::gate_wires,
+                                  gate_op) <= 2) {
+                    REQUIRE(gate_map[gate_op] ==
+                            Pennylane::Gates::KernelType::LM);
                 } else {
-                    REQUIRE(gate_map[gate_op] == Pennylane::Gates::KernelType::PI);
+                    REQUIRE(gate_map[gate_op] ==
+                            Pennylane::Gates::KernelType::PI);
                 }
             });
     }
@@ -113,7 +121,8 @@ TEST_CASE("Test several limiting cases of default kernels", "[KernelMap]") {
 TEST_CASE("Test KernelMap functionalities", "[KernelMap]") {
     using Pennylane::Gates::GateOperation;
     using Pennylane::Gates::KernelType;
-    auto &instance = OperationKernelMap<Pennylane::Gates::GateOperation>::getInstance();
+    auto &instance =
+        OperationKernelMap<Pennylane::Gates::GateOperation>::getInstance();
 
     SECTION("Test priority works") {
         auto original_kernel = instance.getKernelMap(
@@ -125,22 +134,23 @@ TEST_CASE("Test KernelMap functionalities", "[KernelMap]") {
                                    CPUMemoryModel::Unaligned, 100,
                                    Util::full_domain<size_t>(), KernelType::PI);
 
-        REQUIRE(instance.getKernelMap(
-                    24, Threading::SingleThread,
-                    CPUMemoryModel::Unaligned)[Pennylane::Gates::GateOperation::PauliX] ==
+        REQUIRE(instance.getKernelMap(24, Threading::SingleThread,
+                                      CPUMemoryModel::Unaligned)
+                    [Pennylane::Gates::GateOperation::PauliX] ==
                 KernelType::PI);
 
         instance.removeKernelForOp(Pennylane::Gates::GateOperation::PauliX,
                                    Threading::SingleThread,
                                    CPUMemoryModel::Unaligned, 100);
-        REQUIRE(instance.getKernelMap(
-                    24, Threading::SingleThread,
-                    CPUMemoryModel::Unaligned)[Pennylane::Gates::GateOperation::PauliX] ==
+        REQUIRE(instance.getKernelMap(24, Threading::SingleThread,
+                                      CPUMemoryModel::Unaligned)
+                    [Pennylane::Gates::GateOperation::PauliX] ==
                 original_kernel);
     }
     SECTION("Test remove non-existing element") {
         PL_CHECK_THROWS_MATCHES(
-            instance.removeKernelForOp(Pennylane::Gates::GateOperation::PauliX, Threading::END,
+            instance.removeKernelForOp(Pennylane::Gates::GateOperation::PauliX,
+                                       Threading::END,
                                        CPUMemoryModel::Unaligned, 100),
             LightningException, "does not exist");
     }
@@ -151,7 +161,8 @@ TEST_CASE("Test KernelMap is consistent in extreme usecase", "[KernelMap]") {
     using Pennylane::Gates::KernelType;
     using EnumKernelMap =
         OperationKernelMap<Pennylane::Gates::GateOperation>::EnumKernelMap;
-    auto &instance = OperationKernelMap<Pennylane::Gates::GateOperation>::getInstance();
+    auto &instance =
+        OperationKernelMap<Pennylane::Gates::GateOperation>::getInstance();
 
     const auto num_qubits = std::vector<size_t>{4, 6, 8, 10, 12, 14, 16};
     const auto threadings =
