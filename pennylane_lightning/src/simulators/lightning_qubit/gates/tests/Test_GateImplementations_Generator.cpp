@@ -84,8 +84,8 @@ constexpr static auto generator_gate_pairs =
 
 template <class PrecisionT, class RandomEngine>
 void testGeneratorEqualsGateDerivativeForKernel(
-    RandomEngine &re, Gates::KernelType kernel,
-    Gates::GeneratorOperation gntr_op, bool inverse) {
+    RandomEngine &re, Pennylane::Gates::KernelType kernel,
+    Pennylane::Gates::GeneratorOperation gntr_op, bool inverse) {
     using ComplexT = std::complex<PrecisionT>;
     constexpr static auto I = Pennylane::Util::IMAG<PrecisionT>();
 
@@ -142,7 +142,7 @@ void testGeneratorEqualsGateDerivativeForKernel(
 }
 
 template <typename PrecisionT, class RandomEngine>
-void testAllGeneratorsForKernel(RandomEngine &re, Gates::KernelType kernel) {
+void testAllGeneratorsForKernel(RandomEngine &re, Pennylane::Gates::KernelType kernel) {
     const auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
     const auto all_gntr_ops = dispatcher.registeredGeneratorsForKernel(kernel);
 

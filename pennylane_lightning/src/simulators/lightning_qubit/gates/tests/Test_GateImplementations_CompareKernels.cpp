@@ -73,7 +73,7 @@ auto kernelsImplementingMatrix(MatrixOperation mat_op)
  */
 template <typename PrecisionT, class RandomEngine>
 void testApplyGate(RandomEngine &re, GateOperation gate_op, size_t num_qubits) {
-    using Gates::Constant::gate_names;
+    using Pennylane::Gates::Constant::gate_names;
 
     const auto implementing_kernels =
         kernelsImplementingGate<PrecisionT>(gate_op);
@@ -147,10 +147,10 @@ TEMPLATE_TEST_CASE("Test all kernels give the same results for gates",
     std::mt19937 re{1337};
     for_each_enum<GateOperation>([&](GateOperation gate_op) {
         const size_t min_num_qubits = [=] {
-            if (array_has_elem(Gates::Constant::multi_qubit_gates, gate_op)) {
+            if (array_has_elem(Pennylane::Gates::Constant::multi_qubit_gates, gate_op)) {
                 return size_t{1};
             }
-            return lookup(Gates::Constant::gate_wires, gate_op);
+            return lookup(Pennylane::Gates::Constant::gate_wires, gate_op);
         }();
         for (size_t num_qubits = min_num_qubits; num_qubits <= max_num_qubits;
              num_qubits++) {
@@ -162,7 +162,7 @@ TEMPLATE_TEST_CASE("Test all kernels give the same results for gates",
 template <typename PrecisionT, class RandomEngine>
 void testMatrixOp(RandomEngine &re, size_t num_qubits, size_t num_wires,
                   bool inverse) {
-    using Gates::Constant::matrix_names;
+    using Pennylane::Gates::Constant::matrix_names;
     PL_ASSERT(num_wires > 0);
 
     const auto mat_op = [num_wires]() -> MatrixOperation {

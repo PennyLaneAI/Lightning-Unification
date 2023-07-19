@@ -32,6 +32,10 @@
 #include <complex>
 #include <vector>
 
+namespace{
+using Pennylane::Gates::GateOperation;
+}
+
 namespace Pennylane::LightningQubit::Gates {
 template <class Derived>
 class GateImplementationsAVXCommon

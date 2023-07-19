@@ -211,7 +211,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param inverse Indicates whether to use inverse of gate.
      * @param params Optional parameter list for parametric gates.
      */
-    void applyOperation(Gates::KernelType kernel, const std::string &opName,
+    void applyOperation(Pennylane::Gates::KernelType kernel, const std::string &opName,
                         const std::vector<size_t> &wires, bool inverse = false,
                         const std::vector<PrecisionT> &params = {}) {
         auto *arr = this->getData();
@@ -246,7 +246,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param wires Wires to apply gate to.
      * @param adj Indicates whether to use adjoint of operator.
      */
-    [[nodiscard]] inline auto applyGenerator(Gates::KernelType kernel,
+    [[nodiscard]] inline auto applyGenerator(Pennylane::Gates::KernelType kernel,
                                              const std::string &opName,
                                              const std::vector<size_t> &wires,
                                              bool adj = false) -> PrecisionT {
@@ -282,7 +282,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param wires Wires to apply gate to.
      * @param inverse Indicate whether inverse should be taken.
      */
-    inline void applyMatrix(Gates::KernelType kernel, const ComplexT *matrix,
+    inline void applyMatrix(Pennylane::Gates::KernelType kernel, const ComplexT *matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
 
@@ -304,7 +304,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param wires Wires to apply gate to.
      * @param inverse Indicate whether inverse should be taken.
      */
-    inline void applyMatrix(Gates::KernelType kernel,
+    inline void applyMatrix(Pennylane::Gates::KernelType kernel,
                             const std::vector<ComplexT> &matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
@@ -327,7 +327,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
     inline void applyMatrix(const ComplexT *matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
-        using Gates::MatrixOperation;
+        using Pennylane::Gates::MatrixOperation;
 
         PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
 

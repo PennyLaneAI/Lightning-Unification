@@ -24,6 +24,11 @@
 #include <complex>
 #include <vector>
 
+namespace{
+using namespace Pennylane::Gates;
+using Pennylane::Gates::GateOperation;
+}
+
 namespace Pennylane::LightningQubit::Gates {
 
 /**

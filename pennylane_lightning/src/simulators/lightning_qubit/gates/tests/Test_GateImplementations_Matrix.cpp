@@ -758,7 +758,7 @@ void testApplyMultiQubitOp() {
 
 template <typename PrecisionT, typename TypeList>
 void testApplyMatrixForKernels() {
-    using Gates::MatrixOperation;
+    using Pennylane::Gates::MatrixOperation;
     if constexpr (!std::is_same_v<TypeList, void>) {
         using GateImplementation = typename TypeList::Type;
 
@@ -970,7 +970,7 @@ void testApplyMultiQubitOpInverse() {
 
 template <typename PrecisionT, typename TypeList>
 void testApplyMatrixInverseForKernels() {
-    using Gates::MatrixOperation;
+    using Pennylane::Gates::MatrixOperation;
     if constexpr (!std::is_same_v<TypeList, void>) {
         using GateImplementation = typename TypeList::Type;
         if constexpr (array_has_elem(GateImplementation::implemented_matrices,

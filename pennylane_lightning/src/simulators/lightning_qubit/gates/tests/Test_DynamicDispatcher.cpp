@@ -82,13 +82,13 @@ TEMPLATE_TEST_CASE("DynamicDispatcher::applyOperation", "[DynamicDispatcher]",
         auto st = createProductState<PrecisionT>("000");
 
         REQUIRE_THROWS_WITH(
-            dispatcher.applyOperation(Gates::KernelType::None, st.data(),
+            dispatcher.applyOperation(Pennylane::Gates::KernelType::None, st.data(),
                                       num_qubits, "Toffoli", {0, 1, 2}, false),
             Catch::Contains("Cannot find"));
 
         REQUIRE_THROWS_WITH(dispatcher.applyOperation(
-                                Gates::KernelType::None, st.data(), num_qubits,
-                                GateOperation::Toffoli, {0, 1, 2}, false),
+                                Pennylane::Gates::KernelType::None, st.data(), num_qubits,
+                                Pennylane::Gates::GateOperation::Toffoli, {0, 1, 2}, false),
                             Catch::Contains("Cannot find"));
     }
 
@@ -101,7 +101,7 @@ TEMPLATE_TEST_CASE("DynamicDispatcher::applyOperation", "[DynamicDispatcher]",
             auto st1 = ini;
             auto st2 = ini;
 
-            dispatcher.applyOperation(Gates::KernelType::LM, st1.data(),
+            dispatcher.applyOperation(Pennylane::Gates::KernelType::LM, st1.data(),
                                       num_qubits, "PauliX", {2}, false);
             Gates::GateImplementationsLM::applyPauliX(st2.data(), num_qubits,
                                                       {2}, false);
@@ -117,7 +117,7 @@ TEMPLATE_TEST_CASE("DynamicDispatcher::applyOperation", "[DynamicDispatcher]",
             auto st1 = ini;
             auto st2 = ini;
 
-            dispatcher.applyOperation(Gates::KernelType::LM, st1.data(),
+            dispatcher.applyOperation(Pennylane::Gates::KernelType::LM, st1.data(),
                                       num_qubits, "IsingXY", {0, 2}, false,
                                       {angle});
             Gates::GateImplementationsLM::applyIsingXY(st2.data(), num_qubits,
@@ -139,13 +139,13 @@ TEMPLATE_TEST_CASE("DynamicDispatcher::applyGenerator", "[DynamicDispatcher]",
 
         auto &dispatcher = DynamicDispatcher<TestType>::getInstance();
 
-        REQUIRE_THROWS_WITH(dispatcher.applyGenerator(Gates::KernelType::None,
+        REQUIRE_THROWS_WITH(dispatcher.applyGenerator(Pennylane::Gates::KernelType::None,
                                                       st.data(), num_qubits,
                                                       "RX", {0, 1, 2}, false),
                             Catch::Contains("Cannot find"));
 
         REQUIRE_THROWS_WITH(dispatcher.applyGenerator(
-                                Gates::KernelType::None, st.data(), num_qubits,
+                                Pennylane::Gates::KernelType::None, st.data(), num_qubits,
                                 GeneratorOperation::RX, {0, 1, 2}, false),
                             Catch::Contains("Cannot find"));
     }
@@ -164,7 +164,7 @@ TEMPLATE_TEST_CASE("DynamicDispatcher::applyMatrix", "[DynamicDispatcher]",
 
         std::vector<std::complex<PrecisionT>> matrix(4, 0.0);
 
-        REQUIRE_THROWS_WITH(dispatcher.applyMatrix(Gates::KernelType::None,
+        REQUIRE_THROWS_WITH(dispatcher.applyMatrix(Pennylane::Gates::KernelType::None,
                                                    st.data(), num_qubits,
                                                    matrix.data(), {0}, false),
                             Catch::Contains("is not registered") &&

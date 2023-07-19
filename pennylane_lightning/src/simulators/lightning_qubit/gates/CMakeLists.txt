@@ -6,7 +6,7 @@ project(lightning_qubit_gates)
 add_library(lightning_qubit_gates INTERFACE)
 target_include_directories(lightning_qubit_gates INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(lightning_qubit_gates INTERFACE lightning_utils)
+target_link_libraries(lightning_qubit_gates INTERFACE lightning_gates lightning_utils)
 
 if (ENABLE_GATE_DISPATCHER AND UNIX AND (${CMAKE_SYSTEM_PROCESSOR} MATCHES "(AMD64)|(X64)|(x64)|(x86_64)"))
     message(STATUS "Compiling for x86. Enable AVX2/AVX512 kernels (runtime enabled).")
@@ -16,23 +16,23 @@ if (ENABLE_GATE_DISPATCHER AND UNIX AND (${CMAKE_SYSTEM_PROCESSOR} MATCHES "(AMD
                             AssignKernelMap_AVX512.cpp
                             AssignKernelMap_Default.cpp CACHE INTERNAL "" FORCE)
     add_library(lightning_qubit_gates_kernel_map STATIC ${KERNEL_MAP_FILES})
-    target_link_libraries(lightning_qubit_gates_kernel_map PRIVATE lightning_qubit_gates lightning_qubit_utils lightning_external_libs lightning_compile_options)
+    target_link_libraries(lightning_qubit_gates_kernel_map PRIVATE lightning_gates lightning_qubit_gates lightning_qubit_utils lightning_external_libs lightning_compile_options)
     set_target_properties(lightning_qubit_gates_kernel_map PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
     add_library(lightning_qubit_gates_register_kernels_avx2 STATIC RegisterKernels_AVX2.cpp)
     target_compile_options(lightning_qubit_gates_register_kernels_avx2 PRIVATE "-mavx2;-mfma")
-    target_link_libraries(lightning_qubit_gates_register_kernels_avx2 PRIVATE lightning_external_libs lightning_compile_options lightning_utils lightning_qubit_utils)
+    target_link_libraries(lightning_qubit_gates_register_kernels_avx2 PRIVATE lightning_external_libs lightning_compile_options lightning_gates lightning_utils lightning_qubit_utils)
     target_include_directories(lightning_qubit_gates_register_kernels_avx2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     set_target_properties(lightning_qubit_gates_register_kernels_avx2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
     add_library(lightning_qubit_gates_register_kernels_avx512 STATIC RegisterKernels_AVX512.cpp)
     target_compile_options(lightning_qubit_gates_register_kernels_avx512 PRIVATE "-mavx512f")
-    target_link_libraries(lightning_qubit_gates_register_kernels_avx512 PRIVATE lightning_external_libs lightning_compile_options lightning_utils lightning_qubit_utils)
+    target_link_libraries(lightning_qubit_gates_register_kernels_avx512 PRIVATE lightning_external_libs lightning_compile_options lightning_gates lightning_utils lightning_qubit_utils)
     target_include_directories(lightning_qubit_gates_register_kernels_avx512 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     set_target_properties(lightning_qubit_gates_register_kernels_avx512 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
     add_library(lightning_qubit_gates_register_kernels_x64 STATIC RegisterKernels_x64.cpp cpu_kernels/GateImplementationsLM.cpp cpu_kernels/GateImplementationsPI.cpp GateIndices.cpp)
-    target_link_libraries(lightning_qubit_gates_register_kernels_x64 PRIVATE lightning_external_libs lightning_compile_options lightning_utils lightning_qubit_utils)
+    target_link_libraries(lightning_qubit_gates_register_kernels_x64 PRIVATE lightning_external_libs lightning_compile_options lightning_gates lightning_utils lightning_qubit_utils)
     target_include_directories(lightning_qubit_gates_register_kernels_x64 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     set_target_properties(lightning_qubit_gates_register_kernels_x64 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 

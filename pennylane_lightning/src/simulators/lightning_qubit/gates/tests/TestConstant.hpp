@@ -4,6 +4,10 @@
 #include "GateOperation.hpp"
 #include "Util.hpp"
 
+namespace{
+using namespace Pennylane::Gates;
+}
+
 namespace Pennylane::LightningQubit::Gates {
 template <typename T, size_t size1, size_t size2>
 constexpr auto are_mutually_disjoint(const std::array<T, size1> &arr1,

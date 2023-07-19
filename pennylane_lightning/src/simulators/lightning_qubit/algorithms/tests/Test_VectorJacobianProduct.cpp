@@ -43,8 +43,8 @@ auto createRandomOps(RandomEngine &re, size_t length, size_t wires)
     using PrecisionT = typename StateVectorT::PrecisionT;
     using namespace Pennylane::LightningQubit::Gates;
 
-    std::array gates_to_use = {GateOperation::RX, GateOperation::RY,
-                               GateOperation::RZ};
+    std::array gates_to_use = {Pennylane::Gates::GateOperation::RX, Pennylane::Gates::GateOperation::RY,
+                               Pennylane::Gates::GateOperation::RZ};
 
     std::vector<std::string> ops_names;
     std::vector<std::vector<PrecisionT>> ops_params;

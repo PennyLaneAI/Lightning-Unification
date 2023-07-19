@@ -6,6 +6,7 @@ project(lightning_components LANGUAGES CXX)
 # Include all nested sources directories
 ###############################################################################
 set(COMPONENT_SUBDIRS   algorithms
+                        gates
                         measurements
                         observables
                         simulators

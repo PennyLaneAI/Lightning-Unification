@@ -67,9 +67,9 @@ class NamedObs final : public NamedObsBase<StateVectorT> {
     NamedObs(std::string obs_name, std::vector<size_t> wires,
              std::vector<PrecisionT> params = {})
         : BaseType{obs_name, wires, params} {
-        using Pennylane::LightningQubit::Gates::Constant::gate_names;
-        using Pennylane::LightningQubit::Gates::Constant::gate_num_params;
-        using Pennylane::LightningQubit::Gates::Constant::gate_wires;
+        using Pennylane::Gates::Constant::gate_names;
+        using Pennylane::Gates::Constant::gate_num_params;
+        using Pennylane::Gates::Constant::gate_wires;
         using Pennylane::Util::lookup;
 
         const auto gate_op = lookup(Pennylane::Util::reverse_pairs(gate_names),

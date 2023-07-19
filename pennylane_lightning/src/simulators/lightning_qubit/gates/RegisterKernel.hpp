@@ -40,7 +40,7 @@ namespace Pennylane::LightningQubit {
  * @tparam gate_op Gate operation to make a functor.
  */
 template <class PrecisionT, class ParamT, class GateImplementation,
-          Gates::GateOperation gate_op>
+          Pennylane::Gates::GateOperation gate_op>
 constexpr auto gateOpToFunctor() {
     return [](std::complex<PrecisionT> *data, size_t num_qubits,
               const std::vector<size_t> &wires, bool inverse,
@@ -49,7 +49,7 @@ constexpr auto gateOpToFunctor() {
             Gates::GateOpToMemberFuncPtr<PrecisionT, ParamT, GateImplementation,
                                          gate_op>::value;
         assert(params.size() ==
-               lookup(Gates::Constant::gate_num_params, gate_op));
+               lookup(Pennylane::Gates::Constant::gate_num_params, gate_op));
         Gates::callGateOps(func_ptr, data, num_qubits, wires, inverse, params);
     };
 }

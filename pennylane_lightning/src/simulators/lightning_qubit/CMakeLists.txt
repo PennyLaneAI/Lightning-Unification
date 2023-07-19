@@ -63,6 +63,7 @@ target_link_libraries(lightning_qubit PUBLIC    lightning_compile_options
                                                 lightning_base
                                                 lightning_utils
                                                 lightning_qubit_utils
+                                                lightning_gates
                                                 lightning_qubit_gates
                                                 )
 

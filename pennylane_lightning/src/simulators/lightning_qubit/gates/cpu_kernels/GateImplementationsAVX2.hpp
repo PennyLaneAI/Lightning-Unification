@@ -17,6 +17,11 @@
  */
 #pragma once
 
+#include <complex>
+#include <vector>
+
+#include <immintrin.h>
+
 // General implementations
 #include "Error.hpp"
 #include "GateImplementationsAVXCommon.hpp"
@@ -25,11 +30,6 @@
 #include "KernelType.hpp"
 #include "LinearAlgebra.hpp"
 #include "Macros.hpp"
-
-#include <immintrin.h>
-
-#include <complex>
-#include <vector>
 
 namespace Pennylane::LightningQubit::Gates {
 class GateImplementationsAVX2

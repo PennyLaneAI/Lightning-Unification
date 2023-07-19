@@ -39,6 +39,7 @@
 
 /// @cond DEV
 namespace {
+using namespace Pennylane::Gates;
 using Pennylane::Util::ZERO;
 } // namespace
 /// @endcond

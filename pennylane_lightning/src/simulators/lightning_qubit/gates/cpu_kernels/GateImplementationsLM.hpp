@@ -32,6 +32,7 @@
 #include <vector>
 
 namespace {
+using namespace Pennylane::Gates;
 using Pennylane::Util::exp2;
 using Pennylane::Util::INVSQRT2;
 } // namespace
