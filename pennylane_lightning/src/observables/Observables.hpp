@@ -13,15 +13,15 @@
 // limitations under the License.
 #pragma once
 
-#include "Error.hpp"
-#include "Util.hpp"
-
 #include <algorithm>
 #include <complex>
 #include <memory>
 #include <typeinfo>
 #include <unordered_set>
 #include <vector>
+
+#include "Error.hpp"
+#include "Util.hpp"
 
 namespace Pennylane::Observables {
 
