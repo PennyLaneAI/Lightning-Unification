@@ -466,7 +466,7 @@ TEST_CASE("AdjointJacobian::AdjointJacobian Op=[RX,RX,RX], "
 TEST_CASE("AdjointJacobian::AdjointJacobian Test HermitianObs",
           "[AdjointJacobian]") {
     using StateVectorT = StateVectorKokkos<double>;
-    using ComplexT = StateVectorT::ComplexT;
+    using ComplexT = typename StateVectorT::ComplexT;
     AdjointJacobian<StateVectorT> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
     std::vector<size_t> t_params{0, 2};

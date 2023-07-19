@@ -61,7 +61,7 @@ template <class StateVector> struct StateVectorToName {};
 template <typename TypeList> void testStateVectorBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using StateVectorT = typename TypeList::Type;
-        using ComplexT = StateVectorT::ComplexT;
+        using ComplexT = typename StateVectorT::ComplexT;
         using VectorT = std::vector<ComplexT>;
 
         const size_t num_qubits = 4;

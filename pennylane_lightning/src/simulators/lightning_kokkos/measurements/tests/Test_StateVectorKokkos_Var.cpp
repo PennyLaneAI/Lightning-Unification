@@ -72,7 +72,7 @@ TEMPLATE_TEST_CASE("Test variance of HermitianObs", "[StateVectorKokkos_Var]",
                    float, double) {
     const std::size_t num_qubits = 3;
     using StateVectorT = StateVectorKokkos<TestType>;
-    using ComplexT = StateVectorT::ComplexT;
+    using ComplexT = typename StateVectorT::ComplexT;
     SECTION("Using var") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
         auto m = Measurements<StateVectorKokkos<TestType>>(kokkos_sv);

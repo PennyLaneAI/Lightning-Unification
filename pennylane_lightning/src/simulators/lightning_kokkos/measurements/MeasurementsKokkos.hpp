@@ -29,7 +29,7 @@ class Measurements final
 
   private:
     using PrecisionT = StateVectorT::PrecisionT;
-    using ComplexT = StateVectorT::ComplexT;
+    using ComplexT = typename StateVectorT::ComplexT;
     using BaseType = MeasurementsBase<StateVectorT, Measurements<StateVectorT>>;
     using KokkosExecSpace = Kokkos::DefaultExecutionSpace;
     using KokkosVector = Kokkos::View<ComplexT *>;
