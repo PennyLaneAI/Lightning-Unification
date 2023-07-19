@@ -7,7 +7,7 @@
 
 namespace {
 using namespace Pennylane::Util;
-namespace KE = Kokkos::Experimental;
+using Kokkos::Experimental::swap;
 } // namespace
 
 namespace Pennylane::LightningKokkos::Functors {
@@ -349,7 +349,7 @@ template <class Precision, bool inverse = false> struct pauliXFunctor {
         const std::size_t i0 =
             ((k << 1U) & wire_parity_inv) | (wire_parity & k);
         const std::size_t i1 = i0 | rev_wire_shift;
-        KE::swap(arr[i0], arr[i1]);
+        swap(arr[i0], arr[i1]);
     }
 };
 
@@ -665,7 +665,7 @@ template <class Precision, bool inverse = false> struct cnotFunctor {
         const std::size_t i10 = i00 | rev_wire1_shift;
         const std::size_t i11 = i00 | rev_wire1_shift | rev_wire0_shift;
 
-        KE::swap(arr[i10], arr[i11]);
+        swap(arr[i10], arr[i11]);
     }
 };
 
@@ -866,7 +866,7 @@ template <class Precision, bool inverse = false> struct swapFunctor {
                                 ((k << 1U) & parity_middle) | (k & parity_low);
         const std::size_t i10 = i00 | rev_wire1_shift;
         const std::size_t i01 = i00 | rev_wire0_shift;
-        KE::swap(arr[i10], arr[i01]);
+        swap(arr[i10], arr[i01]);
     }
 };
 
@@ -2034,7 +2034,7 @@ template <class Precision, bool inverse = false> struct cSWAPFunctor {
         const std::size_t i101 = i000 | rev_wire2_shift | rev_wire0_shift;
         const std::size_t i110 = i000 | rev_wire2_shift | rev_wire1_shift;
 
-        KE::swap(arr[i101], arr[i110]);
+        swap(arr[i101], arr[i110]);
     }
 };
 
@@ -2103,7 +2103,7 @@ template <class Precision, bool inverse = false> struct toffoliFunctor {
             i000 | rev_wire2_shift | rev_wire1_shift | rev_wire0_shift;
         const std::size_t i110 = i000 | rev_wire2_shift | rev_wire1_shift;
 
-        KE::swap(arr[i111], arr[i110]);
+        swap(arr[i111], arr[i110]);
     }
 };
 
@@ -2218,8 +2218,8 @@ template <class Precision, bool adj = false> struct generatorIsingXXFunctor {
         const std::size_t i10 = i00 | rev_wire1_shift;
         const std::size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-        KE::swap(arr[i00], arr[i11]);
-        KE::swap(arr[i10], arr[i01]);
+        swap(arr[i00], arr[i11]);
+        swap(arr[i10], arr[i01]);
     }
 };
 
@@ -2266,7 +2266,7 @@ template <class Precision, bool adj = false> struct generatorIsingXYFunctor {
         const std::size_t i10 = i00 | rev_wire1_shift;
         const std::size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-        KE::swap(arr[i10], arr[i01]);
+        swap(arr[i10], arr[i01]);
         arr[i00] = Kokkos::complex<Precision>{0.0, 0.0};
         arr[i11] = Kokkos::complex<Precision>{0.0, 0.0};
     }
@@ -2318,7 +2318,7 @@ template <class Precision, bool adj = false> struct generatorIsingYYFunctor {
         const auto v00 = arr[i00];
         arr[i00] = -arr[i11];
         arr[i11] = -v00;
-        KE::swap(arr[i10], arr[i01]);
+        swap(arr[i10], arr[i01]);
     }
 };
 
@@ -2417,7 +2417,7 @@ struct generatorSingleExcitationFunctor {
         arr[i01] *= ComplexPrecision{0, 1};
         arr[i10] *= ComplexPrecision{0, -1};
         arr[i11] = ComplexPrecision{};
-        KE::swap(arr[i10], arr[i01]);
+        swap(arr[i10], arr[i01]);
     }
 };
 
@@ -2467,7 +2467,7 @@ struct generatorSingleExcitationMinusFunctor {
 
         arr[i01] *= ComplexPrecision{0, 1};
         arr[i10] *= ComplexPrecision{0, -1};
-        KE::swap(arr[i10], arr[i01]);
+        swap(arr[i10], arr[i01]);
     }
 };
 
@@ -2521,7 +2521,7 @@ struct generatorSingleExcitationPlusFunctor {
         arr[i10] *= ComplexPrecision{0, -1};
         arr[i11] *= -1;
 
-        KE::swap(arr[i10], arr[i01]);
+        swap(arr[i10], arr[i01]);
     }
 };
 
@@ -2774,7 +2774,7 @@ struct generatorDoubleExcitationMinusFunctor {
 
         arr[i0011] *= ComplexPrecision{0, 1};
         arr[i1100] *= ComplexPrecision{0, -1};
-        KE::swap(arr[i1100], arr[i0011]);
+        swap(arr[i1100], arr[i0011]);
     }
 };
 
@@ -2884,7 +2884,7 @@ struct generatorDoubleExcitationPlusFunctor {
 
         arr[i0011] *= ComplexPrecision{0, -1};
         arr[i1100] *= ComplexPrecision{0, 1};
-        KE::swap(arr[i1100], arr[i0011]);
+        swap(arr[i1100], arr[i0011]);
     }
 };
 
@@ -2980,7 +2980,7 @@ template <class Precision, bool adj = false> struct generatorCRXFunctor {
 
         arr[i00] = Kokkos::complex<Precision>{0.0, 0.0};
         arr[i01] = Kokkos::complex<Precision>{0.0, 0.0};
-        KE::swap(arr[i10], arr[i11]);
+        swap(arr[i10], arr[i11]);
     }
 };
 

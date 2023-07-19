@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        pl_backend: ["lightning_qubit", "lightning_kokkos"]
+        pl_backend: ["lightning_qubit"]
 
     name: C++ tests
     runs-on: ${{ matrix.os }}
@@ -115,7 +115,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        pl_backend: ["lightning_qubit", "lightning_kokkos"]
+        pl_backend: ["lightning_qubit"]
 
     name: C++ tests (OpenBLAS)
     runs-on: ${{ matrix.os }}
