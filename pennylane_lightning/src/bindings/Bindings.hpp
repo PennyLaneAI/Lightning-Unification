@@ -605,6 +605,7 @@ void registerLightningClassBindings(py::module_ &m) {
 } // namespace Pennylane
 
 #elif _ENABLE_PLKOKKOS == 1
+#include "LKokkosBindings.hpp" 
 #else
 static_assert(false, "Backend not found.");
 #endif
