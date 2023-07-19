@@ -171,10 +171,10 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian::ApplyInPlace", "[Observables]",
             ham->applyInPlace(state_vector);
 
             auto expected = std::vector<ComplexT>{
-                ComplexT{0.5, 0.0},
-                ComplexT{0.5, 0.0},
-                ComplexT{-0.5, 0.0},
-                ComplexT{-0.5, 0.0},
+                0.5,
+                0.5,
+                -0.5,
+                -0.5,
             };
 
             REQUIRE(isApproxEqual(state_vector.getData().data(),
@@ -191,10 +191,10 @@ TEMPLATE_PRODUCT_TEST_CASE("Hamiltonian::ApplyInPlace", "[Observables]",
             ham->applyInPlace(state_vector);
 
             auto expected = std::vector<ComplexT>{
-                ComplexT{h, 0.0},
-                ComplexT{-1.0, 0.0},
-                ComplexT{0.0, 0.0},
-                ComplexT{h, 0.0},
+                h,
+                -1.0,
+                0.0,
+                h,
             };
 
             REQUIRE(isApproxEqual(state_vector.getData().data(),

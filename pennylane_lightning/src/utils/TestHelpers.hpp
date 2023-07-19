@@ -307,8 +307,8 @@ auto createZeroState(size_t num_qubits)
  */
 template <typename ComplexT>
 auto createZeroStateComplex(size_t num_qubits) -> std::vector<ComplexT> {
-    std::vector<ComplexT> res(size_t{1U} << num_qubits, ComplexT(0.0, 0.0));
-    res[0] = ComplexT(1.0, 0.0);
+    std::vector<ComplexT> res(size_t{1U} << num_qubits, 0.0);
+    res[0] = 1.0;
     return res;
 }
 
@@ -319,7 +319,7 @@ template <typename PrecisionT>
 auto createPlusState(size_t num_qubits)
     -> TestVector<std::complex<PrecisionT>> {
     TestVector<std::complex<PrecisionT>> res(
-        size_t{1U} << num_qubits, {1.0, 0.0},
+        size_t{1U} << num_qubits, 1.0,
         getBestAllocator<std::complex<PrecisionT>>());
     for (auto &elem : res) {
         elem /= std::sqrt(1U << num_qubits);
@@ -335,7 +335,7 @@ auto createRandomStateVectorData(RandomEngine &re, size_t num_qubits)
     -> TestVector<std::complex<PrecisionT>> {
 
     TestVector<std::complex<PrecisionT>> res(
-        size_t{1U} << num_qubits, {0.0, 0.0},
+        size_t{1U} << num_qubits, 0.0,
         getBestAllocator<std::complex<PrecisionT>>());
     std::uniform_real_distribution<PrecisionT> dist;
     for (size_t idx = 0; idx < (size_t{1U} << num_qubits); idx++) {

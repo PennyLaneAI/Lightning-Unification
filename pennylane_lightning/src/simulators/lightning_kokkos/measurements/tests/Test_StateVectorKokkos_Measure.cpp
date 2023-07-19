@@ -50,7 +50,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values", "[Measurements]",
 
     SECTION("Testing list of operators defined by a matrix:") {
         std::vector<ComplexT> PauliX = {0, 1, 1, 0};
-        std::vector<ComplexT> PauliY = {0, {0, -1}, {0, 1}, 0};
+        std::vector<ComplexT> PauliY = {0, ComplexT(0, -1), ComplexT(0, 1), 0};
         std::vector<ComplexT> PauliZ = {1, 0, 0, -1};
 
         std::vector<PrecisionT> exp_values;
@@ -127,9 +127,9 @@ TEMPLATE_PRODUCT_TEST_CASE("Variances", "[Measurements]", (StateVectorKokkos),
     }
 
     SECTION("Testing list of operators defined by a matrix:") {
-        std::vector<ComplexT> PauliX = {{0, 0}, {1, 0}, {1, 0}, {0, 0}};
-        std::vector<ComplexT> PauliY = {{0, 0}, {0, -1}, {0, 1}, {0, 0}};
-        std::vector<ComplexT> PauliZ = {{1, 0}, {0, 0}, {0, 0}, {-1, 0}};
+        std::vector<ComplexT> PauliX = {0, 1, 1, 0};
+        std::vector<ComplexT> PauliY = {0, ComplexT(0, -1), ComplexT(0, 1), 0};
+        std::vector<ComplexT> PauliZ = {1, 0, 0, -1};
 
         std::vector<PrecisionT> variances;
         std::vector<PrecisionT> variances_ref;
