@@ -440,13 +440,10 @@ getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
         indices.emplace_back(i);
     }
 
-    for (size_t j = 0; j < indicesToExclude.size(); j++) {
-
-        const size_t excludedIndex = indicesToExclude[j];
-
+    for (auto j : indicesToExclude) {
         for (size_t i = 0; i < indices.size(); i++) {
-            if (excludedIndex == indices[i])
-                indices.erase(indices.begin() + i);
+            if (j == indices[i])
+                {indices.erase(indices.begin() + i);}
         }
     }
     return indices;

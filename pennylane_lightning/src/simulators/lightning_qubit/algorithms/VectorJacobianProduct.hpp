@@ -26,7 +26,6 @@
 #include "LinearAlgebra.hpp" // innerProdC
 #include "StateVectorLQubitManaged.hpp"
 
-// using namespace Pennylane;
 /// @cond DEV
 namespace {
 using namespace Pennylane::Algorithms;

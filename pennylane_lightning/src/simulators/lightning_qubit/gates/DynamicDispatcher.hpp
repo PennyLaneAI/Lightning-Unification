@@ -38,7 +38,6 @@
 #include <vector>
 
 /// @cond DEV
-
 namespace {
 using Pennylane::Gates::GateOperation;
 using Pennylane::Gates::GeneratorOperation;
@@ -48,6 +47,7 @@ using Pennylane::Util::exp2;
 using Pennylane::Util::lookup;
 using Pennylane::Util::PairHash;
 } // namespace
+/// @endcond
 
 namespace Pennylane::LightningQubit::Internal {
 constexpr auto generatorNamesWithoutPrefix() {

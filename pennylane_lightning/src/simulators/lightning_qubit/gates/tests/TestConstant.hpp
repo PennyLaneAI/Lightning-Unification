@@ -4,9 +4,11 @@
 #include "GateOperation.hpp"
 #include "Util.hpp"
 
+/// @cond DEV
 namespace {
 using namespace Pennylane::Gates;
-}
+}// namespace
+/// @endcond
 
 namespace Pennylane::LightningQubit::Gates {
 template <typename T, size_t size1, size_t size2>

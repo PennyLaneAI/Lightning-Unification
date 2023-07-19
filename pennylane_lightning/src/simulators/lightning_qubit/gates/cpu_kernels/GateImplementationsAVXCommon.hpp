@@ -32,9 +32,11 @@
 #include <complex>
 #include <vector>
 
+/// @cond DEV
 namespace {
 using Pennylane::Gates::GateOperation;
-}
+}// namespace
+/// @endcond
 
 namespace Pennylane::LightningQubit::Gates {
 template <class Derived>
