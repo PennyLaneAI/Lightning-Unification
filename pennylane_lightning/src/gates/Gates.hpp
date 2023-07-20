@@ -18,8 +18,6 @@
 #include <complex>
 #include <vector>
 
-#include <Kokkos_Core.hpp>
-
 #include "Util.hpp"
 
 /// @cond DEV
@@ -734,9 +732,9 @@ static constexpr auto getGeneratorSingleExcitation()
 template <template <typename...> class ComplexT, typename T>
 static auto getSingleExcitationMinus(T angle) -> std::vector<ComplexT<T>> {
     const T p2 = angle / 2;
-    const ComplexT<T> e = Kokkos::exp(ComplexT<T>(0, -p2));
-    const ComplexT<T> c{Kokkos::cos(p2), 0};
-    const ComplexT<T> s{Kokkos::sin(p2), 0};
+    const ComplexT<T> e = std::exp(ComplexT<T>(0, -p2));
+    const ComplexT<T> c{std::cos(p2), 0};
+    const ComplexT<T> s{std::sin(p2), 0};
     return {e,
             ZERO<ComplexT, T>(),
             ZERO<ComplexT, T>(),
@@ -812,9 +810,9 @@ static constexpr auto getGeneratorSingleExcitationMinus()
 template <template <typename...> class ComplexT, typename T>
 static auto getSingleExcitationPlus(T angle) -> std::vector<ComplexT<T>> {
     const T p2 = angle / 2;
-    const ComplexT<T> e = Kokkos::exp(ComplexT<T>(0, p2));
-    const ComplexT<T> c{Kokkos::cos(p2), 0};
-    const ComplexT<T> s{Kokkos::sin(p2), 0};
+    const ComplexT<T> e = std::exp(ComplexT<T>(0, p2));
+    const ComplexT<T> c{std::cos(p2), 0};
+    const ComplexT<T> s{std::sin(p2), 0};
     return {e,
             ZERO<ComplexT, T>(),
             ZERO<ComplexT, T>(),
@@ -960,9 +958,9 @@ static constexpr auto getGeneratorDoubleExcitation()
 template <template <typename...> class ComplexT, typename T>
 static auto getDoubleExcitationMinus(T angle) -> std::vector<ComplexT<T>> {
     const T p2 = angle / 2;
-    const ComplexT<T> e = Kokkos::exp(ComplexT<T>(0, -p2));
-    const ComplexT<T> c{Kokkos::cos(p2), 0};
-    const ComplexT<T> s{Kokkos::sin(p2), 0};
+    const ComplexT<T> e = std::exp(ComplexT<T>(0, -p2));
+    const ComplexT<T> c{std::cos(p2), 0};
+    const ComplexT<T> s{std::sin(p2), 0};
     std::vector<ComplexT<T>> mat(256, ZERO<ComplexT, T>());
     mat[0] = e;
     mat[17] = e;
@@ -1047,9 +1045,9 @@ static constexpr auto getGeneratorDoubleExcitationMinus()
 template <template <typename...> class ComplexT, typename T>
 static auto getDoubleExcitationPlus(T angle) -> std::vector<ComplexT<T>> {
     const T p2 = angle / 2;
-    const ComplexT<T> e = Kokkos::exp(ComplexT<T>(0, p2));
-    const ComplexT<T> c{Kokkos::cos(p2), 0};
-    const ComplexT<T> s{Kokkos::sin(p2), 0};
+    const ComplexT<T> e = std::exp(ComplexT<T>(0, p2));
+    const ComplexT<T> c{std::cos(p2), 0};
+    const ComplexT<T> s{std::sin(p2), 0};
     std::vector<ComplexT<T>> mat(256, ZERO<ComplexT, T>());
     mat[0] = e;
     mat[17] = e;
@@ -1282,8 +1280,8 @@ static constexpr auto getGeneratorIsingYY() -> std::vector<ComplexT<T>> {
 template <template <typename...> class ComplexT, typename T>
 static auto getIsingZZ(T angle) -> std::vector<ComplexT<T>> {
     const T p2 = angle / 2;
-    const ComplexT<T> neg_e = Kokkos::exp(ComplexT<T>(0, -p2));
-    const ComplexT<T> pos_e = Kokkos::exp(ComplexT<T>(0, p2));
+    const ComplexT<T> neg_e = std::exp(ComplexT<T>(0, -p2));
+    const ComplexT<T> pos_e = std::exp(ComplexT<T>(0, p2));
     return {neg_e,
             ZERO<ComplexT, T>(),
             ZERO<ComplexT, T>(),
