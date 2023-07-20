@@ -24,18 +24,18 @@
 #endif
 /// @endcond
 
+#include <bit>
+#include <complex>
+#include <vector>
+
 #include "BitUtil.hpp"
 #include "GateIndices.hpp"
-#include "GateOperation.hpp"
 #include "Gates.hpp"
+#include "GateOperation.hpp"
 #include "KernelType.hpp"
 #include "LinearAlgebra.hpp"
 #include "PauliGenerator.hpp"
 #include "Util.hpp" // ZERO
-
-#include <bit>
-#include <complex>
-#include <vector>
 
 /// @cond DEV
 namespace {
@@ -485,7 +485,7 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
         PL_ASSERT(wires.size() == 1);
         const auto [indices, externalIndices] = GateIndices(wires, num_qubits);
 
-        const auto rot = Gates::getRot<PrecisionT>(phi, theta, omega);
+        const auto rot = getRot<std::complex, PrecisionT>(phi, theta, omega);
 
         const std::complex<PrecisionT> t1 =
             (inverse) ? std::conj(rot[0]) : rot[0];
@@ -763,7 +763,7 @@ class GateImplementationsPI : public PauliGenerator<GateImplementationsPI> {
                           ParamT phi, ParamT theta, ParamT omega) {
         PL_ASSERT(wires.size() == 2);
         const auto [indices, externalIndices] = GateIndices(wires, num_qubits);
-        const auto rot = Gates::getRot<PrecisionT>(phi, theta, omega);
+        const auto rot = getRot<std::complex, PrecisionT>(phi, theta, omega);
 
         const std::complex<PrecisionT> t1 =
             (inverse) ? std::conj(rot[0]) : rot[0];

@@ -19,15 +19,6 @@
 
 #pragma once
 
-#include "Constant.hpp"
-#include "ConstantUtil.hpp" // lookup
-#include "Error.hpp"
-#include "GateIndices.hpp"
-#include "KernelType.hpp"
-#include "Macros.hpp"
-#include "OpToMemberFuncPtr.hpp"
-#include "Util.hpp" // PairHash, exp2
-
 #include <cassert>
 #include <complex>
 #include <functional>
@@ -36,6 +27,15 @@
 #include <unordered_set>
 #include <variant>
 #include <vector>
+
+#include "Constant.hpp"
+#include "ConstantUtil.hpp" // lookup
+#include "Error.hpp"
+#include "GateIndices.hpp"
+#include "KernelType.hpp"
+#include "Macros.hpp"
+#include "OpToMemberFuncPtr.hpp"
+#include "Util.hpp" // PairHash, exp2
 
 /// @cond DEV
 namespace {

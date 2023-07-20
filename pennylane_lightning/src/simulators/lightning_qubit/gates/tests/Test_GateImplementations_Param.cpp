@@ -27,6 +27,9 @@
 namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::Util;
+using Pennylane::Gates::getPhaseShift;
+using Pennylane::Gates::getRZ;
+using Pennylane::Gates::getRot;
 } // namespace
 /// @endcond
 
@@ -90,7 +93,7 @@ void testApplyPhaseShift() {
     std::vector<std::vector<ComplexT>> ps_data;
     ps_data.reserve(angles.size());
     for (auto &a : angles) {
-        ps_data.push_back(Gates::getPhaseShift<PrecisionT>(a));
+        ps_data.push_back(getPhaseShift<std::complex, PrecisionT>(a));
     }
 
     std::vector<std::vector<ComplexT>> expected_results = {
@@ -199,7 +202,7 @@ void testApplyRZ() {
     std::vector<std::vector<ComplexT>> rz_data;
     rz_data.reserve(angles.size());
     for (auto &a : angles) {
-        rz_data.push_back(Gates::getRZ<PrecisionT>(a));
+        rz_data.push_back(getRZ<std::complex, PrecisionT>(a));
     }
 
     std::vector<std::vector<ComplexT>> expected_results = {
@@ -259,7 +262,7 @@ void testApplyRot() {
 
     for (size_t i = 0; i < angles.size(); i++) {
         const auto rot_mat =
-            Gates::getRot<PrecisionT>(angles[i][0], angles[i][1], angles[i][2]);
+            getRot<std::complex, PrecisionT>(angles[i][0], angles[i][1], angles[i][2]);
         expected_results[i][0] = rot_mat[0];
         expected_results[i][size_t{1U} << (num_qubits - i - 1)] = rot_mat[2];
     }
@@ -880,7 +883,7 @@ void testApplyControlledPhaseShift() {
     std::vector<std::vector<ComplexT>> ps_data;
     ps_data.reserve(angles.size());
     for (auto &a : angles) {
-        ps_data.push_back(Gates::getPhaseShift<PrecisionT>(a));
+        ps_data.push_back(getPhaseShift<std::complex, PrecisionT>(a));
     }
 
     std::vector<std::vector<ComplexT>> expected_results = {
@@ -1404,7 +1407,7 @@ void testApplyCRot() {
 
         std::vector<ComplexT> expected_results(8);
         const auto rot_mat =
-            Gates::getRot<PrecisionT>(angles[0], angles[1], angles[2]);
+            getRot<std::complex, PrecisionT>(angles[0], angles[1], angles[2]);
         expected_results[size_t{1U} << (num_qubits - 1)] = rot_mat[0];
         expected_results[(size_t{1U} << num_qubits) - 2] = rot_mat[2];
 

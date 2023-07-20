@@ -8,7 +8,7 @@
 
 #include <catch2/catch.hpp>
 
-#include "GatesHost.hpp" // getHadamard
+#include "Gates.hpp" // getHadamard
 #include "StateVectorKokkos.hpp"
 
 /**
@@ -21,7 +21,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningKokkos;
-using namespace Pennylane::LightningKokkos::Gates; // getHadamard, getCNOT,
+using namespace Pennylane::Gates; // getHadamard, getCNOT,
                                                    // getToffoli
 using namespace Pennylane::Util;
 } // namespace

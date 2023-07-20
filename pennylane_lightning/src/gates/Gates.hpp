@@ -28,7 +28,7 @@ using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 
-namespace Pennylane::LightningKokkos::Gates {
+namespace Pennylane::Gates {
 
 /**
  * @brief Create a matrix representation of the PauliX gate data in row-major
@@ -410,12 +410,12 @@ e^{-i(\phi-\omega)/2}\sin(\theta/2) & e^{i(\phi+\omega)/2}\cos(\theta/2)
  * @param omega \f$\omega\f$ shift angle.
  * @return std::vector<ComplexT<T>> Return Rot gate data.
  */
-template <template <typename...> class ComplexT, typename T>
-static auto getRot(T phi, T theta, T omega) -> std::vector<ComplexT<T>> {
+template <template <typename...> class ComplexT, typename T, typename U = T>
+static auto getRot(U phi, U theta, U omega) -> std::vector<ComplexT<T>> {
     const T c = std::cos(theta / 2);
     const T s = std::sin(theta / 2);
-    const T p{phi + omega};
-    const T m{phi - omega};
+    const U p{phi + omega};
+    const U m{phi - omega};
 
     return {ComplexT<T>{std::cos(p / 2) * c, -std::sin(p / 2) * c},
             ComplexT<T>{-std::cos(m / 2) * s, -std::sin(m / 2) * s},
@@ -1343,4 +1343,4 @@ static constexpr auto getGeneratorIsingZZ() -> std::vector<ComplexT<T>> {
     };
 }
 
-} // namespace Pennylane::LightningKokkos::Gates
+} // namespace Pennylane::Gates

@@ -15,7 +15,7 @@
  * @file RegisterKernel.hpp
  * Register all gate and generator implementations
  */
-
+#pragma once
 #include <tuple>
 
 #include "Constant.hpp"

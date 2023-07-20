@@ -8,7 +8,7 @@
 
 #include <catch2/catch.hpp>
 
-#include "GatesHost.hpp"
+#include "Gates.hpp"
 #include "MeasurementsKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
@@ -22,7 +22,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningKokkos;
-using namespace Pennylane::LightningKokkos::Gates;
+using namespace Pennylane::Gates;
 using Pennylane::Util::exp2;
 } // namespace
 /// @endcond
