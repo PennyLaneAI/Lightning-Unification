@@ -1,6 +1,6 @@
 #include "Error.hpp" // LightningException
 #include "Observables.hpp"
-#include "TestHelpers.hpp" // isApproxEqual, createZeroStateComplex, createProductState
+#include "TestHelpers.hpp" // isApproxEqual, createZeroState, createProductState
 #include "TypeList.hpp"
 #include "Util.hpp" // TestVector
 
@@ -19,7 +19,7 @@ namespace {
 using namespace Pennylane::Observables;
 
 using Pennylane::Util::createProductState;
-using Pennylane::Util::createZeroStateComplex;
+using Pennylane::Util::createZeroState;
 using Pennylane::Util::isApproxEqual;
 using Pennylane::Util::LightningException;
 using Pennylane::Util::TestVector;
@@ -422,11 +422,10 @@ template <typename TypeList> void testHamiltonianBase() {
 
             DYNAMIC_SECTION("applyInPlace must fail - "
                             << StateVectorToName<StateVectorT>::name) {
-                using VectorT = std::vector<ComplexT>;
 
                 auto ham =
                     HamiltonianT::create({PrecisionT{1.0}, h, h}, {zz, x1, x2});
-                VectorT st_data = createZeroStateComplex<ComplexT>(2);
+                auto st_data = createZeroState<ComplexT>(2);
 
                 StateVectorT state_vector(st_data.data(), st_data.size());
 

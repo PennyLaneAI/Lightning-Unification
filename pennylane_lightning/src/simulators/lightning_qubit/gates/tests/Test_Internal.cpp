@@ -69,13 +69,14 @@ TEMPLATE_TEST_CASE("Approx", "[Test_Internal]", float, double) {
 
 TEMPLATE_TEST_CASE("createProductState", "[Test_Internal]", float, double) {
     using PrecisionT = TestType;
+    using ComplexT = std::complex<PrecisionT>;
 
     const auto margin = PrecisionT{1e-7};
 
     SECTION("createProductState(\"+-0\") == |+-0> ") {
         const auto st = createProductState<PrecisionT>("+-0");
 
-        auto expected = createZeroState<PrecisionT>(3);
+        auto expected = createZeroState<ComplexT>(3);
         GateImplementationsPI::applyHadamard(expected.data(), 3, {0}, false);
 
         GateImplementationsPI::applyPauliX(expected.data(), 3, {1}, false);
@@ -86,7 +87,7 @@ TEMPLATE_TEST_CASE("createProductState", "[Test_Internal]", float, double) {
     SECTION("createProductState(\"+-0\") != |+-1> ") {
         const auto st = createProductState<PrecisionT>("+-0");
 
-        auto expected = createZeroState<PrecisionT>(3); // |000>
+        auto expected = createZeroState<ComplexT>(3); // |000>
         GateImplementationsPI::applyHadamard(expected.data(), 3, {0},
                                              false); // |+00>
 

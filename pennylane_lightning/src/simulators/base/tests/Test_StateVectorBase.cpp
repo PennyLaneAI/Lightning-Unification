@@ -62,10 +62,9 @@ template <typename TypeList> void testStateVectorBase() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using StateVectorT = typename TypeList::Type;
         using ComplexT = typename StateVectorT::ComplexT;
-        using VectorT = std::vector<ComplexT>;
 
         const size_t num_qubits = 4;
-        VectorT st_data = createZeroStateComplex<ComplexT>(num_qubits);
+        auto st_data = createZeroState<ComplexT>(num_qubits);
 
         StateVectorT state_vector(st_data.data(), st_data.size());
 

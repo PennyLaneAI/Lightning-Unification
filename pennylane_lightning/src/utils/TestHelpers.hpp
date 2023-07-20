@@ -289,28 +289,20 @@ void scaleVector(std::vector<std::complex<Data_t>, Alloc> &data,
         [scalar](const std::complex<Data_t> &c) { return c * scalar; });
 }
 
-/**
- * @brief create |0>^N
- */
-template <typename PrecisionT>
-auto createZeroState(size_t num_qubits)
-    -> TestVector<std::complex<PrecisionT>> {
-    TestVector<std::complex<PrecisionT>> res(
-        size_t{1U} << num_qubits, {0.0, 0.0},
-        getBestAllocator<std::complex<PrecisionT>>());
-    res[0] = std::complex<PrecisionT>{1.0, 0.0};
-    return res;
-}
 
 /**
  * @brief create |0>^N
  */
 template <typename ComplexT>
-auto createZeroStateComplex(size_t num_qubits) -> std::vector<ComplexT> {
-    std::vector<ComplexT> res(size_t{1U} << num_qubits, 0.0);
-    res[0] = 1.0;
+auto createZeroState(size_t num_qubits)
+    -> TestVector<ComplexT> {
+    TestVector<ComplexT> res(
+        size_t{1U} << num_qubits, {0.0, 0.0},
+        getBestAllocator<ComplexT>());
+    res[0] = ComplexT{1.0, 0.0};
     return res;
 }
+
 
 /**
  * @brief create |+>^N
