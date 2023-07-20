@@ -78,7 +78,7 @@ class StateVectorKokkos final
     StateVectorKokkos(size_t num_qubits,
                       const Kokkos::InitializationSettings &kokkos_args = {})
         : BaseType{num_qubits},
-          gates_{// Identity
+          gates_{
                  {"PauliX",
                   [&](auto &&wires, auto &&adjoint, auto &&params) {
                       applyPauliX(std::forward<decltype(wires)>(wires),

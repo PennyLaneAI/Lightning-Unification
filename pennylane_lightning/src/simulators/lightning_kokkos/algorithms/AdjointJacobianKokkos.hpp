@@ -47,113 +47,8 @@ class AdjointJacobian final
                                           sv1.getView(), sv2.getView());
     }
 
-    /**
-     * @brief Utility method to apply all operations from given
-     * `%OpsData<StateVectorT>` object to
-     * `%StateVectorT`
-     *
-     * @param state Statevector to be updated.
-     * @param operations Operations to apply.
-     * @param adj Take the adjoint of the given operations.
-     */
-    inline void applyOperations(StateVectorT &state,
-                                const OpsData<StateVectorT> &operations,
-                                bool adj = false) {
-        for (size_t op_idx = 0; op_idx < operations.getOpsName().size();
-             op_idx++) {
-            state.applyOperation(operations.getOpsName()[op_idx],
-                                 operations.getOpsWires()[op_idx],
-                                 operations.getOpsInverses()[op_idx] ^ adj,
-                                 operations.getOpsParams()[op_idx]);
-        }
-    }
-
-    /**
-     * @brief Utility method to apply the adjoint indexed operation from
-     * `%OpsData<StateVectorT>` object to
-     * `%StateVectorT`.
-     *
-     * @param state Statevector to be updated.
-     * @param operations Operations to apply.
-     * @param op_idx Adjointed operation index to apply.
-     */
-    inline void applyOperationAdj(StateVectorT &state,
-                                  const OpsData<StateVectorT> &operations,
-                                  size_t op_idx) {
-        state.applyOperation(operations.getOpsName()[op_idx],
-                             operations.getOpsWires()[op_idx],
-                             !operations.getOpsInverses()[op_idx],
-                             operations.getOpsParams()[op_idx]);
-    }
-
-    /**
-     * @brief Utility method to apply a given operations from given
-     * `%ObsDatum<PrecisionT>` object
-     * to
-     * `%StateVectorT`
-     *
-     * @param state Statevector to be updated.
-     * @param observable Observable to apply.
-     */
-    inline void applyObservable(StateVectorT &state,
-                                const Observable<StateVectorT> &observable) {
-        observable.applyInPlace(state);
-    }
-
-    /**
-     * @brief Application of observables to given
-     * statevectors
-     *
-     * @param states Vector of statevector copies, one per observable.
-     * @param reference_state Reference statevector
-     * @param observables Vector of observables to apply to each statevector.
-     */
-    inline void applyObservables(
-        std::vector<StateVectorT> &states, const StateVectorT &reference_state,
-        const std::vector<std::shared_ptr<Observable<StateVectorT>>>
-            &observables) {
-        size_t num_observables = observables.size();
-        for (size_t h_i = 0; h_i < num_observables; h_i++) {
-            states[h_i].updateData(reference_state);
-            applyObservable(states[h_i], *observables[h_i]);
-        }
-    }
-
-    /**
-     * @brief Application of adjoint operations to
-     * statevectors.
-     *
-     * @param states Vector of all statevectors; 1 per observable
-     * @param operations Operations list.
-     * @param op_idx Index of given operation within operations list to take
-     * adjoint of.
-     */
-    inline void applyOperationsAdj(std::vector<StateVectorT> &states,
-                                   const OpsData<StateVectorT> &operations,
-                                   size_t op_idx) {
-        size_t num_states = states.size();
-        for (size_t obs_idx = 0; obs_idx < num_states; obs_idx++) {
-            applyOperationAdj(states[obs_idx], operations, op_idx);
-        }
-    }
-
-    /**
-     * @brief Applies the gate generator for a given parameteric gate. Returns
-     * the associated scaling coefficient.
-     *
-     * @param sv Statevector data to operate upon.
-     * @param op_name Name of parametric gate.
-     * @param wires Wires to operate upon.
-     * @param adj Indicate whether to take the adjoint of the operation.
-     * @return PrecisionT Generator scaling coefficient.
-     */
-    inline auto applyGenerator(StateVectorT &sv, const std::string &op_name,
-                               const std::vector<size_t> &wires, const bool adj)
-        -> PrecisionT {
-        return sv.applyGenerator(op_name, wires, adj);
-    }
-
   public:
+
     AdjointJacobian() = default;
 
     /**
@@ -285,13 +180,13 @@ class AdjointJacobian final
 
         // Apply given operations to statevector if requested
         if (apply_operations) {
-            applyOperations(lambda, ops);
+            this->applyOperations(lambda, ops);
         }
 
         // Create observable-applied state-vectors
         std::vector<StateVectorT> H_lambda(num_observables,
                                            StateVectorT(lambda.getNumQubits()));
-        applyObservables(H_lambda, lambda, obs);
+        this->applyObservables(H_lambda, lambda, obs);
 
         StateVectorT mu(lambda.getNumQubits());
 
@@ -308,12 +203,12 @@ class AdjointJacobian final
                 break; // All done
             }
             mu.updateData(lambda);
-            applyOperationAdj(lambda, ops, op_idx);
+            this->applyOperationAdj(lambda, ops, op_idx);
 
             if (ops.hasParams(op_idx)) {
                 if (current_param_idx == *tp_it) {
                     const PrecisionT scalingFactor =
-                        applyGenerator(mu, ops.getOpsName()[op_idx],
+                        this->applyGenerator(mu, ops.getOpsName()[op_idx],
                                        ops.getOpsWires()[op_idx],
                                        !ops.getOpsInverses()[op_idx]) *
                         (ops.getOpsInverses()[op_idx] ? -1 : 1);
@@ -329,7 +224,7 @@ class AdjointJacobian final
                 }
                 current_param_idx--;
             }
-            applyOperationsAdj(H_lambda, ops, static_cast<size_t>(op_idx));
+            this->applyOperationsAdj(H_lambda, ops, static_cast<size_t>(op_idx));
         }
     }
 };
