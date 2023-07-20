@@ -24,7 +24,6 @@
 
 #include "BitUtil.hpp"        // log2PerfectPower, isPerfectPowerOf2
 #include "CPUMemoryModel.hpp" // bestCPUMemoryModel
-#include "Gates.hpp"
 #include "KernelType.hpp"
 #include "Memory.hpp"
 #include "StateVectorLQubit.hpp"

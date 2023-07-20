@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Kokkos_Core.hpp>
+#include <Kokkos_StdAlgorithms.hpp>
 
 #include "BitUtil.hpp"
 
