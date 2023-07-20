@@ -20,7 +20,6 @@ target_compile_options(lightning_compile_options INTERFACE "-D_ENABLE_PLKOKKOS=1
 ##########################
 ## Enforce C++ Standard ##
 ##########################
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
