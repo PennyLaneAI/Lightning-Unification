@@ -43,23 +43,6 @@ using namespace Pennylane::LightningKokkos::Functors;
 namespace Pennylane::LightningKokkos {
 
 /**
- * @brief Kokkos functor for setting the state vector
- *
- * @tparam fp_t Floating point precision of underlying statevector data
- */
-template <typename fp_t> struct setStateVectorFunctor {
-    Kokkos::View<Kokkos::complex<fp_t> *> a;
-    Kokkos::View<size_t *> indices;
-    Kokkos::View<Kokkos::complex<fp_t> *> values;
-    setStateVectorFunctor(Kokkos::View<Kokkos::complex<fp_t> *> a_,
-                          const Kokkos::View<size_t *> indices_,
-                          const Kokkos::View<Kokkos::complex<fp_t> *> values_)
-        : a(a_), indices(indices_), values(values_) {}
-    KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t i) const { a(indices[i]) = values[i]; }
-};
-
-/**
  * @brief  Kokkos state vector class
  *
  * @tparam fp_t Floating-point precision type.
@@ -492,7 +475,8 @@ class StateVectorKokkos final
 
         Kokkos::parallel_for(
             indices.size(),
-            setStateVectorFunctor(getData(), d_indices, d_values));
+            KOKKOS_LAMBDA(const std::size_t i){ getData()(indices[i]) = values[i]; }
+        );
     }
 
     /**

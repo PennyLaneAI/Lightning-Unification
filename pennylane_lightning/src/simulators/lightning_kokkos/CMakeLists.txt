@@ -37,8 +37,6 @@ option(PLKOKKOS_ENABLE_NATIVE "Enable native CPU build tuning" OFF)
 option(PLKOKKOS_ENABLE_SANITIZER "Enable address sanitizer" OFF)
 option(PLKOKKOS_ENABLE_WARNINGS "Enable warnings" ON)
 
-
-
 # Include macro and functions supporting Kokkos libraries.
 include("${CMAKE_SOURCE_DIR}/cmake/support_kokkos.cmake")
 FindKokkosAndKokkosKernels(lightning_external_libs)
@@ -63,13 +61,13 @@ if(PLKOKKOS_ENABLE_SANITIZER)
     set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 ENDIF()
 
-target_link_libraries(${PL_BACKEND} PUBLIC   lightning_compile_options
-                                                lightning_external_libs
-                                                lightning_base
-                                                lightning_utils
-                                                ${PL_BACKEND}_utils
-                                                ${PL_BACKEND}_gates
-                                                )
+target_link_libraries(${PL_BACKEND} PUBLIC  lightning_compile_options
+                                            lightning_external_libs
+                                            lightning_base
+                                            lightning_utils
+                                            ${PL_BACKEND}_utils
+                                            ${PL_BACKEND}_gates
+                                            )
 target_include_directories(${PL_BACKEND} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_property(TARGET ${PL_BACKEND} PROPERTY POSITION_INDEPENDENT_CODE ON)
 if(PLKOKKOS_ENABLE_NATIVE)
