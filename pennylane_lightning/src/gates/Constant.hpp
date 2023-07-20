@@ -18,7 +18,6 @@
 #pragma once
 
 #include "GateOperation.hpp"
-#include "KernelType.hpp"
 #include "TypeList.hpp"
 
 namespace Pennylane::Gates::Constant {

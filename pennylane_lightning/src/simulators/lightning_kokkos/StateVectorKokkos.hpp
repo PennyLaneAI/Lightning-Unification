@@ -457,7 +457,7 @@ class StateVectorKokkos final
     /**
      * @brief Init zeros for the state-vector on device.
      */
-    void initZeros() { Kokkos::deep_copy(getData(), ComplexT(0.0, 0.0)); }
+    void initZeros() { Kokkos::deep_copy(getData(), ComplexT{0.0, 0.0}); }
 
     /**
      * @brief Set value for a single element of the state-vector on device.
@@ -466,7 +466,7 @@ class StateVectorKokkos final
      */
     void setBasisState(const size_t index) {
         initZeros();
-        getData()(index) = ComplexT(1.0, 0.0);
+        getData()(index) = ComplexT{1.0, 0.0};
     }
 
     /**

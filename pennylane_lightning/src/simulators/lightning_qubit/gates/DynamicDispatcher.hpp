@@ -163,7 +163,7 @@ template <typename PrecisionT> class DynamicDispatcher {
      * @param kernel Kernel
      * @param name Name of the kernel
      */
-    void registerKernelName(KernelType kernel, std::string name) {
+    void registerKernelName(KernelType kernel, const std::string &name) {
         kernel_names_.emplace(kernel, std::move(name));
     }
 

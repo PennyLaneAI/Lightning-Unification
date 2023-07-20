@@ -89,11 +89,11 @@ TEMPLATE_TEST_CASE("Test variance of HermitianObs", "[StateVectorKokkos_Var]",
         const TestType js = std::sin(-theta / 2);
         std::vector<ComplexT> matrix(16, 0);
         matrix[0] = c;
-        matrix[1] = ComplexT(0, js);
-        matrix[4] = ComplexT(0, js);
+        matrix[1] = ComplexT{0, js};
+        matrix[4] = ComplexT{0, js};
         matrix[5] = c;
-        matrix[10] = ComplexT(1, 0);
-        matrix[15] = ComplexT(1, 0);
+        matrix[10] = ComplexT{1, 0};
+        matrix[15] = ComplexT{1, 0};
 
         auto ob = HermitianObs<StateVectorKokkos<TestType>>(matrix, {0, 2});
         auto res = m.var(ob);

@@ -354,13 +354,13 @@ template <typename PrecisionT, typename ComplexT, class RandomEngine>
 auto createRandomStateVectorComplex(RandomEngine &re, size_t num_qubits)
     -> std::vector<ComplexT> {
 
-    std::vector<ComplexT> res(size_t{1U} << num_qubits, ComplexT(0.0, 0.0));
+    std::vector<ComplexT> res(size_t{1U} << num_qubits, ComplexT{0.0, 0.0});
     std::uniform_real_distribution<PrecisionT> dist;
     for (size_t idx = 0; idx < (size_t{1U} << num_qubits); idx++) {
-        res[idx] = ComplexT(dist(re), dist(re));
+        res[idx] = ComplexT{dist(re), dist(re)};
     }
     auto norm = squaredNorm<PrecisionT>(res);
-    scaleVectorComplex(res, ComplexT(1.0, 0.0) / ComplexT(std::sqrt(norm)));
+    scaleVectorComplex(res, ComplexT{1.0, 0.0} / ComplexT{std::sqrt(norm)});
     return res;
 }
 
@@ -426,8 +426,8 @@ auto createNonTrivialState(size_t num_qubits = 3)
 
     size_t data_size = Util::exp2(num_qubits);
 
-    std::vector<ComplexT> arr(data_size, ComplexT(0, 0));
-    arr[0] = ComplexT(1, 0);
+    std::vector<ComplexT> arr(data_size, ComplexT{0, 0});
+    arr[0] = ComplexT{1, 0};
     StateVectorT Measured_StateVector(arr.data(), data_size);
 
     std::vector<std::string> gates;

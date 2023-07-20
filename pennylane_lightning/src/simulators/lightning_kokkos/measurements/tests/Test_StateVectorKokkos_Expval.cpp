@@ -269,8 +269,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueSingleQubitOp",
             const TestType js = std::sin(-theta / 2);
 
             opMat[0] = c;
-            opMat[1] = ComplexT(static_cast<TestType>(0), js);
-            opMat[2] = ComplexT(static_cast<TestType>(0), js);
+            opMat[1] = ComplexT{0, js};
+            opMat[2] = ComplexT{0, js};
             opMat[3] = c;
 
             Kokkos::deep_copy(opMatDevice, opMat);
@@ -312,11 +312,11 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
             const TestType js = std::sin(-theta / 2);
 
             opMat[0] = c;
-            opMat[1] = ComplexT(static_cast<TestType>(0), js);
-            opMat[4] = ComplexT(static_cast<TestType>(0), js);
+            opMat[1] = ComplexT{0, js};
+            opMat[4] = ComplexT{0, js};
             opMat[5] = c;
-            opMat[10] = ComplexT(static_cast<TestType>(1), 0);
-            opMat[15] = ComplexT(static_cast<TestType>(1), 0);
+            opMat[10] = ComplexT{1, 0};
+            opMat[15] = ComplexT{1, 0};
 
             Kokkos::deep_copy(opMatDevice, opMat);
             auto res = m.getExpectationValueTwoQubitOp(opMatDevice, {0, 1});
@@ -331,11 +331,11 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
             const TestType js = std::sin(-theta / 2);
             std::vector<ComplexT> matrix(16);
             matrix[0] = c;
-            matrix[1] = ComplexT(0, js);
-            matrix[4] = ComplexT(0, js);
+            matrix[1] = ComplexT{0, js};
+            matrix[4] = ComplexT{0, js};
             matrix[5] = c;
-            matrix[10] = ComplexT(1, 0);
-            matrix[15] = ComplexT(1, 0);
+            matrix[10] = ComplexT{1, 0};
+            matrix[15] = ComplexT{1, 0};
 
             auto ob = HermitianObs<StateVectorKokkos<TestType>>(matrix, {0, 1});
             auto res = m.expval(ob);
@@ -362,9 +362,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
 
         for (size_t i = 0; i < matrix.size(); i++) {
             if (i % matrix_dim == i / matrix_dim)
-                matrix[i] = ComplexT(1, 0);
+                matrix[i] = ComplexT{1, 0};
             else
-                matrix[i] = ComplexT(0, 0);
+                matrix[i] = ComplexT{0, 0};
         }
 
         auto results = m.getExpectationValue(wires, matrix);

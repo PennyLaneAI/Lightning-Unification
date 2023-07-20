@@ -105,8 +105,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliX",
                 Kokkos::deep_copy(result_0, result_subview_0);
                 Kokkos::deep_copy(result_1, result_subview_1);
 
-                CHECK(result_0 == ComplexT(ZERO<TestType>()));
-                CHECK(result_1 == ComplexT(ONE<TestType>()));
+                CHECK(result_0 == ComplexT{ZERO<TestType>()});
+                CHECK(result_1 == ComplexT{ONE<TestType>()});
             }
         }
         SECTION("Apply using dispatcher") {
@@ -121,8 +121,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliX",
                 Kokkos::deep_copy(result_0, result_subview_0);
                 Kokkos::deep_copy(result_1, result_subview_1);
 
-                CHECK(result_0 == ComplexT(ZERO<TestType>()));
-                CHECK(result_1 == ComplexT(ONE<TestType>()));
+                CHECK(result_0 == ComplexT{ZERO<TestType>()});
+                CHECK(result_1 == ComplexT{ONE<TestType>()});
             }
         }
     }
@@ -139,10 +139,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliY",
         kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                   {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
-        const auto p = ComplexT(HALF<TestType>()) *
-                       ComplexT(INVSQRT2<TestType>()) *
-                       ComplexT(IMAG<TestType>());
-        const auto m = ComplexT(NEGONE<TestType>()) * p;
+        const auto p = ComplexT{HALF<TestType>()} *
+                       ComplexT{INVSQRT2<TestType>()} *
+                       ComplexT{IMAG<TestType>()};
+        const auto m = ComplexT{NEGONE<TestType>()} * p;
 
         const std::vector<std::vector<ComplexT>> expected_results = {
             {m, m, m, m, p, p, p, p},
@@ -207,8 +207,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliZ",
                                   {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
         const auto p =
-            ComplexT(HALF<TestType>()) * ComplexT(INVSQRT2<TestType>());
-        const auto m = ComplexT(NEGONE<TestType>()) * p;
+            ComplexT{HALF<TestType>()} * ComplexT{INVSQRT2<TestType>()};
+        const auto m = ComplexT{NEGONE<TestType>()} * p;
 
         const std::vector<std::vector<ComplexT>> expected_results = {
             {p, p, p, p, m, m, m, m},
@@ -271,8 +271,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyS", "[StateVectorKokkos_Nonparam]",
         kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                   {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
-        auto r = ComplexT(HALF<TestType>()) * ComplexT(INVSQRT2<TestType>());
-        auto i = r * ComplexT(IMAG<TestType>());
+        auto r = ComplexT{HALF<TestType>()} * ComplexT{INVSQRT2<TestType>()};
+        auto i = r * ComplexT{IMAG<TestType>()};
 
         const std::vector<std::vector<ComplexT>> expected_results = {
             {r, r, r, r, i, i, i, i},
@@ -333,9 +333,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyT", "[StateVectorKokkos_Nonparam]",
         kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                   {{0}, {1}, {2}}, {{false}, {false}, {false}});
 
-        auto r = ComplexT(HALF<TestType>()) * ComplexT(INVSQRT2<TestType>());
-        auto i = ComplexT(HALF<TestType>()) * ComplexT(HALF<TestType>()) *
-                 (ComplexT(IMAG<TestType>()) + ComplexT(ONE<TestType>()));
+        auto r = ComplexT{HALF<TestType>()} * ComplexT{INVSQRT2<TestType>()};
+        auto i = ComplexT{HALF<TestType>()} * ComplexT{HALF<TestType>()} *
+                 (ComplexT{IMAG<TestType>()} + ComplexT{ONE<TestType>()});
 
         const std::vector<std::vector<ComplexT>> expected_results = {
             {r, r, r, r, i, i, i, i},
@@ -410,13 +410,13 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCNOT",
             }
 
             Kokkos::deep_copy(result, kokkos_sv.getData());
-            CHECK(imag(ComplexT(INVSQRT2<TestType>())) ==
+            CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
                   Approx(imag(result[0])));
-            CHECK(real(ComplexT(INVSQRT2<TestType>())) ==
+            CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
                   Approx(real(result[0])));
-            CHECK(imag(ComplexT(INVSQRT2<TestType>())) ==
+            CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
                   Approx(imag(result[7])));
-            CHECK(real(ComplexT(INVSQRT2<TestType>())) ==
+            CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
                   Approx(real(result[7])));
         }
         SECTION("Apply using dispatcher") {
@@ -428,13 +428,13 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCNOT",
                 kokkos_sv.applyCNOT({index - 1, index}, false);
             }
             Kokkos::deep_copy(result, kokkos_sv.getData());
-            CHECK(imag(ComplexT(INVSQRT2<TestType>())) ==
+            CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
                   Approx(imag(result[0])));
-            CHECK(real(ComplexT(INVSQRT2<TestType>())) ==
+            CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
                   Approx(real(result[0])));
-            CHECK(imag(ComplexT(INVSQRT2<TestType>())) ==
+            CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
                   Approx(imag(result[7])));
-            CHECK(real(ComplexT(INVSQRT2<TestType>())) ==
+            CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
                   Approx(real(result[7])));
         }
     }
@@ -455,26 +455,26 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applySWAP",
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
                                                           kokkos_sv.getData());
 
-        auto z = ComplexT(ZERO<TestType>());
-        auto i = ComplexT(INVSQRT2<TestType>());
+        auto z = ComplexT{ZERO<TestType>()};
+        auto i = ComplexT{INVSQRT2<TestType>()};
 
         SECTION("Apply directly") {
             SECTION("Check Initial value") {
                 for (std::size_t j = 0; j < exp2(num_qubits); j++) {
                     if (j == 2) {
-                        CHECK(imag(ComplexT(INVSQRT2<TestType>())) ==
+                        CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
                               Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT(INVSQRT2<TestType>())) ==
+                        CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
                               Approx(real(ini_sv[j])));
                     } else if (j == 6) {
-                        CHECK(imag(ComplexT(INVSQRT2<TestType>())) ==
+                        CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
                               Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT(INVSQRT2<TestType>())) ==
+                        CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
                               Approx(real(ini_sv[j])));
                     } else {
-                        CHECK(imag(ComplexT(ZERO<TestType>())) ==
+                        CHECK(imag(ComplexT{ZERO<TestType>()}) ==
                               Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT(ZERO<TestType>())) ==
+                        CHECK(real(ComplexT{ZERO<TestType>()}) ==
                               Approx(real(ini_sv[j])));
                     }
                 }
@@ -647,26 +647,26 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCZ", "[StateVectorKokkos_Nonparam]",
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
                                                           kokkos_sv.getData());
 
-        auto z = ComplexT(ZERO<TestType>());
-        auto i = ComplexT(INVSQRT2<TestType>());
+        auto z = ComplexT{ZERO<TestType>()};
+        auto i = ComplexT{INVSQRT2<TestType>()};
 
         SECTION("Apply directly") {
             SECTION("Check Initial value") {
                 for (std::size_t j = 0; j < exp2(num_qubits); j++) {
                     if (j == 2) {
-                        CHECK(imag(ComplexT(INVSQRT2<TestType>())) ==
+                        CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
                               Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT(INVSQRT2<TestType>())) ==
+                        CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
                               Approx(real(ini_sv[j])));
                     } else if (j == 6) {
-                        CHECK(imag(ComplexT(INVSQRT2<TestType>())) ==
+                        CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
                               Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT(INVSQRT2<TestType>())) ==
+                        CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
                               Approx(real(ini_sv[j])));
                     } else {
-                        CHECK(imag(ComplexT(ZERO<TestType>())) ==
+                        CHECK(imag(ComplexT{ZERO<TestType>()}) ==
                               Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT(ZERO<TestType>())) ==
+                        CHECK(real(ComplexT{ZERO<TestType>()}) ==
                               Approx(real(ini_sv[j])));
                     }
                 }
@@ -837,8 +837,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyToffoli",
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
                                                           kokkos_sv.getData());
 
-        auto z = ComplexT(ZERO<TestType>());
-        auto i = ComplexT(INVSQRT2<TestType>());
+        auto z = ComplexT{ZERO<TestType>()};
+        auto i = ComplexT{INVSQRT2<TestType>()};
 
         SECTION("Apply directly") {
 
@@ -1012,8 +1012,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCSWAP",
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
                                                           kokkos_sv.getData());
 
-        auto z = ComplexT(ZERO<TestType>());
-        auto i = ComplexT(INVSQRT2<TestType>());
+        auto z = ComplexT{ZERO<TestType>()};
+        auto i = ComplexT{INVSQRT2<TestType>()};
 
         SECTION("Apply directly") {
 
