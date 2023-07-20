@@ -151,16 +151,12 @@ template <class PrecisionT, class Derived> class StateVectorBase {
                          const std::vector<std::vector<size_t>> &ops_wires,
                          const std::vector<bool> &ops_adjoint) {
         const size_t numOperations = ops.size();
-        if (numOperations != ops_wires.size()) {
-            PL_ABORT(
-                "Invalid arguments: number of operations, wires, and inverses "
-                "must all be equal");
-        }
-        if (numOperations != ops_adjoint.size()) {
-            PL_ABORT(
-                "Invalid arguments: number of operations, wires and inverses"
-                "must all be equal");
-        }
+        PL_ABORT_IF_NOT(numOperations == ops_wires.size(),
+            "Invalid arguments: number of operations, wires, and inverses "
+            "must all be equal");
+        PL_ABORT_IF_NOT(numOperations == ops_adjoint.size(),
+            "Invalid arguments: number of operations, wires and inverses"
+            "must all be equal");
         for (size_t i = 0; i < numOperations; i++) {
             this->applyOperation(ops[i], ops_wires[i], ops_adjoint[i], {});
         }
