@@ -48,7 +48,6 @@ class AdjointJacobian final
     }
 
   public:
-
     AdjointJacobian() = default;
 
     /**
@@ -209,8 +208,8 @@ class AdjointJacobian final
                 if (current_param_idx == *tp_it) {
                     const PrecisionT scalingFactor =
                         this->applyGenerator(mu, ops.getOpsName()[op_idx],
-                                       ops.getOpsWires()[op_idx],
-                                       !ops.getOpsInverses()[op_idx]) *
+                                             ops.getOpsWires()[op_idx],
+                                             !ops.getOpsInverses()[op_idx]) *
                         (ops.getOpsInverses()[op_idx] ? -1 : 1);
 
                     for (size_t obs_idx = 0; obs_idx < num_observables;
@@ -224,7 +223,8 @@ class AdjointJacobian final
                 }
                 current_param_idx--;
             }
-            this->applyOperationsAdj(H_lambda, ops, static_cast<size_t>(op_idx));
+            this->applyOperationsAdj(H_lambda, ops,
+                                     static_cast<size_t>(op_idx));
         }
     }
 };

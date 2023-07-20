@@ -88,12 +88,15 @@ template <typename TypeList> void testApplyOperations() {
         DYNAMIC_SECTION("Apply operations without parameters - "
                         << StateVectorToName<StateVectorT>::name) {
             auto st_data_1 =
-                createRandomStateVectorData<PrecisionT>(
-                    re, num_qubits);
+                createRandomStateVectorData<PrecisionT>(re, num_qubits);
             auto st_data_2 = st_data_1;
 
-            StateVectorT state_vector_1(reinterpret_cast<ComplexT *>(st_data_1.data()), st_data_1.size());
-            StateVectorT state_vector_2(reinterpret_cast<ComplexT *>(st_data_2.data()), st_data_2.size());
+            StateVectorT state_vector_1(
+                reinterpret_cast<ComplexT *>(st_data_1.data()),
+                st_data_1.size());
+            StateVectorT state_vector_2(
+                reinterpret_cast<ComplexT *>(st_data_2.data()),
+                st_data_2.size());
 
             state_vector_1.applyOperations({"PauliX", "PauliY"}, {{0}, {1}},
                                            {false, false});
@@ -109,12 +112,15 @@ template <typename TypeList> void testApplyOperations() {
         DYNAMIC_SECTION("Apply operations with parameters - "
                         << StateVectorToName<StateVectorT>::name) {
             auto st_data_1 =
-                createRandomStateVectorData<PrecisionT>(
-                    re, num_qubits);
+                createRandomStateVectorData<PrecisionT>(re, num_qubits);
             auto st_data_2 = st_data_1;
 
-            StateVectorT state_vector_1(reinterpret_cast<ComplexT *>(st_data_1.data()), st_data_1.size());
-            StateVectorT state_vector_2(reinterpret_cast<ComplexT *>(st_data_2.data()), st_data_2.size());
+            StateVectorT state_vector_1(
+                reinterpret_cast<ComplexT *>(st_data_1.data()),
+                st_data_1.size());
+            StateVectorT state_vector_2(
+                reinterpret_cast<ComplexT *>(st_data_2.data()),
+                st_data_2.size());
 
             state_vector_1.applyOperations({"RX", "RY"}, {{0}, {1}},
                                            {false, false}, {{0.1}, {0.2}});

@@ -94,7 +94,7 @@ template <class StateVectorT, class Derived> class AdjointJacobianBase {
     inline void applyOperationsAdj(std::vector<StateVectorT> &states,
                                    const OpsData<StateVectorT> &operations,
                                    size_t op_idx) {
-        for (auto & state : states) {
+        for (auto &state : states) {
             applyOperationAdj(state, operations, op_idx);
         }
     }
