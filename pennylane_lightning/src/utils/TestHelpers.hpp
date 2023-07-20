@@ -262,20 +262,6 @@ void scaleVector(std::vector<std::complex<Data_t>, Alloc> &data,
 /**
  * @brief Multiplies every value in a dataset by a given complex scalar value.
  *
- * @tparam ComplexT Complex data type. Supports float/double
- * std::complex/Kokkos::complex data.
- * @param data Data vector to be scaled.
- * @param scalar Scalar value.
- */
-template <class ComplexT>
-void scaleVectorComplex(std::vector<ComplexT> &data, ComplexT scalar) {
-    std::transform(data.begin(), data.end(), data.begin(),
-                   [scalar](const ComplexT &c) { return c * scalar; });
-}
-
-/**
- * @brief Multiplies every value in a dataset by a given complex scalar value.
- *
  * @tparam Data_t Precision of complex data type. Supports float and double
  * data.
  * @param data Data to be scaled.
@@ -332,23 +318,6 @@ auto createRandomStateVectorData(RandomEngine &re, size_t num_qubits)
 
     scaleVector(res, std::complex<PrecisionT>{1.0, 0.0} /
                          std::sqrt(squaredNorm(res.data(), res.size())));
-    return res;
-}
-
-/**
- * @brief create a random state
- */
-template <typename PrecisionT, typename ComplexT, class RandomEngine>
-auto createRandomStateVectorComplex(RandomEngine &re, size_t num_qubits)
-    -> std::vector<ComplexT> {
-
-    std::vector<ComplexT> res(size_t{1U} << num_qubits, ComplexT{0.0, 0.0});
-    std::uniform_real_distribution<PrecisionT> dist;
-    for (size_t idx = 0; idx < (size_t{1U} << num_qubits); idx++) {
-        res[idx] = ComplexT{dist(re), dist(re)};
-    }
-    auto norm = squaredNorm<PrecisionT>(res);
-    scaleVectorComplex(res, ComplexT{1.0, 0.0} / ComplexT{std::sqrt(norm)});
     return res;
 }
 

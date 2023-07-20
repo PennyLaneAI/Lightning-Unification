@@ -355,32 +355,6 @@ auto squaredNorm(const T *data, size_t data_size) -> remove_complex_t<T> {
  * Compute the squared norm of a real/complex vector :math:`\sum_k |v_k|^2`
  * @endrst
  *
- * @tparam T Vector data type.
- * @tparam PrecisionT Vector data precision.
- * @param data Data pointer
- * @param data_size Size of the data
- */
-template <typename PrecisionT, class T>
-auto squaredNorm(const std::vector<T> &data) -> PrecisionT {
-    PrecisionT norm2 = 0.0;
-    if constexpr (is_complex_v<T>) {
-        for (size_t i = 0; i < data.size(); i++) {
-            norm2 += real(data[i] * data[i]);
-            norm2 += imag(data[i] * data[i]);
-        }
-    } else {
-        for (size_t i = 0; i < data.size(); i++) {
-            norm2 += data[i] * data[i];
-        }
-    }
-    return norm2;
-}
-
-/**
- * @brief @rst
- * Compute the squared norm of a real/complex vector :math:`\sum_k |v_k|^2`
- * @endrst
- *
  * @param vec std::vector containing data
  */
 template <class T, class Alloc>

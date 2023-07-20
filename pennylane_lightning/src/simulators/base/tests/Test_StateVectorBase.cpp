@@ -82,19 +82,18 @@ template <typename TypeList> void testApplyOperations() {
         using StateVectorT = typename TypeList::Type;
         using PrecisionT = typename StateVectorT::PrecisionT;
         using ComplexT = typename StateVectorT::ComplexT;
-        using VectorT = std::vector<ComplexT>;
 
         const size_t num_qubits = 3;
 
         DYNAMIC_SECTION("Apply operations without parameters - "
                         << StateVectorToName<StateVectorT>::name) {
-            VectorT st_data_1 =
-                createRandomStateVectorComplex<PrecisionT, ComplexT>(
+            auto st_data_1 =
+                createRandomStateVectorData<PrecisionT>(
                     re, num_qubits);
-            VectorT st_data_2 = st_data_1;
+            auto st_data_2 = st_data_1;
 
-            StateVectorT state_vector_1(st_data_1.data(), st_data_1.size());
-            StateVectorT state_vector_2(st_data_2.data(), st_data_2.size());
+            StateVectorT state_vector_1(reinterpret_cast<ComplexT *>(st_data_1.data()), st_data_1.size());
+            StateVectorT state_vector_2(reinterpret_cast<ComplexT *>(st_data_2.data()), st_data_2.size());
 
             state_vector_1.applyOperations({"PauliX", "PauliY"}, {{0}, {1}},
                                            {false, false});
@@ -109,13 +108,13 @@ template <typename TypeList> void testApplyOperations() {
 
         DYNAMIC_SECTION("Apply operations with parameters - "
                         << StateVectorToName<StateVectorT>::name) {
-            VectorT st_data_1 =
-                createRandomStateVectorComplex<PrecisionT, ComplexT>(
+            auto st_data_1 =
+                createRandomStateVectorData<PrecisionT>(
                     re, num_qubits);
-            VectorT st_data_2 = st_data_1;
+            auto st_data_2 = st_data_1;
 
-            StateVectorT state_vector_1(st_data_1.data(), st_data_1.size());
-            StateVectorT state_vector_2(st_data_2.data(), st_data_2.size());
+            StateVectorT state_vector_1(reinterpret_cast<ComplexT *>(st_data_1.data()), st_data_1.size());
+            StateVectorT state_vector_2(reinterpret_cast<ComplexT *>(st_data_2.data()), st_data_2.size());
 
             state_vector_1.applyOperations({"RX", "RY"}, {{0}, {1}},
                                            {false, false}, {{0.1}, {0.2}});
