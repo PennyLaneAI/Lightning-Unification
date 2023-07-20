@@ -112,24 +112,11 @@ class AdjointJacobian final
         std::vector<StateVectorT> &states, const StateVectorT &reference_state,
         const std::vector<std::shared_ptr<Observable<StateVectorT>>>
             &observables) {
-        // clang-format off
-        // Globally scoped exception value to be captured within OpenMP block.
-        // See the following for OpenMP design decisions:
-        // https://www.openmp.org/wp-content/uploads/openmp-examples-4.5.0.pdf
-        std::exception_ptr ex = nullptr;
         size_t num_observables = observables.size();
-            for (size_t h_i = 0; h_i < num_observables; h_i++) {
-                try {
-                    states[h_i].updateData(reference_state);
-                    applyObservable(states[h_i], *observables[h_i]);
-                } catch (...) {
-                    ex = std::current_exception();
-                }
-            }
-        if (ex) {
-            std::rethrow_exception(ex);
+        for (size_t h_i = 0; h_i < num_observables; h_i++) {
+            states[h_i].updateData(reference_state);
+            applyObservable(states[h_i], *observables[h_i]);
         }
-        // clang-format on
     }
 
     /**
@@ -144,36 +131,10 @@ class AdjointJacobian final
     inline void applyOperationsAdj(std::vector<StateVectorT> &states,
                                    const OpsData<StateVectorT> &operations,
                                    size_t op_idx) {
-        // clang-format off
-        // Globally scoped exception value to be captured within OpenMP block.
-        // See the following for OpenMP design decisions:
-        // https://www.openmp.org/wp-content/uploads/openmp-examples-4.5.0.pdf
-        std::exception_ptr ex = nullptr;
         size_t num_states = states.size();
-            for (size_t obs_idx = 0; obs_idx < num_states; obs_idx++) {
-                try {
-                    applyOperationAdj(states[obs_idx], operations, op_idx);
-                } catch (...) {
-                    ex = std::current_exception();
-                }
-            }
-        if (ex) {
-            std::rethrow_exception(ex);
+        for (size_t obs_idx = 0; obs_idx < num_states; obs_idx++) {
+            applyOperationAdj(states[obs_idx], operations, op_idx);
         }
-        // clang-format on
-    }
-
-    /**
-     * @brief Inline utility to assist with getting the Jacobian index offset.
-     *
-     * @param obs_index
-     * @param tp_index
-     * @param tp_size
-     * @return size_t
-     */
-    inline auto getJacIndex(size_t obs_index, size_t tp_index, size_t tp_size)
-        -> size_t {
-        return obs_index * tp_size + tp_index;
     }
 
     /**
@@ -371,6 +332,8 @@ class AdjointJacobian final
             applyOperationsAdj(H_lambda, ops, static_cast<size_t>(op_idx));
         }
     }
+
+
 };
 
 } // namespace Pennylane::LightningKokkos::Algorithms
