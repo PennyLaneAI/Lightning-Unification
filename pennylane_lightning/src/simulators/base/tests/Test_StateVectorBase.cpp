@@ -26,9 +26,6 @@ constexpr bool BACKEND_FOUND = true;
 #include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
 #include "TestHelpersWires.hpp"
 
-#define ISAPPROXEQUAL(A, B)                                                    \
-    isApproxEqual(A.getData(), A.getLength(), B.getData(), B.getLength())
-
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit::Util;
@@ -40,10 +37,6 @@ constexpr bool BACKEND_FOUND = true;
 
 #include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
 #include "TestHelpersWires.hpp"
-
-#define ISAPPROXEQUAL(A, B)                                                    \
-    isApproxEqual(A.getData().data(), A.getLength(), B.getData().data(),       \
-                  B.getLength())
 
 /// @cond DEV
 namespace {
@@ -109,7 +102,7 @@ template <typename TypeList> void testApplyOperations() {
             state_vector_2.applyOperation("PauliX", {0}, false);
             state_vector_2.applyOperation("PauliY", {1}, false);
 
-            REQUIRE(ISAPPROXEQUAL(state_vector_1, state_vector_2));
+            REQUIRE(isApproxEqual(state_vector_1.getData(), state_vector_1.getLength(), state_vector_2.getData(), state_vector_2.getLength()));
         }
 
         DYNAMIC_SECTION("Apply operations with parameters - "
@@ -128,7 +121,7 @@ template <typename TypeList> void testApplyOperations() {
             state_vector_2.applyOperation("RX", {0}, false, {0.1});
             state_vector_2.applyOperation("RY", {1}, false, {0.2});
 
-            REQUIRE(ISAPPROXEQUAL(state_vector_1, state_vector_2));
+            REQUIRE(isApproxEqual(state_vector_1.getData(), state_vector_1.getLength(), state_vector_2.getData(), state_vector_2.getLength()));
         }
         testApplyOperations<typename TypeList::Next>();
     }

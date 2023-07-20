@@ -245,8 +245,8 @@ class Hamiltonian final : public HamiltonianBase<StateVectorT> {
             StateVectorT tmp(sv);
             this->obs_[term_idx]->applyInPlace(tmp);
             LightningKokkos::Util::axpy_Kokkos<PrecisionT>(
-                ComplexT{this->coeffs_[term_idx], 0.0}, tmp.getData(),
-                buffer.getData(), tmp.getLength());
+                ComplexT{this->coeffs_[term_idx], 0.0}, tmp.getView(),
+                buffer.getView(), tmp.getLength());
         }
         sv.updateData(buffer);
     }
@@ -339,7 +339,7 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
         StateVectorKokkos<T> d_sv_prime(sv.getNumQubits());
 
         LightningKokkos::Util::SparseMV_Kokkos<T>(
-            sv.getData(), d_sv_prime.getData(), data_, indices_, indptr_);
+            sv.getView(), d_sv_prime.getView(), data_, indices_, indptr_);
 
         sv.updateData(d_sv_prime);
     }

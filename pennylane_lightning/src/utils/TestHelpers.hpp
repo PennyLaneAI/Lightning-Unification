@@ -437,15 +437,9 @@ auto createNonTrivialState(size_t num_qubits = 3)
     }
     Measured_StateVector.applyOperations(gates, wires, inv_op, phase);
 
-#if _ENABLE_PLKOKKOS == 1
-    return std::vector<ComplexT>(Measured_StateVector.getData().data(),
-                                 Measured_StateVector.getData().data() +
-                                     Measured_StateVector.getLength());
-#else
     return std::vector<ComplexT>(Measured_StateVector.getData(),
                                  Measured_StateVector.getData() +
                                      Measured_StateVector.getLength());
-#endif
 }
 
 /**

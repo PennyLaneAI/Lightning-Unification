@@ -31,9 +31,6 @@ constexpr bool BACKEND_FOUND = true;
 
 #include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
 
-#define ISAPPROXEQUAL(A, B)                                                    \
-    isApproxEqual(A.getData(), A.getLength(), B.data(), B.size())
-
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit::Util;
@@ -44,9 +41,6 @@ using namespace Pennylane::LightningQubit::Util;
 constexpr bool BACKEND_FOUND = true;
 
 #include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
-
-#define ISAPPROXEQUAL(A, B)                                                    \
-    isApproxEqual(A.getData().data(), A.getLength(), B.data(), B.size())
 
 /// @cond DEV
 namespace {
@@ -267,7 +261,7 @@ template <typename TypeList> void testTensorProdObsBase() {
                 VectorT expected =
                     createProductState<PrecisionT, ComplexT>("0+1");
 
-                REQUIRE(ISAPPROXEQUAL(state_vector, expected));
+                REQUIRE(isApproxEqual(state_vector.getData(),state_vector.getLength(), expected.data(), expected.size()));
             }
 
             SECTION("Test using |+-01>") {
@@ -281,7 +275,7 @@ template <typename TypeList> void testTensorProdObsBase() {
                 VectorT expected =
                     createProductState<PrecisionT, ComplexT>("+-11");
 
-                REQUIRE(ISAPPROXEQUAL(state_vector, expected));
+                REQUIRE(isApproxEqual(state_vector.getData(),state_vector.getLength(), expected.data(), expected.size()));
             }
         }
 

@@ -152,7 +152,7 @@ class Measurements final
                                    index_type row_map_size,
                                    const index_type *indices,
                                    const ComplexT *data, index_type data_size) {
-        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         PrecisionT expval = 0.0;
         KokkosSizeTVector kok_row_map("row_map", row_map_size);
         KokkosSizeTVector kok_indices("indices", data_size);
@@ -204,7 +204,7 @@ class Measurements final
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits),
@@ -226,7 +226,7 @@ class Measurements final
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
@@ -248,7 +248,7 @@ class Measurements final
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
@@ -270,7 +270,7 @@ class Measurements final
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
@@ -292,7 +292,7 @@ class Measurements final
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
@@ -315,7 +315,7 @@ class Measurements final
         const KokkosVector &matrix, const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
@@ -339,7 +339,7 @@ class Measurements final
         const KokkosVector &matrix, const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
-        Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         PrecisionT expval = 0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 2),
@@ -372,7 +372,7 @@ class Measurements final
                 wires_host(wires.data(), wires.size());
             const size_t num_qubits = this->_statevector.getNumQubits();
             const Kokkos::View<ComplexT *> arr_data =
-                this->_statevector.getData();
+                this->_statevector.getView();
 
             Kokkos::View<size_t *> wires_view("wires_view", wires.size());
             Kokkos::deep_copy(wires_view, wires_host);
@@ -395,10 +395,10 @@ class Measurements final
      */
     auto expval(const Observable<StateVectorT> &ob) {
         StateVectorT ob_sv(this->_statevector.getNumQubits());
-        ob_sv.DeviceToDevice(this->_statevector.getData());
+        ob_sv.DeviceToDevice(this->_statevector.getView());
         ob.applyInPlace(ob_sv);
-        return getRealOfComplexInnerProduct(this->_statevector.getData(),
-                                            ob_sv.getData());
+        return getRealOfComplexInnerProduct(this->_statevector.getView(),
+                                            ob_sv.getView());
     }
 
     /**
@@ -411,7 +411,7 @@ class Measurements final
     PrecisionT expval(const std::vector<ComplexT> &matrix,
                       const std::vector<size_t> &wires) {
         StateVectorT ob_sv(this->_statevector.getNumQubits());
-        ob_sv.DeviceToDevice(this->_statevector.getData());
+        ob_sv.DeviceToDevice(this->_statevector.getView());
         ob_sv.applyMatrix(matrix, wires);
         // using kv = StateVectorT::KokkosVector;
         // kv matrix_("tmp", matrix.size());
@@ -419,8 +419,8 @@ class Measurements final
         //     matrix_(i) = matrix[i];
         // }
         // ob_sv.applyMultiQubitOp(matrix_, wires);
-        return getRealOfComplexInnerProduct(this->_statevector.getData(),
-                                            ob_sv.getData());
+        return getRealOfComplexInnerProduct(this->_statevector.getView(),
+                                            ob_sv.getView());
     };
 
     /**
@@ -433,10 +433,10 @@ class Measurements final
     PrecisionT expval(const std::string &operation,
                       const std::vector<size_t> &wires) {
         StateVectorT ob_sv(this->_statevector.getNumQubits());
-        ob_sv.DeviceToDevice(this->_statevector.getData());
+        ob_sv.DeviceToDevice(this->_statevector.getView());
         ob_sv.applyOperation(operation, wires);
-        return getRealOfComplexInnerProduct(this->_statevector.getData(),
-                                            ob_sv.getData());
+        return getRealOfComplexInnerProduct(this->_statevector.getView(),
+                                            ob_sv.getView());
     };
 
     /**
@@ -497,14 +497,14 @@ class Measurements final
      */
     auto var(const Observable<StateVectorT> &ob) -> PrecisionT {
         StateVectorT ob_sv(this->_statevector.getNumQubits());
-        ob_sv.DeviceToDevice(this->_statevector.getData());
+        ob_sv.DeviceToDevice(this->_statevector.getView());
         ob.applyInPlace(ob_sv);
 
         const PrecisionT mean_square =
-            getRealOfComplexInnerProduct(ob_sv.getData(), ob_sv.getData());
+            getRealOfComplexInnerProduct(ob_sv.getView(), ob_sv.getView());
         const PrecisionT squared_mean = static_cast<PrecisionT>(
-            std::pow(getRealOfComplexInnerProduct(this->_statevector.getData(),
-                                                  ob_sv.getData()),
+            std::pow(getRealOfComplexInnerProduct(this->_statevector.getView(),
+                                                  ob_sv.getView()),
                      2));
         return (mean_square - squared_mean);
     }
@@ -519,14 +519,14 @@ class Measurements final
     PrecisionT var(const std::string &operation,
                    const std::vector<size_t> &wires) {
         StateVectorT ob_sv(this->_statevector.getNumQubits());
-        ob_sv.DeviceToDevice(this->_statevector.getData());
+        ob_sv.DeviceToDevice(this->_statevector.getView());
         ob_sv.applyOperation(operation, wires);
 
         const PrecisionT mean_square =
-            getRealOfComplexInnerProduct(ob_sv.getData(), ob_sv.getData());
+            getRealOfComplexInnerProduct(ob_sv.getView(), ob_sv.getView());
         const PrecisionT squared_mean = static_cast<PrecisionT>(
-            std::pow(getRealOfComplexInnerProduct(this->_statevector.getData(),
-                                                  ob_sv.getData()),
+            std::pow(getRealOfComplexInnerProduct(this->_statevector.getView(),
+                                                  ob_sv.getView()),
                      2));
         return (mean_square - squared_mean);
     };
@@ -541,14 +541,14 @@ class Measurements final
     PrecisionT var(const std::vector<ComplexT> &matrix,
                    const std::vector<size_t> &wires) {
         StateVectorT ob_sv(this->_statevector.getNumQubits());
-        ob_sv.DeviceToDevice(this->_statevector.getData());
+        ob_sv.DeviceToDevice(this->_statevector.getView());
         ob_sv.applyMatrix(matrix, wires);
 
         const PrecisionT mean_square =
-            getRealOfComplexInnerProduct(ob_sv.getData(), ob_sv.getData());
+            getRealOfComplexInnerProduct(ob_sv.getView(), ob_sv.getView());
         const PrecisionT squared_mean = static_cast<PrecisionT>(
-            std::pow(getRealOfComplexInnerProduct(this->_statevector.getData(),
-                                                  ob_sv.getData()),
+            std::pow(getRealOfComplexInnerProduct(this->_statevector.getView(),
+                                                  ob_sv.getView()),
                      2));
         return (mean_square - squared_mean);
     };
@@ -590,7 +590,7 @@ class Measurements final
     auto probs() -> std::vector<PrecisionT> {
         const size_t N = this->_statevector.getLength();
 
-        Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         Kokkos::View<PrecisionT *> d_probability("d_probability", N);
 
         // Compute probability distribution from StateVector using
@@ -620,7 +620,7 @@ class Measurements final
             Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left>>;
 
         //  Determining probabilities for the sorted wires.
-        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         const size_t num_qubits = this->_statevector.getNumQubits();
 
         std::vector<size_t> sorted_ind_wires(wires);
@@ -728,7 +728,7 @@ class Measurements final
         const size_t num_qubits = this->_statevector.getNumQubits();
         const size_t N = this->_statevector.getLength();
 
-        Kokkos::View<ComplexT *> arr_data = this->_statevector.getData();
+        Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         Kokkos::View<PrecisionT *> probability("probability", N);
         Kokkos::View<size_t *> samples("num_samples", num_samples * num_qubits);
 

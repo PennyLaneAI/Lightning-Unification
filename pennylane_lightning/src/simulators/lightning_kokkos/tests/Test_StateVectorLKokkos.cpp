@@ -148,19 +148,19 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
             state_vector_2.applyMultiQubitOp(mkview, wires);
 
             // printf("---------------\n");
-            // for (size_t i = 0; i < state_vector_1.getData().size(); i++) {
+            // for (size_t i = 0; i < state_vector_1.getLength(); i++) {
             //     printf("(%f %f) (%f %f)\n",
-            //            state_vector_1.getData().data()[i].real(),
-            //            state_vector_1.getData().data()[i].imag(),
-            //            state_vector_2.getData().data()[i].real(),
-            //            state_vector_2.getData().data()[i].imag());
+            //            state_vector_1.getData()[i].real(),
+            //            state_vector_1.getData()[i].imag(),
+            //            state_vector_2.getData()[i].real(),
+            //            state_vector_2.getData()[i].imag());
             // }
             // printf("---------------\n");
 
             PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
-            REQUIRE(isApproxEqual(state_vector_1.getData().data(),
+            REQUIRE(isApproxEqual(state_vector_1.getData(),
                                   state_vector_1.getLength(),
-                                  state_vector_2.getData().data(),
+                                  state_vector_2.getData(),
                                   state_vector_2.getLength(), eps));
         }
     }

@@ -44,7 +44,7 @@ class AdjointJacobian final
                                size_t param_index) {
         jac[obs_index][param_index] = -2 * scaling_coeff *
                                       getImagOfComplexInnerProduct<PrecisionT>(
-                                          sv1.getData(), sv2.getData());
+                                          sv1.getView(), sv2.getView());
     }
 
     /**
@@ -281,7 +281,7 @@ class AdjointJacobian final
 
         // Create $U_{1:p}\vert \lambda \rangle$
         StateVectorT lambda(ref_data.getNumQubits());
-        lambda.DeviceToDevice(ref_data.getData());
+        lambda.DeviceToDevice(ref_data.getView());
 
         // Apply given operations to statevector if requested
         if (apply_operations) {

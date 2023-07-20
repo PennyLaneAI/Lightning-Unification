@@ -440,7 +440,7 @@ class StateVectorKokkos final
     /**
      * @brief Init zeros for the state-vector on device.
      */
-    void initZeros() { Kokkos::deep_copy(getData(), ComplexT{0.0, 0.0}); }
+    void initZeros() { Kokkos::deep_copy(getView(), ComplexT{0.0, 0.0}); }
 
     /**
      * @brief Set value for a single element of the state-vector on device.
@@ -449,7 +449,7 @@ class StateVectorKokkos final
      */
     void setBasisState(const size_t index) {
         initZeros();
-        getData()(index) = ComplexT{1.0, 0.0};
+        getView()(index) = ComplexT{1.0, 0.0};
     }
 
     /**
@@ -475,7 +475,7 @@ class StateVectorKokkos final
 
         Kokkos::parallel_for(
             indices.size(), KOKKOS_LAMBDA(const std::size_t i) {
-                getData()(indices[i]) = values[i];
+                getView()(indices[i]) = values[i];
             });
     }
 
@@ -534,7 +534,7 @@ class StateVectorKokkos final
     StateVectorKokkos(const StateVectorKokkos &other,
                       const Kokkos::InitializationSettings &kokkos_args = {})
         : StateVectorKokkos(other.getNumQubits(), kokkos_args) {
-        this->DeviceToDevice(other.getData());
+        this->DeviceToDevice(other.getView());
     }
 
     /**
@@ -1582,7 +1582,7 @@ class StateVectorKokkos final
      * @param other State vector
      */
     void updateData(const StateVectorKokkos<fp_t> &other) {
-        updateData(other.getData());
+        updateData(other.getView());
     }
 
     /**
@@ -1604,32 +1604,38 @@ class StateVectorKokkos final
         updateData(other.data(), other.size());
     }
 
+    [[nodiscard]] auto getData() -> ComplexT * { return getView().data(); }
+
+    [[nodiscard]] auto getData() const -> const ComplexT * {
+        return getView().data();
+    }
+
     /**
      * @brief Get the Kokkos data of the state vector.
      *
      * @return The pointer to the data of state vector
      */
-    [[nodiscard]] auto getData() const -> KokkosVector & { return *data_; }
+    [[nodiscard]] auto getView() const -> KokkosVector & { return *data_; }
 
     /**
      * @brief Get the Kokkos data of the state vector
      *
      * @return The pointer to the data of state vector
      */
-    [[nodiscard]] auto getData() -> KokkosVector & { return *data_; }
+    [[nodiscard]] auto getView() -> KokkosVector & { return *data_; }
 
     /**
      * @brief Get underlying data vector
      */
     [[nodiscard]] auto getDataVector() -> std::vector<ComplexT> {
-        std::vector<ComplexT> data_(getData().data(),
-                                    getData().data() + getData().size());
+        std::vector<ComplexT> data_(getData(),
+                                    getData() + getLength());
         return data_;
     }
 
     [[nodiscard]] auto getDataVector() const -> const std::vector<ComplexT> {
-        const std::vector<ComplexT> data_(getData().data(),
-                                          getData().data() + getData().size());
+        const std::vector<ComplexT> data_(getData(),
+                                          getData() + getLength());
         return data_;
     }
 
