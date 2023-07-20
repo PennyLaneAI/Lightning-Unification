@@ -1,0 +1,67 @@
+#!/usr/bin/python3
+
+from pathlib import Path
+import subprocess
+import sys
+
+CMAKE_FMT_BIN = "cmake-format"
+
+
+def check_bin():
+    try:
+        p = subprocess.run(
+            [CMAKE_FMT_BIN, "--version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+        )
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(f"{CMAKE_FMT_BIN} is not installed or is not in PATH.") from exc
+
+
+def get_cmake_files():
+    filelist = list(Path.cwd().glob("CMakeLists.txt"))
+    filelist += list((Path.cwd() / "pennylane_lightning").glob("**/CMakeLists.txt"))
+    return filelist
+
+
+def fmt() -> int:
+    files = get_cmake_files()
+    options = [
+        "--line-width",
+        "100",
+        "--tab-size",
+        "4",
+        "--max-subgroups-hwrap",
+        "1",
+        "--max-pargs-hwrap",
+        "2",
+        "--line-ending",
+        "auto",
+        "--dangle-align",
+        "child",
+        "--command-case",
+        "upper",
+        "--keyword-case",
+        "upper",
+        "--enable-sort",
+        "true",
+    ]
+    cmd = (CMAKE_FMT_BIN, *options, "-i", *(str(f) for f in files))
+
+    sys.stderr.write(f"Formatting {len(files)} files in {Path.cwd()}.\n")
+
+    ret = subprocess.run(cmd, universal_newlines=True)
+    if ret.returncode != 0:
+        sys.stderr.write(ret.stderr)
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    check_bin()
+
+    ret = fmt()
+
+    sys.exit(int(ret > 0))

@@ -55,12 +55,12 @@ test-python: test-builtin test-suite
 
 build:
 	rm -rf ./Build
-	cmake -BBuild -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+	cmake -G Ninja -BBuild -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 	cmake --build ./Build $(VERBOSE)
 
 test-cpp:
 	rm -rf ./BuildTests
-	cmake -BBuildTests -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_OPENMP=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+	cmake -G Ninja -BBuildTests -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_OPENMP=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 ifdef target
 	cmake --build ./BuildTests $(VERBOSE) --target $(target)
 	OMP_PROC_BIND=false ./BuildTests/$(target)
@@ -71,12 +71,15 @@ endif
 
 test-cpp-blas:
 	rm -rf ./BuildTests
-	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_BLAS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+	cmake -G Ninja -BBuildTests -DBUILD_TESTS=ON -DENABLE_BLAS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 	cmake --build ./BuildTests $(VERBOSE)
 	cmake --build ./BuildTests $(VERBOSE) --target test
 
 .PHONY: format format-cpp
 format: format-cpp format-python
+
+format-cmake:
+	./bin/format-cmake
 
 format-cpp:
 	./bin/format $(CHECK) --cfversion $(if $(version:-=),$(version),0) ./pennylane_lightning
