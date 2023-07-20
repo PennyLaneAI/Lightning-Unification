@@ -261,7 +261,9 @@ template <typename TypeList> void testTensorProdObsBase() {
                 VectorT expected =
                     createProductState<PrecisionT, ComplexT>("0+1");
 
-                REQUIRE(isApproxEqual(state_vector.getData(),state_vector.getLength(), expected.data(), expected.size()));
+                REQUIRE(isApproxEqual(state_vector.getData(),
+                                      state_vector.getLength(), expected.data(),
+                                      expected.size()));
             }
 
             SECTION("Test using |+-01>") {
@@ -275,7 +277,9 @@ template <typename TypeList> void testTensorProdObsBase() {
                 VectorT expected =
                     createProductState<PrecisionT, ComplexT>("+-11");
 
-                REQUIRE(isApproxEqual(state_vector.getData(),state_vector.getLength(), expected.data(), expected.size()));
+                REQUIRE(isApproxEqual(state_vector.getData(),
+                                      state_vector.getLength(), expected.data(),
+                                      expected.size()));
             }
         }
 

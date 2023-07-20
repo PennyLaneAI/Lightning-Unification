@@ -22,7 +22,7 @@
 namespace {
 using namespace Pennylane::LightningKokkos;
 using namespace Pennylane::Gates; // getHadamard, getCNOT,
-                                                   // getToffoli
+                                  // getToffoli
 using namespace Pennylane::Util;
 } // namespace
 /// @endcond

@@ -34,8 +34,8 @@
 
 /// @cond DEV
 namespace {
-using Pennylane::Gates::getRot;
 using Pennylane::Gates::GateOperation;
+using Pennylane::Gates::getRot;
 } // namespace
 /// @endcond
 

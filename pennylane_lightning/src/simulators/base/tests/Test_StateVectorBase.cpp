@@ -102,7 +102,9 @@ template <typename TypeList> void testApplyOperations() {
             state_vector_2.applyOperation("PauliX", {0}, false);
             state_vector_2.applyOperation("PauliY", {1}, false);
 
-            REQUIRE(isApproxEqual(state_vector_1.getData(), state_vector_1.getLength(), state_vector_2.getData(), state_vector_2.getLength()));
+            REQUIRE(isApproxEqual(
+                state_vector_1.getData(), state_vector_1.getLength(),
+                state_vector_2.getData(), state_vector_2.getLength()));
         }
 
         DYNAMIC_SECTION("Apply operations with parameters - "
@@ -121,7 +123,9 @@ template <typename TypeList> void testApplyOperations() {
             state_vector_2.applyOperation("RX", {0}, false, {0.1});
             state_vector_2.applyOperation("RY", {1}, false, {0.2});
 
-            REQUIRE(isApproxEqual(state_vector_1.getData(), state_vector_1.getLength(), state_vector_2.getData(), state_vector_2.getLength()));
+            REQUIRE(isApproxEqual(
+                state_vector_1.getData(), state_vector_1.getLength(),
+                state_vector_2.getData(), state_vector_2.getLength()));
         }
         testApplyOperations<typename TypeList::Next>();
     }

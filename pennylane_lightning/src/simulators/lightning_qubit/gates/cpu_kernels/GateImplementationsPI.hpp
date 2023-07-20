@@ -30,8 +30,8 @@
 
 #include "BitUtil.hpp"
 #include "GateIndices.hpp"
-#include "Gates.hpp"
 #include "GateOperation.hpp"
+#include "Gates.hpp"
 #include "KernelType.hpp"
 #include "LinearAlgebra.hpp"
 #include "PauliGenerator.hpp"

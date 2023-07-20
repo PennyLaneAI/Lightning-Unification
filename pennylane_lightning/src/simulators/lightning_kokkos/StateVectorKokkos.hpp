@@ -1628,14 +1628,12 @@ class StateVectorKokkos final
      * @brief Get underlying data vector
      */
     [[nodiscard]] auto getDataVector() -> std::vector<ComplexT> {
-        std::vector<ComplexT> data_(getData(),
-                                    getData() + getLength());
+        std::vector<ComplexT> data_(getData(), getData() + getLength());
         return data_;
     }
 
     [[nodiscard]] auto getDataVector() const -> const std::vector<ComplexT> {
-        const std::vector<ComplexT> data_(getData(),
-                                          getData() + getLength());
+        const std::vector<ComplexT> data_(getData(), getData() + getLength());
         return data_;
     }
 

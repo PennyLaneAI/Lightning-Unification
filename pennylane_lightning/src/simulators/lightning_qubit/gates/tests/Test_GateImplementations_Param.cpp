@@ -28,8 +28,8 @@ namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::Util;
 using Pennylane::Gates::getPhaseShift;
-using Pennylane::Gates::getRZ;
 using Pennylane::Gates::getRot;
+using Pennylane::Gates::getRZ;
 } // namespace
 /// @endcond
 
@@ -261,8 +261,8 @@ void testApplyRot() {
         std::vector<ComplexT>(1U << num_qubits)};
 
     for (size_t i = 0; i < angles.size(); i++) {
-        const auto rot_mat =
-            getRot<std::complex, PrecisionT>(angles[i][0], angles[i][1], angles[i][2]);
+        const auto rot_mat = getRot<std::complex, PrecisionT>(
+            angles[i][0], angles[i][1], angles[i][2]);
         expected_results[i][0] = rot_mat[0];
         expected_results[i][size_t{1U} << (num_qubits - i - 1)] = rot_mat[2];
     }

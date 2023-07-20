@@ -158,10 +158,9 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
             // printf("---------------\n");
 
             PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
-            REQUIRE(isApproxEqual(state_vector_1.getData(),
-                                  state_vector_1.getLength(),
-                                  state_vector_2.getData(),
-                                  state_vector_2.getLength(), eps));
+            REQUIRE(isApproxEqual(
+                state_vector_1.getData(), state_vector_1.getLength(),
+                state_vector_2.getData(), state_vector_2.getLength(), eps));
         }
     }
 }
