@@ -332,8 +332,6 @@ class AdjointJacobian final
             applyOperationsAdj(H_lambda, ops, static_cast<size_t>(op_idx));
         }
     }
-
-
 };
 
 } // namespace Pennylane::LightningKokkos::Algorithms

@@ -237,7 +237,8 @@ class TensorProdObsBase : public Observable<StateVectorT> {
         for (const auto &ob : obs_) {
             const auto ob_wires = ob->getWires();
             for (const auto wire : ob_wires) {
-                PL_ABORT_IF(wires.contains(wire), "All wires in observables must be disjoint.");
+                PL_ABORT_IF(wires.contains(wire),
+                            "All wires in observables must be disjoint.");
                 wires.insert(wire);
             }
         }

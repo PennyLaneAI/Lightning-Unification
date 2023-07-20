@@ -209,7 +209,6 @@ template <class Precision, bool inverse = false> struct tFunctor {
     }
 };
 
-
 template <class Precision, bool inverse = false> struct cnotFunctor {
 
     Kokkos::View<Kokkos::complex<Precision> *> arr;

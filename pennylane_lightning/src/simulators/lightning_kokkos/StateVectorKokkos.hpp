@@ -474,9 +474,9 @@ class StateVectorKokkos final
                                         values.data(), values.size()));
 
         Kokkos::parallel_for(
-            indices.size(),
-            KOKKOS_LAMBDA(const std::size_t i){ getData()(indices[i]) = values[i]; }
-        );
+            indices.size(), KOKKOS_LAMBDA(const std::size_t i) {
+                getData()(indices[i]) = values[i];
+            });
     }
 
     /**
