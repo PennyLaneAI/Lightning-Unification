@@ -73,6 +73,8 @@ class StateVectorKokkos final
     using UnmanagedConstSizeTHostView =
         Kokkos::View<const size_t *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using UnmanagedPrecisionHostView = Kokkos::View<PrecisionT *, Kokkos::HostSpace,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits,

@@ -31,21 +31,15 @@ class Measurements final
     using PrecisionT = StateVectorT::PrecisionT;
     using ComplexT = typename StateVectorT::ComplexT;
     using BaseType = MeasurementsBase<StateVectorT, Measurements<StateVectorT>>;
-    using KokkosExecSpace = Kokkos::DefaultExecutionSpace;
-    using KokkosVector = Kokkos::View<ComplexT *>;
-    using KokkosSizeTVector = Kokkos::View<size_t *>;
-    using UnmanagedSizeTHostView =
-        Kokkos::View<size_t *, Kokkos::HostSpace,
-                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
-    using UnmanagedPrecisionHostView =
-        Kokkos::View<PrecisionT *, Kokkos::HostSpace,
-                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
-    using UnmanagedConstComplexHostView =
-        Kokkos::View<const ComplexT *, Kokkos::HostSpace,
-                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
-    using UnmanagedConstSizeTHostView =
-        Kokkos::View<const size_t *, Kokkos::HostSpace,
-                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+
+    using KokkosExecSpace = StateVectorT::KokkosExecSpace;
+    using KokkosVector = StateVectorT::KokkosVector;
+    using KokkosSizeTVector = StateVectorT::KokkosSizeTVector;
+    using UnmanagedSizeTHostView = StateVectorT::UnmanagedSizeTHostView;
+    using UnmanagedConstComplexHostView = StateVectorT::UnmanagedConstComplexHostView;
+    using UnmanagedConstSizeTHostView = StateVectorT::UnmanagedConstSizeTHostView;
+    using UnmanagedPrecisionHostView = StateVectorT::UnmanagedPrecisionHostView;
+
     using ExpValFunc = std::function<PrecisionT(
         const std::vector<size_t> &, const std::vector<PrecisionT> &)>;
     using ExpValMap = std::unordered_map<std::string, ExpValFunc>;
