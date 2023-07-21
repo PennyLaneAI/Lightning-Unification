@@ -22,13 +22,13 @@
 
 #include <catch2/catch.hpp>
 
-#include "MeasurementsKokkos.hpp" // Measurements
+#include "MeasurementsKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::LightningKokkos::Measures; // Measurements
+using namespace Pennylane::LightningKokkos::Measures;
 using Pennylane::Util::createNonTrivialState;
 }; // namespace
 /// @endcond
