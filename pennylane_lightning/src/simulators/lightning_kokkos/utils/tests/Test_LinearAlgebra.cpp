@@ -24,9 +24,7 @@
 
 /**
  * @file
- *  Tests for functionality:
- *      - defined in the intermediate base class StateVectorKokkos.
- *      - shared between all child classes.
+ *  Tests linear algebra functionality defined for the class StateVectorKokkos.
  */
 
 /// @cond DEV
