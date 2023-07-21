@@ -74,8 +74,8 @@ template <typename TypeList> void testAdjointJacobian() {
 
             StateVectorT psi(cdata.data(), cdata.size());
 
-            JacobianData<StateVectorT> tape = JacobianData(
-                num_params, psi.getLength(), psi.getData(), {obs}, ops, tp);
+            JacobianData<StateVectorT> tape {
+                num_params, psi.getLength(), psi.getData(), {obs}, ops, tp};
             PL_REQUIRE_THROWS_MATCHES(
                 adj.adjointJacobian(std::span{jacobian}, tape, true),
                 LightningException,
@@ -100,8 +100,8 @@ template <typename TypeList> void testAdjointJacobian() {
 
                 StateVectorT psi(cdata.data(), cdata.size());
 
-                JacobianData<StateVectorT> tape = JacobianData(
-                    num_params, psi.getLength(), psi.getData(), {obs}, ops, tp);
+                JacobianData<StateVectorT> tape {
+                    num_params, psi.getLength(), psi.getData(), {obs}, ops, tp};
                 REQUIRE_NOTHROW(
                     adj.adjointJacobian(std::span{jacobian}, tape, true));
             }
@@ -126,8 +126,8 @@ template <typename TypeList> void testAdjointJacobian() {
 
                 StateVectorT psi(cdata.data(), cdata.size());
 
-                JacobianData<StateVectorT> tape = JacobianData(
-                    num_params, psi.getLength(), psi.getData(), {obs}, ops, tp);
+                JacobianData<StateVectorT> tape {
+                    num_params, psi.getLength(), psi.getData(), {obs}, ops, tp};
                 adj.adjointJacobian(std::span{jacobian}, tape, true);
 
                 CAPTURE(jacobian);
@@ -154,8 +154,8 @@ template <typename TypeList> void testAdjointJacobian() {
 
                 StateVectorT psi(cdata.data(), cdata.size());
 
-                JacobianData<StateVectorT> tape = JacobianData(
-                    num_params, psi.getLength(), psi.getData(), {obs}, ops, tp);
+                JacobianData<StateVectorT> tape {
+                    num_params, psi.getLength(), psi.getData(), {obs}, ops, tp};
                 adj.adjointJacobian(std::span{jacobian}, tape, true);
 
                 CAPTURE(jacobian);
@@ -183,9 +183,9 @@ template <typename TypeList> void testAdjointJacobian() {
             auto ops =
                 OpsData<StateVectorT>({"RX"}, {{param[0]}}, {{0}}, {false});
 
-            JacobianData<StateVectorT> tape =
-                JacobianData(num_params, psi.getLength(), psi.getData(),
-                             {obs1, obs2}, ops, tp);
+            JacobianData<StateVectorT> tape 
+                {num_params, psi.getLength(), psi.getData(),
+                             {obs1, obs2}, ops, tp};
             adj.adjointJacobian(std::span{jacobian}, tape, true);
 
             CAPTURE(jacobian);
@@ -217,9 +217,9 @@ template <typename TypeList> void testAdjointJacobian() {
                 {"RX", "RX", "RX"}, {{param[0]}, {param[1]}, {param[2]}},
                 {{0}, {1}, {2}}, {false, false, false});
 
-            JacobianData<StateVectorT> tape =
-                JacobianData(num_params, psi.getLength(), psi.getData(),
-                             {obs1, obs2, obs3}, ops, tp);
+            JacobianData<StateVectorT> tape 
+                {num_params, psi.getLength(), psi.getData(),
+                             {obs1, obs2, obs3}, ops, tp};
             adj.adjointJacobian(std::span{jacobian}, tape, true);
 
             CAPTURE(jacobian);
@@ -254,9 +254,9 @@ template <typename TypeList> void testAdjointJacobian() {
                 {"RX", "RX", "RX"}, {{param[0]}, {param[1]}, {param[2]}},
                 {{0}, {1}, {2}}, {false, false, false});
 
-            JacobianData<StateVectorT> tape =
-                JacobianData(num_params, psi.getLength(), psi.getData(),
-                             {obs1, obs2, obs3}, ops, t_params);
+            JacobianData<StateVectorT> tape 
+                {num_params, psi.getLength(), psi.getData(),
+                             {obs1, obs2, obs3}, ops, t_params};
 
             adj.adjointJacobian(std::span{jacobian}, tape, true);
 
@@ -291,8 +291,8 @@ template <typename TypeList> void testAdjointJacobian() {
                 {"RX", "RX", "RX"}, {{param[0]}, {param[1]}, {param[2]}},
                 {{0}, {1}, {2}}, {false, false, false});
 
-            JacobianData<StateVectorT> tape = JacobianData(
-                num_params, psi.getLength(), psi.getData(), {obs}, ops, tp);
+            JacobianData<StateVectorT> tape {
+                num_params, psi.getLength(), psi.getData(), {obs}, ops, tp};
 
             adj.adjointJacobian(std::span{jacobian}, tape, true);
 
@@ -337,8 +337,8 @@ template <typename TypeList> void testAdjointJacobian() {
                 {{0}, {0}, {0}, {0, 1}, {1, 2}, {1}, {1}, {1}},
                 {false, false, false, false, false, false, false, false});
 
-            JacobianData<StateVectorT> tape = JacobianData(
-                num_params, psi.getLength(), psi.getData(), {obs}, ops, tp);
+            JacobianData<StateVectorT> tape {
+                num_params, psi.getLength(), psi.getData(), {obs}, ops, tp};
 
             adj.adjointJacobian(std::span{jacobian}, tape, true);
 
@@ -390,8 +390,8 @@ template <typename TypeList> void testAdjointJacobian() {
                     {{local_params[0]}, {local_params[1]}, {local_params[2]}},
                     {{0}, {0}, {0}}, {false, false, false});
 
-                JacobianData<StateVectorT> tape = JacobianData(
-                    num_params, psi.getLength(), psi.getData(), {obs}, ops, tp);
+                JacobianData<StateVectorT> tape {
+                    num_params, psi.getLength(), psi.getData(), {obs}, ops, tp};
                 adj.adjointJacobian(std::span{jacobian}, tape, true);
 
                 CAPTURE(theta);
@@ -457,9 +457,9 @@ template <typename TypeList> void testAdjointJacobian() {
                 {false, false, false, false, false, false, false, false, false,
                  false, false, false});
 
-            JacobianData<StateVectorT> tape =
-                JacobianData(t_params.size(), psi.getLength(), psi.getData(),
-                             {obs}, ops, t_params);
+            JacobianData<StateVectorT> tape 
+                {t_params.size(), psi.getLength(), psi.getData(),
+                             {obs}, ops, t_params};
             adj.adjointJacobian(std::span{jacobian}, tape, true);
 
             std::vector<PrecisionT> expected{-0.71429188, 0.04998561,
@@ -494,8 +494,8 @@ template <typename TypeList> void testAdjointJacobian() {
             auto ops =
                 OpsData<StateVectorT>({"RX"}, {{param[0]}}, {{0}}, {false});
 
-            JacobianData<StateVectorT> tape = JacobianData(
-                num_params, psi.getLength(), psi.getData(), {ham}, ops, tp);
+            JacobianData<StateVectorT> tape {
+                num_params, psi.getLength(), psi.getData(), {ham}, ops, tp};
 
             adj.adjointJacobian(std::span{jacobian}, tape, true);
 
@@ -530,9 +530,9 @@ template <typename TypeList> void testAdjointJacobian() {
                 {"RX", "RX", "RX"}, {{param[0]}, {param[1]}, {param[2]}},
                 {{0}, {1}, {2}}, {false, false, false});
 
-            JacobianData<StateVectorT> tape =
-                JacobianData(num_params, psi.getLength(), psi.getData(), {ham},
-                             ops, t_params);
+            JacobianData<StateVectorT> tape 
+                {num_params, psi.getLength(), psi.getData(), {ham},
+                             ops, t_params};
             adj.adjointJacobian(std::span{jacobian}, tape, true);
 
             CAPTURE(jacobian);
@@ -568,13 +568,13 @@ template <typename TypeList> void testAdjointJacobian() {
                 {"RX", "RX", "RX"}, {{param[0]}, {param[1]}, {param[2]}},
                 {{0}, {1}, {2}}, {false, false, false});
 
-            JacobianData<StateVectorT> tape1 =
-                JacobianData(num_params, psi.getLength(), psi.getData(), {obs1},
-                             ops, t_params);
+            JacobianData<StateVectorT> tape1
+                {num_params, psi.getLength(), psi.getData(), {obs1},
+                             ops, t_params};
 
-            JacobianData<StateVectorT> tape2 =
-                JacobianData(num_params, psi.getLength(), psi.getData(), {obs2},
-                             ops, t_params);
+            JacobianData<StateVectorT> tape2
+                {num_params, psi.getLength(), psi.getData(), {obs2},
+                             ops, t_params};
             adj.adjointJacobian(std::span{jacobian1}, tape1, true);
             adj.adjointJacobian(std::span{jacobian2}, tape2, true);
 
