@@ -27,8 +27,7 @@
 
 /**
  * @file
- *  Tests for functionality:
- *      - expectation values.
+ *  Tests for StateVectorKokkos expectation value functionality.
  */
 
 /// @cond DEV
