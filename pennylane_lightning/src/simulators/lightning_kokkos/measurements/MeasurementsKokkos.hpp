@@ -595,8 +595,7 @@ class Measurements final
         Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         Kokkos::View<PrecisionT *> d_probability("d_probability", N);
 
-        // Compute probability distribution from StateVector using
-        // Kokkos::parallel_for
+        // Compute probability distribution from StateVector
         Kokkos::parallel_for(
             Kokkos::RangePolicy<KokkosExecSpace>(0, N),
             getProbFunctor<PrecisionT>(arr_data, d_probability));
@@ -734,13 +733,11 @@ class Measurements final
         Kokkos::View<PrecisionT *> probability("probability", N);
         Kokkos::View<size_t *> samples("num_samples", num_samples * num_qubits);
 
-        // Compute probability distribution from StateVector using
-        // Kokkos::parallel_for
+        // Compute probability distribution from StateVector
         Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
                              getProbFunctor<PrecisionT>(arr_data, probability));
 
-        // Convert probability distribution to cumulative distribution using
-        // Kokkos:: parallel_scan
+        // Convert probability distribution to cumulative distribution
         Kokkos::parallel_scan(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
                               getCDFFunctor<PrecisionT>(probability));
 
