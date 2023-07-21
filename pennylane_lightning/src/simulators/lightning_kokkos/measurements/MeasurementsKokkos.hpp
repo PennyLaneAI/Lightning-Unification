@@ -421,12 +421,6 @@ class Measurements final
         StateVectorT ob_sv(this->_statevector.getNumQubits());
         ob_sv.DeviceToDevice(this->_statevector.getView());
         ob_sv.applyMatrix(matrix, wires);
-        // using kv = StateVectorT::KokkosVector;
-        // kv matrix_("tmp", matrix.size());
-        // for (size_t i = 0; i < matrix.size(); i++) {
-        //     matrix_(i) = matrix[i];
-        // }
-        // ob_sv.applyMultiQubitOp(matrix_, wires);
         return getRealOfComplexInnerProduct(this->_statevector.getView(),
                                             ob_sv.getView());
     };
