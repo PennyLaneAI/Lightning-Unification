@@ -162,7 +162,7 @@ static constexpr auto getSWAP() -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the CZ gate data in row-major
+ * @brief Create a matrix representation of the CY gate data in row-major
  * format.
  *
  * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
