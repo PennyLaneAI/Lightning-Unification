@@ -13,7 +13,6 @@
 // limitations under the License.
 #include <ranges>
 
-#include "ConstantUtil.hpp"
 #include "GateIndices.hpp"
 #include "Util.hpp" // exp2, maxDecimalForQubit
 

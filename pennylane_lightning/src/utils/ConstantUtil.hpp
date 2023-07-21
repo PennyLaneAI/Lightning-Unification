@@ -17,9 +17,6 @@
  */
 #pragma once
 
-#include "TypeTraits.hpp"
-#include "Util.hpp"
-
 #include <algorithm>
 #include <array>
 #include <compare>
@@ -30,6 +27,9 @@
 #if __has_include(<version>)
 #include <version>
 #endif
+
+#include "TypeTraits.hpp"
+#include "Util.hpp"
 
 namespace Pennylane::Util {
 /**
