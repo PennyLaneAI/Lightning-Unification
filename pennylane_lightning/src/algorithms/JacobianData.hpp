@@ -223,6 +223,10 @@ template <class StateVectorT> class JacobianData {
     /* @var trainableParams      */
     const std::vector<size_t> trainableParams;
 
+  protected:
+    JacobianData &operator=(const JacobianData &) = default;
+    JacobianData &operator=(JacobianData &&) = default;
+
   public:
     /**
      * @brief Construct a JacobianData object
