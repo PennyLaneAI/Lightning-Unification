@@ -190,7 +190,7 @@ TEMPLATE_PRODUCT_TEST_CASE("Variances", "[Measurements]", (StateVectorKokkos),
 }
 
 TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
-    // Probabilities calculated with Pennylane default_qbit:
+    // Probabilities calculated with Pennylane default.qubit:
     std::vector<std::pair<std::vector<size_t>, std::vector<TestType>>> input = {
         {{0, 1, 2},
          {0.67078706, 0.03062806, 0.0870997, 0.00397696, 0.17564072, 0.00801973,
