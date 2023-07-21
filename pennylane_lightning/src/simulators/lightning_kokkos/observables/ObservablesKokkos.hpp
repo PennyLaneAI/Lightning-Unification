@@ -202,7 +202,6 @@ class Hamiltonian final : public HamiltonianBase<StateVectorT> {
     }
 };
 
-
 /**
  * @brief A base class for all observable classes.
  *

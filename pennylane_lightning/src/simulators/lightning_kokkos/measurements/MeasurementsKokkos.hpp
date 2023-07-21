@@ -49,8 +49,10 @@ class Measurements final
     using KokkosVector = StateVectorT::KokkosVector;
     using KokkosSizeTVector = StateVectorT::KokkosSizeTVector;
     using UnmanagedSizeTHostView = StateVectorT::UnmanagedSizeTHostView;
-    using UnmanagedConstComplexHostView = StateVectorT::UnmanagedConstComplexHostView;
-    using UnmanagedConstSizeTHostView = StateVectorT::UnmanagedConstSizeTHostView;
+    using UnmanagedConstComplexHostView =
+        StateVectorT::UnmanagedConstComplexHostView;
+    using UnmanagedConstSizeTHostView =
+        StateVectorT::UnmanagedConstSizeTHostView;
     using UnmanagedPrecisionHostView = StateVectorT::UnmanagedPrecisionHostView;
 
     using ExpValFunc = std::function<PrecisionT(
