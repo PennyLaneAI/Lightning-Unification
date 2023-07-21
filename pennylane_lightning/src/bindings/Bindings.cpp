@@ -19,13 +19,14 @@
 
 #include "pybind11/pybind11.h"
 
+
+#if defined(_ENABLE_PLQUBIT) || _ENABLE_PLKOKKOS == 1
+
 /// @cond DEV
 namespace {
 using namespace Pennylane;
 } // namespace
 /// @endcond
-
-#ifdef _ENABLE_PLQUBIT
 
 /**
  * @brief Add C++ classes, methods and functions to Python module.
@@ -49,4 +50,5 @@ PYBIND11_MODULE(
 
     registerLightningClassBindings<StateVectorBackends>(m);
 }
+
 #endif
