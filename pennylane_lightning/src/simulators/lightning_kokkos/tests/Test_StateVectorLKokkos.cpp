@@ -124,8 +124,7 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
 
     SECTION("Test with different number of wires") {
         using KokkosVector = typename StateVectorT::KokkosVector;
-        const size_t num_qubits = 3;
-        // const size_t num_qubits = 5;
+        const size_t num_qubits = 5;
         for (size_t num_wires = 1; num_wires < num_qubits; num_wires++) {
 
             VectorT st_data_1 =
@@ -146,16 +145,6 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
                                 m.size());
             state_vector_1.applyMatrix(mkview, wires);
             state_vector_2.applyMultiQubitOp(mkview, wires);
-
-            // printf("---------------\n");
-            // for (size_t i = 0; i < state_vector_1.getLength(); i++) {
-            //     printf("(%f %f) (%f %f)\n",
-            //            state_vector_1.getData()[i].real(),
-            //            state_vector_1.getData()[i].imag(),
-            //            state_vector_2.getData()[i].real(),
-            //            state_vector_2.getData()[i].imag());
-            // }
-            // printf("---------------\n");
 
             PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
             REQUIRE(isApproxEqual(
