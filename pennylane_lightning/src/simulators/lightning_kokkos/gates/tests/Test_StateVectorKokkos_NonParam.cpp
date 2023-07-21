@@ -26,9 +26,7 @@
 
 /**
  * @file
- *  Tests for functionality:
- *      - defined in the intermediate base class StateVectorKokkos.
- *      - shared between all child classes.
+ *  Tests for non-parametric gates functionality defined in the class StateVectorKokkos.
  */
 
 /// @cond DEV
