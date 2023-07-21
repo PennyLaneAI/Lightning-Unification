@@ -32,7 +32,6 @@ set(CMAKE_SKIP_BUILD_RPATH FALSE)
 #########################
 ## Set Default Options ##
 #########################
-option(PLKOKKOS_ENABLE_CLANG_TIDY "Enable clang-tidy build checks" OFF)
 option(PLKOKKOS_ENABLE_NATIVE "Enable native CPU build tuning" OFF)
 option(PLKOKKOS_ENABLE_SANITIZER "Enable address sanitizer" OFF)
 option(PLKOKKOS_ENABLE_WARNINGS "Enable warnings" ON)
@@ -40,15 +39,6 @@ option(PLKOKKOS_ENABLE_WARNINGS "Enable warnings" ON)
 # Include macro and functions supporting Kokkos libraries.
 include("${CMAKE_SOURCE_DIR}/cmake/support_kokkos.cmake")
 FindKokkosAndKokkosKernels(lightning_external_libs)
-
-if(PLKOKKOS_ENABLE_CLANG_TIDY)
-    if (NOT DEFINED CLANG_TIDY_BINARY)
-        set(CLANG_TIDY_BINARY clang-tidy)
-    endif()
-    set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_BINARY};
-                            -extra-arg=-std=c++20;
-    )
-endif()
 
 if(PLKOKKOS_ENABLE_SANITIZER)
     add_compile_options(-fsanitize=address)
