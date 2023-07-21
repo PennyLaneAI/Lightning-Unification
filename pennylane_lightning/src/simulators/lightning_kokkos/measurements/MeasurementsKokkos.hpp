@@ -59,7 +59,6 @@ class Measurements final
         const std::vector<size_t> &, const std::vector<PrecisionT> &)>;
     using ExpValMap = std::unordered_map<std::string, ExpValFunc>;
 
-    // const StateVectorT &this->_statevector;
     ExpValMap expval_funcs;
 
   public:
