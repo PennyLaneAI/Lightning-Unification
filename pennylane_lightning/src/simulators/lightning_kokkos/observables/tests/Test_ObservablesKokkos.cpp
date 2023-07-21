@@ -16,7 +16,6 @@
 
 #include <catch2/catch.hpp>
 
-// using namespace Pennylane;
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningKokkos::Observables;
