@@ -64,28 +64,6 @@ class AdjointJacobian final
     AdjointJacobian() = default;
 
     /**
-     * @brief Utility to create a given operations object.
-     *
-     * @param ops_name Name of operations.
-     * @param ops_params Parameters for each operation in ops_name.
-     * @param ops_wires Wires for each operation in ops_name.
-     * @param ops_inverses Indicate whether to take adjoint of each operation in
-     * ops_name.
-     * @param ops_matrices Matrix definition of an operation if unsupported.
-     * @return const
-     * OpsData<StateVectorT>
-     */
-    auto
-    createOpsData(const std::vector<std::string> &ops_name,
-                  const std::vector<std::vector<PrecisionT>> &ops_params,
-                  const std::vector<std::vector<size_t>> &ops_wires,
-                  const std::vector<bool> &ops_inverses,
-                  const std::vector<std::vector<ComplexT>> &ops_matrices = {{}})
-        -> OpsData<StateVectorT> {
-        return {ops_name, ops_params, ops_wires, ops_inverses, ops_matrices};
-    }
-
-    /**
      * @brief Calculates the Jacobian for the statevector for the selected set
      * of parametric gates.
      *

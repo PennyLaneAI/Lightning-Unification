@@ -32,6 +32,7 @@
 namespace {
 using namespace Pennylane::Util;
 using namespace Pennylane::LightningKokkos::Algorithms;
+using Pennylane::Algorithms::OpsData;
 } // namespace
 /// @endcond
 
@@ -67,7 +68,7 @@ TEST_CASE("AdjointJacobian::AdjointJacobian Op=RX, Obs=Z",
         StateVectorT{num_qubits}, StateVectorT{num_qubits, num_threads_2}};
     for (auto &psi : st_vecs) {
         for (const auto &p : param) {
-            auto ops = adj.createOpsData({"RX"}, {{p}}, {{0}}, {false});
+            auto ops = OpsData<StateVectorT>{{"RX"}, {{p}}, {{0}}, {false}};
             psi.resetStateVector();
             adj.adjointJacobian(psi, jacobian, {obs}, ops, {0}, true);
             CHECK(-sin(p) == Approx(jacobian[0][0]).margin(1e-5));
@@ -91,7 +92,7 @@ TEST_CASE("AdjointJacobian::adjointJacobian Op=RY, Obs=X",
         num_obs, std::vector<double>(num_params, 0));
     StateVectorT psi(num_qubits);
     for (const auto &p : param) {
-        auto ops = adj.createOpsData({"RY"}, {{p}}, {{0}}, {false});
+        auto ops = OpsData<StateVectorT>{{"RY"}, {{p}}, {{0}}, {false}};
         psi.resetStateVector();
         adj.adjointJacobian(psi, jacobian, {obs}, ops, {0}, true);
         CHECK(cos(p) == Approx(jacobian[0][0]).margin(1e-5));
@@ -117,7 +118,7 @@ TEST_CASE("AdjointJacobian::adjointJacobian Op=RX, Obs=[Z,Z]",
         auto obs2 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{1});
 
-        auto ops = adj.createOpsData({"RX"}, {{param[0]}}, {{0}}, {false});
+        auto ops = OpsData<StateVectorT>{{"RX"}, {{param[0]}}, {{0}}, {false}};
 
         adj.adjointJacobian(psi, jacobian, {obs1, obs2}, ops, {0}, true);
 
@@ -148,9 +149,9 @@ TEST_CASE("AdjointJacobian::adjointJacobian Op=[RX,RX,RX], Obs=[Z,Z,Z]",
         auto obs3 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{2});
 
-        auto ops = adj.createOpsData({"RX", "RX", "RX"},
+        auto ops = OpsData<StateVectorT>{{"RX", "RX", "RX"},
                                      {{param[0]}, {param[1]}, {param[2]}},
-                                     {{0}, {1}, {2}}, {false, false, false});
+                                     {{0}, {1}, {2}}, {false, false, false}};
 
         adj.adjointJacobian(psi, jacobian, {obs1, obs2, obs3}, ops, {0, 1, 2},
                             true);
@@ -185,9 +186,9 @@ TEST_CASE("AdjointJacobian::adjointJacobian Op=[RX,RX,RX], Obs=[Z,Z,Z],"
         auto obs3 = std::make_shared<NamedObs<StateVectorT>>(
             "PauliZ", std::vector<size_t>{2});
 
-        auto ops = adj.createOpsData({"RX", "RX", "RX"},
+        auto ops = OpsData<StateVectorT>{{"RX", "RX", "RX"},
                                      {{param[0]}, {param[1]}, {param[2]}},
-                                     {{0}, {1}, {2}}, {false, false, false});
+                                     {{0}, {1}, {2}}, {false, false, false}};
 
         adj.adjointJacobian(psi, jacobian, {obs1, obs2, obs3}, ops, t_params,
                             true);
@@ -220,9 +221,9 @@ TEST_CASE("AdjointJacobian::adjointJacobian Op=[RX,RX,RX], Obs=[ZZZ]",
                                                      std::vector<size_t>{1}),
             std::make_shared<NamedObs<StateVectorT>>("PauliZ",
                                                      std::vector<size_t>{2}));
-        auto ops = adj.createOpsData({"RX", "RX", "RX"},
+        auto ops = OpsData<StateVectorT>{{"RX", "RX", "RX"},
                                      {{param[0]}, {param[1]}, {param[2]}},
-                                     {{0}, {1}, {2}}, {false, false, false});
+                                     {{0}, {1}, {2}}, {false, false, false}};
 
         adj.adjointJacobian(psi, jacobian, {obs}, ops, {0, 1, 2}, true);
         CAPTURE(jacobian);
@@ -256,7 +257,7 @@ TEST_CASE("AdjointJacobian::adjointJacobian Op=Mixed, Obs=[XXX]",
             std::make_shared<NamedObs<StateVectorT>>("PauliX",
                                                      std::vector<size_t>{2}));
 
-        auto ops = adj.createOpsData(
+        auto ops = OpsData<StateVectorT>{
             {"RZ", "RY", "RZ", "CNOT", "CNOT", "RZ", "RY", "RZ"},
             {{param[0]},
              {param[1]},
@@ -267,7 +268,7 @@ TEST_CASE("AdjointJacobian::adjointJacobian Op=Mixed, Obs=[XXX]",
              {param[1]},
              {param[2]}},
             {{0}, {0}, {0}, {0, 1}, {1, 2}, {1}, {1}, {1}},
-            {false, false, false, false, false, false, false, false});
+            {false, false, false, false, false, false, false, false}};
 
         adj.adjointJacobian(psi, jacobian, {obs}, ops, {0, 1, 2, 3, 4, 5},
                             true);
@@ -318,10 +319,10 @@ TEST_CASE("AdjointJacobian::adjointJacobian Decomposed Rot gate, non "
 
             auto obs = std::make_shared<NamedObs<StateVectorT>>(
                 "PauliZ", std::vector<size_t>{0});
-            auto ops = adj.createOpsData(
+            auto ops = OpsData<StateVectorT>{
                 {"RZ", "RY", "RZ"},
                 {{local_params[0]}, {local_params[1]}, {local_params[2]}},
-                {{0}, {0}, {0}}, {false, false, false});
+                {{0}, {0}, {0}}, {false, false, false}};
 
             adj.adjointJacobian(psi, jacobian, {obs}, ops, {0, 1, 2}, true);
             CAPTURE(theta);
@@ -369,7 +370,7 @@ TEST_CASE("AdjointJacobian::adjointJacobian Mixed Ops, Obs and TParams",
             std::make_shared<NamedObs<StateVectorT>>("PauliZ",
                                                      std::vector<size_t>{1}));
         auto ops =
-            adj.createOpsData({"Hadamard", "RX", "CNOT", "RZ", "RY", "RZ", "RZ",
+            OpsData<StateVectorT>{{"Hadamard", "RX", "CNOT", "RZ", "RY", "RZ", "RZ",
                                "RY", "RZ", "RZ", "RY", "CNOT"},
                               {{},
                                {local_params[0]},
@@ -396,7 +397,7 @@ TEST_CASE("AdjointJacobian::adjointJacobian Mixed Ops, Obs and TParams",
                                                                     {1},
                                                                     {0, 1}},
                               {false, false, false, false, false, false, false,
-                               false, false, false, false, false});
+                               false, false, false, false, false}};
 
         adj.adjointJacobian(psi, jacobian, {obs}, ops, t_params, true);
 
@@ -428,8 +429,8 @@ TEST_CASE("Algorithms::adjointJacobian Op=RX, Obs=Ham[Z0+Z1]", "[Algorithms]") {
 
         auto ham = Hamiltonian<StateVectorT>::create({0.3, 0.7}, {obs1, obs2});
 
-        auto ops = Pennylane::Algorithms::OpsData<StateVectorT>(
-            {"RX"}, {{param[0]}}, {{0}}, {false});
+        auto ops = OpsData<StateVectorT>{
+            {"RX"}, {{param[0]}}, {{0}}, {false}};
 
         adj.adjointJacobian(psi, jacobian, {ham}, ops, tp, true);
 
@@ -464,9 +465,9 @@ TEST_CASE("AdjointJacobian::AdjointJacobian Op=[RX,RX,RX], "
         auto ham = Hamiltonian<StateVectorT>::create({0.47, 0.32, 0.96},
                                                      {obs1, obs2, obs3});
 
-        auto ops = adj.createOpsData({"RX", "RX", "RX"},
+        auto ops = OpsData<StateVectorT>{{"RX", "RX", "RX"},
                                      {{param[0]}, {param[1]}, {param[2]}},
-                                     {{0}, {1}, {2}}, {false, false, false});
+                                     {{0}, {1}, {2}}, {false, false, false}};
 
         adj.adjointJacobian(psi, jacobian, {ham}, ops, t_params, true);
         CAPTURE(jacobian);
@@ -504,9 +505,9 @@ TEST_CASE("AdjointJacobian::AdjointJacobian Test HermitianObs",
                                   1},
             std::vector<size_t>{0, 1});
 
-        auto ops = adj.createOpsData({"RX", "RX", "RX"},
+        auto ops = OpsData<StateVectorT>{{"RX", "RX", "RX"},
                                      {{param[0]}, {param[1]}, {param[2]}},
-                                     {{0}, {1}, {2}}, {false, false, false});
+                                     {{0}, {1}, {2}}, {false, false, false}};
 
         adj.adjointJacobian(psi, jacobian1, {obs1}, ops, t_params, true);
         adj.adjointJacobian(psi, jacobian2, {obs2}, ops, t_params, true);
