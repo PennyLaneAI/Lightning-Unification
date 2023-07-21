@@ -284,22 +284,6 @@ static auto getPhaseShift(T angle) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the Phase-shift gate data in
- * row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return Phase-shift gate
- * data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getPhaseShift(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getPhaseShift<ComplexT<T>>(params.front());
-}
-
-/**
  * @brief Create a matrix representation of the RX gate data in row-major
  * format.
  *
@@ -313,20 +297,6 @@ static auto getRX(T angle) -> std::vector<ComplexT<T>> {
     const ComplexT<T> c{std::cos(angle / 2), 0};
     const ComplexT<T> js{0, -std::sin(angle / 2)};
     return {c, js, js, c};
-}
-
-/**
- * @brief Create a matrix representation of the RX gate data in row-major
- * format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return RX gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getRX(const std::vector<T> &params) -> std::vector<ComplexT<T>> {
-    return getRX<ComplexT<T>>(params.front());
 }
 
 /**
@@ -346,20 +316,6 @@ static auto getRY(T angle) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the RY gate data in row-major
- * format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return RY gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getRY(const std::vector<T> &params) -> std::vector<ComplexT<T>> {
-    return getRY<ComplexT<T>>(params.front());
-}
-
-/**
  * @brief Create a matrix representation of the RZ gate data in row-major
  * format.
  *
@@ -374,20 +330,6 @@ static auto getRZ(T angle) -> std::vector<ComplexT<T>> {
             ZERO<ComplexT, T>(),
             ZERO<ComplexT, T>(),
             {std::cos(angle / 2), std::sin(angle / 2)}};
-}
-
-/**
- * @brief Create a matrix representation of the RZ gate data in row-major
- * format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return RZ gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getRZ(const std::vector<T> &params) -> std::vector<ComplexT<T>> {
-    return getRZ<ComplexT<T>>(params.front());
 }
 
 /**
@@ -422,28 +364,6 @@ static auto getRot(U phi, U theta, U omega) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the Rot gate data in row-major
-format.
- *
- * The gate is defined as:
- * \f$\begin{split}Rot(\phi,\theta,\omega) = RZ(\omega)RY(\theta)RZ(\phi)=
-\begin{bmatrix}
-e^{-i(\phi+\omega)/2}\cos(\theta/2) & -e^{i(\phi-\omega)/2}\sin(\theta/2) \\
-e^{-i(\phi-\omega)/2}\sin(\theta/2) & e^{i(\phi+\omega)/2}\cos(\theta/2)
-\end{bmatrix}.\end{split}\f$
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of gate data. Values are expected in order of
-\f$[\phi, \theta, \omega]\f$.
- * @return std::vector<ComplexT<T>> Return Rot gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getRot(const std::vector<T> &params) -> std::vector<ComplexT<T>> {
-    return getRot<ComplexT<T>>(params[0], params[1], params[2]);
-}
-
-/**
  * @brief Create a matrix representation of the controlled RX gate data in
  * row-major format.
  *
@@ -471,20 +391,6 @@ static auto getCRX(T angle) -> std::vector<ComplexT<T>> {
             ZERO<ComplexT, T>(),
             rx[2],
             rx[3]};
-}
-
-/**
- * @brief Create a matrix representation of the controlled RX gate data in
- * row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return RX gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getCRX(const std::vector<T> &params) -> std::vector<ComplexT<T>> {
-    return getCRX<ComplexT<T>>(params.front());
 }
 
 /**
@@ -518,20 +424,6 @@ static auto getCRY(T angle) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the controlled RY gate data in
- * row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return RY gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getCRY(const std::vector<T> &params) -> std::vector<ComplexT<T>> {
-    return getCRY<ComplexT<T>>(params.front());
-}
-
-/**
  * @brief Create a matrix representation of the controlled RZ gate data in
  * row-major format.
  *
@@ -562,20 +454,6 @@ static auto getCRZ(T angle) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the controlled RZ gate data in
- * row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return RZ gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getCRZ(const std::vector<T> &params) -> std::vector<ComplexT<T>> {
-    return getCRZ<ComplexT<T>>(params.front());
-}
-
-/**
  * @brief Create a matrix representation of the controlled Rot gate data in
 row-major format.
  *
@@ -603,17 +481,6 @@ static auto getCRot(T phi, T theta, T omega) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the controlled Rot gate data in
-row-major format.
- *
- * @see `getRot<T,U>(const std::vector<T> &params)`.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getCRot(const std::vector<T> &params) -> std::vector<T> {
-    return getCRot<T>(params[0], params[1], params[2]);
-}
-
-/**
  * @brief Create a matrix representation of the controlled phase-shift gate
 data in row-major format.
  *
@@ -629,18 +496,6 @@ static auto getControlledPhaseShift(T angle) -> std::vector<ComplexT<T>> {
             ONE<ComplexT, T>(),  ZERO<ComplexT, T>(),
             ZERO<ComplexT, T>(), ZERO<ComplexT, T>(),
             ZERO<ComplexT, T>(), {std::cos(angle), std::sin(angle)}};
-}
-
-/**
- * @brief Create a matrix representation of the controlled phase-shift gate
-data in row-major format.
- *
- * @see `getPhaseShift<T,U>(const std::vector<T> &params)`.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getControlledPhaseShift(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getControlledPhaseShift<ComplexT<T>>(params.front());
 }
 
 /**
@@ -674,22 +529,6 @@ static auto getSingleExcitation(T angle) -> std::vector<ComplexT<T>> {
             ZERO<ComplexT, T>(),
             ZERO<ComplexT, T>(),
             ONE<ComplexT, T>()};
-}
-
-/**
- * @brief Create a matrix representation of the single excitation rotation
- * gate data in row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return single excitation rotation
- * gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getSingleExcitation(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getSingleExcitation<ComplexT<T>>(params.front());
 }
 
 /**
@@ -754,23 +593,6 @@ static auto getSingleExcitationMinus(T angle) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the single excitation rotation
- * with negative phase-shift outside the rotation subspace gate data in
- * row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return single excitation rotation
- * with negative phase-shift outside the rotation subspace gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getSingleExcitationMinus(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getSingleExcitationMinus<ComplexT<T>>(params.front());
-}
-
-/**
  * @brief Create a matrix representation of the SingleExcitation Minus
  * generator data in row-major format.
  *
@@ -829,23 +651,6 @@ static auto getSingleExcitationPlus(T angle) -> std::vector<ComplexT<T>> {
             ZERO<ComplexT, T>(),
             ZERO<ComplexT, T>(),
             e};
-}
-
-/**
- * @brief Create a matrix representation of the single excitation rotation
- * with positive phase-shift outside the rotation subspace gate data in
- * row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return single excitation rotation
- * with positive phase-shift outside the rotation subspace gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getSingleExcitationPlus(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getSingleExcitationPlus<ComplexT<T>>(params.front());
 }
 
 /**
@@ -912,22 +717,6 @@ static auto getDoubleExcitation(T angle) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the double excitation rotation
- * gate data in row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return double excitation rotation
- * gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getDoubleExcitation(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getDoubleExcitation<ComplexT, T>(params.front());
-}
-
-/**
  * @brief Create a matrix representation of the DoubleExcitation
  * generator data in row-major format.
  *
@@ -981,23 +770,6 @@ static auto getDoubleExcitationMinus(T angle) -> std::vector<ComplexT<T>> {
     mat[238] = e;
     mat[255] = e;
     return mat;
-}
-
-/**
- * @brief Create a matrix representation of the double excitation rotation
- * with negative phase-shift outside the rotation subspace gate data in
- * row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return double excitation rotation
- * with negative phase-shift outside the rotation subspace gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getDoubleExcitationMinus(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getDoubleExcitationMinus<ComplexT<T>>(params.front());
 }
 
 /**
@@ -1071,23 +843,6 @@ static auto getDoubleExcitationPlus(T angle) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the double excitation rotation
- * with positive phase-shift outside the rotation subspace gate data in
- * row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return double excitation rotation
- * with positive phase-shift outside the rotation subspace gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getDoubleExcitationPlus(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getDoubleExcitationPlus<ComplexT, T>(params.front());
-}
-
-/**
  * @brief Create a matrix representation of the DoubleExcitation Plus
  * generator data in row-major format.
  *
@@ -1152,22 +907,6 @@ static auto getIsingXX(T angle) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the Ising XX coupling
- * gate data in row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return Ising XX coupling
- * gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getIsingXX(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getIsingXX<ComplexT, T>(params.front());
-}
-
-/**
  * @brief Create a matrix representation of the Ising XX generator
  * data in row-major format.
  *
@@ -1227,22 +966,6 @@ static auto getIsingYY(T angle) -> std::vector<ComplexT<T>> {
 }
 
 /**
- * @brief Create a matrix representation of the Ising YY coupling
- * gate data in row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return Ising YY coupling
- * gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getIsingYY(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getIsingYY<ComplexT, T>(params.front());
-}
-
-/**
  * @brief Create a matrix representation of the Ising YY generator
  * data in row-major format.
  *
@@ -1298,22 +1021,6 @@ static auto getIsingZZ(T angle) -> std::vector<ComplexT<T>> {
             ZERO<ComplexT, T>(),
             ZERO<ComplexT, T>(),
             neg_e};
-}
-
-/**
- * @brief Create a matrix representation of the Ising ZZ coupling
- * gate data in row-major format.
- *
- * @tparam ComplexT<T> Required precision of gate (`float` or `double`).
- * @tparam T Required precision of parameter (`float` or `double`).
- * @param params Vector of phase shift angles. Only front element is read.
- * @return std::vector<ComplexT<T>> Return Ising ZZ coupling
- * gate data.
- */
-template <template <typename...> class ComplexT, typename T>
-static auto getIsingZZ(const std::vector<T> &params)
-    -> std::vector<ComplexT<T>> {
-    return getIsingZZ<ComplexT, T>(params.front());
 }
 
 /**
