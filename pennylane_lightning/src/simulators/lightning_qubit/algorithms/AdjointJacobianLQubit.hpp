@@ -32,8 +32,8 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::Algorithms;
-using Pennylane::Util::innerProdC;
-using Pennylane::Util::Transpose;
+using Pennylane::LightningQubit::Util::innerProdC;
+using Pennylane::LightningQubit::Util::Transpose;
 
 } // namespace
 /// @endcond

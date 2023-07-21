@@ -27,7 +27,8 @@
 
 /// @cond DEV
 namespace {
-using namespace Pennylane;
+using namespace Pennylane::LightningQubit;
+using Pennylane::Util::randomUnitary;
 } // namespace
 /// @endcond
 
@@ -832,7 +833,7 @@ TEMPLATE_TEST_CASE("randomUnitary", "[Util][LinearAlgebra]", float, double) {
 
     for (size_t num_qubits = 1; num_qubits <= 5; num_qubits++) {
         const size_t dim = (1U << num_qubits);
-        const auto unitary = Util::randomUnitary<PrecisionT>(re, num_qubits);
+        const auto unitary = randomUnitary<PrecisionT>(re, num_qubits);
 
         auto unitary_dagger = Util::Transpose(unitary, dim, dim);
         std::transform(

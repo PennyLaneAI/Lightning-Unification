@@ -17,10 +17,6 @@
  */
 #pragma once
 
-#include "Macros.hpp"
-#include "TypeTraits.hpp" // remove_complex_t
-#include "Util.hpp"       // ConstSum, ConstMult, ConstMultConj
-
 #include <algorithm>
 #include <complex>
 #include <cstdlib>
@@ -28,6 +24,10 @@
 #include <random>
 #include <span>
 #include <vector>
+
+#include "Macros.hpp"
+#include "TypeTraits.hpp" // remove_complex_t
+#include "Util.hpp"       // ConstSum, ConstMult, ConstMultConj
 
 /// @cond DEV
 
@@ -58,7 +58,7 @@ using namespace Pennylane::Util;
 
 /// @endcond
 
-namespace Pennylane::Util {
+namespace Pennylane::LightningQubit::Util {
 /**
  * @brief Transpose enum class
  */
@@ -759,63 +759,6 @@ inline auto matrixMatProd(const std::vector<std::complex<T>> m_left,
 }
 
 /**
- * @brief Generate random unitary matrix
- *
- * @tparam PrecisionT Floating point type
- * @tparam RandomEngine Random engine type
- * @param re Random engine instance
- * @param num_qubits Number of qubits
- * @return Generated unitary matrix in row-major format
- */
-template <typename PrecisionT, class RandomEngine>
-auto randomUnitary(RandomEngine &re, size_t num_qubits)
-    -> std::vector<std::complex<PrecisionT>> {
-    using ComplexT = std::complex<PrecisionT>;
-    const size_t dim = (1U << num_qubits);
-    std::vector<ComplexT> res(dim * dim, ComplexT{});
-
-    std::normal_distribution<PrecisionT> dist;
-
-    auto generator = [&dist, &re]() -> ComplexT {
-        return ComplexT{dist(re), dist(re)};
-    };
-
-    std::generate(res.begin(), res.end(), generator);
-
-    // Simple algorithm to make rows orthogonal with Gram-Schmidt
-    // This algorithm is unstable but works for a small matrix.
-    // Use QR decomposition when we have LAPACK support.
-
-    for (size_t row2 = 0; row2 < dim; row2++) {
-        ComplexT *row2_p = res.data() + row2 * dim;
-        for (size_t row1 = 0; row1 < row2; row1++) {
-            const ComplexT *row1_p = res.data() + row1 * dim;
-            ComplexT dot12 = Util::innerProdC(row1_p, row2_p, dim);
-            ComplexT dot11 = squaredNorm(row1_p, dim);
-
-            // orthogonalize row2
-            std::transform(
-                row2_p, row2_p + dim, row1_p, row2_p,
-                [scale = dot12 / dot11](auto &elem2, const auto &elem1) {
-                    return elem2 - scale * elem1;
-                });
-        }
-    }
-
-    // Normalize each row
-    for (size_t row = 0; row < dim; row++) {
-        ComplexT *row_p = res.data() + row * dim;
-        PrecisionT norm2 = std::sqrt(squaredNorm(row_p, dim));
-
-        // normalize row2
-        std::transform(row_p, row_p + dim, row_p, [norm2](const auto c) {
-            return (static_cast<PrecisionT>(1.0) / norm2) * c;
-        });
-    }
-    return res;
-}
-
-/**
  * @brief @rst
  * Calculate :math:`y += a*x` for a scalar :math:`a` and a vector :math:`x`
  * using OpenMP
@@ -912,4 +855,4 @@ void scaleAndAdd(std::complex<T> a, const std::vector<std::complex<T>> &x,
     }
     scaleAndAdd(x.size(), a, x.data(), y.data());
 }
-} // namespace Pennylane::Util
+} // namespace Pennylane::LightningQubit::Util

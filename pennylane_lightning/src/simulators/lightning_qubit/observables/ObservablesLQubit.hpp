@@ -13,6 +13,13 @@
 // limitations under the License.
 #pragma once
 
+#include <complex>
+#include <iostream>
+#include <memory>
+#include <type_traits>
+#include <unordered_set>
+#include <vector>
+
 #include "CPUMemoryModel.hpp" // getAllocator
 #include "Constant.hpp"
 #include "ConstantUtil.hpp" // lookup
@@ -23,14 +30,6 @@
 #include "StateVectorLQubitManaged.hpp"
 #include "StateVectorLQubitRaw.hpp"
 #include "Util.hpp"
-
-#include <complex>
-#include <memory>
-#include <type_traits>
-#include <unordered_set>
-#include <vector>
-
-#include <iostream>
 
 // using namespace Pennylane;
 /// @cond DEV
@@ -151,7 +150,7 @@ class TensorProdObs final : public TensorProdObsBase<StateVectorT> {
 
 /// @cond DEV
 namespace detail {
-using Pennylane::Util::scaleAndAdd;
+using Pennylane::LightningQubit::Util::scaleAndAdd;
 
 // Default implementation
 template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {

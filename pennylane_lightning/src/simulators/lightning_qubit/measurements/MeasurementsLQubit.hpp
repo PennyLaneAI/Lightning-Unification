@@ -42,9 +42,8 @@
 namespace {
 using namespace Pennylane::Measures;
 using namespace Pennylane::Observables;
-using Pennylane::Util::innerProdC;
-
 using Pennylane::LightningQubit::StateVectorLQubitManaged;
+using Pennylane::LightningQubit::Util::innerProdC;
 } // namespace
 /// @endcond
 

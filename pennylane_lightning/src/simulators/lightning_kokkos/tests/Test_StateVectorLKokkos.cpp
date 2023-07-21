@@ -20,7 +20,6 @@
 
 #include <catch2/catch.hpp>
 
-#include "LinearAlgebra.hpp" //randomUnitary
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp" // createRandomStateVectorData
 

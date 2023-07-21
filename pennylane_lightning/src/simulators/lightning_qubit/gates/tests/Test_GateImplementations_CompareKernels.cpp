@@ -11,19 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "TestHelpers.hpp" // PrecisionToName
-#include "TestHelpersWires.hpp"
-#include "TestKernels.hpp"
-
-#include "ConstantUtil.hpp" // lookup, array_has_elem
-#include "DynamicDispatcher.hpp"
-#include "KernelMap.hpp"
-#include "KernelType.hpp"
-#include "OpToMemberFuncPtr.hpp"
-#include "Util.hpp" // for_each_enum
-
-#include <catch2/catch.hpp>
-
 #include <algorithm>
 #include <complex>
 #include <iostream>
@@ -32,6 +19,18 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#include <catch2/catch.hpp>
+
+#include "ConstantUtil.hpp" // lookup, array_has_elem
+#include "DynamicDispatcher.hpp"
+#include "KernelMap.hpp"
+#include "KernelType.hpp"
+#include "OpToMemberFuncPtr.hpp"
+#include "TestHelpers.hpp" // PrecisionToName
+#include "TestHelpersWires.hpp"
+#include "TestKernels.hpp"
+#include "Util.hpp" // for_each_enum
 
 /**
  * @file Test_GateImplementations_Nonparam.cpp
@@ -44,6 +43,7 @@ namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Util;
 using namespace Pennylane::LightningQubit::Gates;
+using Pennylane::Util::randomUnitary;
 } // namespace
 /// @endcond
 

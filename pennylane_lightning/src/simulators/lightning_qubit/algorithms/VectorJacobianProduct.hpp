@@ -29,7 +29,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::Algorithms;
-using Pennylane::Util::innerProdC;
+using Pennylane::LightningQubit::Util::innerProdC;
 using Pennylane::Util::log2PerfectPower;
 } // namespace
 /// @endcond
