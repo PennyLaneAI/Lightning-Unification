@@ -138,7 +138,7 @@ info = {
     "license": "Apache License 2.0",
     "packages": find_packages(where="."),
     "package_data": {
-        "pennylane_lightning": [
+        "pennylane_lightning_kokkos": [
             os.path.join("src", "*"),
             os.path.join("src", "**", "*"),
         ]
@@ -146,21 +146,26 @@ info = {
     "include_package_data": True,
     "entry_points": {
         "pennylane.plugins": [
-            "lightning.qubit = pennylane_lightning:LightningQubit",
+            "lightning.kokkos = pennylane_lightning_kokkos:LightningKokkos",
         ],
     },
     "description": "PennyLane-Lightning plugin",
     "long_description": open("README.md").read(),
     "long_description_content_type": "text/markdown",
-    "provides": ["pennylane_lightning"],
+    "provides": ["pennylane_lightning_kokkos"],
     "install_requires": requirements,
-    "ext_modules": []
-    if os.environ.get("SKIP_COMPILATION", False)
-    else [CMakeExtension("pennylane_lightning_ops")],
-    "cmdclass": {"build_ext": CMakeBuild},
-    "ext_package": "pennylane_lightning",
-    "extras_require": {"gpu": ["pennylane-lightning-gpu"]},
+    "ext_package": "pennylane_lightning_kokkos",
+    # "ext_modules": []
+    # if os.environ.get("SKIP_COMPILATION", False)
+    # else [CMakeExtension("pennylane_lightning_ops")],
+    # "cmdclass": {"build_ext": CMakeBuild},
+    # "ext_package": "pennylane_lightning",
+    # "extras_require": {"gpu": ["pennylane-lightning-gpu"]},
 }
+
+if not os.getenv("READTHEDOCS"):
+    info["ext_modules"] = [CMakeExtension("lightning_kokkos_qubit_ops")]
+    info["cmdclass"] = {"build_ext": CMakeBuild}
 
 classifiers = [
     "Development Status :: 4 - Beta",

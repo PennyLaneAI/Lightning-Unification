@@ -1,4 +1,4 @@
-# Copyright 2018-2023 Xanadu Quantum Technologies Inc.
+# Copyright 2018-2022 Xanadu Quantum Technologies Inc.
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,10 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Top level PennyLane-Lightning module."""
+"""Top level PennyLane-Lightning-Kokkos module."""
 
 from ._version import __version__
-
-from .lightning_base import CPP_BINARY_AVAILABLE, backend_info
-
-from .lightning_qubit import LightningQubit
+from .lightning_kokkos import LightningKokkos

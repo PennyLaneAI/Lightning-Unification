@@ -114,6 +114,40 @@ if(ENABLE_PYTHON)
     set_target_properties(pennylane_lightning_ops PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
     target_compile_definitions(pennylane_lightning_ops PRIVATE VERSION_INFO=${VERSION_STRING})
+
+    ##################################################
+    ## LKOKKOS
+    ##################################################
+    find_package (Python COMPONENTS Interpreter Development)
+    if(Kokkos_ENABLE_CUDA)
+        add_library(lightning_kokkos_qubit_ops MODULE "pennylane_lightning/src/simulators/lightning_kokkos/bindings/Bindings.cpp")
+        target_link_libraries(lightning_kokkos_qubit_ops PUBLIC pybind11::module)
+        pybind11_extension(lightning_kokkos_qubit_ops)
+    else()
+        pybind11_add_module(lightning_kokkos_qubit_ops "pennylane_lightning/src/simulators/lightning_kokkos/bindings/Bindings.cpp" )
+    endif()
+    target_link_libraries(lightning_kokkos_qubit_ops PRIVATE    lightning_compile_options
+                                                                lightning_external_libs
+                                                                )
+
+    target_link_libraries(lightning_kokkos_qubit_ops PRIVATE    lightning_observables
+                                                                lightning_utils
+                                                                lightning_algorithms
+                                                                )
+
+    target_link_libraries(lightning_kokkos_qubit_ops PRIVATE    ${PL_BACKEND} #simulator
+                                                                "${PL_BACKEND}_algorithms"
+                                                                "${PL_BACKEND}_observables"
+                                                                "${PL_BACKEND}_bindings"
+                                                                "${PL_BACKEND}_measurements"
+                                                                )    
+    set_target_properties(lightning_kokkos_qubit_ops PROPERTIES CXX_VISIBILITY_PRESET "hidden" CUDA_VISIBILITY_PRESET "hidden")
+    target_compile_options(lightning_kokkos_qubit_ops PRIVATE "$<$<CONFIG:RELEASE>:-W>")
+    target_include_directories(lightning_kokkos_qubit_ops PRIVATE ${PLKOKKOS_KOKKOS_INC_DIR})
+    target_compile_definitions(lightning_kokkos_qubit_ops PRIVATE VERSION_INFO=${VERSION_STRING})
+    ##################################################
+    ## LKOKKOS
+    ##################################################
 endif()
 
 install(TARGETS pennylane_lightning
