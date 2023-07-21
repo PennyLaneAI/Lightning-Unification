@@ -18,31 +18,17 @@
 #pragma once
 #include <complex>
 
-#if _ENABLE_PLKOKKOS == 1
-#include <Kokkos_Core.hpp>
-#endif
-
 namespace Pennylane::Util {
 template <typename T> struct remove_complex { using type = T; };
 template <typename T> struct remove_complex<std::complex<T>> {
     using type = T;
 };
 
-#if _ENABLE_PLKOKKOS == 1
-template <typename T> struct remove_complex<Kokkos::complex<T>> {
-    using type = T;
-};
-#endif
-
 template <typename T> using remove_complex_t = typename remove_complex<T>::type;
 
 template <typename T> struct is_complex : std::false_type {};
 
 template <typename T> struct is_complex<std::complex<T>> : std::true_type {};
-
-#if _ENABLE_PLKOKKOS == 1
-template <typename T> struct is_complex<Kokkos::complex<T>> : std::true_type {};
-#endif
 
 template <typename T> constexpr bool is_complex_v = is_complex<T>::value;
 
