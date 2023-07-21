@@ -32,7 +32,6 @@ using Pennylane::Util::prepend_to_tuple;
 } // namespace
 /// @endcond
 
-
 /// @cond DEV
 namespace Pennylane::LightningQubit {
 /**

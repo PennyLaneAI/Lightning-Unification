@@ -24,6 +24,7 @@
 #include "MeasurementsKokkos.hpp"
 #include "ObservablesKokkos.hpp"
 #include "StateVectorKokkos.hpp"
+#include "TestHelpers.hpp"
 
 /**
  * @file
@@ -34,6 +35,7 @@
 namespace {
 using namespace Pennylane::LightningKokkos::Measures;
 using namespace Pennylane::LightningKokkos::Observables;
+using Pennylane::Util::createNonTrivialState;
 } // namespace
 /// @endcond
 
@@ -208,26 +210,26 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliZ",
                    "[StateVectorKokkosManaged_Expval]", float, double) {
     {
-        const std::size_t num_qubits = 3;
+        using StateVectorT = StateVectorKokkos<TestType>;
+        using PrecisionT = StateVectorT::PrecisionT;
+
+        // Defining the statevector that will be measured.
+        auto statevector_data = createNonTrivialState<StateVectorT>();
+        StateVectorT kokkos_sv(statevector_data.data(),
+                               statevector_data.size());
 
         SECTION("Apply directly") {
-            StateVectorKokkos<TestType> kokkos_sv{num_qubits};
             auto m = Measurements(kokkos_sv);
-            kokkos_sv.applyOperation("Hadamard", {0}, false);
-            kokkos_sv.applyOperation("CNOT", {0, 1}, false);
-            kokkos_sv.applyOperation("CNOT", {1, 2}, false);
             auto res = m.getExpectationValuePauliZ({0});
-            CHECK(res == 0); // A 0-result is not a good test.
+            PrecisionT ref = 0.58498357;
+            REQUIRE(res == Approx(ref).margin(1e-6));
         }
         SECTION("Using expval") {
-            StateVectorKokkos<TestType> kokkos_sv{num_qubits};
             auto m = Measurements(kokkos_sv);
-            kokkos_sv.applyOperation("Hadamard", {0}, false);
-            kokkos_sv.applyOperation("CNOT", {0, 1}, false);
-            kokkos_sv.applyOperation("CNOT", {1, 2}, false);
-            auto ob = NamedObs<StateVectorKokkos<TestType>>("PauliZ", {0});
+            auto ob = NamedObs<StateVectorKokkos<TestType>>("PauliZ", {1});
             auto res = m.expval(ob);
-            CHECK(res == 0); // A 0-result is not a good test.
+            PrecisionT ref = 0.77015115;
+            REQUIRE(res == Approx(ref).margin(1e-6));
         }
     }
 }

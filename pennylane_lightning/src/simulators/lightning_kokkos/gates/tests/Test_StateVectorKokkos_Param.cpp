@@ -27,7 +27,8 @@
 
 /**
  * @file
- *  Tests for parametric gates functionality defined in the class StateVectorKokkos.
+ *  Tests for parametric gates functionality defined in the class
+ * StateVectorKokkos.
  */
 
 /// @cond DEV
