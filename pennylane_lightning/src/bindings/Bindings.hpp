@@ -40,6 +40,7 @@
 #include <vector>
 
 #ifdef _ENABLE_PLQUBIT
+
 #include "AdjointJacobianLQubit.hpp"
 #include "LQubitBindings.hpp" // StateVectorBackends, registerBackendClassSpecificBindings, registerBackendSpecificMeasurements, registerBackendSpecificAlgorithms
 #include "MeasurementsLQubit.hpp"
@@ -53,6 +54,28 @@ using namespace Pennylane::LightningQubit::Observables;
 using namespace Pennylane::LightningQubit::Measures;
 } // namespace
 /// @endcond
+
+#elif _ENABLE_PLKOKKOS == 1
+
+#include "AdjointJacobianKokkos.hpp"
+#include "LKokkosBindings.hpp" // StateVectorBackends, registerBackendClassSpecificBindings, registerBackendSpecificMeasurements, registerBackendSpecificAlgorithms
+#include "MeasurementsKokkos.hpp"
+#include "ObservablesKokkos.hpp"
+
+/// @cond DEV
+namespace {
+using namespace Pennylane::LightningKokkos;
+using namespace Pennylane::LightningKokkos::Algorithms;
+using namespace Pennylane::LightningKokkos::Observables;
+using namespace Pennylane::LightningKokkos::Measures;
+} // namespace
+/// @endcond
+
+#else
+
+static_assert(false, "Backend not found.");
+
+#endif
 
 /// @cond DEV
 namespace {
@@ -77,18 +100,18 @@ template <class StateVectorT>
 auto createStateVectorFromNumpyData(
     const pybind11::array_t<std::complex<typename StateVectorT::PrecisionT>>
         &numpyArray) -> StateVectorT {
-    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexT = typename StateVectorT::ComplexT;
     pybind11::buffer_info numpyArrayInfo = numpyArray.request();
     if (numpyArrayInfo.ndim != 1) {
         throw std::invalid_argument(
             "NumPy array must be a 1-dimensional array");
     }
-    if (numpyArrayInfo.itemsize != sizeof(std::complex<PrecisionT>)) {
+    if (numpyArrayInfo.itemsize != sizeof(ComplexT)) {
         throw std::invalid_argument(
             "NumPy array must be of type np.complex64 or np.complex128");
     }
     auto *data_ptr =
-        static_cast<std::complex<PrecisionT> *>(numpyArrayInfo.ptr);
+        static_cast<ComplexT *>(numpyArrayInfo.ptr);
     return StateVectorT(
         {data_ptr, static_cast<size_t>(numpyArrayInfo.shape[0])});
 }
@@ -259,6 +282,8 @@ void registerInfo(py::module_ &m) {
 template <class StateVectorT> void registerObservables(py::module_ &m) {
     using PrecisionT =
         typename StateVectorT::PrecisionT; // Statevector's precision.
+    using ComplexT =
+        typename StateVectorT::ComplexT;   // Statevector's complex type.
     using ParamT = PrecisionT;             // Parameter's data precision
 
     const std::string bitsize =
@@ -305,9 +330,9 @@ template <class StateVectorT> void registerObservables(py::module_ &m) {
                          const std::vector<size_t> &wires) {
             auto buffer = matrix.request();
             const auto *ptr =
-                static_cast<std::complex<PrecisionT> *>(buffer.ptr);
+                static_cast<ComplexT *>(buffer.ptr);
             return HermitianObs<StateVectorT>(
-                std::vector<std::complex<PrecisionT>>(ptr, ptr + buffer.size),
+                std::vector<ComplexT>(ptr, ptr + buffer.size),
                 wires);
         }))
         .def("__repr__", &HermitianObs<StateVectorT>::getObsName)
@@ -468,6 +493,8 @@ template <class StateVectorT>
 void registerBackendAgnosticAlgorithms(py::module_ &m) {
     using PrecisionT =
         typename StateVectorT::PrecisionT; // Statevector's precision
+    using ComplexT =
+        typename StateVectorT::ComplexT;   // Statevector's complex type
     using ParamT = PrecisionT;             // Parameter's data precision
 
     using np_arr_c = py::array_t<std::complex<ParamT>, py::array::c_style>;
@@ -488,7 +515,7 @@ void registerBackendAgnosticAlgorithms(py::module_ &m) {
              const std::vector<std::vector<ParamT>> &,
              const std::vector<std::vector<size_t>> &,
              const std::vector<bool> &,
-             const std::vector<std::vector<std::complex<PrecisionT>>> &>())
+             const std::vector<std::vector<ComplexT>> &>())
         .def("__repr__", [](const OpsData<StateVectorT> &ops) {
             using namespace Pennylane::Util;
             std::ostringstream ops_stream;
@@ -515,14 +542,14 @@ void registerBackendAgnosticAlgorithms(py::module_ &m) {
            const std::vector<std::vector<size_t>> &ops_wires,
            const std::vector<bool> &ops_inverses,
            const std::vector<np_arr_c> &ops_matrices) {
-            std::vector<std::vector<std::complex<PrecisionT>>> conv_matrices(
+            std::vector<std::vector<ComplexT>> conv_matrices(
                 ops_matrices.size());
             for (size_t op = 0; op < ops_name.size(); op++) {
                 const auto m_buffer = ops_matrices[op].request();
                 if (m_buffer.size) {
                     const auto m_ptr =
-                        static_cast<const std::complex<ParamT> *>(m_buffer.ptr);
-                    conv_matrices[op] = std::vector<std::complex<ParamT>>{
+                        static_cast<const ComplexT *>(m_buffer.ptr);
+                    conv_matrices[op] = std::vector<ComplexT>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
             }
@@ -582,7 +609,7 @@ template <class StateVectorT> void lightningClassBindings(py::module_ &m) {
 
     pyclass_measurements.def(py::init<const StateVectorT &>());
     registerBackendAgnosticMeasurements<StateVectorT>(pyclass_measurements);
-    registerBackendSpecificMeasurements<StateVectorT>(pyclass_measurements);
+    // registerBackendSpecificMeasurements<StateVectorT>(pyclass_measurements);
 
     //***********************************************************************//
     //                           Algorithms
@@ -591,7 +618,7 @@ template <class StateVectorT> void lightningClassBindings(py::module_ &m) {
     py::module_ alg_submodule = m.def_submodule(
         "algorithms", "Submodule for the algorithms functionality.");
     registerBackendAgnosticAlgorithms<StateVectorT>(alg_submodule);
-    registerBackendSpecificAlgorithms<StateVectorT>(alg_submodule);
+    // registerBackendSpecificAlgorithms<StateVectorT>(alg_submodule);
 }
 
 template <typename TypeList>
@@ -603,9 +630,3 @@ void registerLightningClassBindings(py::module_ &m) {
     }
 }
 } // namespace Pennylane
-
-#elif _ENABLE_PLKOKKOS == 1
-#include "LKokkosBindings.hpp" 
-#else
-static_assert(false, "Backend not found.");
-#endif
