@@ -70,9 +70,8 @@ class NamedObs final : public NamedObsBase<StateVectorT> {
         using Pennylane::Gates::Constant::gate_names;
         using Pennylane::Gates::Constant::gate_num_params;
         using Pennylane::Gates::Constant::gate_wires;
-        using Pennylane::Util::lookup;
 
-        const auto gate_op = lookup(Pennylane::Util::reverse_pairs(gate_names),
+        const auto gate_op = lookup(reverse_pairs(gate_names),
                                     std::string_view{this->obs_name_});
         PL_ASSERT(lookup(gate_wires, gate_op) == this->wires_.size());
         PL_ASSERT(lookup(gate_num_params, gate_op) == this->params_.size());
@@ -91,7 +90,8 @@ class HermitianObs final : public HermitianObsBase<StateVectorT> {
 
   public:
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using MatrixT = std::vector<std::complex<PrecisionT>>;
+    using ComplexT = typename StateVectorT::ComplexT;
+    using MatrixT = std::vector<ComplexT>;
 
     /**
      * @brief Create an Hermitian observable

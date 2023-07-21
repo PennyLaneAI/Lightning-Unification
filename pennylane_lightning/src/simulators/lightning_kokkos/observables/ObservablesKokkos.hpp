@@ -24,67 +24,6 @@ using Pennylane::LightningKokkos::StateVectorKokkos;
 namespace Pennylane::LightningKokkos::Observables {
 
 /**
- * @brief A base class for all observable classes.
- *
- * We note that all subclasses must be immutable (does not provide any setter).
- *
- * @tparam T Floating point type
- */
-
-template <typename T>
-class ObservableKokkos
-    : public std::enable_shared_from_this<ObservableKokkos<T>> {
-  private:
-    /**
-     * @brief Polymorphic function comparing this to another Observable
-     * object.
-     *
-     * @param Another instance of subclass of Observable<T> to compare
-     */
-    [[nodiscard]] virtual bool
-    isEqual(const ObservableKokkos<T> &other) const = 0;
-
-  protected:
-    ObservableKokkos() = default;
-    ObservableKokkos(const ObservableKokkos &) = default;
-    ObservableKokkos(ObservableKokkos &&) noexcept = default;
-    ObservableKokkos &operator=(const ObservableKokkos &) = default;
-    ObservableKokkos &operator=(ObservableKokkos &&) noexcept = default;
-
-  public:
-    virtual ~ObservableKokkos() = default;
-
-    /**
-     * @brief Apply the observable to the given statevector in place.
-     */
-    virtual void applyInPlace(StateVectorKokkos<T> &sv) const = 0;
-
-    /**
-     * @brief Get the name of the observable
-     */
-    [[nodiscard]] virtual auto getObsName() const -> std::string = 0;
-
-    /**
-     * @brief Get the wires the observable applies to.
-     */
-    [[nodiscard]] virtual auto getWires() const -> std::vector<size_t> = 0;
-
-    /**
-     * @brief Test whether this object is equal to another object
-     */
-    [[nodiscard]] bool operator==(const ObservableKokkos<T> &other) const {
-        return typeid(*this) == typeid(other) && isEqual(other);
-    }
-
-    /**
-     * @brief Test whether this object is different from another object.
-     */
-    [[nodiscard]] bool operator!=(const ObservableKokkos<T> &other) const {
-        return !(*this == other);
-    }
-};
-
-/**
  * @brief Final class for named observables (PauliX, PauliY, PauliZ, etc.)
  *
  * @tparam StateVectorT State vector class.
@@ -109,8 +48,6 @@ class NamedObs final : public NamedObsBase<StateVectorT> {
         using Pennylane::Gates::Constant::gate_names;
         using Pennylane::Gates::Constant::gate_num_params;
         using Pennylane::Gates::Constant::gate_wires;
-        using Pennylane::Util::lookup;
-        using Pennylane::Util::reverse_pairs;
 
         const auto gate_op = lookup(reverse_pairs(gate_names),
                                     std::string_view{this->obs_name_});
@@ -249,6 +186,68 @@ class Hamiltonian final : public HamiltonianBase<StateVectorT> {
                 buffer.getView(), tmp.getLength());
         }
         sv.updateData(buffer);
+    }
+};
+
+
+/**
+ * @brief A base class for all observable classes.
+ *
+ * We note that all subclasses must be immutable (does not provide any setter).
+ *
+ * @tparam T Floating point type
+ */
+
+template <typename T>
+class ObservableKokkos
+    : public std::enable_shared_from_this<ObservableKokkos<T>> {
+  private:
+    /**
+     * @brief Polymorphic function comparing this to another Observable
+     * object.
+     *
+     * @param Another instance of subclass of Observable<T> to compare
+     */
+    [[nodiscard]] virtual bool
+    isEqual(const ObservableKokkos<T> &other) const = 0;
+
+  protected:
+    ObservableKokkos() = default;
+    ObservableKokkos(const ObservableKokkos &) = default;
+    ObservableKokkos(ObservableKokkos &&) noexcept = default;
+    ObservableKokkos &operator=(const ObservableKokkos &) = default;
+    ObservableKokkos &operator=(ObservableKokkos &&) noexcept = default;
+
+  public:
+    virtual ~ObservableKokkos() = default;
+
+    /**
+     * @brief Apply the observable to the given statevector in place.
+     */
+    virtual void applyInPlace(StateVectorKokkos<T> &sv) const = 0;
+
+    /**
+     * @brief Get the name of the observable
+     */
+    [[nodiscard]] virtual auto getObsName() const -> std::string = 0;
+
+    /**
+     * @brief Get the wires the observable applies to.
+     */
+    [[nodiscard]] virtual auto getWires() const -> std::vector<size_t> = 0;
+
+    /**
+     * @brief Test whether this object is equal to another object
+     */
+    [[nodiscard]] bool operator==(const ObservableKokkos<T> &other) const {
+        return typeid(*this) == typeid(other) && isEqual(other);
+    }
+
+    /**
+     * @brief Test whether this object is different from another object.
+     */
+    [[nodiscard]] bool operator!=(const ObservableKokkos<T> &other) const {
+        return !(*this == other);
     }
 };
 
