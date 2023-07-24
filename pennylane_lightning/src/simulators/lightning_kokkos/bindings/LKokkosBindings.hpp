@@ -12,22 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <set>
-#include <tuple>
-#include <variant>
-#include <vector>
+// #include <set>
+// #include <tuple>
+// #include <variant>
+// #include <vector>
 
-#include "AdjointJacobianKokkos.hpp"
-#include "Error.hpp"         // LightningException
-// #include "GetConfigInfo.hpp" // Kokkos configuration info
+// #include "AdjointJacobianKokkos.hpp"
+// #include "Error.hpp"         // LightningException
+// // #include "GetConfigInfo.hpp" // Kokkos configuration info
+// #include "MeasurementsKokkos.hpp"
+// #include "StateVectorKokkos.hpp"
+
+// #include "pybind11/complex.h"
+// #include "pybind11/numpy.h"
+// #include "pybind11/pybind11.h"
+// #include "pybind11/stl.h"
+// #include "pybind11/pybind11.h"
+
+// namespace py = pybind11;
+
+#include "Constant.hpp"
+#include "ConstantUtil.hpp" // lookup
+#include "GateOperation.hpp"
 #include "MeasurementsKokkos.hpp"
 #include "StateVectorKokkos.hpp"
+#include "TypeList.hpp"
 
-#include "pybind11/complex.h"
-#include "pybind11/numpy.h"
 #include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
-#include "pybind11/pybind11.h"
+
+/// @cond DEV
+namespace {
+using Pennylane::LightningKokkos::StateVectorKokkos;
+using namespace Pennylane::LightningKokkos::Measures;
+using namespace Pennylane::LightningKokkos::Algorithms;
+} // namespace
+/// @endcond
 
 namespace py = pybind11;
 
@@ -98,6 +117,84 @@ void registerBackendClassSpecificBindings(PyClass &pyclass) {
 
 }
 
+
+/**
+ * @brief Register backend specific measurements class functionalities.
+ *
+ * @tparam StateVectorT
+ * @tparam PyClass
+ * @param pyclass Pybind11's measurements class to bind methods.
+ */
+template <class StateVectorT, class PyClass>
+void registerBackendSpecificMeasurements(PyClass &pyclass) {
+    using PrecisionT =
+        typename StateVectorT::PrecisionT; // Statevector's precision
+    using ComplexT =
+        typename StateVectorT::ComplexT; // Statevector's complex type
+    using ParamT = PrecisionT;             // Parameter's data precision
+
+    using np_arr_c = py::array_t<std::complex<ParamT>,
+                                 py::array::c_style | py::array::forcecast>;
+    using sparse_index_type = std::size_t;
+    using np_arr_sparse_ind =
+        py::array_t<sparse_index_type,
+                    py::array::c_style | py::array::forcecast>;
+
+    pyclass
+        .def("expval",
+             static_cast<PrecisionT (Measurements<StateVectorT>::*)(
+                 const std::string &, const std::vector<size_t> &)>(
+                 &Measurements<StateVectorT>::expval),
+             "Expected value of an operation by name.")
+        .def(
+            "expval",
+            [](Measurements<StateVectorT> &M, const np_arr_sparse_ind &row_map,
+               const np_arr_sparse_ind &entries, const np_arr_c &values) {
+                return M.expval(
+                    static_cast<sparse_index_type *>(row_map.request().ptr),
+                    static_cast<sparse_index_type>(row_map.request().size),
+                    static_cast<sparse_index_type *>(entries.request().ptr),
+                    static_cast<ComplexT *>(
+                        values.request().ptr),
+                    static_cast<sparse_index_type>(values.request().size));
+            },
+            "Expected value of a sparse Hamiltonian.")
+        .def("var",
+             [](Measurements<StateVectorT> &M, const std::string &operation,
+                const std::vector<size_t> &wires) {
+                 return M.var(operation, wires);
+             })
+        .def("var",
+             static_cast<PrecisionT (Measurements<StateVectorT>::*)(
+                 const std::string &, const std::vector<size_t> &)>(
+                 &Measurements<StateVectorT>::var),
+             "Variance of an operation by name.")
+        // .def(
+        //     "var",
+        //     [](Measurements<StateVectorT> &M, const np_arr_sparse_ind &row_map,
+        //        const np_arr_sparse_ind &entries, const np_arr_c &values) {
+        //         return M.var(
+        //             static_cast<sparse_index_type *>(row_map.request().ptr),
+        //             static_cast<sparse_index_type>(row_map.request().size),
+        //             static_cast<sparse_index_type *>(entries.request().ptr),
+        //             static_cast<ComplexT *>(
+        //                 values.request().ptr),
+        //             static_cast<sparse_index_type>(values.request().size));
+        //     },
+        //     "Variance of a sparse Hamiltonian.")
+;
+}
+
+/**
+ * @brief Register backend specific adjoint Jacobian methods.
+ *
+ * @tparam StateVectorT
+ * @param m Pybind module
+ */
+template <class StateVectorT>
+void registerBackendSpecificAlgorithms([[maybe_unused]] py::module_ &m) {
+}
+
 /**
  * @brief Provide backend information.
  */
@@ -117,9 +214,9 @@ void registerBackendSpecificInfo(py::module_ &m) {
     /* Add Kokkos and Kokkos Kernels info */
     m.def("backend_info", &getBackendInfo, "Backend-specific information.");
 }
-}
+} // Pennylane::LightningKokkos
+/// @cond DEV
 
-// /// @cond DEV
 // namespace {
 // using namespace Pennylane;
 // using namespace Pennylane::LightningKokkos::Algorithms;
@@ -1088,4 +1185,4 @@ void registerBackendSpecificInfo(py::module_ &m) {
 // }
 
 // } // namespace
-//   /// @endcond
+//  /// @endcond

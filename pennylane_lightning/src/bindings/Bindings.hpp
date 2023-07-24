@@ -609,7 +609,7 @@ template <class StateVectorT> void lightningClassBindings(py::module_ &m) {
 
     pyclass_measurements.def(py::init<const StateVectorT &>());
     registerBackendAgnosticMeasurements<StateVectorT>(pyclass_measurements);
-    // registerBackendSpecificMeasurements<StateVectorT>(pyclass_measurements);
+    registerBackendSpecificMeasurements<StateVectorT>(pyclass_measurements);
 
     //***********************************************************************//
     //                           Algorithms
@@ -618,7 +618,7 @@ template <class StateVectorT> void lightningClassBindings(py::module_ &m) {
     py::module_ alg_submodule = m.def_submodule(
         "algorithms", "Submodule for the algorithms functionality.");
     registerBackendAgnosticAlgorithms<StateVectorT>(alg_submodule);
-    // registerBackendSpecificAlgorithms<StateVectorT>(alg_submodule);
+    registerBackendSpecificAlgorithms<StateVectorT>(alg_submodule);
 }
 
 template <typename TypeList>

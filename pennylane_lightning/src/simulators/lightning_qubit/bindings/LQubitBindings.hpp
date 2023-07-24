@@ -210,7 +210,7 @@ void registerBackendSpecificMeasurements(PyClass &pyclass) {
                         values.request().ptr),
                     static_cast<sparse_index_type>(values.request().size));
             },
-            "Expected value of a sparse Hamiltonian.")
+            "Variance of a sparse Hamiltonian.")
         .def("generate_mcmc_samples",
              [](Measurements<StateVectorT> &M, size_t num_wires,
                 const std::string &kernelname, size_t num_burnin,
