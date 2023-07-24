@@ -14,6 +14,7 @@
 #pragma once
 
 #include <complex>
+#include <exception>
 #include <memory>
 #include <type_traits>
 #include <unordered_set>
@@ -198,6 +199,7 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
             std::shared_ptr<Observable<StateVectorLQubitManaged<PrecisionT>>>>
             &terms,
         StateVectorLQubitManaged<PrecisionT> &sv) {
+        std::exception_ptr ex = nullptr;
         const size_t length = sv.getLength();
         auto allocator = sv.allocator();
 
@@ -205,7 +207,7 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
                                                        allocator);
 
 #pragma omp parallel default(none) firstprivate(length, allocator)             \
-    shared(coeffs, terms, sv, sum)
+    shared(coeffs, terms, sv, sum, ex)
         {
             StateVectorLQubitManaged<PrecisionT> tmp(sv.getNumQubits());
 
@@ -214,14 +216,24 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
 
 #pragma omp for
             for (size_t term_idx = 0; term_idx < terms.size(); term_idx++) {
-                tmp.updateData(sv.getDataVector());
+                try {
+                    tmp.updateData(sv.getDataVector());
+                } catch (...) {
+#pragma omp critical
+                    ex = std::current_exception();
+#pragma omp cancel for
+                }
                 terms[term_idx]->applyInPlace(tmp);
                 scaleAndAdd(length, ComplexT{coeffs[term_idx], 0.0},
                             tmp.getData(), local_sv.data());
             }
 
-#pragma omp critical
+            if (ex) {
+#pragma omp cancel parallel
+                std::rethrow_exception(ex);
+            } else
             {
+#pragma omp critical
                 scaleAndAdd(length, ComplexT{1.0, 0.0}, local_sv.data(),
                             sum.data());
             }
