@@ -38,6 +38,7 @@
 
 /// @cond DEV
 namespace {
+namespace GateConstant = Pennylane::Gates::Constant;
 using Pennylane::Gates::GateOperation;
 using Pennylane::Gates::GeneratorOperation;
 using Pennylane::Gates::KernelType;
@@ -47,6 +48,7 @@ using Pennylane::Util::lookup;
 using Pennylane::Util::PairHash;
 } // namespace
 /// @endcond
+
 
 namespace Pennylane::LightningQubit::Internal {
 constexpr auto generatorNamesWithoutPrefix() {
@@ -82,7 +84,6 @@ namespace Pennylane::LightningQubit {
 template <typename PrecisionT> class DynamicDispatcher {
   public:
     using CFP_t = std::complex<PrecisionT>;
-
     using GateFunc = std::function<void(
         std::complex<PrecisionT> * /*data*/, size_t /*num_qubits*/,
         const std::vector<size_t> & /*wires*/, bool /*inverse*/,
@@ -112,8 +113,7 @@ template <typename PrecisionT> class DynamicDispatcher {
         constexpr static auto gntr_names_without_prefix =
             Internal::generatorNamesWithoutPrefix();
 
-        for (const auto &[gate_op, gate_name] :
-             Pennylane::Gates::Constant::gate_names) {
+        for (const auto &[gate_op, gate_name] : GateConstant::gate_names) {
             str_to_gates_.emplace(gate_name, gate_op);
         }
         for (const auto &[gntr_op, gntr_name] : gntr_names_without_prefix) {
@@ -439,7 +439,7 @@ template <typename PrecisionT> class DynamicDispatcher {
         if (iter == matrix_kernels_.end()) {
             throw std::invalid_argument(
                 std::string(
-                    lookup(Pennylane::Gates::Constant::matrix_names, mat_op)) +
+                    lookup(GateConstant::matrix_names, mat_op)) +
                 " is not registered for the given kernel");
         }
         (iter->second)(data, num_qubits, matrix, wires, inverse);
