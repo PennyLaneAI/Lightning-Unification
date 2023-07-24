@@ -20,6 +20,8 @@
 
 #include <Kokkos_Core.hpp>
 
+#include "Error.hpp"
+
 namespace Pennylane::LightningKokkos::Util {
 
 /**
@@ -184,7 +186,7 @@ getRealOfComplexInnerProduct(Kokkos::View<Kokkos::complex<PrecisionT> *> x,
                              Kokkos::View<Kokkos::complex<PrecisionT> *> y)
     -> PrecisionT {
 
-    assert(x.size() == y.size());
+    PL_ASSERT(x.size() == y.size());
     PrecisionT inner = 0;
     Kokkos::parallel_reduce(
         x.size(), getRealOfComplexInnerProductFunctor<PrecisionT>(x, y), inner);
@@ -228,7 +230,7 @@ getImagOfComplexInnerProduct(Kokkos::View<Kokkos::complex<PrecisionT> *> x,
                              Kokkos::View<Kokkos::complex<PrecisionT> *> y)
     -> PrecisionT {
 
-    assert(x.size() == y.size());
+    PL_ASSERT(x.size() == y.size());
     PrecisionT inner = 0;
     Kokkos::parallel_reduce(
         x.size(), getImagOfComplexInnerProductFunctor<PrecisionT>(x, y), inner);

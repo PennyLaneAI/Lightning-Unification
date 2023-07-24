@@ -19,10 +19,11 @@
  */
 
 #pragma once
-#include "GateOperation.hpp"
-#include "cassert"
 #include <complex>
 #include <vector>
+
+#include "Error.hpp"
+#include "GateOperation.hpp"
 
 namespace {
 using namespace Pennylane::Gates;
@@ -552,7 +553,7 @@ inline void callGateOps(GateFuncPtrT<PrecisionT, ParamT, 0> func,
                         std::complex<PrecisionT> *data, size_t num_qubits,
                         const std::vector<size_t> &wires, bool inverse,
                         [[maybe_unused]] const std::vector<ParamT> &params) {
-    assert(params.empty());
+    PL_ASSERT(params.empty());
     func(data, num_qubits, wires, inverse);
 }
 
@@ -564,7 +565,7 @@ inline void callGateOps(GateFuncPtrT<PrecisionT, ParamT, 1> func,
                         std::complex<PrecisionT> *data, size_t num_qubits,
                         const std::vector<size_t> &wires, bool inverse,
                         const std::vector<ParamT> &params) {
-    assert(params.size() == 1);
+    PL_ASSERT(params.size() == 1);
     func(data, num_qubits, wires, inverse, params[0]);
 }
 
@@ -576,7 +577,7 @@ inline void callGateOps(GateFuncPtrT<PrecisionT, ParamT, 3> func,
                         std::complex<PrecisionT> *data, size_t num_qubits,
                         const std::vector<size_t> &wires, bool inverse,
                         const std::vector<ParamT> &params) {
-    assert(params.size() == 3);
+    PL_ASSERT(params.size() == 3);
     func(data, num_qubits, wires, inverse, params[0], params[1], params[2]);
 }
 /// @}

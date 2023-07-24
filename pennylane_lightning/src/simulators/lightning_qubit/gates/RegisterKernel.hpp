@@ -21,6 +21,7 @@
 #include "Constant.hpp"
 #include "ConstantUtil.hpp"
 #include "DynamicDispatcher.hpp"
+#include "Error.hpp"
 #include "GateIndices.hpp"
 #include "GateOperation.hpp"
 #include "OpToMemberFuncPtr.hpp"
@@ -55,7 +56,7 @@ constexpr auto gateOpToFunctor() {
         constexpr auto func_ptr =
             Gates::GateOpToMemberFuncPtr<PrecisionT, ParamT, GateImplementation,
                                          gate_op>::value;
-        assert(params.size() ==
+        PL_ASSERT(params.size() ==
                lookup(Pennylane::Gates::Constant::gate_num_params, gate_op));
         Gates::callGateOps(func_ptr, data, num_qubits, wires, inverse, params);
     };

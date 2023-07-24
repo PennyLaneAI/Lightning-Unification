@@ -18,9 +18,6 @@
  */
 #pragma once
 
-#include "TypeTraits.hpp" // remove_complex_t
-
-#include <cassert> // assert
 #include <cmath>
 #include <complex>
 #include <numbers> // sqrt2_v
@@ -28,6 +25,9 @@
 #include <set>
 #include <type_traits> // is_same_v
 #include <vector>
+
+#include "Error.hpp"
+#include "TypeTraits.hpp" // remove_complex_t
 
 namespace Pennylane::Util {
 /**
@@ -241,7 +241,7 @@ inline auto log2(size_t value) -> size_t {
  * @return decimal value for the qubit at specified index
  */
 inline auto maxDecimalForQubit(size_t qubitIndex, size_t qubits) -> size_t {
-    assert(qubitIndex < qubits);
+    PL_ASSERT(qubitIndex < qubits);
     return exp2(qubits - qubitIndex - 1);
 }
 

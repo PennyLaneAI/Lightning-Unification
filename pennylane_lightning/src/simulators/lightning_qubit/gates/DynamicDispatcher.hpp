@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <complex>
 #include <functional>
 #include <string>
@@ -422,7 +421,7 @@ template <typename PrecisionT> class DynamicDispatcher {
     void applyMatrix(KernelType kernel, CFP_t *data, size_t num_qubits,
                      const std::complex<PrecisionT> *matrix,
                      const std::vector<size_t> &wires, bool inverse) const {
-        assert(num_qubits >= wires.size());
+        PL_ASSERT(num_qubits >= wires.size());
 
         const auto mat_op = [n_wires = wires.size()]() {
             switch (n_wires) {

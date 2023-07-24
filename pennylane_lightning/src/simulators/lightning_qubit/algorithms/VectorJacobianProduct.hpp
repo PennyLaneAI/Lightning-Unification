@@ -17,7 +17,6 @@
  */
 #pragma once
 
-#include <cassert>
 #include <span>
 
 #include "AdjointJacobianBase.hpp"
@@ -83,7 +82,7 @@ class VectorJacobianProduct final
                     std::span<const ComplexT> dy,
                     bool apply_operations = false) {
 
-        assert(dy.size() == jd.getSizeStateVec());
+        PL_ASSERT(dy.size() == jd.getSizeStateVec());
 
         if (!jd.hasTrainableParams()) {
             return;

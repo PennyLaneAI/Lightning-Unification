@@ -11,13 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "TestHelpers.hpp" // PrecisionToName, createProductState
-#include "TestHelpersWires.hpp"
-#include "TestKernels.hpp"
-#include "Util.hpp" // ConstMult, INVSQRT2, IMAG, ZERO
-
-#include <catch2/catch.hpp>
-
 #include <algorithm>
 #include <complex>
 #include <iostream>
@@ -25,6 +18,13 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#include <catch2/catch.hpp>
+
+#include "TestHelpers.hpp" // PrecisionToName, createProductState
+#include "TestHelpersWires.hpp"
+#include "TestKernels.hpp"
+#include "Util.hpp" // ConstMult, INVSQRT2, IMAG, ZERO
 
 /**
  * @file Test_GateImplementations_Nonparam.cpp

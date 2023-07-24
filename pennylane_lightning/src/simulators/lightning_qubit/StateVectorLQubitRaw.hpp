@@ -115,7 +115,7 @@ class StateVectorLQubitRaw final
      * @param new_size size of underlying data storage.
      */
     void updateData(const ComplexT *new_data, size_t new_size) {
-        assert(length_ == new_size);
+        PL_ASSERT(length_ == new_size);
         std::copy(new_data, new_data + new_size, data_);
     }
 
