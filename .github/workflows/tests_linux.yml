@@ -12,6 +12,10 @@ env:
   GCC_VERSION: 11
   OMP_NUM_THREADS: "2"
 
+concurrency:
+  group: tests_linux-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   cpptests:
     strategy:
@@ -23,15 +27,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          access_token: ${{ github.token }}
-
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
@@ -75,7 +74,7 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION
@@ -121,15 +120,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          access_token: ${{ github.token }}
-
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
@@ -164,11 +158,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
         with:
@@ -178,7 +167,7 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  libopenblas-dev
@@ -233,15 +222,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          access_token: ${{ github.token }}
-
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
@@ -291,11 +275,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
         with:
@@ -305,7 +284,7 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Restoring cached dependencies
         id: kokkos-cache
@@ -367,15 +346,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          access_token: ${{ github.token }}
-
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
@@ -425,11 +399,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
         with:
@@ -439,7 +408,7 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Restoring cached dependencies
         id: kokkos-cache
