@@ -5,6 +5,10 @@ on:
       - master
   pull_request:
 
+concurrency:
+  group: tests_windows-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   cpptests:
     name: C++ tests (Windows)
@@ -14,11 +18,8 @@ jobs:
         os: [windows-latest]
         pl_backend: ["lightning_qubit"]
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-      - uses: actions/checkout@v3
+      - name: Checkout PennyLane-Lightning
+        uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
@@ -59,11 +60,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
 
@@ -92,11 +88,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Cache installation directories
         id: kokkos-cache
         uses: actions/cache@v3
@@ -170,11 +161,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Restoring cached dependencies
         id: kokkos-cache
         uses: actions/cache@v3
@@ -182,7 +168,8 @@ jobs:
           path: D:\a\install_dir\${{ matrix.exec_model }}
           key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}-Debug
 
-      - uses: actions/checkout@v3
+      - name: Checkout PennyLane-Lightning
+        uses: actions/checkout@v3
 
       - name: Copy cached libraries
         if: steps.kokkos-cache.outputs.cache-hit == 'true'

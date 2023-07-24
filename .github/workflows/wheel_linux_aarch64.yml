@@ -12,6 +12,10 @@ on:
   release:
     types: [published]
 
+concurrency:
+  group: wheel_linux_aarch64-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   set_wheel_build_matrix:
     name: "Set wheel build matrix"
@@ -33,11 +37,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Cache installation directories
         id: kokkos-cache
         uses: actions/cache@v3
@@ -73,7 +72,7 @@ jobs:
             -i ${{ matrix.container_img }} \
             bash -c "git config --global --add safe.directory /io && \
             cd /io && \
-            python3.8 -m pip install ninja && \
+            python3.9 -m pip install ninja && \
             ln -s /opt/python/cp38-cp38/bin/ninja /usr/bin/ninja && \
             cmake -BBuild . -DCMAKE_INSTALL_PREFIX=/install \
                             -DKokkos_ENABLE_COMPLEX_ALIGN=OFF \
@@ -96,7 +95,7 @@ jobs:
             -i ${{ matrix.container_img }} \
             bash -c "git config --global --add safe.directory /io && \
             cd /io && \
-            python3.8 -m pip install ninja && \
+            python3.9 -m pip install ninja && \
             ln -s /opt/python/cp38-cp38/bin/ninja /usr/bin/ninja && \
             cmake -BBuild . -DCMAKE_INSTALL_PREFIX=/install \
                             -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
@@ -121,16 +120,12 @@ jobs:
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
         container_img: ["quay.io/pypa/manylinux2014_aarch64"]
 
-    name: ${{ matrix.os }}::${{ matrix.arch }} - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp38-*":"3.8","cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
+    name: ${{ matrix.os }}::${{ matrix.arch }} - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
-      - uses: actions/checkout@v3
+      - name: Checkout PennyLane-Lightning
+        uses: actions/checkout@v3
 
       - name: Restoring cached dependencies
         id: kokkos-cache
@@ -195,7 +190,7 @@ jobs:
   #   steps:
   #     - uses: actions/download-artifact@v2
   #       with:
-  #         name: Linux-wheels-aarch64.zip
+  #         name: Linux-wheels-aarch64
   #         path: dist
 
   #     - name: Upload wheels to PyPI

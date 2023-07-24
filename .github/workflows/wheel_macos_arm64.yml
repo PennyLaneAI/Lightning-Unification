@@ -1,7 +1,7 @@
 name: Wheel::MacOS::ARM
 
 # **What it does**: Builds python wheels for MacOS (11) architecture ARM 64 and store it as artifacts.
-#                   Python versions: 3.8, 3.9, 3.10, 3.11.
+#                   Python versions: 3.9, 3.10, 3.11.
 # **Why we have it**: To build wheels for pennylane-lightning installation.
 # **Who does it impact**: Wheels to be uploaded to PyPI.
 
@@ -18,17 +18,16 @@ env:
   PYTHON3_MIN_VERSION: "9"
   PYTHON3_MAX_VERSION: "11"
 
+concurrency:
+  group: wheel_macos_arm64-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   mac-set-matrix-arm:
     name: Set builder matrix
     runs-on: ubuntu-latest
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
 
@@ -58,22 +57,17 @@ jobs:
         pl_backend: ["lightning_qubit"]
         cibw_build: ${{fromJson(needs.mac-set-matrix-arm.outputs.python_version)}}
 
-    name: macos-latest::arm64 - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp38-*":"3.8","cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
+    name: macos-latest::arm64 - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
 
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: 3.9
 
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel~=2.11.0

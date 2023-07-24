@@ -1,7 +1,7 @@
 name: Wheel::Linux::x86_64
 
 # **What it does**: Builds python wheels for Linux (ubuntu-latest) architecture x86_64 and store it as artifacts.
-#                   Python versions: 3.8, 3.9, 3.10, 3.11.
+#                   Python versions: 3.9, 3.10, 3.11.
 # **Why we have it**: To build wheels for pennylane-lightning installation.
 # **Who does it impact**: Wheels to be uploaded to PyPI.
 
@@ -15,6 +15,10 @@ on:
       - master
   release:
     types: [published]
+
+concurrency:
+  group: wheel_linux_x86_64-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   set_wheel_build_matrix:
@@ -37,11 +41,6 @@ jobs:
     container: ${{ matrix.container_img }}
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Cache installation directories
         id: kokkos-cache
         uses: actions/cache@v3
@@ -119,16 +118,11 @@ jobs:
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
         container_img: ["quay.io/pypa/manylinux2014_x86_64"]
 
-    name: ${{ matrix.os }} - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp38-*":"3.8","cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
+    name: ${{ matrix.os }} - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container_img }}
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Restoring cached dependencies
         id: kokkos-cache
         uses: actions/cache@v3
@@ -152,7 +146,7 @@ jobs:
           yum update -y && yum install -y docker
 
       - name: Install cibuildwheel
-        run: python3.8 -m pip install cibuildwheel~=2.11.0
+        run: python3.9 -m pip install cibuildwheel~=2.11.0
 
       - name: Build wheels
         env:
@@ -186,12 +180,12 @@ jobs:
 
           CIBW_BUILD_VERBOSITY: 3
 
-        run: python3.8 -m cibuildwheel --output-dir wheelhouse
+        run: python3.9 -m cibuildwheel --output-dir wheelhouse
 
       - name: Validate wheels
         run: |
-          python3.8 -m pip install twine
-          python3.8 -m twine check ./wheelhouse/*.whl
+          python3.9 -m pip install twine
+          python3.9 -m twine check ./wheelhouse/*.whl
 
       - uses: actions-ecosystem/action-regex-match@v2
         id: rc_build

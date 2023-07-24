@@ -1,7 +1,7 @@
 name: Wheel::Any::None
 
 # **What it does**: Builds a pure python wheel for Linux (ubuntu-latest) and store it as an artifact.
-#                   Python version: 3.8.
+#                   Python version: 3.9.
 # **Why we have it**: To test the wheel build in the python layer, with no compilation.
 # **Who does it impact**: Wheels to be uploaded to PyPI.
 
@@ -13,6 +13,10 @@ on:
   release:
     types: [published]
 
+concurrency:
+  group: wheel_noarch-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-pure-python-wheel:
     runs-on: ubuntu-latest
@@ -20,7 +24,7 @@ jobs:
       matrix:
         pl_backend: ["lightning_qubit"]
 
-    name: ${{ matrix.os }} - Pure Python wheels - ${{ matrix.pl_backend }} (Python 3.8)
+    name: ${{ matrix.os }} - Pure Python wheels - ${{ matrix.pl_backend }} (Python 3.9)
     steps:
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
@@ -29,7 +33,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: 3.9
 
       - name: Upgrade pip
         run: |
