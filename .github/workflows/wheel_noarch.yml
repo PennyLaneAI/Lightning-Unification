@@ -57,8 +57,7 @@ jobs:
           python -m twine check main/dist/*.whl
 
       - uses: actions/upload-artifact@v2
-        # uncomment before merging PR
-        # if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' }}
+        if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' }}
         with:
           name: pure-python-wheels-${{ matrix.pl_backend }}.zip
           path: main/dist/*.whl
