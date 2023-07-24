@@ -28,8 +28,6 @@
 #include "Error.hpp"
 #include "StateVectorLQubit.hpp"
 
-#include <iostream>
-
 /// @cond DEV
 namespace {
 using Pennylane::Util::getMemoryModel;

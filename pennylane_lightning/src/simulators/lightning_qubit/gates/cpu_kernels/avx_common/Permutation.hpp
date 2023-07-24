@@ -17,14 +17,12 @@
  * Defines permutation of AVX intrinsics
  */
 #pragma once
-#include "AVXUtil.hpp"
-
-#include <immintrin.h>
-
 #include <array>
 #include <cstdint>
 #include <cstdlib>
-#include <iostream>
+#include <immintrin.h>
+
+#include "AVXUtil.hpp"
 
 // Clang warns constexpr __m256i constructor, but it works.
 #if defined(__clang__)

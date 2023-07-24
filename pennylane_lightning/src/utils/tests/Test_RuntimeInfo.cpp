@@ -11,12 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <catch2/catch.hpp>
+
 #include "Macros.hpp"
 #include "RuntimeInfo.hpp"
 
-#include <catch2/catch.hpp>
-
-#include <iostream>
 /// @cond DEV
 namespace {
 using namespace Pennylane::Util;

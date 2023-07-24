@@ -11,16 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "LinearAlgebra.hpp" //randomUnitary
-#include "StateVectorLQubitManaged.hpp"
-#include "StateVectorLQubitRaw.hpp"
-#include "TestHelpers.hpp" // createRandomStateVectorData, TestVector
-#include "TestHelpersWires.hpp"
-#include "cpu_kernels/GateImplementationsPI.hpp"
-
 #include <algorithm>
 #include <complex>
-#include <iostream>
 #include <limits>
 #include <random>
 #include <type_traits>
@@ -28,6 +20,13 @@
 #include <vector>
 
 #include <catch2/catch.hpp>
+
+#include "LinearAlgebra.hpp" //randomUnitary
+#include "StateVectorLQubitManaged.hpp"
+#include "StateVectorLQubitRaw.hpp"
+#include "TestHelpers.hpp" // createRandomStateVectorData, TestVector
+#include "TestHelpersWires.hpp"
+#include "cpu_kernels/GateImplementationsPI.hpp"
 
 /**
  * @file
