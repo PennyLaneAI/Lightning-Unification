@@ -23,19 +23,19 @@ namespace Pennylane::LightningKokkos::Functors {
  * @param arr_ StateVector data.
  * @param probabilities_ Discrete probability distribution.
  */
-template <class Precision> struct getProbFunctor {
+template <class PrecisionT> struct getProbFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
-    Kokkos::View<Precision *> probability;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
+    Kokkos::View<PrecisionT *> probability;
 
-    getProbFunctor(Kokkos::View<Kokkos::complex<Precision> *> arr_,
-                   Kokkos::View<Precision *> probability_)
+    getProbFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> arr_,
+                   Kokkos::View<PrecisionT *> probability_)
         : arr(arr_), probability(probability_) {}
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const size_t k) const {
-        Precision REAL = arr[k].real();
-        Precision IMAG = arr[k].imag();
+        PrecisionT REAL = arr[k].real();
+        PrecisionT IMAG = arr[k].imag();
         probability[k] = REAL * REAL + IMAG * IMAG;
     }
 };
@@ -47,17 +47,17 @@ template <class Precision> struct getProbFunctor {
  *
  *@param probabilities_ Discrete probability distribution.
  */
-template <class Precision> struct getCDFFunctor {
+template <class PrecisionT> struct getCDFFunctor {
 
-    Kokkos::View<Precision *> probability;
+    Kokkos::View<PrecisionT *> probability;
 
-    getCDFFunctor(Kokkos::View<Precision *> probability_)
+    getCDFFunctor(Kokkos::View<PrecisionT *> probability_)
         : probability(probability_) {}
 
     KOKKOS_INLINE_FUNCTION
-    void operator()(const size_t &k, Precision &update_value,
+    void operator()(const size_t &k, PrecisionT &update_value,
                     const bool fin) const {
-        const Precision val_k = probability[k];
+        const PrecisionT val_k = probability[k];
 
         if (fin)
             probability[k] = update_value;
@@ -76,18 +76,18 @@ template <class Precision> struct getCDFFunctor {
  * @param length_ Length of cumulative probability distribution.
  */
 
-template <class Precision, template <class ExecutionSpace> class GeneratorPool,
+template <class PrecisionT, template <class ExecutionSpace> class GeneratorPool,
           class ExecutionSpace = Kokkos::DefaultExecutionSpace>
 struct Sampler {
 
     Kokkos::View<size_t *> samples;
-    Kokkos::View<Precision *> cdf;
+    Kokkos::View<PrecisionT *> cdf;
     GeneratorPool<ExecutionSpace> rand_pool;
 
     const size_t num_qubits;
     const size_t length;
 
-    Sampler(Kokkos::View<size_t *> samples_, Kokkos::View<Precision *> cdf_,
+    Sampler(Kokkos::View<size_t *> samples_, Kokkos::View<PrecisionT *> cdf_,
             GeneratorPool<ExecutionSpace> rand_pool_, const size_t num_qubits_,
             const size_t length_)
         : samples(samples_), cdf(cdf_), rand_pool(rand_pool_),
@@ -97,7 +97,7 @@ struct Sampler {
     void operator()(const size_t k) const {
         // Get a random number state from the pool for the active thread
         auto rand_gen = rand_pool.get_state();
-        Precision U_rand = rand_gen.drand(0.0, 1.0);
+        PrecisionT U_rand = rand_gen.drand(0.0, 1.0);
         size_t index;
 
         // Binary search for the bin index of cumulative probability
@@ -107,7 +107,7 @@ struct Sampler {
         } else {
             size_t low_idx = 1, high_idx = length;
             size_t mid_idx;
-            Precision cdf_t;
+            PrecisionT cdf_t;
             while (high_idx - low_idx > 1) {
                 mid_idx = high_idx - ((high_idx - low_idx) >> 1U);
                 if (mid_idx == length)
@@ -138,15 +138,15 @@ struct Sampler {
  * @param probability_ Discrete probability distribution of a subset of the
  * full system.
  */
-template <class Precision> struct getSubProbFunctor {
+template <class PrecisionT> struct getSubProbFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
-    Kokkos::View<Precision *> probability;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
+    Kokkos::View<PrecisionT *> probability;
     Kokkos::View<size_t *> all_indices;
     Kokkos::View<size_t *> all_offsets;
 
-    getSubProbFunctor(Kokkos::View<Kokkos::complex<Precision> *> arr_,
-                      Kokkos::View<Precision *> probability_,
+    getSubProbFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> arr_,
+                      Kokkos::View<PrecisionT *> probability_,
                       Kokkos::View<size_t *> all_indices_,
                       Kokkos::View<size_t *> all_offsets_)
         : arr(arr_), probability(probability_), all_indices(all_indices_),
@@ -155,9 +155,9 @@ template <class Precision> struct getSubProbFunctor {
     KOKKOS_INLINE_FUNCTION
     void operator()(const size_t i, const size_t j) const {
         size_t index = all_indices[i] + all_offsets[j];
-        Precision REAL = arr[index].real();
-        Precision IMAG = arr[index].imag();
-        Precision value = REAL * REAL + IMAG * IMAG;
+        PrecisionT REAL = arr[index].real();
+        PrecisionT IMAG = arr[index].imag();
+        PrecisionT value = REAL * REAL + IMAG * IMAG;
         Kokkos::atomic_add(&probability[i], value);
     }
 };
@@ -201,13 +201,13 @@ struct getTransposedIndexFunctor {
  * @param new_axes new axes distribution.
  * @return Transposed Tensor.
  */
-template <class Precision> struct getTransposedFunctor {
+template <class PrecisionT> struct getTransposedFunctor {
 
-    Kokkos::View<Precision *> transProb;
-    Kokkos::View<Precision *> probability;
+    Kokkos::View<PrecisionT *> transProb;
+    Kokkos::View<PrecisionT *> probability;
     Kokkos::View<size_t *> trans_index;
-    getTransposedFunctor(Kokkos::View<Precision *> transProb_,
-                         Kokkos::View<Precision *> probability_,
+    getTransposedFunctor(Kokkos::View<PrecisionT *> transProb_,
+                         Kokkos::View<PrecisionT *> probability_,
                          Kokkos::View<size_t *> trans_index_)
         : transProb(transProb_), probability(probability_),
           trans_index(trans_index_) {}

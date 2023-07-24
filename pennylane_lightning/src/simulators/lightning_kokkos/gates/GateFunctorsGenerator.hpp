@@ -24,9 +24,9 @@ using Kokkos::Experimental::swap;
 } // namespace
 
 namespace Pennylane::LightningKokkos::Functors {
-template <class Precision, bool adj = false> struct generatorPhaseShiftFunctor {
+template <class PrecisionT, bool adj = false> struct generatorPhaseShiftFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire;
     std::size_t rev_wire_shift;
@@ -34,9 +34,9 @@ template <class Precision, bool adj = false> struct generatorPhaseShiftFunctor {
     std::size_t wire_parity_inv;
 
     generatorPhaseShiftFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
@@ -48,13 +48,13 @@ template <class Precision, bool adj = false> struct generatorPhaseShiftFunctor {
     void operator()(const std::size_t k) const {
         const std::size_t i0 =
             ((k << 1U) & wire_parity_inv) | (wire_parity & k);
-        arr[i0] = Kokkos::complex<Precision>{0.0, 0.0};
+        arr[i0] = Kokkos::complex<PrecisionT>{0.0, 0.0};
     }
 };
 
-template <class Precision, bool adj = false> struct generatorIsingXXFunctor {
+template <class PrecisionT, bool adj = false> struct generatorIsingXXFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -67,9 +67,9 @@ template <class Precision, bool adj = false> struct generatorIsingXXFunctor {
     std::size_t parity_middle;
 
     generatorIsingXXFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -100,9 +100,9 @@ template <class Precision, bool adj = false> struct generatorIsingXXFunctor {
     }
 };
 
-template <class Precision, bool adj = false> struct generatorIsingXYFunctor {
+template <class PrecisionT, bool adj = false> struct generatorIsingXYFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -115,9 +115,9 @@ template <class Precision, bool adj = false> struct generatorIsingXYFunctor {
     std::size_t parity_middle;
 
     generatorIsingXYFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -144,14 +144,14 @@ template <class Precision, bool adj = false> struct generatorIsingXYFunctor {
         const std::size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
         swap(arr[i10], arr[i01]);
-        arr[i00] = Kokkos::complex<Precision>{0.0, 0.0};
-        arr[i11] = Kokkos::complex<Precision>{0.0, 0.0};
+        arr[i00] = Kokkos::complex<PrecisionT>{0.0, 0.0};
+        arr[i11] = Kokkos::complex<PrecisionT>{0.0, 0.0};
     }
 };
 
-template <class Precision, bool adj = false> struct generatorIsingYYFunctor {
+template <class PrecisionT, bool adj = false> struct generatorIsingYYFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -164,9 +164,9 @@ template <class Precision, bool adj = false> struct generatorIsingYYFunctor {
     std::size_t parity_middle;
 
     generatorIsingYYFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -199,9 +199,9 @@ template <class Precision, bool adj = false> struct generatorIsingYYFunctor {
     }
 };
 
-template <class Precision, bool adj = false> struct generatorIsingZZFunctor {
+template <class PrecisionT, bool adj = false> struct generatorIsingZZFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -214,9 +214,9 @@ template <class Precision, bool adj = false> struct generatorIsingZZFunctor {
     std::size_t parity_middle;
 
     generatorIsingZZFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -245,10 +245,10 @@ template <class Precision, bool adj = false> struct generatorIsingZZFunctor {
     }
 };
 
-template <class Precision, bool adj = false>
+template <class PrecisionT, bool adj = false>
 struct generatorSingleExcitationFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -261,9 +261,9 @@ struct generatorSingleExcitationFunctor {
     std::size_t parity_middle;
 
     generatorSingleExcitationFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -283,25 +283,25 @@ struct generatorSingleExcitationFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k) const {
-        using ComplexPrecision = Kokkos::complex<Precision>;
+        using ComplexT = Kokkos::complex<PrecisionT>;
         const std::size_t i00 = ((k << 2U) & parity_high) |
                                 ((k << 1U) & parity_middle) | (k & parity_low);
         const std::size_t i01 = i00 | rev_wire0_shift;
         const std::size_t i10 = i00 | rev_wire1_shift;
         const std::size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-        arr[i00] = ComplexPrecision{};
-        arr[i01] *= ComplexPrecision{0, 1};
-        arr[i10] *= ComplexPrecision{0, -1};
-        arr[i11] = ComplexPrecision{};
+        arr[i00] = ComplexT{};
+        arr[i01] *= ComplexT{0, 1};
+        arr[i10] *= ComplexT{0, -1};
+        arr[i11] = ComplexT{};
         swap(arr[i10], arr[i01]);
     }
 };
 
-template <class Precision, bool adj = false>
+template <class PrecisionT, bool adj = false>
 struct generatorSingleExcitationMinusFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -314,9 +314,9 @@ struct generatorSingleExcitationMinusFunctor {
     std::size_t parity_middle;
 
     generatorSingleExcitationMinusFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -336,22 +336,22 @@ struct generatorSingleExcitationMinusFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k) const {
-        using ComplexPrecision = Kokkos::complex<Precision>;
+        using ComplexT = Kokkos::complex<PrecisionT>;
         const std::size_t i00 = ((k << 2U) & parity_high) |
                                 ((k << 1U) & parity_middle) | (k & parity_low);
         const std::size_t i01 = i00 | rev_wire0_shift;
         const std::size_t i10 = i00 | rev_wire1_shift;
 
-        arr[i01] *= ComplexPrecision{0, 1};
-        arr[i10] *= ComplexPrecision{0, -1};
+        arr[i01] *= ComplexT{0, 1};
+        arr[i10] *= ComplexT{0, -1};
         swap(arr[i10], arr[i01]);
     }
 };
 
-template <class Precision, bool adj = false>
+template <class PrecisionT, bool adj = false>
 struct generatorSingleExcitationPlusFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -364,9 +364,9 @@ struct generatorSingleExcitationPlusFunctor {
     std::size_t parity_middle;
 
     generatorSingleExcitationPlusFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -386,7 +386,7 @@ struct generatorSingleExcitationPlusFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k) const {
-        using ComplexPrecision = Kokkos::complex<Precision>;
+        using ComplexT = Kokkos::complex<PrecisionT>;
         const std::size_t i00 = ((k << 2U) & parity_high) |
                                 ((k << 1U) & parity_middle) | (k & parity_low);
         const std::size_t i01 = i00 | rev_wire0_shift;
@@ -394,18 +394,18 @@ struct generatorSingleExcitationPlusFunctor {
         const std::size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
         arr[i00] *= -1;
-        arr[i01] *= ComplexPrecision{0, 1};
-        arr[i10] *= ComplexPrecision{0, -1};
+        arr[i01] *= ComplexT{0, 1};
+        arr[i10] *= ComplexT{0, -1};
         arr[i11] *= -1;
 
         swap(arr[i10], arr[i01]);
     }
 };
 
-template <class Precision, bool inverse = false>
+template <class PrecisionT, bool inverse = false>
 struct generatorDoubleExcitationFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -425,15 +425,15 @@ struct generatorDoubleExcitationFunctor {
     std::size_t parity_hmiddle;
     std::size_t parity_lmiddle;
 
-    Kokkos::complex<Precision> shifts_0;
-    Kokkos::complex<Precision> shifts_1;
-    Kokkos::complex<Precision> shifts_2;
-    Kokkos::complex<Precision> shifts_3;
+    Kokkos::complex<PrecisionT> shifts_0;
+    Kokkos::complex<PrecisionT> shifts_1;
+    Kokkos::complex<PrecisionT> shifts_2;
+    Kokkos::complex<PrecisionT> shifts_3;
 
     generatorDoubleExcitationFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[3] - 1;
         rev_wire1 = num_qubits - wires[2] - 1;
         rev_wire2 = num_qubits - wires[1] - 1;
@@ -498,7 +498,7 @@ struct generatorDoubleExcitationFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k) const {
-        using ComplexPrecision = Kokkos::complex<Precision>;
+        using ComplexT = Kokkos::complex<PrecisionT>;
         const std::size_t i0000 =
             ((k << 4U) & parity_high) | ((k << 3U) & parity_hmiddle) |
             ((k << 2U) & parity_middle) | ((k << 1U) & parity_lmiddle) |
@@ -524,31 +524,31 @@ struct generatorDoubleExcitationFunctor {
         const std::size_t i1111 = i0000 | rev_wire3_shift | rev_wire2_shift |
                                   rev_wire1_shift | rev_wire0_shift;
 
-        const Kokkos::complex<Precision> v3 = arr[i0011];
-        const Kokkos::complex<Precision> v12 = arr[i1100];
-        arr[i0000] = ComplexPrecision{};
-        arr[i0001] = ComplexPrecision{};
-        arr[i0010] = ComplexPrecision{};
-        arr[i0011] = v12 * ComplexPrecision{0, -1};
-        arr[i0100] = ComplexPrecision{};
-        arr[i0101] = ComplexPrecision{};
-        arr[i0110] = ComplexPrecision{};
-        arr[i0111] = ComplexPrecision{};
-        arr[i1000] = ComplexPrecision{};
-        arr[i1001] = ComplexPrecision{};
-        arr[i1010] = ComplexPrecision{};
-        arr[i1011] = ComplexPrecision{};
-        arr[i1100] = v3 * ComplexPrecision{0, 1};
-        arr[i1101] = ComplexPrecision{};
-        arr[i1110] = ComplexPrecision{};
-        arr[i1111] = ComplexPrecision{};
+        const Kokkos::complex<PrecisionT> v3 = arr[i0011];
+        const Kokkos::complex<PrecisionT> v12 = arr[i1100];
+        arr[i0000] = ComplexT{};
+        arr[i0001] = ComplexT{};
+        arr[i0010] = ComplexT{};
+        arr[i0011] = v12 * ComplexT{0, -1};
+        arr[i0100] = ComplexT{};
+        arr[i0101] = ComplexT{};
+        arr[i0110] = ComplexT{};
+        arr[i0111] = ComplexT{};
+        arr[i1000] = ComplexT{};
+        arr[i1001] = ComplexT{};
+        arr[i1010] = ComplexT{};
+        arr[i1011] = ComplexT{};
+        arr[i1100] = v3 * ComplexT{0, 1};
+        arr[i1101] = ComplexT{};
+        arr[i1110] = ComplexT{};
+        arr[i1111] = ComplexT{};
     }
 };
 
-template <class Precision, bool inverse = false>
+template <class PrecisionT, bool inverse = false>
 struct generatorDoubleExcitationMinusFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -568,15 +568,15 @@ struct generatorDoubleExcitationMinusFunctor {
     std::size_t parity_hmiddle;
     std::size_t parity_lmiddle;
 
-    Kokkos::complex<Precision> shifts_0;
-    Kokkos::complex<Precision> shifts_1;
-    Kokkos::complex<Precision> shifts_2;
-    Kokkos::complex<Precision> shifts_3;
+    Kokkos::complex<PrecisionT> shifts_0;
+    Kokkos::complex<PrecisionT> shifts_1;
+    Kokkos::complex<PrecisionT> shifts_2;
+    Kokkos::complex<PrecisionT> shifts_3;
 
     generatorDoubleExcitationMinusFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[3] - 1;
         rev_wire1 = num_qubits - wires[2] - 1;
         rev_wire2 = num_qubits - wires[1] - 1;
@@ -641,7 +641,7 @@ struct generatorDoubleExcitationMinusFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k) const {
-        using ComplexPrecision = Kokkos::complex<Precision>;
+        using ComplexT = Kokkos::complex<PrecisionT>;
         const std::size_t i0000 =
             ((k << 4U) & parity_high) | ((k << 3U) & parity_hmiddle) |
             ((k << 2U) & parity_middle) | ((k << 1U) & parity_lmiddle) |
@@ -649,16 +649,16 @@ struct generatorDoubleExcitationMinusFunctor {
         const std::size_t i0011 = i0000 | rev_wire1_shift | rev_wire0_shift;
         const std::size_t i1100 = i0000 | rev_wire3_shift | rev_wire2_shift;
 
-        arr[i0011] *= ComplexPrecision{0, 1};
-        arr[i1100] *= ComplexPrecision{0, -1};
+        arr[i0011] *= ComplexT{0, 1};
+        arr[i1100] *= ComplexT{0, -1};
         swap(arr[i1100], arr[i0011]);
     }
 };
 
-template <class Precision, bool inverse = false>
+template <class PrecisionT, bool inverse = false>
 struct generatorDoubleExcitationPlusFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -678,15 +678,15 @@ struct generatorDoubleExcitationPlusFunctor {
     std::size_t parity_hmiddle;
     std::size_t parity_lmiddle;
 
-    Kokkos::complex<Precision> shifts_0;
-    Kokkos::complex<Precision> shifts_1;
-    Kokkos::complex<Precision> shifts_2;
-    Kokkos::complex<Precision> shifts_3;
+    Kokkos::complex<PrecisionT> shifts_0;
+    Kokkos::complex<PrecisionT> shifts_1;
+    Kokkos::complex<PrecisionT> shifts_2;
+    Kokkos::complex<PrecisionT> shifts_3;
 
     generatorDoubleExcitationPlusFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[3] - 1;
         rev_wire1 = num_qubits - wires[2] - 1;
         rev_wire2 = num_qubits - wires[1] - 1;
@@ -751,7 +751,7 @@ struct generatorDoubleExcitationPlusFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k) const {
-        using ComplexPrecision = Kokkos::complex<Precision>;
+        using ComplexT = Kokkos::complex<PrecisionT>;
         const std::size_t i0000 =
             ((k << 4U) & parity_high) | ((k << 3U) & parity_hmiddle) |
             ((k << 2U) & parity_middle) | ((k << 1U) & parity_lmiddle) |
@@ -759,16 +759,16 @@ struct generatorDoubleExcitationPlusFunctor {
         const std::size_t i0011 = i0000 | rev_wire1_shift | rev_wire0_shift;
         const std::size_t i1100 = i0000 | rev_wire3_shift | rev_wire2_shift;
 
-        arr[i0011] *= ComplexPrecision{0, -1};
-        arr[i1100] *= ComplexPrecision{0, 1};
+        arr[i0011] *= ComplexT{0, -1};
+        arr[i1100] *= ComplexT{0, 1};
         swap(arr[i1100], arr[i0011]);
     }
 };
 
-template <class Precision, bool adj = false>
+template <class PrecisionT, bool adj = false>
 struct generatorControlledPhaseShiftFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -781,9 +781,9 @@ struct generatorControlledPhaseShiftFunctor {
     std::size_t parity_middle;
 
     generatorControlledPhaseShiftFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
         std::size_t num_qubits, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params) {
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -807,15 +807,15 @@ struct generatorControlledPhaseShiftFunctor {
         const std::size_t i01 = i00 | rev_wire0_shift;
         const std::size_t i10 = i00 | rev_wire1_shift;
 
-        arr[i00] = Kokkos::complex<Precision>{0.0, 0.0};
-        arr[i01] = Kokkos::complex<Precision>{0.0, 0.0};
-        arr[i10] = Kokkos::complex<Precision>{0.0, 0.0};
+        arr[i00] = Kokkos::complex<PrecisionT>{0.0, 0.0};
+        arr[i01] = Kokkos::complex<PrecisionT>{0.0, 0.0};
+        arr[i10] = Kokkos::complex<PrecisionT>{0.0, 0.0};
     }
 };
 
-template <class Precision, bool adj = false> struct generatorCRXFunctor {
+template <class PrecisionT, bool adj = false> struct generatorCRXFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -827,10 +827,10 @@ template <class Precision, bool adj = false> struct generatorCRXFunctor {
     std::size_t parity_high;
     std::size_t parity_middle;
 
-    generatorCRXFunctor(Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+    generatorCRXFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
                         std::size_t num_qubits,
                         const std::vector<size_t> &wires,
-                        [[maybe_unused]] const std::vector<Precision> &params) {
+                        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -855,15 +855,15 @@ template <class Precision, bool adj = false> struct generatorCRXFunctor {
         const std::size_t i10 = i00 | rev_wire1_shift;
         const std::size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-        arr[i00] = Kokkos::complex<Precision>{0.0, 0.0};
-        arr[i01] = Kokkos::complex<Precision>{0.0, 0.0};
+        arr[i00] = Kokkos::complex<PrecisionT>{0.0, 0.0};
+        arr[i01] = Kokkos::complex<PrecisionT>{0.0, 0.0};
         swap(arr[i10], arr[i11]);
     }
 };
 
-template <class Precision, bool adj = false> struct generatorCRYFunctor {
+template <class PrecisionT, bool adj = false> struct generatorCRYFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -875,10 +875,10 @@ template <class Precision, bool adj = false> struct generatorCRYFunctor {
     std::size_t parity_high;
     std::size_t parity_middle;
 
-    generatorCRYFunctor(Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+    generatorCRYFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
                         std::size_t num_qubits,
                         const std::vector<size_t> &wires,
-                        [[maybe_unused]] const std::vector<Precision> &params) {
+                        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -897,26 +897,26 @@ template <class Precision, bool adj = false> struct generatorCRYFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k) const {
-        using ComplexPrecision = Kokkos::complex<Precision>;
+        using ComplexT = Kokkos::complex<PrecisionT>;
         const std::size_t i00 = ((k << 2U) & parity_high) |
                                 ((k << 1U) & parity_middle) | (k & parity_low);
         const std::size_t i01 = i00 | rev_wire0_shift;
         const std::size_t i10 = i00 | rev_wire1_shift;
         const std::size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-        arr[i00] = ComplexPrecision{};
-        arr[i01] = ComplexPrecision{};
+        arr[i00] = ComplexT{};
+        arr[i01] = ComplexT{};
 
         const auto v0 = arr[i10];
 
-        arr[i10] = ComplexPrecision{imag(arr[i11]), -real(arr[i11])};
-        arr[i11] = ComplexPrecision{-imag(v0), real(v0)};
+        arr[i10] = ComplexT{imag(arr[i11]), -real(arr[i11])};
+        arr[i11] = ComplexT{-imag(v0), real(v0)};
     }
 };
 
-template <class Precision, bool adj = false> struct generatorCRZFunctor {
+template <class PrecisionT, bool adj = false> struct generatorCRZFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -928,10 +928,10 @@ template <class Precision, bool adj = false> struct generatorCRZFunctor {
     std::size_t parity_high;
     std::size_t parity_middle;
 
-    generatorCRZFunctor(Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+    generatorCRZFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
                         std::size_t num_qubits,
                         const std::vector<size_t> &wires,
-                        [[maybe_unused]] const std::vector<Precision> &params) {
+                        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -950,25 +950,25 @@ template <class Precision, bool adj = false> struct generatorCRZFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k) const {
-        using ComplexPrecision = Kokkos::complex<Precision>;
+        using ComplexT = Kokkos::complex<PrecisionT>;
         const std::size_t i00 = ((k << 2U) & parity_high) |
                                 ((k << 1U) & parity_middle) | (k & parity_low);
         const std::size_t i01 = i00 | rev_wire0_shift;
         const std::size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
-        arr[i00] = ComplexPrecision{};
-        arr[i01] = ComplexPrecision{};
+        arr[i00] = ComplexT{};
+        arr[i01] = ComplexT{};
         arr[i11] *= -1;
     }
 };
 
-template <class Precision, bool adj = false> struct generatorMultiRZFunctor {
+template <class PrecisionT, bool adj = false> struct generatorMultiRZFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
     std::size_t wires_parity;
 
-    generatorMultiRZFunctor(Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+    generatorMultiRZFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
                             std::size_t num_qubits,
                             const std::vector<size_t> &wires) {
         arr = arr_;
@@ -981,7 +981,7 @@ template <class Precision, bool adj = false> struct generatorMultiRZFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k) const {
-        arr[k] *= static_cast<Precision>(
+        arr[k] *= static_cast<PrecisionT>(
             1 - 2 * int(Kokkos::Impl::bit_count(k & wires_parity) % 2));
     }
 };
