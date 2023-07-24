@@ -14,6 +14,7 @@
 #include <ranges>
 
 #include "GateIndices.hpp"
+#include "ConstantUtil.hpp"
 #include "Util.hpp" // exp2, maxDecimalForQubit
 
 namespace Pennylane::LightningQubit::Gates {
