@@ -16,8 +16,9 @@ on:
 jobs:
   build-pure-python-wheel:
     runs-on: ubuntu-latest
-    matrix:
-      pl_backend: ["lightning_qubit"]
+    strategy:
+      matrix:
+        pl_backend: ["lightning_qubit"]
 
     name: ${{ matrix.os }} - Pure Python wheels - ${{ matrix.pl_backend }} (Python 3.8)
     steps:
