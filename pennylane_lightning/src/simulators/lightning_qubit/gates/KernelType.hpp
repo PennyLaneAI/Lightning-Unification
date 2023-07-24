@@ -16,8 +16,6 @@
  * Defines possible kernel types as enum and define python export.
  */
 #pragma once
-#include <array>
-
 #include "Error.hpp"
 #include "Util.hpp"
 

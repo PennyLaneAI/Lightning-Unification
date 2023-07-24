@@ -16,7 +16,6 @@
  * Defines possible operations.
  */
 #pragma once
-#include <array>
 #include <cstdint>
 #include <string>
 #include <utility>
