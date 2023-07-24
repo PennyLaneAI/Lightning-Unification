@@ -57,7 +57,7 @@ constexpr auto gateOpToFunctor() {
             Gates::GateOpToMemberFuncPtr<PrecisionT, ParamT, GateImplementation,
                                          gate_op>::value;
         PL_ASSERT(params.size() ==
-               lookup(Pennylane::Gates::Constant::gate_num_params, gate_op));
+                  lookup(Pennylane::Gates::Constant::gate_num_params, gate_op));
         Gates::callGateOps(func_ptr, data, num_qubits, wires, inverse, params);
     };
 }

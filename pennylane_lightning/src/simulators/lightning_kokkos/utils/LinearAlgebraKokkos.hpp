@@ -134,7 +134,7 @@ inline void SparseMV_Kokkos(Kokkos::View<Kokkos::complex<PrecisionT> *> x,
 
     const std::vector<Kokkos::complex<PrecisionT>> kok_complex_data =
         std::vector<Kokkos::complex<PrecisionT>>{data_ptr,
-                                                data_ptr + data.size()};
+                                                 data_ptr + data.size()};
 
     Kokkos::deep_copy(
         kok_data, ConstComplexHostView(kok_complex_data.data(), data.size()));

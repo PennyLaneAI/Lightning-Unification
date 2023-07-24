@@ -24,7 +24,8 @@ using Kokkos::Experimental::swap;
 } // namespace
 
 namespace Pennylane::LightningKokkos::Functors {
-template <class PrecisionT, bool adj = false> struct generatorPhaseShiftFunctor {
+template <class PrecisionT, bool adj = false>
+struct generatorPhaseShiftFunctor {
 
     Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
 
@@ -827,10 +828,10 @@ template <class PrecisionT, bool adj = false> struct generatorCRXFunctor {
     std::size_t parity_high;
     std::size_t parity_middle;
 
-    generatorCRXFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
-                        std::size_t num_qubits,
-                        const std::vector<size_t> &wires,
-                        [[maybe_unused]] const std::vector<PrecisionT> &params) {
+    generatorCRXFunctor(
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires,
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -875,10 +876,10 @@ template <class PrecisionT, bool adj = false> struct generatorCRYFunctor {
     std::size_t parity_high;
     std::size_t parity_middle;
 
-    generatorCRYFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
-                        std::size_t num_qubits,
-                        const std::vector<size_t> &wires,
-                        [[maybe_unused]] const std::vector<PrecisionT> &params) {
+    generatorCRYFunctor(
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires,
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -928,10 +929,10 @@ template <class PrecisionT, bool adj = false> struct generatorCRZFunctor {
     std::size_t parity_high;
     std::size_t parity_middle;
 
-    generatorCRZFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
-                        std::size_t num_qubits,
-                        const std::vector<size_t> &wires,
-                        [[maybe_unused]] const std::vector<PrecisionT> &params) {
+    generatorCRZFunctor(
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires,
+        [[maybe_unused]] const std::vector<PrecisionT> &params) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 

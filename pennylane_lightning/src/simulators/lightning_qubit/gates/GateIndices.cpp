@@ -13,8 +13,8 @@
 // limitations under the License.
 #include <ranges>
 
-#include "GateIndices.hpp"
 #include "ConstantUtil.hpp"
+#include "GateIndices.hpp"
 #include "Util.hpp" // exp2, maxDecimalForQubit
 
 namespace Pennylane::LightningQubit::Gates {

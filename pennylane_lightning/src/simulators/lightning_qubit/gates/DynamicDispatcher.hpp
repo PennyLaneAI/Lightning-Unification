@@ -49,7 +49,6 @@ using Pennylane::Util::PairHash;
 } // namespace
 /// @endcond
 
-
 namespace Pennylane::LightningQubit::Internal {
 constexpr auto generatorNamesWithoutPrefix() {
     constexpr std::string_view prefix = "Generator";
@@ -438,8 +437,7 @@ template <typename PrecisionT> class DynamicDispatcher {
 
         if (iter == matrix_kernels_.end()) {
             throw std::invalid_argument(
-                std::string(
-                    lookup(GateConstant::matrix_names, mat_op)) +
+                std::string(lookup(GateConstant::matrix_names, mat_op)) +
                 " is not registered for the given kernel");
         }
         (iter->second)(data, num_qubits, matrix, wires, inverse);

@@ -50,8 +50,8 @@ template <class PrecisionT> struct getExpectationValuePauliXFunctor {
     std::size_t wire_parity_inv;
 
     getExpectationValuePauliXFunctor(
-        Kokkos::View<Kokkos::complex<PrecisionT> *> arr_, std::size_t num_qubits,
-        const std::vector<size_t> &wires) {
+        Kokkos::View<Kokkos::complex<PrecisionT> *> arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires) {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
@@ -80,8 +80,8 @@ template <class PrecisionT> struct getExpectationValuePauliYFunctor {
     std::size_t wire_parity_inv;
 
     getExpectationValuePauliYFunctor(
-        Kokkos::View<Kokkos::complex<PrecisionT> *> arr_, std::size_t num_qubits,
-        const std::vector<size_t> &wires) {
+        Kokkos::View<Kokkos::complex<PrecisionT> *> arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires) {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
@@ -114,8 +114,8 @@ template <class PrecisionT> struct getExpectationValuePauliZFunctor {
     std::size_t wire_parity_inv;
 
     getExpectationValuePauliZFunctor(
-        Kokkos::View<Kokkos::complex<PrecisionT> *> arr_, std::size_t num_qubits,
-        const std::vector<size_t> &wires) {
+        Kokkos::View<Kokkos::complex<PrecisionT> *> arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires) {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
@@ -143,8 +143,8 @@ template <class PrecisionT> struct getExpectationValueHadamardFunctor {
     std::size_t wire_parity_inv;
 
     getExpectationValueHadamardFunctor(
-        Kokkos::View<Kokkos::complex<PrecisionT> *> arr_, std::size_t num_qubits,
-        const std::vector<size_t> &wires) {
+        Kokkos::View<Kokkos::complex<PrecisionT> *> arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires) {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);

@@ -126,7 +126,6 @@ struct Sampler {
         for (size_t j = 0; j < num_qubits; j++) {
             samples[k * num_qubits + (num_qubits - 1 - j)] = (index >> j) & 1U;
         }
-
     }
 };
 

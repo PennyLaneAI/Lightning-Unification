@@ -101,10 +101,11 @@ template <class PrecisionT, bool inverse = false> struct twoQubitOpFunctor {
     std::size_t parity_high;
     std::size_t parity_middle;
 
-    twoQubitOpFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
-                      std::size_t num_qubits,
-                      const Kokkos::View<Kokkos::complex<PrecisionT> *> &matrix_,
-                      const std::vector<size_t> &wires) {
+    twoQubitOpFunctor(
+        Kokkos::View<Kokkos::complex<PrecisionT> *> &arr_,
+        std::size_t num_qubits,
+        const Kokkos::View<Kokkos::complex<PrecisionT> *> &matrix_,
+        const std::vector<size_t> &wires) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1; // Control qubit
 
@@ -395,9 +396,9 @@ template <class PrecisionT, bool inverse = false> struct ryFunctor {
         const auto v1 = arr[i1];
 
         arr[i0] = Kokkos::complex<PrecisionT>{c * real(v0) - s * real(v1),
-                                             c * imag(v0) - s * imag(v1)};
+                                              c * imag(v0) - s * imag(v1)};
         arr[i1] = Kokkos::complex<PrecisionT>{s * real(v0) + c * real(v1),
-                                             s * imag(v0) + c * imag(v1)};
+                                              s * imag(v0) + c * imag(v1)};
     }
 };
 
@@ -471,9 +472,11 @@ template <class PrecisionT, bool inverse = false> struct cRotFunctor {
         const PrecisionT m{phi - omega};
 
         auto imag = Kokkos::complex<PrecisionT>(0, 1);
-        rot_mat_0b00 = Kokkos::exp(static_cast<PrecisionT>(p / 2) * (-imag)) * c;
+        rot_mat_0b00 =
+            Kokkos::exp(static_cast<PrecisionT>(p / 2) * (-imag)) * c;
         rot_mat_0b01 = -Kokkos::exp(static_cast<PrecisionT>(m / 2) * imag) * s;
-        rot_mat_0b10 = Kokkos::exp(static_cast<PrecisionT>(m / 2) * (-imag)) * s;
+        rot_mat_0b10 =
+            Kokkos::exp(static_cast<PrecisionT>(m / 2) * (-imag)) * s;
         rot_mat_0b11 = Kokkos::exp(static_cast<PrecisionT>(p / 2) * imag) * c;
 
         rev_wire0 = num_qubits - wires[1] - 1;
@@ -564,13 +567,13 @@ template <class PrecisionT, bool inverse = false> struct isingXXFunctor {
         const Kokkos::complex<PrecisionT> v11 = arr[i11];
 
         arr[i00] = Kokkos::complex<PrecisionT>{cr * real(v00) + sj * imag(v11),
-                                              cr * imag(v00) - sj * real(v11)};
+                                               cr * imag(v00) - sj * real(v11)};
         arr[i01] = Kokkos::complex<PrecisionT>{cr * real(v01) + sj * imag(v10),
-                                              cr * imag(v01) - sj * real(v10)};
+                                               cr * imag(v01) - sj * real(v10)};
         arr[i10] = Kokkos::complex<PrecisionT>{cr * real(v10) + sj * imag(v01),
-                                              cr * imag(v10) - sj * real(v01)};
+                                               cr * imag(v10) - sj * real(v01)};
         arr[i11] = Kokkos::complex<PrecisionT>{cr * real(v11) + sj * imag(v00),
-                                              cr * imag(v11) - sj * real(v00)};
+                                               cr * imag(v11) - sj * real(v00)};
     }
 };
 
@@ -631,9 +634,9 @@ template <class PrecisionT, bool inverse = false> struct isingXYFunctor {
 
         arr[i00] = Kokkos::complex<PrecisionT>{real(v00), imag(v00)};
         arr[i01] = Kokkos::complex<PrecisionT>{cr * real(v01) - sj * imag(v10),
-                                              cr * imag(v01) + sj * real(v10)};
+                                               cr * imag(v01) + sj * real(v10)};
         arr[i10] = Kokkos::complex<PrecisionT>{cr * real(v10) - sj * imag(v01),
-                                              cr * imag(v10) + sj * real(v01)};
+                                               cr * imag(v10) + sj * real(v01)};
         arr[i11] = Kokkos::complex<PrecisionT>{real(v11), imag(v11)};
     }
 };
@@ -693,13 +696,13 @@ template <class PrecisionT, bool inverse = false> struct isingYYFunctor {
         const Kokkos::complex<PrecisionT> v11 = arr[i11];
 
         arr[i00] = Kokkos::complex<PrecisionT>{cr * real(v00) - sj * imag(v11),
-                                              cr * imag(v00) + sj * real(v11)};
+                                               cr * imag(v00) + sj * real(v11)};
         arr[i01] = Kokkos::complex<PrecisionT>{cr * real(v01) + sj * imag(v10),
-                                              cr * imag(v01) - sj * real(v10)};
+                                               cr * imag(v01) - sj * real(v10)};
         arr[i10] = Kokkos::complex<PrecisionT>{cr * real(v10) + sj * imag(v01),
-                                              cr * imag(v10) - sj * real(v01)};
+                                               cr * imag(v10) - sj * real(v01)};
         arr[i11] = Kokkos::complex<PrecisionT>{cr * real(v11) - sj * imag(v00),
-                                              cr * imag(v11) + sj * real(v00)};
+                                               cr * imag(v11) + sj * real(v00)};
     }
 };
 
@@ -742,9 +745,9 @@ template <class PrecisionT, bool inverse = false> struct isingZZFunctor {
             fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
 
         first = Kokkos::complex<PrecisionT>{std::cos(angle / 2),
-                                           -std::sin(angle / 2)};
+                                            -std::sin(angle / 2)};
         second = Kokkos::complex<PrecisionT>{std::cos(angle / 2),
-                                            std::sin(angle / 2)};
+                                             std::sin(angle / 2)};
 
         shift_0 = (inverse) ? conj(first) : first;
         shift_1 = (inverse) ? conj(second) : second;
@@ -1674,9 +1677,11 @@ template <class PrecisionT, bool inverse = false> struct rotFunctor {
         const PrecisionT m{phi - omega};
 
         auto imag = Kokkos::complex<PrecisionT>(0, 1);
-        rot_mat_0b00 = Kokkos::exp(static_cast<PrecisionT>(p / 2) * (-imag)) * c;
+        rot_mat_0b00 =
+            Kokkos::exp(static_cast<PrecisionT>(p / 2) * (-imag)) * c;
         rot_mat_0b01 = -Kokkos::exp(static_cast<PrecisionT>(m / 2) * imag) * s;
-        rot_mat_0b10 = Kokkos::exp(static_cast<PrecisionT>(m / 2) * (-imag)) * s;
+        rot_mat_0b10 =
+            Kokkos::exp(static_cast<PrecisionT>(m / 2) * (-imag)) * s;
         rot_mat_0b11 = Kokkos::exp(static_cast<PrecisionT>(p / 2) * imag) * c;
 
         arr = arr_;
