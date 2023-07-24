@@ -98,6 +98,8 @@ struct Sampler {
         // Get a random number state from the pool for the active thread
         auto rand_gen = rand_pool.get_state();
         PrecisionT U_rand = rand_gen.drand(0.0, 1.0);
+        // Give the state back, which will allow another thread to acquire it
+        rand_pool.free_state(rand_gen);
         size_t index;
 
         // Binary search for the bin index of cumulative probability
@@ -125,8 +127,6 @@ struct Sampler {
             samples[k * num_qubits + (num_qubits - 1 - j)] = (index >> j) & 1U;
         }
 
-        // Give the state back, which will allow another thread to acquire it
-        rand_pool.free_state(rand_gen);
     }
 };
 
