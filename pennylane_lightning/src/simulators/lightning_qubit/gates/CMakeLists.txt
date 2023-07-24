@@ -47,17 +47,24 @@ else()
     set(KERNEL_MAP_FILES    KernelMap_Default.cpp
                             AssignKernelMap_Default.cpp CACHE INTERNAL "" FORCE)
     add_library(lq_gates_kernel_map STATIC ${KERNEL_MAP_FILES})
-    target_link_libraries(lq_gates_kernel_map PRIVATE  lightning_qubit_utils lightning_external_libs lightning_compile_options)
+    target_link_libraries(lq_gates_kernel_map PRIVATE   lightning_qubit_utils
+                                                        lightning_external_libs
+                                                        lightning_compile_options
+                                                        lightning_gates)
     set_target_properties(lq_gates_kernel_map PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
     add_library(lq_gates_register_kernels_default STATIC RegisterKernels_Default.cpp cpu_kernels/GateImplementationsLM.cpp cpu_kernels/GateImplementationsPI.cpp GateIndices.cpp)
     target_include_directories(lq_gates_register_kernels_default PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(lq_gates_register_kernels_default PRIVATE lightning_external_libs lightning_compile_options lightning_utils lightning_qubit_utils)
+    target_link_libraries(lq_gates_register_kernels_default PRIVATE lightning_gates
+                                                                    lightning_external_libs
+                                                                    lightning_compile_options
+                                                                    lightning_utils lightning_qubit_utils)
     set_target_properties(lq_gates_register_kernels_default PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
     target_link_libraries(lightning_qubit_gates INTERFACE   lq_gates_kernel_map
                                                             lq_gates_register_kernels_default
                                                             )
+
 endif()
 
 if (BUILD_TESTS)
