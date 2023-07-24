@@ -61,7 +61,7 @@ jobs:
         os: [ubuntu-22.04]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
-        pl_backend: ["lightning_qubit", "lightning_kokkos"]
+        pl_backend: ["lightning_qubit"]
 
     name: Tidy (C++)
     runs-on: ${{ matrix.os }}
