@@ -231,9 +231,8 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
             if (ex) {
 #pragma omp cancel parallel
                 std::rethrow_exception(ex);
-            } else
+            } else {
 #pragma omp critical
-            {
                 scaleAndAdd(length, ComplexT{1.0, 0.0}, local_sv.data(),
                             sum.data());
             }
