@@ -17,6 +17,8 @@
  */
 #pragma once
 
+#include <array>
+
 #include "GateOperation.hpp"
 #include "TypeList.hpp"
 
