@@ -107,7 +107,7 @@ class CMakeBuild(build_ext):
         if not Path(self.build_temp).exists():
             os.makedirs(self.build_temp)
 
-        if "CMAKE_ARGS" in os.environ.keys():
+        if "CMAKE_ARGS" in os.environ:
             configure_args += os.environ["CMAKE_ARGS"].split(" ")
 
         subprocess.check_call(
@@ -124,6 +124,10 @@ class CMakeBuild(build_ext):
 
 with open(os.path.join("pennylane_lightning", "_version.py")) as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
+
+backend = os.environ.get("BACKEND", "qubit")
+if backend not in ["kokkos", "qubit"]:
+    raise ValueError(f"Invalid backend {backend}.")
 
 requirements = [
     "pennylane>=0.30",
@@ -146,7 +150,7 @@ info = {
     "include_package_data": True,
     "entry_points": {
         "pennylane.plugins": [
-            "lightning.qubit = pennylane_lightning:LightningQubit",
+            f"lightning.{backend} = pennylane_lightning:LightningQubit",
         ],
     },
     "description": "PennyLane-Lightning plugin",
@@ -158,8 +162,6 @@ info = {
     if os.environ.get("SKIP_COMPILATION", False)
     else [CMakeExtension("pennylane_lightning_ops")],
     "cmdclass": {"build_ext": CMakeBuild},
-    "ext_package": "pennylane_lightning",
-    "extras_require": {"gpu": ["pennylane-lightning-gpu"]},
 }
 
 classifiers = [
@@ -174,7 +176,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

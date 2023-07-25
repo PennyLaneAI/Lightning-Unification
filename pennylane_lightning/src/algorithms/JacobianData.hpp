@@ -248,7 +248,7 @@ template <class StateVectorT> class JacobianData {
      * Further note that ``ops`` does not contain state preparation operations
      * (e.g. QubitStateVector) or Hamiltonian coefficients.
      * @endrst
-     */    
+     */
     JacobianData(size_t num_params, size_t num_elem, const ComplexT *ps,
                  std::vector<std::shared_ptr<Observable<StateVectorT>>> obs,
                  OpsData<StateVectorT> ops, std::vector<size_t> trainP)

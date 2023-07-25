@@ -19,7 +19,6 @@
 
 #include "pybind11/pybind11.h"
 
-
 #if defined(_ENABLE_PLQUBIT) || _ENABLE_PLKOKKOS == 1
 
 /// @cond DEV

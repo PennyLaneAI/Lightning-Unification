@@ -69,7 +69,7 @@ using namespace Pennylane::LightningKokkos::Algorithms;
 using namespace Pennylane::LightningKokkos::Observables;
 using namespace Pennylane::LightningKokkos::Measures;
 } // namespace
-/// @endcond
+  /// @endcond
 
 #else
 
@@ -110,8 +110,7 @@ auto createStateVectorFromNumpyData(
         throw std::invalid_argument(
             "NumPy array must be of type np.complex64 or np.complex128");
     }
-    auto *data_ptr =
-        static_cast<ComplexT *>(numpyArrayInfo.ptr);
+    auto *data_ptr = static_cast<ComplexT *>(numpyArrayInfo.ptr);
     return StateVectorT(
         {data_ptr, static_cast<size_t>(numpyArrayInfo.shape[0])});
 }
@@ -283,8 +282,8 @@ template <class StateVectorT> void registerObservables(py::module_ &m) {
     using PrecisionT =
         typename StateVectorT::PrecisionT; // Statevector's precision.
     using ComplexT =
-        typename StateVectorT::ComplexT;   // Statevector's complex type.
-    using ParamT = PrecisionT;             // Parameter's data precision
+        typename StateVectorT::ComplexT; // Statevector's complex type.
+    using ParamT = PrecisionT;           // Parameter's data precision
 
     const std::string bitsize =
         std::to_string(sizeof(std::complex<PrecisionT>) * 8);
@@ -326,15 +325,13 @@ template <class StateVectorT> void registerObservables(py::module_ &m) {
                std::shared_ptr<HermitianObs<StateVectorT>>,
                Observable<StateVectorT>>(m, class_name.c_str(),
                                          py::module_local())
-        .def(py::init([](const np_arr_c &matrix,
-                         const std::vector<size_t> &wires) {
-            auto buffer = matrix.request();
-            const auto *ptr =
-                static_cast<ComplexT *>(buffer.ptr);
-            return HermitianObs<StateVectorT>(
-                std::vector<ComplexT>(ptr, ptr + buffer.size),
-                wires);
-        }))
+        .def(py::init(
+            [](const np_arr_c &matrix, const std::vector<size_t> &wires) {
+                auto buffer = matrix.request();
+                const auto *ptr = static_cast<ComplexT *>(buffer.ptr);
+                return HermitianObs<StateVectorT>(
+                    std::vector<ComplexT>(ptr, ptr + buffer.size), wires);
+            }))
         .def("__repr__", &HermitianObs<StateVectorT>::getObsName)
         .def("get_wires", &HermitianObs<StateVectorT>::getWires,
              "Get wires of observables")
@@ -494,8 +491,8 @@ void registerBackendAgnosticAlgorithms(py::module_ &m) {
     using PrecisionT =
         typename StateVectorT::PrecisionT; // Statevector's precision
     using ComplexT =
-        typename StateVectorT::ComplexT;   // Statevector's complex type
-    using ParamT = PrecisionT;             // Parameter's data precision
+        typename StateVectorT::ComplexT; // Statevector's complex type
+    using ParamT = PrecisionT;           // Parameter's data precision
 
     using np_arr_c = py::array_t<std::complex<ParamT>, py::array::c_style>;
 
@@ -510,12 +507,11 @@ void registerBackendAgnosticAlgorithms(py::module_ &m) {
 
     class_name = "OpsStructC" + bitsize;
     py::class_<OpsData<StateVectorT>>(m, class_name.c_str(), py::module_local())
-        .def(py::init<
-             const std::vector<std::string> &,
-             const std::vector<std::vector<ParamT>> &,
-             const std::vector<std::vector<size_t>> &,
-             const std::vector<bool> &,
-             const std::vector<std::vector<ComplexT>> &>())
+        .def(py::init<const std::vector<std::string> &,
+                      const std::vector<std::vector<ParamT>> &,
+                      const std::vector<std::vector<size_t>> &,
+                      const std::vector<bool> &,
+                      const std::vector<std::vector<ComplexT>> &>())
         .def("__repr__", [](const OpsData<StateVectorT> &ops) {
             using namespace Pennylane::Util;
             std::ostringstream ops_stream;
@@ -549,8 +545,8 @@ void registerBackendAgnosticAlgorithms(py::module_ &m) {
                 if (m_buffer.size) {
                     const auto m_ptr =
                         static_cast<const ComplexT *>(m_buffer.ptr);
-                    conv_matrices[op] = std::vector<ComplexT>{
-                        m_ptr, m_ptr + m_buffer.size};
+                    conv_matrices[op] =
+                        std::vector<ComplexT>{m_ptr, m_ptr + m_buffer.size};
                 }
             }
             return OpsData<StateVectorT>{ops_name, ops_params, ops_wires,
