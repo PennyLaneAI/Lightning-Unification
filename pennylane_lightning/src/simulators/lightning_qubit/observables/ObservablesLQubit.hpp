@@ -252,15 +252,14 @@ struct HamiltonianApplyInPlace<StateVectorLQubitRaw<PrecisionT>, true> {
         const size_t length = sv.getLength();
         std::vector<ComplexT> sum(length, ComplexT{});
 
-#pragma omp parallel default(none) firstprivate(length)                        \
+#pragma omp parallel default(none) firstprivate(length)      \
     shared(coeffs, terms, sv, sum, ex)
-        {
+        { // NOLINT(openmp-exception-escape)
             std::vector<ComplexT> tmp_data_storage(
                 sv.getData(), sv.getData() + sv.getLength());
             StateVectorLQubitRaw<PrecisionT> tmp(tmp_data_storage.data(),
                                                  tmp_data_storage.size());
             std::vector<ComplexT> local_sv(length, ComplexT{});
-
 #pragma omp for
             for (size_t term_idx = 0; term_idx < terms.size(); term_idx++) {
                 std::copy(sv.getData(), sv.getData() + sv.getLength(),
