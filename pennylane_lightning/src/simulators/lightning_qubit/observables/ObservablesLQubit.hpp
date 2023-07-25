@@ -254,32 +254,46 @@ struct HamiltonianApplyInPlace<StateVectorLQubitRaw<PrecisionT>, true> {
 
 #pragma omp parallel default(none) firstprivate(length)                        \
     shared(coeffs, terms, sv, sum, ex)
-        { // NOLINT(openmp-exception-escape)
-            std::vector<ComplexT> tmp_data_storage(
-                sv.getData(), sv.getData() + sv.getLength());
-            StateVectorLQubitRaw<PrecisionT> tmp(tmp_data_storage.data(),
-                                                 tmp_data_storage.size());
-            std::vector<ComplexT> local_sv(length, ComplexT{});
+        {
+            std::unique_ptr<std::vector<ComplexT>> tmp_data_storage{nullptr};
+            std::unique_ptr<StateVectorLQubitRaw<PrecisionT>> tmp{nullptr};
+            std::unique_ptr<std::vector<ComplexT>> local_sv{nullptr};
+
+            try {
+                tmp_data_storage.reset(new std::vector<ComplexT>(
+                    sv.getData(), sv.getData() + sv.getLength()));
+                tmp.reset(new StateVectorLQubitRaw<PrecisionT>(
+                    tmp_data_storage->data(), tmp_data_storage->size()));
+                local_sv.reset(new std::vector<ComplexT>(length, ComplexT{}));
+            } catch (...) {
+#pragma omp critical
+                ex = std::current_exception();
+            }
+            if (ex) {
+#pragma omp cancel parallel
+                std::rethrow_exception(ex);
+            }
+
 #pragma omp for
             for (size_t term_idx = 0; term_idx < terms.size(); term_idx++) {
                 std::copy(sv.getData(), sv.getData() + sv.getLength(),
-                          tmp_data_storage.data());
+                          tmp_data_storage->data());
                 try {
-                    terms[term_idx]->applyInPlace(tmp);
+                    terms[term_idx]->applyInPlace(*tmp);
                 } catch (...) {
 #pragma omp critical
                     ex = std::current_exception();
 #pragma omp cancel for
                 }
                 scaleAndAdd(length, ComplexT{coeffs[term_idx], 0.0},
-                            tmp.getData(), local_sv.data());
+                            tmp->getData(), local_sv->data());
             }
             if (ex) {
 #pragma omp cancel parallel
                 std::rethrow_exception(ex);
             } else {
 #pragma omp critical
-                scaleAndAdd(length, ComplexT{1.0, 0.0}, local_sv.data(),
+                scaleAndAdd(length, ComplexT{1.0, 0.0}, local_sv->data(),
                             sum.data());
             }
         }
