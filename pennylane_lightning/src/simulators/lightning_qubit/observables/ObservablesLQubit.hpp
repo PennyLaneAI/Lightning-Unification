@@ -218,16 +218,15 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
             for (size_t term_idx = 0; term_idx < terms.size(); term_idx++) {
                 try {
                     tmp.updateData(sv.getDataVector());
+                    terms[term_idx]->applyInPlace(tmp);
                 } catch (...) {
 #pragma omp critical
                     ex = std::current_exception();
 #pragma omp cancel for
                 }
-                terms[term_idx]->applyInPlace(tmp);
                 scaleAndAdd(length, ComplexT{coeffs[term_idx], 0.0},
                             tmp.getData(), local_sv.data());
             }
-
             if (ex) {
 #pragma omp cancel parallel
                 std::rethrow_exception(ex);
@@ -249,32 +248,38 @@ struct HamiltonianApplyInPlace<StateVectorLQubitRaw<PrecisionT>, true> {
                     const std::vector<std::shared_ptr<
                         Observable<StateVectorLQubitRaw<PrecisionT>>>> &terms,
                     StateVectorLQubitRaw<PrecisionT> &sv) {
+        std::exception_ptr ex = nullptr;
         const size_t length = sv.getLength();
-
         std::vector<ComplexT> sum(length, ComplexT{});
 
 #pragma omp parallel default(none) firstprivate(length)                        \
-    shared(coeffs, terms, sv, sum)
+    shared(coeffs, terms, sv, sum, ex)
         {
             std::vector<ComplexT> tmp_data_storage(
                 sv.getData(), sv.getData() + sv.getLength());
             StateVectorLQubitRaw<PrecisionT> tmp(tmp_data_storage.data(),
                                                  tmp_data_storage.size());
-
             std::vector<ComplexT> local_sv(length, ComplexT{});
 
 #pragma omp for
             for (size_t term_idx = 0; term_idx < terms.size(); term_idx++) {
                 std::copy(sv.getData(), sv.getData() + sv.getLength(),
                           tmp_data_storage.data());
-
-                terms[term_idx]->applyInPlace(tmp);
+                try {
+                    terms[term_idx]->applyInPlace(tmp);
+                } catch (...) {
+#pragma omp critical
+                    ex = std::current_exception();
+#pragma omp cancel for
+                }
                 scaleAndAdd(length, ComplexT{coeffs[term_idx], 0.0},
                             tmp.getData(), local_sv.data());
             }
-
+            if (ex) {
+#pragma omp cancel parallel
+                std::rethrow_exception(ex);
+            } else {
 #pragma omp critical
-            {
                 scaleAndAdd(length, ComplexT{1.0, 0.0}, local_sv.data(),
                             sum.data());
             }
