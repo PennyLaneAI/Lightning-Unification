@@ -1,3 +1,16 @@
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
+
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include "Error.hpp" // LightningException
 #include "Observables.hpp"
 #include "TestHelpers.hpp" // isApproxEqual, createZeroState, createProductState
@@ -36,6 +49,17 @@ namespace {
 using namespace Pennylane::LightningQubit::Util;
 } // namespace
 /// @endcond
+
+#elif _ENABLE_PLKOKKOS == 1
+constexpr bool BACKEND_FOUND = true;
+
+#include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
+
+/// @cond DEV
+namespace {
+using namespace Pennylane::LightningKokkos::Util;
+} // namespace
+  /// @endcond
 
 #else
 constexpr bool BACKEND_FOUND = false;
@@ -240,13 +264,15 @@ template <typename TypeList> void testTensorProdObsBase() {
             };
 
             SECTION("Test using |1+0>") {
-                VectorT st_data = createProductState<PrecisionT>("1+0");
+                VectorT st_data =
+                    createProductState<PrecisionT, ComplexT>("1+0");
 
                 StateVectorT state_vector(st_data.data(), st_data.size());
 
                 obs.applyInPlace(state_vector);
 
-                VectorT expected = createProductState<PrecisionT>("0+1");
+                VectorT expected =
+                    createProductState<PrecisionT, ComplexT>("0+1");
 
                 REQUIRE(isApproxEqual(state_vector.getData(),
                                       state_vector.getLength(), expected.data(),
@@ -254,13 +280,15 @@ template <typename TypeList> void testTensorProdObsBase() {
             }
 
             SECTION("Test using |+-01>") {
-                VectorT st_data = createProductState<PrecisionT>("+-01");
+                VectorT st_data =
+                    createProductState<PrecisionT, ComplexT>("+-01");
 
                 StateVectorT state_vector(st_data.data(), st_data.size());
 
                 obs.applyInPlace(state_vector);
 
-                VectorT expected = createProductState<PrecisionT>("+-11");
+                VectorT expected =
+                    createProductState<PrecisionT, ComplexT>("+-11");
 
                 REQUIRE(isApproxEqual(state_vector.getData(),
                                       state_vector.getLength(), expected.data(),
@@ -405,11 +433,10 @@ template <typename TypeList> void testHamiltonianBase() {
 
             DYNAMIC_SECTION("applyInPlace must fail - "
                             << StateVectorToName<StateVectorT>::name) {
-                using VectorT = TestVector<ComplexT>;
 
                 auto ham =
                     HamiltonianT::create({PrecisionT{1.0}, h, h}, {zz, x1, x2});
-                VectorT st_data = createZeroState<PrecisionT>(2);
+                auto st_data = createZeroState<ComplexT>(2);
 
                 StateVectorT state_vector(st_data.data(), st_data.size());
 

@@ -17,11 +17,12 @@
  */
 #pragma once
 
+#include <array>
+
 #include "GateOperation.hpp"
-#include "KernelType.hpp"
 #include "TypeList.hpp"
 
-namespace Pennylane::LightningQubit::Gates::Constant {
+namespace Pennylane::Gates::Constant {
 /**
  * @brief List of multi-qubit gates
  */
@@ -266,4 +267,4 @@ namespace Pennylane::LightningQubit::Gates::Constant {
     std::pair<GateOperation, size_t>{GateOperation::CSWAP, 0},
     std::pair<GateOperation, size_t>{GateOperation::MultiRZ, 1},
 };
-} // namespace Pennylane::LightningQubit::Gates::Constant
+} // namespace Pennylane::Gates::Constant

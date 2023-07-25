@@ -16,22 +16,22 @@
  * Defines kernel functions with less memory (and fast)
  */
 #pragma once
-#include "GateOperation.hpp"
-#include "Gates.hpp"
-#include "KernelType.hpp"
-
-#include "BitUtil.hpp" // fillLeadingOnes, fillTrailingOnes, bitswap
-#include "Error.hpp"
-#include "LinearAlgebra.hpp"
-#include "PauliGenerator.hpp"
-#include "Util.hpp" // exp2, INVSQRT2
-
 #include <bit>
 #include <complex>
 #include <tuple>
 #include <vector>
 
+#include "BitUtil.hpp" // fillLeadingOnes, fillTrailingOnes, bitswap
+#include "Error.hpp"
+#include "GateOperation.hpp"
+#include "Gates.hpp"
+#include "KernelType.hpp"
+#include "LinearAlgebra.hpp"
+#include "PauliGenerator.hpp"
+#include "Util.hpp" // exp2, INVSQRT2
+
 namespace {
+using namespace Pennylane::Gates;
 using Pennylane::Util::exp2;
 using Pennylane::Util::INVSQRT2;
 } // namespace
@@ -621,8 +621,8 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
         PL_ASSERT(wires.size() == 1);
 
         const auto rotMat =
-            (inverse) ? Gates::getRot<PrecisionT>(-omega, -theta, -phi)
-                      : Gates::getRot<PrecisionT>(phi, theta, omega);
+            (inverse) ? getRot<std::complex, PrecisionT>(-omega, -theta, -phi)
+                      : getRot<std::complex, PrecisionT>(phi, theta, omega);
 
         applySingleQubitOp(arr, num_qubits, rotMat.data(), wires);
     }
@@ -723,8 +723,8 @@ class GateImplementationsLM : public PauliGenerator<GateImplementationsLM> {
             revWireParity(rev_wire0, rev_wire1);
 
         const auto rotMat =
-            (inverse) ? Gates::getRot<PrecisionT>(-omega, -theta, -phi)
-                      : Gates::getRot<PrecisionT>(phi, theta, omega);
+            (inverse) ? getRot<std::complex, PrecisionT>(-omega, -theta, -phi)
+                      : getRot<std::complex, PrecisionT>(phi, theta, omega);
 
         for (size_t k = 0; k < exp2(num_qubits - 2); k++) {
             const size_t i00 = ((k << 2U) & parity_high) |

@@ -1,3 +1,16 @@
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
+
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include "TestHelpers.hpp"      // createProductState, createZeroState
 #include "TestHelpersWires.hpp" // CombinationGenerator, PermutationGenerator
 #include "cpu_kernels/GateImplementationsPI.hpp"
@@ -18,7 +31,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::LightningQubit::Util;
+using namespace Pennylane::Util;
 using Pennylane::LightningQubit::Gates::GateImplementationsPI;
 } // namespace
 /// @endcond
@@ -69,13 +82,14 @@ TEMPLATE_TEST_CASE("Approx", "[Test_Internal]", float, double) {
 
 TEMPLATE_TEST_CASE("createProductState", "[Test_Internal]", float, double) {
     using PrecisionT = TestType;
+    using ComplexT = std::complex<PrecisionT>;
 
     const auto margin = PrecisionT{1e-7};
 
     SECTION("createProductState(\"+-0\") == |+-0> ") {
         const auto st = createProductState<PrecisionT>("+-0");
 
-        auto expected = createZeroState<PrecisionT>(3);
+        auto expected = createZeroState<ComplexT>(3);
         GateImplementationsPI::applyHadamard(expected.data(), 3, {0}, false);
 
         GateImplementationsPI::applyPauliX(expected.data(), 3, {1}, false);
@@ -86,7 +100,7 @@ TEMPLATE_TEST_CASE("createProductState", "[Test_Internal]", float, double) {
     SECTION("createProductState(\"+-0\") != |+-1> ") {
         const auto st = createProductState<PrecisionT>("+-0");
 
-        auto expected = createZeroState<PrecisionT>(3); // |000>
+        auto expected = createZeroState<ComplexT>(3); // |000>
         GateImplementationsPI::applyHadamard(expected.data(), 3, {0},
                                              false); // |+00>
 

@@ -211,7 +211,8 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param inverse Indicates whether to use inverse of gate.
      * @param params Optional parameter list for parametric gates.
      */
-    void applyOperation(Gates::KernelType kernel, const std::string &opName,
+    void applyOperation(Pennylane::Gates::KernelType kernel,
+                        const std::string &opName,
                         const std::vector<size_t> &wires, bool inverse = false,
                         const std::vector<PrecisionT> &params = {}) {
         auto *arr = this->getData();
@@ -239,67 +240,6 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
     }
 
     /**
-     * @brief Apply multiple gates to the state-vector.
-     *
-     * @param ops Vector of gate names to be applied in order.
-     * @param ops_wires Vector of wires on which to apply index-matched gate
-     * name.
-     * @param ops_inverse Indicates whether gate at matched index is to be
-     * inverted.
-     * @param ops_params Optional parameter data for index matched gates.
-     */
-    void
-    applyOperations(const std::vector<std::string> &ops,
-                    const std::vector<std::vector<size_t>> &ops_wires,
-                    const std::vector<bool> &ops_inverse,
-                    const std::vector<std::vector<PrecisionT>> &ops_params) {
-        const size_t numOperations = ops.size();
-        PL_ABORT_IF(
-            numOperations != ops_wires.size(),
-            "Invalid arguments: number of operations, wires, inverses, and "
-            "parameters must all be equal");
-        PL_ABORT_IF(
-            numOperations != ops_inverse.size(),
-            "Invalid arguments: number of operations, wires, inverses, and "
-            "parameters must all be equal");
-        PL_ABORT_IF(
-            numOperations != ops_params.size(),
-            "Invalid arguments: number of operations, wires, inverses, and "
-            "parameters must all be equal");
-        for (size_t i = 0; i < numOperations; i++) {
-            applyOperation(ops[i], ops_wires[i], ops_inverse[i], ops_params[i]);
-        }
-    }
-
-    /**
-     * @brief Apply multiple gates to the state-vector.
-     *
-     * @param ops Vector of gate names to be applied in order.
-     * @param ops_wires Vector of wires on which to apply index-matched gate
-     * name.
-     * @param ops_inverse Indicates whether gate at matched index is to be
-     * inverted.
-     */
-    void applyOperations(const std::vector<std::string> &ops,
-                         const std::vector<std::vector<size_t>> &ops_wires,
-                         const std::vector<bool> &ops_inverse) {
-        const size_t numOperations = ops.size();
-        if (numOperations != ops_wires.size()) {
-            PL_ABORT(
-                "Invalid arguments: number of operations, wires, and inverses "
-                "must all be equal");
-        }
-        if (numOperations != ops_inverse.size()) {
-            PL_ABORT(
-                "Invalid arguments: number of operations, wires and inverses"
-                "must all be equal");
-        }
-        for (size_t i = 0; i < numOperations; i++) {
-            applyOperation(ops[i], ops_wires[i], ops_inverse[i], {});
-        }
-    }
-
-    /**
      * @brief Apply a single generator to the state-vector using a given kernel.
      *
      * @param kernel Kernel to run the operation.
@@ -307,10 +247,10 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param wires Wires to apply gate to.
      * @param adj Indicates whether to use adjoint of operator.
      */
-    [[nodiscard]] inline auto applyGenerator(Gates::KernelType kernel,
-                                             const std::string &opName,
-                                             const std::vector<size_t> &wires,
-                                             bool adj = false) -> PrecisionT {
+    [[nodiscard]] inline auto
+    applyGenerator(Pennylane::Gates::KernelType kernel,
+                   const std::string &opName, const std::vector<size_t> &wires,
+                   bool adj = false) -> PrecisionT {
         auto *arr = this->getData();
         return DynamicDispatcher<PrecisionT>::getInstance().applyGenerator(
             kernel, arr, this->getNumQubits(), opName, wires, adj);
@@ -343,7 +283,8 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param wires Wires to apply gate to.
      * @param inverse Indicate whether inverse should be taken.
      */
-    inline void applyMatrix(Gates::KernelType kernel, const ComplexT *matrix,
+    inline void applyMatrix(Pennylane::Gates::KernelType kernel,
+                            const ComplexT *matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
 
@@ -365,7 +306,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
      * @param wires Wires to apply gate to.
      * @param inverse Indicate whether inverse should be taken.
      */
-    inline void applyMatrix(Gates::KernelType kernel,
+    inline void applyMatrix(Pennylane::Gates::KernelType kernel,
                             const std::vector<ComplexT> &matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
@@ -388,7 +329,7 @@ class StateVectorLQubit : public StateVectorBase<PrecisionT, Derived> {
     inline void applyMatrix(const ComplexT *matrix,
                             const std::vector<size_t> &wires,
                             bool inverse = false) {
-        using Gates::MatrixOperation;
+        using Pennylane::Gates::MatrixOperation;
 
         PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
 

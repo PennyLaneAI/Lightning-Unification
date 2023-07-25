@@ -17,16 +17,14 @@
  */
 #pragma once
 
+#include <span>
+
 #include "AdjointJacobianBase.hpp"
 #include "BitUtil.hpp" // log2PerfectPower
 #include "JacobianData.hpp"
 #include "LinearAlgebra.hpp" // innerProdC
 #include "StateVectorLQubitManaged.hpp"
 
-#include <cassert>
-#include <span>
-
-// using namespace Pennylane;
 /// @cond DEV
 namespace {
 using namespace Pennylane::Algorithms;
@@ -84,7 +82,7 @@ class VectorJacobianProduct final
                     std::span<const ComplexT> dy,
                     bool apply_operations = false) {
 
-        assert(dy.size() == jd.getSizeStateVec());
+        PL_ASSERT(dy.size() == jd.getSizeStateVec());
 
         if (!jd.hasTrainableParams()) {
             return;

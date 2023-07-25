@@ -1,19 +1,30 @@
-#include "CPUMemoryModel.hpp"
-#include "TestHelpers.hpp" // PrecisionToName, createProductState
-#include "TestHelpersWires.hpp"
-#include "Util.hpp" // INVSQRT2
-#include "cpu_kernels/GateImplementationsLM.hpp"
-#include "cpu_kernels/GateImplementationsPI.hpp"
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
 
-#include <catch2/catch.hpp>
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include <algorithm>
 #include <complex>
-#include <iostream>
 #include <limits>
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#include <catch2/catch.hpp>
+
+#include "CPUMemoryModel.hpp"
+#include "TestHelpers.hpp" // PrecisionToName, createProductState
+#include "TestHelpersWires.hpp"
+#include "TestKernels.hpp"
+#include "Util.hpp" // INVSQRT2
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4305)
@@ -27,9 +38,10 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::LightningQubit::Util;
-
-using Pennylane::Util::INVSQRT2;
+using namespace Pennylane::Util;
+using Pennylane::Gates::getPhaseShift;
+using Pennylane::Gates::getRot;
+using Pennylane::Gates::getRZ;
 } // namespace
 /// @endcond
 
@@ -93,7 +105,7 @@ void testApplyPhaseShift() {
     std::vector<std::vector<ComplexT>> ps_data;
     ps_data.reserve(angles.size());
     for (auto &a : angles) {
-        ps_data.push_back(Gates::getPhaseShift<PrecisionT>(a));
+        ps_data.push_back(getPhaseShift<std::complex, PrecisionT>(a));
     }
 
     std::vector<std::vector<ComplexT>> expected_results = {
@@ -142,7 +154,7 @@ void testApplyRX() {
                               {0, -0.867423225594017}}};
 
     for (size_t index = 0; index < angles.size(); index++) {
-        auto st = createZeroState<PrecisionT>(num_qubits);
+        auto st = createZeroState<ComplexT>(num_qubits);
 
         GateImplementation::applyRX(st.data(), num_qubits, {0}, false,
                                     {angles[index]});
@@ -202,7 +214,7 @@ void testApplyRZ() {
     std::vector<std::vector<ComplexT>> rz_data;
     rz_data.reserve(angles.size());
     for (auto &a : angles) {
-        rz_data.push_back(Gates::getRZ<PrecisionT>(a));
+        rz_data.push_back(getRZ<std::complex, PrecisionT>(a));
     }
 
     std::vector<std::vector<ComplexT>> expected_results = {
@@ -248,7 +260,7 @@ template <typename PrecisionT, typename ParamT, class GateImplementation>
 void testApplyRot() {
     using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
-    auto ini_st = createZeroState<PrecisionT>(num_qubits);
+    auto ini_st = createZeroState<ComplexT>(num_qubits);
 
     const std::vector<std::vector<PrecisionT>> angles{
         std::vector<PrecisionT>{0.3, 0.8, 2.4},
@@ -261,14 +273,14 @@ void testApplyRot() {
         std::vector<ComplexT>(1U << num_qubits)};
 
     for (size_t i = 0; i < angles.size(); i++) {
-        const auto rot_mat =
-            Gates::getRot<PrecisionT>(angles[i][0], angles[i][1], angles[i][2]);
+        const auto rot_mat = getRot<std::complex, PrecisionT>(
+            angles[i][0], angles[i][1], angles[i][2]);
         expected_results[i][0] = rot_mat[0];
         expected_results[i][size_t{1U} << (num_qubits - i - 1)] = rot_mat[2];
     }
 
     for (size_t index = 0; index < num_qubits; index++) {
-        auto st = createZeroState<PrecisionT>(num_qubits);
+        auto st = createZeroState<ComplexT>(num_qubits);
         GateImplementation::applyRot(st.data(), num_qubits, {index}, false,
                                      angles[index][0], angles[index][1],
                                      angles[index][2]);
@@ -291,7 +303,7 @@ void testApplyIsingXX() {
                     << ", IsingXX0,1 |000> -> a|000> + b|110> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 3;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
         ParamT angle = 0.312;
 
         const std::vector<ComplexT> expected_results{
@@ -426,7 +438,7 @@ void testApplyIsingXY() {
                     << ", IsingXY0,1 |000> -> a|000> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 3;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
         ParamT angle = 0.312;
 
         const std::vector<ComplexT> expected_results{
@@ -571,7 +583,7 @@ void testApplyIsingYY() {
                     << ", IsingYY0,1 |000> -> a|000> + b|110> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 3;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
         ParamT angle = 0.312;
 
         const std::vector<ComplexT> expected_results{
@@ -723,7 +735,7 @@ void testApplyIsingZZ() {
                     << ", IsingZZ0,1 |000> -> |000> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 3;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
         ParamT angle = 0.312;
 
         const std::vector<ComplexT> expected_results{
@@ -883,7 +895,7 @@ void testApplyControlledPhaseShift() {
     std::vector<std::vector<ComplexT>> ps_data;
     ps_data.reserve(angles.size());
     for (auto &a : angles) {
-        ps_data.push_back(Gates::getPhaseShift<PrecisionT>(a));
+        ps_data.push_back(getPhaseShift<std::complex, PrecisionT>(a));
     }
 
     std::vector<std::vector<ComplexT>> expected_results = {
@@ -1390,9 +1402,9 @@ void testApplyCRot() {
                     << ", CRot0,1 |000> -> |000> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 3;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
 
-        auto st = createZeroState<PrecisionT>(num_qubits);
+        auto st = createZeroState<ComplexT>(num_qubits);
         GateImplementation::applyCRot(st.data(), num_qubits, {0, 1}, false,
                                       angles[0], angles[1], angles[2]);
 
@@ -1403,11 +1415,11 @@ void testApplyCRot() {
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 3;
 
-        auto st = createZeroState<PrecisionT>(num_qubits);
+        auto st = createZeroState<ComplexT>(num_qubits);
 
         std::vector<ComplexT> expected_results(8);
         const auto rot_mat =
-            Gates::getRot<PrecisionT>(angles[0], angles[1], angles[2]);
+            getRot<std::complex, PrecisionT>(angles[0], angles[1], angles[2]);
         expected_results[size_t{1U} << (num_qubits - 1)] = rot_mat[0];
         expected_results[(size_t{1U} << num_qubits) - 2] = rot_mat[2];
 
@@ -1482,7 +1494,7 @@ void testApplySingleExcitation() {
                     << ", SingleExcitation0,1 |000> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 3;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
         ParamT angle = 0.312;
         auto st = ini_st;
         GateImplementation::applySingleExcitation(st.data(), num_qubits, {0, 1},
@@ -1578,7 +1590,7 @@ void testApplySingleExcitationMinus() {
                     << ", SingleExcitationMinus0,1 |000> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 3;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
         ParamT angle = 0.312;
 
         const std::vector<ComplexT> expected_results{
@@ -1696,7 +1708,7 @@ void testApplySingleExcitationPlus() {
                     << ", SingleExcitationPlus0,1 |000> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 3;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
         ParamT angle = 0.312;
 
         const std::vector<ComplexT> expected_results{
@@ -1817,7 +1829,7 @@ void testApplyDoubleExcitation() {
                     << ", DoubleExcitation0,1,2,3 |0000> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 4;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
         ParamT angle = 0.312;
         auto st = ini_st;
         GateImplementation::applyDoubleExcitation(st.data(), num_qubits,
@@ -1907,7 +1919,7 @@ void testApplyDoubleExcitationMinus() {
                     << ", DoubleExcitationMinus0,1,2,3 |0000> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 4;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
         ParamT angle = 0.312;
 
         std::vector<ComplexT> expected_results(16, ComplexT{});
@@ -2002,7 +2014,7 @@ void testApplyDoubleExcitationPlus() {
                     << ", DoubleExcitationPlus0,1,2,3 |0000> - "
                     << PrecisionToName<PrecisionT>::value) {
         const size_t num_qubits = 4;
-        const auto ini_st = createZeroState<PrecisionT>(num_qubits);
+        const auto ini_st = createZeroState<ComplexT>(num_qubits);
         ParamT angle = 0.312;
 
         std::vector<ComplexT> expected_results(16, ComplexT{});

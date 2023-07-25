@@ -16,18 +16,16 @@
  * Defines kernel functions with AVX512F and AVX512DQ
  */
 #pragma once
-#include "Error.hpp"
-#include "GateImplementationsAVXCommon.hpp"
-#include "GateOperation.hpp"
-#include "Gates.hpp"
-#include "KernelType.hpp"
-#include "LinearAlgebra.hpp"
-#include "Macros.hpp"
+#include <complex>
+#include <vector>
 
 #include <immintrin.h>
 
-#include <complex>
-#include <vector>
+#include "Error.hpp"
+#include "GateImplementationsAVXCommon.hpp"
+#include "KernelType.hpp"
+#include "LinearAlgebra.hpp"
+#include "Macros.hpp"
 
 namespace Pennylane::LightningQubit::Gates {
 

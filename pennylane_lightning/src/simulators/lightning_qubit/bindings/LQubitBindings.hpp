@@ -76,15 +76,15 @@ void registerGatesForStateVector(PyClass &pyclass) {
         typename StateVectorT::PrecisionT; // Statevector's precision
     using ParamT = PrecisionT;             // Parameter's data precision
 
-    using Gates::GateOperation;
+    using Pennylane::Gates::GateOperation;
     using Pennylane::Util::for_each_enum;
-    namespace Constant = Gates::Constant;
+    namespace Constant = Pennylane::Gates::Constant;
 
     pyclass.def("applyMatrix", &registerMatrix<StateVectorT>,
                 "Apply a given matrix to wires.");
 
     for_each_enum<GateOperation>([&pyclass](GateOperation gate_op) {
-        using Pennylane::LightningQubit::Util::lookup;
+        using Pennylane::Util::lookup;
         const auto gate_name =
             std::string(lookup(Constant::gate_names, gate_op));
         const std::string doc = "Apply the " + gate_name + " gate.";
@@ -105,8 +105,8 @@ auto svKernelMap(const StateVectorT &sv) -> pybind11::dict {
     using PrecisionT =
         typename StateVectorT::PrecisionT; // Statevector's precision
     pybind11::dict res_map;
-    namespace Constant = Gates::Constant;
-    using Pennylane::LightningQubit::Util::lookup;
+    namespace Constant = Pennylane::Gates::Constant;
+    using Pennylane::Util::lookup;
 
     const auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
 

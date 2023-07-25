@@ -33,8 +33,6 @@
 #include "pybind11/stl.h"
 #include "pybind11/stl_bind.h"
 
-#include <cassert>
-#include <iostream>
 #include <set>
 #include <string>
 #include <string_view>
@@ -55,9 +53,6 @@ using namespace Pennylane::LightningQubit::Observables;
 using namespace Pennylane::LightningQubit::Measures;
 } // namespace
 /// @endcond
-#else
-static_assert(false, "Backend not found.");
-#endif
 
 /// @cond DEV
 namespace {
@@ -608,3 +603,8 @@ void registerLightningClassBindings(py::module_ &m) {
     }
 }
 } // namespace Pennylane
+
+#elif _ENABLE_PLKOKKOS == 1
+#else
+static_assert(false, "Backend not found.");
+#endif

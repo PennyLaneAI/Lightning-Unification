@@ -18,17 +18,19 @@
  */
 #pragma once
 
+#include <complex>
+#include <numeric>
+#include <random>
+#include <string>
+#include <vector>
+
+#include <catch2/catch.hpp>
+
 #include "CPUMemoryModel.hpp" // getBestAllocator
 #include "Error.hpp"          // PL_ABORT
 #include "Memory.hpp"         // AlignedAllocator
 #include "TypeTraits.hpp"
 #include "Util.hpp" // INVSQRT2
-
-#include <catch2/catch.hpp>
-#include <complex>
-#include <random>
-#include <string>
-#include <vector>
 
 namespace Pennylane::Util {
 template <class T, class Alloc = std::allocator<T>> struct PLApprox {
@@ -278,13 +280,11 @@ void scaleVector(std::vector<std::complex<Data_t>, Alloc> &data,
 /**
  * @brief create |0>^N
  */
-template <typename PrecisionT>
-auto createZeroState(size_t num_qubits)
-    -> TestVector<std::complex<PrecisionT>> {
-    TestVector<std::complex<PrecisionT>> res(
-        size_t{1U} << num_qubits, {0.0, 0.0},
-        getBestAllocator<std::complex<PrecisionT>>());
-    res[0] = std::complex<PrecisionT>{1.0, 0.0};
+template <typename ComplexT>
+auto createZeroState(size_t num_qubits) -> TestVector<ComplexT> {
+    TestVector<ComplexT> res(size_t{1U} << num_qubits, {0.0, 0.0},
+                             getBestAllocator<ComplexT>());
+    res[0] = ComplexT{1.0, 0.0};
     return res;
 }
 
@@ -295,7 +295,7 @@ template <typename PrecisionT>
 auto createPlusState(size_t num_qubits)
     -> TestVector<std::complex<PrecisionT>> {
     TestVector<std::complex<PrecisionT>> res(
-        size_t{1U} << num_qubits, {1.0, 0.0},
+        size_t{1U} << num_qubits, 1.0,
         getBestAllocator<std::complex<PrecisionT>>());
     for (auto &elem : res) {
         elem /= std::sqrt(1U << num_qubits);
@@ -311,7 +311,7 @@ auto createRandomStateVectorData(RandomEngine &re, size_t num_qubits)
     -> TestVector<std::complex<PrecisionT>> {
 
     TestVector<std::complex<PrecisionT>> res(
-        size_t{1U} << num_qubits, {0.0, 0.0},
+        size_t{1U} << num_qubits, 0.0,
         getBestAllocator<std::complex<PrecisionT>>());
     std::uniform_real_distribution<PrecisionT> dist;
     for (size_t idx = 0; idx < (size_t{1U} << num_qubits); idx++) {
@@ -329,12 +329,10 @@ auto createRandomStateVectorData(RandomEngine &re, size_t num_qubits)
  * Example: createProductState("+01") will produce |+01> state.
  * Note that the wire index starts from the left.
  */
-template <typename PrecisionT>
-auto createProductState(std::string_view str)
-    -> TestVector<std::complex<PrecisionT>> {
+template <typename PrecisionT, typename ComplexT = std::complex<PrecisionT>>
+auto createProductState(std::string_view str) -> TestVector<ComplexT> {
     using Pennylane::Util::INVSQRT2;
-    TestVector<std::complex<PrecisionT>> st(
-        getBestAllocator<std::complex<PrecisionT>>());
+    TestVector<ComplexT> st(getBestAllocator<ComplexT>());
     st.resize(1U << str.length());
 
     std::vector<PrecisionT> zero{1.0, 0.0};
@@ -387,8 +385,8 @@ auto createNonTrivialState(size_t num_qubits = 3)
 
     size_t data_size = Util::exp2(num_qubits);
 
-    std::vector<ComplexT> arr(data_size, {0, 0});
-    arr[0] = {1, 0};
+    std::vector<ComplexT> arr(data_size, ComplexT{0, 0});
+    arr[0] = ComplexT{1, 0};
     StateVectorT Measured_StateVector(arr.data(), data_size);
 
     std::vector<std::string> gates;
@@ -526,6 +524,66 @@ std::vector<int> randomIntVector(RandomEngine &re, size_t size, int min,
     res.reserve(size);
     for (size_t i = 0; i < size; i++) {
         res.emplace_back(dist(re));
+    }
+    return res;
+}
+
+/**
+ * @brief Generate random unitary matrix
+ *
+ * @tparam PrecisionT Floating point type
+ * @tparam RandomEngine Random engine type
+ * @param re Random engine instance
+ * @param num_qubits Number of qubits
+ * @return Generated unitary matrix in row-major format
+ */
+template <typename PrecisionT, class RandomEngine>
+auto randomUnitary(RandomEngine &re, size_t num_qubits)
+    -> std::vector<std::complex<PrecisionT>> {
+    using ComplexT = std::complex<PrecisionT>;
+    const size_t dim = (1U << num_qubits);
+    std::vector<ComplexT> res(dim * dim, ComplexT{});
+
+    std::normal_distribution<PrecisionT> dist;
+
+    auto generator = [&dist, &re]() -> ComplexT {
+        return ComplexT{dist(re), dist(re)};
+    };
+
+    std::generate(res.begin(), res.end(), generator);
+
+    // Simple algorithm to make rows orthogonal with Gram-Schmidt
+    // This algorithm is unstable but works for a small matrix.
+    // Use QR decomposition when we have LAPACK support.
+
+    for (size_t row2 = 0; row2 < dim; row2++) {
+        ComplexT *row2_p = res.data() + row2 * dim;
+        for (size_t row1 = 0; row1 < row2; row1++) {
+            const ComplexT *row1_p = res.data() + row1 * dim;
+            ComplexT dot12 = std::inner_product(
+                row1_p, row1_p + dim, row2_p, std::complex<PrecisionT>(),
+                ConstSum<PrecisionT>, ConstMultConj<PrecisionT>);
+
+            ComplexT dot11 = squaredNorm(row1_p, dim);
+
+            // orthogonalize row2
+            std::transform(
+                row2_p, row2_p + dim, row1_p, row2_p,
+                [scale = dot12 / dot11](auto &elem2, const auto &elem1) {
+                    return elem2 - scale * elem1;
+                });
+        }
+    }
+
+    // Normalize each row
+    for (size_t row = 0; row < dim; row++) {
+        ComplexT *row_p = res.data() + row * dim;
+        PrecisionT norm2 = std::sqrt(squaredNorm(row_p, dim));
+
+        // normalize row2
+        std::transform(row_p, row_p + dim, row_p, [norm2](const auto c) {
+            return (static_cast<PrecisionT>(1.0) / norm2) * c;
+        });
     }
     return res;
 }

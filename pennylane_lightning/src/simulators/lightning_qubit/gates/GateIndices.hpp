@@ -22,8 +22,6 @@
 #include <set>
 #include <vector>
 
-#include "GateOperation.hpp"
-#include "KernelType.hpp"
 #include "Util.hpp"
 
 /**

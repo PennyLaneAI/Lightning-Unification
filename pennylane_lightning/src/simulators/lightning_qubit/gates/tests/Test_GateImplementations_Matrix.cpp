@@ -1,15 +1,29 @@
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
+
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#include <catch2/catch.hpp>
+
 #include "ConstantUtil.hpp"  // array_has_elem
 #include "LinearAlgebra.hpp" // randomUnitary
 #include "TestHelpers.hpp"   // PrecisionToName
 #include "TestHelpersWires.hpp"
+#include "TestKernels.hpp"
 #include "Util.hpp"
-
-#include <catch2/catch.hpp>
 
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::LightningQubit::Util;
+using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 
@@ -758,7 +772,7 @@ void testApplyMultiQubitOp() {
 
 template <typename PrecisionT, typename TypeList>
 void testApplyMatrixForKernels() {
-    using Gates::MatrixOperation;
+    using Pennylane::Gates::MatrixOperation;
     if constexpr (!std::is_same_v<TypeList, void>) {
         using GateImplementation = typename TypeList::Type;
 
@@ -970,7 +984,7 @@ void testApplyMultiQubitOpInverse() {
 
 template <typename PrecisionT, typename TypeList>
 void testApplyMatrixInverseForKernels() {
-    using Gates::MatrixOperation;
+    using Pennylane::Gates::MatrixOperation;
     if constexpr (!std::is_same_v<TypeList, void>) {
         using GateImplementation = typename TypeList::Type;
         if constexpr (array_has_elem(GateImplementation::implemented_matrices,

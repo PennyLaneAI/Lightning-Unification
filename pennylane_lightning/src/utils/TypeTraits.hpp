@@ -23,6 +23,7 @@ template <typename T> struct remove_complex { using type = T; };
 template <typename T> struct remove_complex<std::complex<T>> {
     using type = T;
 };
+
 template <typename T> using remove_complex_t = typename remove_complex<T>::type;
 
 template <typename T> struct is_complex : std::false_type {};

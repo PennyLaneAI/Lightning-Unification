@@ -32,6 +32,13 @@
 #include <complex>
 #include <vector>
 
+/// @cond DEV
+namespace {
+using Pennylane::Gates::GateOperation;
+using Pennylane::Gates::getRot;
+} // namespace
+/// @endcond
+
 namespace Pennylane::LightningQubit::Gates {
 template <class Derived>
 class GateImplementationsAVXCommon
@@ -245,8 +252,8 @@ class GateImplementationsAVXCommon
         PL_ASSERT(wires.size() == 1);
 
         const auto rotMat =
-            (inverse) ? Gates::getRot<PrecisionT>(-omega, -theta, -phi)
-                      : Gates::getRot<PrecisionT>(phi, theta, omega);
+            (inverse) ? getRot<std::complex, PrecisionT>(-omega, -theta, -phi)
+                      : getRot<std::complex, PrecisionT>(phi, theta, omega);
 
         Derived::applySingleQubitOp(arr, num_qubits, rotMat.data(), wires);
     }

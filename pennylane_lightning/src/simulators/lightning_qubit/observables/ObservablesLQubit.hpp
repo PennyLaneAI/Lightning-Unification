@@ -13,6 +13,13 @@
 // limitations under the License.
 #pragma once
 
+#include <complex>
+#include <exception>
+#include <memory>
+#include <type_traits>
+#include <unordered_set>
+#include <vector>
+
 #include "CPUMemoryModel.hpp" // getAllocator
 #include "Constant.hpp"
 #include "ConstantUtil.hpp" // lookup
@@ -23,14 +30,6 @@
 #include "StateVectorLQubitManaged.hpp"
 #include "StateVectorLQubitRaw.hpp"
 #include "Util.hpp"
-
-#include <complex>
-#include <memory>
-#include <type_traits>
-#include <unordered_set>
-#include <vector>
-
-#include <iostream>
 
 // using namespace Pennylane;
 /// @cond DEV
@@ -67,12 +66,11 @@ class NamedObs final : public NamedObsBase<StateVectorT> {
     NamedObs(std::string obs_name, std::vector<size_t> wires,
              std::vector<PrecisionT> params = {})
         : BaseType{obs_name, wires, params} {
-        using Pennylane::LightningQubit::Gates::Constant::gate_names;
-        using Pennylane::LightningQubit::Gates::Constant::gate_num_params;
-        using Pennylane::LightningQubit::Gates::Constant::gate_wires;
-        using Pennylane::LightningQubit::Util::lookup;
+        using Pennylane::Gates::Constant::gate_names;
+        using Pennylane::Gates::Constant::gate_num_params;
+        using Pennylane::Gates::Constant::gate_wires;
 
-        const auto gate_op = lookup(Util::reverse_pairs(gate_names),
+        const auto gate_op = lookup(reverse_pairs(gate_names),
                                     std::string_view{this->obs_name_});
         PL_ASSERT(lookup(gate_wires, gate_op) == this->wires_.size());
         PL_ASSERT(lookup(gate_num_params, gate_op) == this->params_.size());
@@ -91,7 +89,8 @@ class HermitianObs final : public HermitianObsBase<StateVectorT> {
 
   public:
     using PrecisionT = typename StateVectorT::PrecisionT;
-    using MatrixT = std::vector<std::complex<PrecisionT>>;
+    using ComplexT = typename StateVectorT::ComplexT;
+    using MatrixT = std::vector<ComplexT>;
 
     /**
      * @brief Create an Hermitian observable
@@ -169,9 +168,8 @@ template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
             for (size_t term_idx = 0; term_idx < coeffs.size(); term_idx++) {
                 StateVectorT tmp(sv);
                 terms[term_idx]->applyInPlace(tmp);
-                Util::scaleAndAdd(tmp.getLength(),
-                                  ComplexT{coeffs[term_idx], 0.0},
-                                  tmp.getData(), res.data());
+                scaleAndAdd(tmp.getLength(), ComplexT{coeffs[term_idx], 0.0},
+                            tmp.getData(), res.data());
             }
             sv.updateData(res);
         } else if constexpr (std::is_same_v<StateVectorLQubitRaw<PrecisionT>,
@@ -183,9 +181,8 @@ template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
                 StateVectorT tmp(tmp_data_storage.data(),
                                  tmp_data_storage.size());
                 terms[term_idx]->applyInPlace(tmp);
-                Util::scaleAndAdd(tmp.getLength(),
-                                  ComplexT{coeffs[term_idx], 0.0},
-                                  tmp.getData(), res.data());
+                scaleAndAdd(tmp.getLength(), ComplexT{coeffs[term_idx], 0.0},
+                            tmp.getData(), res.data());
             }
             sv.updateData(res);
         }
@@ -202,6 +199,7 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
             std::shared_ptr<Observable<StateVectorLQubitManaged<PrecisionT>>>>
             &terms,
         StateVectorLQubitManaged<PrecisionT> &sv) {
+        std::exception_ptr ex = nullptr;
         const size_t length = sv.getLength();
         auto allocator = sv.allocator();
 
@@ -209,7 +207,7 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
                                                        allocator);
 
 #pragma omp parallel default(none) firstprivate(length, allocator)             \
-    shared(coeffs, terms, sv, sum)
+    shared(coeffs, terms, sv, sum, ex)
         {
             StateVectorLQubitManaged<PrecisionT> tmp(sv.getNumQubits());
 
@@ -218,14 +216,22 @@ struct HamiltonianApplyInPlace<StateVectorLQubitManaged<PrecisionT>, true> {
 
 #pragma omp for
             for (size_t term_idx = 0; term_idx < terms.size(); term_idx++) {
-                tmp.updateData(sv.getDataVector());
-                terms[term_idx]->applyInPlace(tmp);
+                try {
+                    tmp.updateData(sv.getDataVector());
+                    terms[term_idx]->applyInPlace(tmp);
+                } catch (...) {
+#pragma omp critical
+                    ex = std::current_exception();
+#pragma omp cancel for
+                }
                 scaleAndAdd(length, ComplexT{coeffs[term_idx], 0.0},
                             tmp.getData(), local_sv.data());
             }
-
+            if (ex) {
+#pragma omp cancel parallel
+                std::rethrow_exception(ex);
+            } else {
 #pragma omp critical
-            {
                 scaleAndAdd(length, ComplexT{1.0, 0.0}, local_sv.data(),
                             sum.data());
             }
@@ -242,34 +248,52 @@ struct HamiltonianApplyInPlace<StateVectorLQubitRaw<PrecisionT>, true> {
                     const std::vector<std::shared_ptr<
                         Observable<StateVectorLQubitRaw<PrecisionT>>>> &terms,
                     StateVectorLQubitRaw<PrecisionT> &sv) {
+        std::exception_ptr ex = nullptr;
         const size_t length = sv.getLength();
-
         std::vector<ComplexT> sum(length, ComplexT{});
 
 #pragma omp parallel default(none) firstprivate(length)                        \
-    shared(coeffs, terms, sv, sum)
-        { // NOLINT(openmp-exception-escape)
-            std::vector<ComplexT> tmp_data_storage(
-                sv.getData(), sv.getData() + sv.getLength());
-            StateVectorLQubitRaw<PrecisionT> tmp(tmp_data_storage.data(),
-                                                 tmp_data_storage.size());
+    shared(coeffs, terms, sv, sum, ex)
+        {
+            std::unique_ptr<std::vector<ComplexT>> tmp_data_storage{nullptr};
+            std::unique_ptr<StateVectorLQubitRaw<PrecisionT>> tmp{nullptr};
+            std::unique_ptr<std::vector<ComplexT>> local_sv{nullptr};
 
-            std::vector<ComplexT> local_sv(length, ComplexT{});
+            try {
+                tmp_data_storage.reset(new std::vector<ComplexT>(
+                    sv.getData(), sv.getData() + sv.getLength()));
+                tmp.reset(new StateVectorLQubitRaw<PrecisionT>(
+                    tmp_data_storage->data(), tmp_data_storage->size()));
+                local_sv.reset(new std::vector<ComplexT>(length, ComplexT{}));
+            } catch (...) {
+#pragma omp critical
+                ex = std::current_exception();
+            }
+            if (ex) {
+#pragma omp cancel parallel
+                std::rethrow_exception(ex);
+            }
 
 #pragma omp for
             for (size_t term_idx = 0; term_idx < terms.size(); term_idx++) {
-                // Update tmp data
                 std::copy(sv.getData(), sv.getData() + sv.getLength(),
-                          tmp_data_storage.data());
-
-                terms[term_idx]->applyInPlace(tmp);
-                scaleAndAdd(length, ComplexT{coeffs[term_idx], 0.0},
-                            tmp.getData(), local_sv.data());
-            }
-
+                          tmp_data_storage->data());
+                try {
+                    terms[term_idx]->applyInPlace(*tmp);
+                } catch (...) {
 #pragma omp critical
-            {
-                scaleAndAdd(length, ComplexT{1.0, 0.0}, local_sv.data(),
+                    ex = std::current_exception();
+#pragma omp cancel for
+                }
+                scaleAndAdd(length, ComplexT{coeffs[term_idx], 0.0},
+                            tmp->getData(), local_sv->data());
+            }
+            if (ex) {
+#pragma omp cancel parallel
+                std::rethrow_exception(ex);
+            } else {
+#pragma omp critical
+                scaleAndAdd(length, ComplexT{1.0, 0.0}, local_sv->data(),
                             sum.data());
             }
         }

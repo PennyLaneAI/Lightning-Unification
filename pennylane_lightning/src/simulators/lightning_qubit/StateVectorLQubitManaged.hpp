@@ -24,7 +24,7 @@
 
 #include "BitUtil.hpp"        // log2PerfectPower, isPerfectPowerOf2
 #include "CPUMemoryModel.hpp" // bestCPUMemoryModel
-#include "Gates.hpp"
+#include "Error.hpp"
 #include "KernelType.hpp"
 #include "Memory.hpp"
 #include "StateVectorLQubit.hpp"
@@ -164,7 +164,7 @@ class StateVectorLQubitManaged final
      * @param new_size size of underlying data storage.
      */
     void updateData(const ComplexT *new_data, size_t new_size) {
-        assert(data_.size() == new_size);
+        PL_ASSERT(data_.size() == new_size);
         std::copy(new_data, new_data + new_size, data_.data());
     }
 

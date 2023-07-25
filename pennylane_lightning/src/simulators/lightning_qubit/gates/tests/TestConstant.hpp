@@ -1,15 +1,36 @@
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
+
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+
+//     http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#pragma once
 #include "Constant.hpp"
 #include "ConstantTestHelpers.hpp" // count_unique, first_elems_of, second_elems_of
 #include "ConstantUtil.hpp"        // array_has_elem
 #include "GateOperation.hpp"
 #include "Util.hpp"
 
+/// @cond DEV
+namespace {
+using namespace Pennylane::Gates;
+} // namespace
+/// @endcond
+
 namespace Pennylane::LightningQubit::Gates {
 template <typename T, size_t size1, size_t size2>
 constexpr auto are_mutually_disjoint(const std::array<T, size1> &arr1,
                                      const std::array<T, size2> &arr2) -> bool {
     return std::all_of(arr1.begin(), arr1.end(), [&arr2](const auto &elem) {
-        return !Util::array_has_elem(arr2, elem);
+        return !Pennylane::Util::array_has_elem(arr2, elem);
     });
 }
 

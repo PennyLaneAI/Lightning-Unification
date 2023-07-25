@@ -26,7 +26,7 @@ help:
 	@echo "                         Default: lightning_qubit"
 	@echo "  test-cpp [verbose=1]   to run the C++ test suite (requires CMake)"
 	@echo "                         use with 'verbose=1' for building with verbose flag"
-	@echo "  test-cpp [target=?]    to run a specific  C++ test target (requires CMake)."
+	@echo "  test-cpp [target=?]    to run a specific C++ test target (requires CMake)."
 	@echo "  test-python            to run the Python test suite"
 	@echo "  format [check=1]       to apply C++ and Python formatter;"
 	@echo "                         use with 'check=1' to check instead of modify (requires black and clang-format)"
@@ -60,13 +60,13 @@ build:
 
 test-cpp:
 	rm -rf ./BuildTests
-	cmake -BBuildTests -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_OPENMP=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
+	cmake -BBuildTests -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_OPENMP=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=$(if $(backend:-=),$(backend),lightning_qubit)
 ifdef target
 	cmake --build ./BuildTests $(VERBOSE) --target $(target)
-	./BuildTests/$(target)
+	OMP_PROC_BIND=false ./BuildTests/$(target)
 else
 	cmake --build ./BuildTests $(VERBOSE)
-	cmake --build ./BuildTests $(VERBOSE) --target test
+	OMP_PROC_BIND=false cmake --build ./BuildTests $(VERBOSE) --target test
 endif
 
 test-cpp-blas:

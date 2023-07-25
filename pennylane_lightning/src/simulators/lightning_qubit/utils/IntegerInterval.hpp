@@ -17,9 +17,10 @@
  */
 #pragma once
 #include <algorithm>
-#include <cassert>
 #include <limits>
 #include <type_traits>
+
+#include "Error.hpp"
 
 namespace Pennylane::LightningQubit::Util {
 
@@ -37,7 +38,7 @@ template <typename IntegerType> class IntegerInterval {
   public:
     constexpr IntegerInterval(IntegerType min, IntegerType max)
         : min_{min}, max_{max} {
-        assert(min < max);
+        PL_ASSERT(min < max);
     }
     bool operator()(IntegerType test_val) const {
         return (min_ <= test_val) && (test_val < max_);

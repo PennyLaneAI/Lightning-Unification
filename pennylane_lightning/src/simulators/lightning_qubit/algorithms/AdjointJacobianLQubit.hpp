@@ -16,6 +16,7 @@
  * Defines the methods and class to support the adjoint Jacobian differentiation
  * method.
  */
+#pragma once
 
 #include <span>
 #include <type_traits>

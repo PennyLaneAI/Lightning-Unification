@@ -1,3 +1,16 @@
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
+
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include <algorithm>
 #include <random>
 #include <span>
@@ -43,8 +56,9 @@ auto createRandomOps(RandomEngine &re, size_t length, size_t wires)
     using PrecisionT = typename StateVectorT::PrecisionT;
     using namespace Pennylane::LightningQubit::Gates;
 
-    std::array gates_to_use = {GateOperation::RX, GateOperation::RY,
-                               GateOperation::RZ};
+    std::array gates_to_use = {Pennylane::Gates::GateOperation::RX,
+                               Pennylane::Gates::GateOperation::RY,
+                               Pennylane::Gates::GateOperation::RZ};
 
     std::vector<std::string> ops_names;
     std::vector<std::vector<PrecisionT>> ops_params;

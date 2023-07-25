@@ -25,6 +25,8 @@ using namespace Pennylane;
 } // namespace
 /// @endcond
 
+#ifdef _ENABLE_PLQUBIT
+
 /**
  * @brief Add C++ classes, methods and functions to Python module.
  */
@@ -47,3 +49,4 @@ PYBIND11_MODULE(
 
     registerLightningClassBindings<StateVectorBackends>(m);
 }
+#endif

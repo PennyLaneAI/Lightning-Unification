@@ -18,15 +18,16 @@
  */
 #pragma once
 
-#include "TypeTraits.hpp" // remove_complex_t
-
-#include <cassert> // assert
+#include <cmath>
 #include <complex>
 #include <numbers> // sqrt2_v
 #include <numeric> // transform_reduce
 #include <set>
 #include <type_traits> // is_same_v
 #include <vector>
+
+#include "Error.hpp"
+#include "TypeTraits.hpp" // remove_complex_t
 
 namespace Pennylane::Util {
 /**
@@ -82,12 +83,44 @@ inline static constexpr auto ConstSum(std::complex<U> a, std::complex<T> b)
 }
 
 /**
+ * @brief Return complex value 0.5+0i in the given precision.
+ *
+ * @tparam T Floating point precision type. Accepts `double` and `float`.
+ * @return constexpr std::complex<T>{0.5,0}
+ */
+template <class T> inline static constexpr auto HALF() -> std::complex<T> {
+    return {0.5, 0};
+}
+
+/**
+ * @brief Return complex value -1+0i in the given precision.
+ *
+ * @tparam T Floating point precision type. Accepts `double` and `float`.
+ * @return constexpr std::complex<T>{-1,0}
+ */
+template <class T> inline static constexpr auto NEGONE() -> std::complex<T> {
+    return {-1, 0};
+}
+
+/**
  * @brief Return complex value 1+0i in the given precision.
  *
  * @tparam T Floating point precision type. Accepts `double` and `float`.
  * @return constexpr std::complex<T>{1,0}
  */
 template <class T> inline static constexpr auto ONE() -> std::complex<T> {
+    return {1, 0};
+}
+
+/**
+ * @brief Return complex value 1+0i in the given precision.
+ *
+ * @tparam ComplexT Complex type.
+ * @tparam T Floating point precision type. Accepts `double` and `float`.
+ * @return constexpr std::complex<T>{1,0}
+ */
+template <template <class> class ComplexT, class T>
+inline static constexpr auto ONE() -> ComplexT<T> {
     return {1, 0};
 }
 
@@ -102,12 +135,36 @@ template <class T> inline static constexpr auto ZERO() -> std::complex<T> {
 }
 
 /**
+ * @brief Return complex value 0+0i in the given precision.
+ *
+ * @tparam ComplexT Complex type.
+ * @tparam T Floating point precision type. Accepts `double` and `float`.
+ * @return constexpr std::complex<T>{0,0}
+ */
+template <template <class> class ComplexT, class T>
+inline static constexpr auto ZERO() -> ComplexT<T> {
+    return {0, 0};
+}
+
+/**
  * @brief Return complex value 0+1i in the given precision.
  *
  * @tparam T Floating point precision type. Accepts `double` and `float`.
  * @return constexpr std::complex<T>{0,1}
  */
 template <class T> inline static constexpr auto IMAG() -> std::complex<T> {
+    return {0, 1};
+}
+
+/**
+ * @brief Return complex value 0+1i in the given precision.
+ *
+ * @tparam ComplexT Complex type.
+ * @tparam T Floating point precision type. Accepts `double` and `float`.
+ * @return constexpr std::complex<T>{0,1}
+ */
+template <template <class> class ComplexT, class T>
+inline static constexpr auto IMAG() -> ComplexT<T> {
     return {0, 1};
 }
 
@@ -122,12 +179,36 @@ template <class T> inline static constexpr auto SQRT2() -> T {
 }
 
 /**
+ * @brief Returns sqrt(2) as a compile-time constant.
+ *
+ * @tparam ComplexT Complex type.
+ * @tparam T Precision of result. `double`, `float` are accepted values.
+ * @return constexpr T sqrt(2)
+ */
+template <template <class> class ComplexT, class T>
+inline static constexpr auto SQRT2() -> ComplexT<T> {
+    return std::numbers::sqrt2_v<T>;
+}
+
+/**
  * @brief Returns inverse sqrt(2) as a compile-time constant.
  *
  * @tparam T Precision of result. `double`, `float` are accepted values.
  * @return constexpr T 1/sqrt(2)
  */
 template <class T> inline static constexpr auto INVSQRT2() -> T {
+    return {1 / SQRT2<T>()};
+}
+
+/**
+ * @brief Returns inverse sqrt(2) as a compile-time constant.
+ *
+ * @tparam ComplexT Complex type.
+ * @tparam T Precision of result. `double`, `float` are accepted values.
+ * @return constexpr T 1/sqrt(2)
+ */
+template <template <class> class ComplexT, class T>
+inline static constexpr auto INVSQRT2() -> ComplexT<T> {
     return {1 / SQRT2<T>()};
 }
 
@@ -142,6 +223,16 @@ inline auto exp2(const size_t &n) -> size_t {
 }
 
 /**
+ * @brief Log2 calculation.
+ *
+ * @param value Value to calculate for.
+ * @return size_t
+ */
+inline auto log2(size_t value) -> size_t {
+    return static_cast<size_t>(std::log2(value));
+}
+
+/**
  * @brief Calculates the decimal value for a qubit, assuming a big-endian
  * convention.
  *
@@ -150,7 +241,7 @@ inline auto exp2(const size_t &n) -> size_t {
  * @return decimal value for the qubit at specified index
  */
 inline auto maxDecimalForQubit(size_t qubitIndex, size_t qubits) -> size_t {
-    assert(qubitIndex < qubits);
+    PL_ASSERT(qubitIndex < qubits);
     return exp2(qubits - qubitIndex - 1);
 }
 
@@ -304,6 +395,65 @@ inline auto sorting_indices(const std::vector<T> &vec) -> std::vector<size_t> {
     return sorting_indices(vec.data(), vec.size());
 }
 
+/**
+ * @brief Generate indices for applying operations.
+ *
+ * This method will return the statevector indices participating in the
+ * application of a gate to a given set of qubits.
+ *
+ * @param qubitIndices Indices of the qubits to apply operations.
+ * @param num_qubits Number of qubits in register.
+ * @return std::vector<size_t>
+ */
+
+inline auto
+getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
+                         size_t num_qubits) -> std::vector<size_t> {
+    std::vector<size_t> indices;
+    for (size_t i = 0; i < num_qubits; i++) {
+        indices.emplace_back(i);
+    }
+
+    for (auto j : indicesToExclude) {
+        for (size_t i = 0; i < indices.size(); i++) {
+            if (j == indices[i]) {
+                indices.erase(indices.begin() + i);
+            }
+        }
+    }
+    return indices;
+}
+
+/**
+ * @brief Generate indices for applying operations.
+ *
+ * This method will return the statevector indices participating in the
+ * application of a gate to a given set of qubits.
+ *
+ * @param qubitIndices Indices of the qubits to apply operations.
+ * @param num_qubits Number of qubits in register.
+ * @return std::vector<size_t>
+ */
+
+inline auto generateBitsPatterns(const std::vector<size_t> &qubitIndices,
+                                 size_t num_qubits) -> std::vector<size_t> {
+
+    std::vector<size_t> indices;
+    indices.reserve(exp2(qubitIndices.size()));
+    indices.emplace_back(0);
+
+    for (size_t index_it0 = 0; index_it0 < qubitIndices.size(); index_it0++) {
+        size_t index_it = qubitIndices.size() - 1 - index_it0;
+        const size_t value =
+            maxDecimalForQubit(qubitIndices[index_it], num_qubits);
+
+        const size_t currentSize = indices.size();
+        for (size_t j = 0; j < currentSize; j++) {
+            indices.emplace_back(indices[j] + value);
+        }
+    }
+    return indices;
+}
 /**
  * @brief Determines the transposed index of a tensor stored linearly.
  *  This function assumes each axis will have a length of 2 (|0>, |1>).

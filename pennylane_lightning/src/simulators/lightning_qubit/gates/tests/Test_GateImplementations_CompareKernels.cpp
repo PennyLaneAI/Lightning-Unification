@@ -1,24 +1,35 @@
-#include "TestHelpers.hpp" // PrecisionToName
-#include "TestHelpersWires.hpp"
-#include "TestKernels.hpp"
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
+
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#include <algorithm>
+#include <complex>
+#include <iterator>
+#include <limits>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
+#include <catch2/catch.hpp>
 
 #include "ConstantUtil.hpp" // lookup, array_has_elem
 #include "DynamicDispatcher.hpp"
 #include "KernelMap.hpp"
 #include "KernelType.hpp"
 #include "OpToMemberFuncPtr.hpp"
+#include "TestHelpers.hpp" // PrecisionToName
+#include "TestHelpersWires.hpp"
+#include "TestKernels.hpp"
 #include "Util.hpp" // for_each_enum
-
-#include <catch2/catch.hpp>
-
-#include <algorithm>
-#include <complex>
-#include <iostream>
-#include <iterator>
-#include <limits>
-#include <type_traits>
-#include <utility>
-#include <vector>
 
 /**
  * @file Test_GateImplementations_Nonparam.cpp
@@ -31,6 +42,7 @@ namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::Util;
 using namespace Pennylane::LightningQubit::Gates;
+using Pennylane::Util::randomUnitary;
 } // namespace
 /// @endcond
 
@@ -73,7 +85,7 @@ auto kernelsImplementingMatrix(MatrixOperation mat_op)
  */
 template <typename PrecisionT, class RandomEngine>
 void testApplyGate(RandomEngine &re, GateOperation gate_op, size_t num_qubits) {
-    using Gates::Constant::gate_names;
+    using Pennylane::Gates::Constant::gate_names;
 
     const auto implementing_kernels =
         kernelsImplementingGate<PrecisionT>(gate_op);
@@ -147,10 +159,11 @@ TEMPLATE_TEST_CASE("Test all kernels give the same results for gates",
     std::mt19937 re{1337};
     for_each_enum<GateOperation>([&](GateOperation gate_op) {
         const size_t min_num_qubits = [=] {
-            if (array_has_elem(Gates::Constant::multi_qubit_gates, gate_op)) {
+            if (array_has_elem(Pennylane::Gates::Constant::multi_qubit_gates,
+                               gate_op)) {
                 return size_t{1};
             }
-            return lookup(Gates::Constant::gate_wires, gate_op);
+            return lookup(Pennylane::Gates::Constant::gate_wires, gate_op);
         }();
         for (size_t num_qubits = min_num_qubits; num_qubits <= max_num_qubits;
              num_qubits++) {
@@ -162,7 +175,7 @@ TEMPLATE_TEST_CASE("Test all kernels give the same results for gates",
 template <typename PrecisionT, class RandomEngine>
 void testMatrixOp(RandomEngine &re, size_t num_qubits, size_t num_wires,
                   bool inverse) {
-    using Gates::Constant::matrix_names;
+    using Pennylane::Gates::Constant::matrix_names;
     PL_ASSERT(num_wires > 0);
 
     const auto mat_op = [num_wires]() -> MatrixOperation {

@@ -21,10 +21,10 @@ namespace {
 using namespace Pennylane::LightningQubit;
 using namespace Pennylane::LightningQubit::KernelMap;
 
-using Gates::GateOperation;
-using Gates::GeneratorOperation;
-using Gates::KernelType;
-using Gates::MatrixOperation;
+using Pennylane::Gates::GateOperation;
+using Pennylane::Gates::GeneratorOperation;
+using Pennylane::Gates::KernelType;
+using Pennylane::Gates::MatrixOperation;
 using Util::full_domain;
 using Util::in_between_closed;
 using Util::larger_than;
@@ -42,40 +42,40 @@ void assignKernelsForGateOp_AVX2(CPUMemoryModel memory_model) {
     auto &instance = OperationKernelMap<GateOperation>::getInstance();
 
     instance.assignKernelForOp(GateOperation::PauliX, all_threading,
-                               memory_model, leq_four, Gates::KernelType::AVX2);
+                               memory_model, leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::PauliY, all_threading,
-                               memory_model, leq_four, Gates::KernelType::AVX2);
+                               memory_model, leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::PauliZ, all_threading,
-                               memory_model, leq_four, Gates::KernelType::AVX2);
+                               memory_model, leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::Hadamard, all_threading,
-                               memory_model, leq_four, Gates::KernelType::AVX2);
+                               memory_model, leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::S, all_threading, memory_model,
-                               leq_four, Gates::KernelType::AVX2);
+                               leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::T, all_threading, memory_model,
-                               leq_four, Gates::KernelType::AVX2);
+                               leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::PhaseShift, all_threading,
-                               memory_model, leq_four, Gates::KernelType::AVX2);
+                               memory_model, leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::RX, all_threading, memory_model,
-                               leq_four, Gates::KernelType::AVX2);
+                               leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::RY, all_threading, memory_model,
-                               leq_four, Gates::KernelType::AVX2);
+                               leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::RZ, all_threading, memory_model,
-                               leq_four, Gates::KernelType::AVX2);
+                               leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::Rot, all_threading, memory_model,
-                               leq_four, Gates::KernelType::AVX2);
+                               leq_four, KernelType::AVX2);
     /* Two-qubit gates */
     instance.assignKernelForOp(GateOperation::CZ, all_threading, memory_model,
-                               leq_four, Gates::KernelType::AVX2);
+                               leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::CNOT, all_threading, memory_model,
-                               leq_four, Gates::KernelType::AVX2);
+                               leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::SWAP, all_threading, memory_model,
-                               leq_four, Gates::KernelType::AVX2);
+                               leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::IsingXX, all_threading,
-                               memory_model, leq_four, Gates::KernelType::AVX2);
+                               memory_model, leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::IsingYY, all_threading,
-                               memory_model, leq_four, Gates::KernelType::AVX2);
+                               memory_model, leq_four, KernelType::AVX2);
     instance.assignKernelForOp(GateOperation::IsingZZ, all_threading,
-                               memory_model, leq_four, Gates::KernelType::AVX2);
+                               memory_model, leq_four, KernelType::AVX2);
     /* Multi-qubit gates */
 }
 

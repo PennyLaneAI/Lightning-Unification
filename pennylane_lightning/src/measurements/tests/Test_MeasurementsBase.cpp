@@ -1,3 +1,16 @@
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
+
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include "TestHelpers.hpp"
 #include <catch2/catch.hpp>
 
@@ -19,8 +32,25 @@ constexpr bool BACKEND_FOUND = true;
 namespace {
 using namespace Pennylane::LightningQubit::Measures;
 using namespace Pennylane::LightningQubit::Observables;
+using namespace Pennylane::LightningQubit::Util;
 } // namespace
 /// @endcond
+
+#elif _ENABLE_PLKOKKOS == 1
+constexpr bool BACKEND_FOUND = true;
+
+#include "MeasurementsKokkos.hpp"
+#include "ObservablesKokkos.hpp"
+#include "TestHelpersStateVectors.hpp" // TestStateVectorBackends, StateVectorToName
+#include "TestHelpersWires.hpp"
+
+/// @cond DEV
+namespace {
+using namespace Pennylane::LightningKokkos::Measures;
+using namespace Pennylane::LightningKokkos::Observables;
+using namespace Pennylane::LightningKokkos::Util;
+} // namespace
+  /// @endcond
 
 #else
 constexpr bool BACKEND_FOUND = false;
@@ -164,8 +194,8 @@ template <typename TypeList> void testHermitianObsExpval() {
             std::vector<PrecisionT> exp_values_ref = {
                 0.644217687237691, 0.4794255386042027, 0.29552020666133955};
 
-            MatrixT Hermitian_matrix{
-                real_term, {0, imag_term}, {0, -imag_term}, real_term};
+            MatrixT Hermitian_matrix{real_term, ComplexT{0, imag_term},
+                                     ComplexT{0, -imag_term}, real_term};
 
             for (size_t ind_wires = 0; ind_wires < wires_list.size();
                  ind_wires++) {
@@ -187,11 +217,11 @@ template <typename TypeList> void testHermitianObsExpval() {
 
             MatrixT Hermitian_matrix(16);
             Hermitian_matrix[0] = real_term;
-            Hermitian_matrix[1] = {0, imag_term};
-            Hermitian_matrix[4] = {0, -imag_term};
+            Hermitian_matrix[1] = ComplexT{0, imag_term};
+            Hermitian_matrix[4] = ComplexT{0, -imag_term};
             Hermitian_matrix[5] = real_term;
-            Hermitian_matrix[10] = {1.0, 0};
-            Hermitian_matrix[15] = {1.0, 0};
+            Hermitian_matrix[10] = ComplexT{1.0, 0};
+            Hermitian_matrix[15] = ComplexT{1.0, 0};
 
             for (size_t ind_wires = 0; ind_wires < wires_list.size();
                  ind_wires++) {
@@ -263,7 +293,8 @@ template <typename TypeList> void testHermitianObsVar() {
     if constexpr (!std::is_same_v<TypeList, void>) {
         using StateVectorT = typename TypeList::Type;
         using PrecisionT = typename StateVectorT::PrecisionT;
-        using MatrixT = std::vector<std::complex<PrecisionT>>;
+        using ComplexT = typename StateVectorT::ComplexT;
+        using MatrixT = std::vector<ComplexT>;
 
         // Defining the State Vector that will be measured.
         auto statevector_data = createNonTrivialState<StateVectorT>();
@@ -285,8 +316,8 @@ template <typename TypeList> void testHermitianObsVar() {
             std::vector<PrecisionT> exp_values_ref = {
                 0.5849835714501204, 0.7701511529340699, 0.9126678074548389};
 
-            MatrixT Hermitian_matrix{
-                real_term, {0, imag_term}, {0, -imag_term}, real_term};
+            MatrixT Hermitian_matrix{real_term, ComplexT{0, imag_term},
+                                     ComplexT{0, -imag_term}, real_term};
 
             for (size_t ind_wires = 0; ind_wires < wires_list.size();
                  ind_wires++) {
@@ -308,11 +339,11 @@ template <typename TypeList> void testHermitianObsVar() {
 
             MatrixT Hermitian_matrix(16);
             Hermitian_matrix[0] = real_term;
-            Hermitian_matrix[1] = {0, imag_term};
-            Hermitian_matrix[4] = {0, -imag_term};
+            Hermitian_matrix[1] = ComplexT{0, imag_term};
+            Hermitian_matrix[4] = ComplexT{0, -imag_term};
             Hermitian_matrix[5] = real_term;
-            Hermitian_matrix[10] = {1.0, 0};
-            Hermitian_matrix[15] = {1.0, 0};
+            Hermitian_matrix[10] = ComplexT{1.0, 0};
+            Hermitian_matrix[15] = ComplexT{1.0, 0};
 
             for (size_t ind_wires = 0; ind_wires < wires_list.size();
                  ind_wires++) {

@@ -1,3 +1,16 @@
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
+
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include <catch2/catch.hpp>
 
 #include "ConstantTestHelpers.hpp"
@@ -22,7 +35,7 @@ TEST_CASE("Utility array and tuples", "[Util][ConstantUtil]") {
         std::pair(3, "Three"), std::pair(4, "Four"),
     };
 
-    REQUIRE(Util::reverse_pairs(test_pairs) ==
+    REQUIRE(reverse_pairs(test_pairs) ==
             std::array{
                 std::pair<std::string_view, int>("Zero", 0),
                 std::pair<std::string_view, int>("One", 1),
@@ -31,7 +44,7 @@ TEST_CASE("Utility array and tuples", "[Util][ConstantUtil]") {
                 std::pair<std::string_view, int>("Four", 4),
             });
 
-    REQUIRE(Util::reverse_pairs(test_pairs) !=
+    REQUIRE(reverse_pairs(test_pairs) !=
             std::array{
                 std::pair<std::string_view, int>("Zero", 0),
                 std::pair<std::string_view, int>("One", 1),
@@ -52,11 +65,11 @@ TEST_CASE("Test utility functions for constants", "[Util][ConstantUtil]") {
             std::pair{"QML"sv, "library"sv},
         };
 
-        REQUIRE(Util::lookup(test_pairs, "Pennylane"sv) == "-"sv);
-        REQUIRE(Util::lookup(test_pairs, "Lightning"sv) == "is"sv);
-        REQUIRE(Util::lookup(test_pairs, "the"sv) == "best"sv);
-        REQUIRE(Util::lookup(test_pairs, "QML"sv) == "library"sv);
-        REQUIRE_THROWS(Util::lookup(test_pairs, "bad"sv));
+        REQUIRE(lookup(test_pairs, "Pennylane"sv) == "-"sv);
+        REQUIRE(lookup(test_pairs, "Lightning"sv) == "is"sv);
+        REQUIRE(lookup(test_pairs, "the"sv) == "best"sv);
+        REQUIRE(lookup(test_pairs, "QML"sv) == "library"sv);
+        REQUIRE_THROWS(lookup(test_pairs, "bad"sv));
     }
 
     SECTION("count_unique") {
@@ -82,7 +95,7 @@ TEST_CASE("Test utility functions for constants", "[Util][ConstantUtil]") {
             std::pair{TestEnum::Two, uint32_t{2U}},
         };
 
-        static_assert(Util::lookup(test_pairs, TestEnum::One) == 1U);
-        static_assert(Util::lookup(test_pairs, TestEnum::Two) == 2U);
+        static_assert(lookup(test_pairs, TestEnum::One) == 1U);
+        static_assert(lookup(test_pairs, TestEnum::Two) == 2U);
     }
 }

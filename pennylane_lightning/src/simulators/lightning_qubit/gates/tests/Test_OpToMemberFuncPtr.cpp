@@ -1,3 +1,16 @@
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
+
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include "Constant.hpp"
 #include "ConstantTestHelpers.hpp" // count_unique, first_elems_of, second_elems_of
 #include "ConstantUtil.hpp" // tuple_to_array, array_has_elem, prepend_to_tuple, lookup
@@ -21,14 +34,15 @@ allGateOpsHelper([[maybe_unused]] std::integer_sequence<uint32_t, I...> dummy) {
 }
 
 template <typename EnumClass> constexpr auto allGateOps() {
-    return Util::tuple_to_array(allGateOpsHelper<EnumClass>(
+    return Pennylane::Util::tuple_to_array(allGateOpsHelper<EnumClass>(
         std::make_integer_sequence<uint32_t,
                                    static_cast<uint32_t>(EnumClass::END)>{}));
 }
 template <class PrecisionT, class ParamT, class GateImplemenation,
           uint32_t gate_idx>
 constexpr bool testAllGatesImplementedIter() {
-    if constexpr (gate_idx < static_cast<uint32_t>(GateOperation::END)) {
+    if constexpr (gate_idx <
+                  static_cast<uint32_t>(Pennylane::Gates::GateOperation::END)) {
         constexpr auto gate_op = static_cast<GateOperation>(gate_idx);
         static_cast<void>(
             GateOpToMemberFuncPtr<PrecisionT, ParamT, GateImplemenation,
@@ -194,13 +208,14 @@ template <typename PrecisionT, typename ParamT, class ValueClass, size_t op_idx>
 constexpr auto opFuncPtrPairsIter() {
     if constexpr (op_idx < ValueClass::value.size()) {
         constexpr auto op = ValueClass::value[op_idx];
-        if constexpr (Util::array_has_elem(ValueClass::ignore_list, op)) {
+        if constexpr (Pennylane::Util::array_has_elem(ValueClass::ignore_list,
+                                                      op)) {
             return opFuncPtrPairsIter<PrecisionT, ParamT, ValueClass,
                                       op_idx + 1>();
         } else {
             const auto elem = std::pair{
                 op, ValueClass::template func_ptr<PrecisionT, ParamT, op>};
-            return Util::prepend_to_tuple(
+            return Pennylane::Util::prepend_to_tuple(
                 elem, opFuncPtrPairsIter<PrecisionT, ParamT, ValueClass,
                                          op_idx + 1>());
         }
@@ -229,9 +244,9 @@ constexpr auto gateOpFuncPtrPairsWithNumParamsIter() {
                       decltype(gate_op_func_ptr_pairs<PrecisionT, ParamT>)>) {
         constexpr auto elem =
             std::get<tuple_idx>(gate_op_func_ptr_pairs<PrecisionT, ParamT>);
-        if constexpr (Util::lookup(Constant::gate_num_params, elem.first) ==
-                      num_params) {
-            return Util::prepend_to_tuple(
+        if constexpr (Pennylane::Util::lookup(Constant::gate_num_params,
+                                              elem.first) == num_params) {
+            return Pennylane::Util::prepend_to_tuple(
                 elem, gateOpFuncPtrPairsWithNumParamsIter<
                           PrecisionT, ParamT, num_params, tuple_idx + 1>());
         } else {
@@ -244,12 +259,12 @@ constexpr auto gateOpFuncPtrPairsWithNumParamsIter() {
 }
 
 template <typename PrecisionT, typename ParamT, size_t num_params>
-constexpr auto gate_op_func_ptr_with_params = Util::tuple_to_array(
+constexpr auto gate_op_func_ptr_with_params = Pennylane::Util::tuple_to_array(
     gateOpFuncPtrPairsWithNumParamsIter<PrecisionT, ParamT, num_params, 0>());
 
 template <typename PrecisionT, typename ParamT>
-constexpr auto generator_op_func_ptr =
-    Util::tuple_to_array(generator_op_func_ptr_pairs<PrecisionT, PrecisionT>);
+constexpr auto generator_op_func_ptr = Pennylane::Util::tuple_to_array(
+    generator_op_func_ptr_pairs<PrecisionT, PrecisionT>);
 
 template <typename T, typename U, size_t size>
 auto testUniqueness(const std::array<std::pair<T, U>, size> &pairs) {

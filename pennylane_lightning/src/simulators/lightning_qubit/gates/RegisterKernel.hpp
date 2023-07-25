@@ -15,15 +15,23 @@
  * @file RegisterKernel.hpp
  * Register all gate and generator implementations
  */
-
+#pragma once
 #include <tuple>
 
 #include "Constant.hpp"
 #include "ConstantUtil.hpp"
 #include "DynamicDispatcher.hpp"
+#include "Error.hpp"
 #include "GateIndices.hpp"
 #include "GateOperation.hpp"
 #include "OpToMemberFuncPtr.hpp"
+
+/// @cond DEV
+namespace {
+using Pennylane::Util::lookup;
+using Pennylane::Util::prepend_to_tuple;
+} // namespace
+/// @endcond
 
 /// @cond DEV
 namespace Pennylane::LightningQubit {
@@ -40,7 +48,7 @@ namespace Pennylane::LightningQubit {
  * @tparam gate_op Gate operation to make a functor.
  */
 template <class PrecisionT, class ParamT, class GateImplementation,
-          Gates::GateOperation gate_op>
+          Pennylane::Gates::GateOperation gate_op>
 constexpr auto gateOpToFunctor() {
     return [](std::complex<PrecisionT> *data, size_t num_qubits,
               const std::vector<size_t> &wires, bool inverse,
@@ -48,8 +56,8 @@ constexpr auto gateOpToFunctor() {
         constexpr auto func_ptr =
             Gates::GateOpToMemberFuncPtr<PrecisionT, ParamT, GateImplementation,
                                          gate_op>::value;
-        assert(params.size() ==
-               Util::lookup(Gates::Constant::gate_num_params, gate_op));
+        PL_ASSERT(params.size() ==
+                  lookup(Pennylane::Gates::Constant::gate_num_params, gate_op));
         Gates::callGateOps(func_ptr, data, num_qubits, wires, inverse, params);
     };
 }
@@ -68,7 +76,7 @@ constexpr auto constructGateOpsFunctorTupleIter() {
     } else if (gate_idx < GateImplementation::implemented_gates.size()) {
         constexpr auto gate_op =
             GateImplementation::implemented_gates[gate_idx];
-        return Util::prepend_to_tuple(
+        return prepend_to_tuple(
             std::pair{gate_op, gateOpToFunctor<PrecisionT, ParamT,
                                                GateImplementation, gate_op>()},
             constructGateOpsFunctorTupleIter<
@@ -86,7 +94,7 @@ constexpr auto constructGeneratorOpsFunctorTupleIter() {
     } else if (gntr_idx < GateImplementation::implemented_generators.size()) {
         constexpr auto gntr_op =
             GateImplementation::implemented_generators[gntr_idx];
-        return Util::prepend_to_tuple(
+        return prepend_to_tuple(
             std::pair{gntr_op,
                       Gates::GeneratorOpToMemberFuncPtr<
                           PrecisionT, GateImplementation, gntr_op>::value},
@@ -104,7 +112,7 @@ constexpr auto constructMatrixOpsFunctorTupleIter() {
     } else if (mat_idx < GateImplementation::implemented_matrices.size()) {
         constexpr auto mat_op =
             GateImplementation::implemented_matrices[mat_idx];
-        return Util::prepend_to_tuple(
+        return prepend_to_tuple(
             std::pair{
                 mat_op,
                 Gates::MatrixOpToMemberFuncPtr<PrecisionT, GateImplementation,

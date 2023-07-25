@@ -13,6 +13,7 @@ target_link_libraries(lightning_qubit_algorithms PRIVATE   lightning_compile_opt
 target_link_libraries(lightning_qubit_algorithms PUBLIC     lightning_qubit_utils
                                                             lightning_algorithms
                                                             lightning_qubit
+                                                            lightning_utils
                                                             )
 
 if (BUILD_TESTS)

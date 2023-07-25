@@ -10,6 +10,7 @@ target_link_libraries(lightning_qubit_bindings INTERFACE    lightning_utils
                                                             )
 
 target_link_libraries(lightning_qubit_bindings INTERFACE    lightning_qubit
+                                                            lightning_gates 
                                                             lightning_qubit_gates
                                                             lightning_qubit_utils
                                                             )

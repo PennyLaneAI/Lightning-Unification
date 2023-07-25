@@ -16,6 +16,7 @@ FetchAndIncludeCatch()
 
 add_library(lightning_qubit_gates_tests INTERFACE)
 target_link_libraries(lightning_qubit_gates_tests INTERFACE Catch2::Catch2
+                                                            lightning_gates 
                                                             lightning_qubit_gates
                                                             )
 
@@ -29,7 +30,9 @@ target_sources(lightning_qubit_gates_tests INTERFACE runner_lightning_qubit_gate
 
 add_executable(compile_time_tests compile_time_tests.cpp)
 target_link_libraries(compile_time_tests    lightning_compile_options
+                                            lightning_gates 
                                             lightning_qubit_gates
+                                            lightning_qubit_utils
                                             )
 
 set(TEST_SOURCES    Test_AVXSingleQubitGateHelpers.cpp
@@ -48,7 +51,9 @@ set(TEST_SOURCES    Test_AVXSingleQubitGateHelpers.cpp
                     )
 
 add_executable(lightning_qubit_gates_test_runner ${TEST_SOURCES})
-target_link_libraries(lightning_qubit_gates_test_runner PRIVATE    lightning_qubit_gates_tests)
+target_link_libraries(lightning_qubit_gates_test_runner PRIVATE lightning_gates 
+                                                                lightning_qubit_utils 
+                                                                lightning_qubit_gates_tests)
 catch_discover_tests(lightning_qubit_gates_test_runner)
 
 # We build compile time tests before the runtime tests as build error messages

@@ -23,16 +23,15 @@
  * in runtime.
  */
 #pragma once
-#include "BitUtil.hpp" // log2PerfectPower
-#include "ConstantUtil.hpp"
-#include "Error.hpp"
-#include "TypeTraits.hpp"
-
-#include <cassert>
 #include <complex>
 #include <cstdlib>
 #include <type_traits> // FuncReturn
 #include <vector>
+
+#include "BitUtil.hpp" // log2PerfectPower
+#include "ConstantUtil.hpp"
+#include "Error.hpp"
+#include "TypeTraits.hpp"
 
 namespace Pennylane::LightningQubit::Gates::AVXCommon {
 using Pennylane::Util::FuncReturn;

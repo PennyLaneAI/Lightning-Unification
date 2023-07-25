@@ -42,9 +42,8 @@
 namespace {
 using namespace Pennylane::Measures;
 using namespace Pennylane::Observables;
-using namespace Pennylane::LightningQubit::Util;
-
 using Pennylane::LightningQubit::StateVectorLQubitManaged;
+using Pennylane::LightningQubit::Util::innerProdC;
 } // namespace
 /// @endcond
 
@@ -152,9 +151,9 @@ class Measurements final
 
         operator_statevector.applyMatrix(matrix, wires);
 
-        ComplexT expected_value = Util::innerProdC(
-            this->_statevector.getData(), operator_statevector.getData(),
-            this->_statevector.getLength());
+        ComplexT expected_value = innerProdC(this->_statevector.getData(),
+                                             operator_statevector.getData(),
+                                             this->_statevector.getLength());
         return std::real(expected_value);
     };
 
@@ -174,9 +173,9 @@ class Measurements final
 
         operator_statevector.applyOperation(operation, wires);
 
-        ComplexT expected_value = Util::innerProdC(
-            this->_statevector.getData(), operator_statevector.getData(),
-            this->_statevector.getLength());
+        ComplexT expected_value = innerProdC(this->_statevector.getData(),
+                                             operator_statevector.getData(),
+                                             this->_statevector.getLength());
         return std::real(expected_value);
     };
 
@@ -208,9 +207,9 @@ class Measurements final
             static_cast<index_type>(this->_statevector.getLength()),
             row_map_ptr, row_map_size, entries_ptr, values_ptr, numNNZ);
 
-        ComplexT expected_value = Util::innerProdC(
-            this->_statevector.getData(), operator_vector.data(),
-            this->_statevector.getLength());
+        ComplexT expected_value =
+            innerProdC(this->_statevector.getData(), operator_vector.data(),
+                       this->_statevector.getLength());
         return std::real(expected_value);
     };
 
@@ -310,9 +309,9 @@ class Measurements final
         size_t orgsv_len = this->_statevector.getLength();
 
         PrecisionT mean_square =
-            std::real(Util::innerProdC(opsv_data, opsv_data, orgsv_len));
-        PrecisionT squared_mean = std::real(Util::innerProdC(
-            this->_statevector.getData(), opsv_data, orgsv_len));
+            std::real(innerProdC(opsv_data, opsv_data, orgsv_len));
+        PrecisionT squared_mean = std::real(
+            innerProdC(this->_statevector.getData(), opsv_data, orgsv_len));
         squared_mean = static_cast<PrecisionT>(std::pow(squared_mean, 2));
         return (mean_square - squared_mean);
     };
@@ -338,9 +337,9 @@ class Measurements final
         size_t orgsv_len = this->_statevector.getLength();
 
         PrecisionT mean_square =
-            std::real(Util::innerProdC(opsv_data, opsv_data, orgsv_len));
-        PrecisionT squared_mean = std::real(Util::innerProdC(
-            this->_statevector.getData(), opsv_data, orgsv_len));
+            std::real(innerProdC(opsv_data, opsv_data, orgsv_len));
+        PrecisionT squared_mean = std::real(
+            innerProdC(this->_statevector.getData(), opsv_data, orgsv_len));
         squared_mean = static_cast<PrecisionT>(std::pow(squared_mean, 2));
         return (mean_square - squared_mean);
     };
@@ -461,13 +460,13 @@ class Measurements final
             static_cast<index_type>(this->_statevector.getLength()),
             row_map_ptr, row_map_size, entries_ptr, values_ptr, numNNZ);
 
-        const PrecisionT mean_square = std::real(
-            Util::innerProdC(operator_vector.data(), operator_vector.data(),
-                             operator_vector.size()));
+        const PrecisionT mean_square =
+            std::real(innerProdC(operator_vector.data(), operator_vector.data(),
+                                 operator_vector.size()));
         const auto squared_mean = static_cast<PrecisionT>(
-            std::pow(std::real(Util::innerProdC(operator_vector.data(),
-                                                this->_statevector.getData(),
-                                                operator_vector.size())),
+            std::pow(std::real(innerProdC(operator_vector.data(),
+                                          this->_statevector.getData(),
+                                          operator_vector.size())),
                      2));
         return (mean_square - squared_mean);
     };
@@ -574,7 +573,7 @@ class Measurements final
                                    const StateVectorT &ket) -> PrecisionT {
         obs.applyInPlace(bra);
         return std::real(
-            Util::innerProdC(bra.getData(), ket.getData(), ket.getLength()));
+            innerProdC(bra.getData(), ket.getData(), ket.getLength()));
     }
 
     /**
@@ -592,10 +591,10 @@ class Measurements final
                                 const StateVectorT &ket) -> PrecisionT {
         obs.applyInPlace(bra);
         PrecisionT mean_square = std::real(
-            Util::innerProdC(bra.getData(), bra.getData(), bra.getLength()));
+            innerProdC(bra.getData(), bra.getData(), bra.getLength()));
         auto squared_mean = static_cast<PrecisionT>(
-            std::pow(std::real(Util::innerProdC(bra.getData(), ket.getData(),
-                                                ket.getLength())),
+            std::pow(std::real(innerProdC(bra.getData(), ket.getData(),
+                                          ket.getLength())),
                      2));
         return (mean_square - squared_mean);
     }

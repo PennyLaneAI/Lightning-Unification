@@ -1,20 +1,32 @@
-#include "ConstantUtil.hpp" // lookup, array_has_elem, prepend_to_tuple, tuple_to_array
-#include "DynamicDispatcher.hpp"
-#include "TestHelpers.hpp"
-#include "TestHelpersWires.hpp"
-#include "Util.hpp"
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
 
-#include <catch2/catch.hpp>
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include <algorithm>
 #include <complex>
-#include <iostream>
 #include <limits>
 #include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#include <catch2/catch.hpp>
+
+#include "ConstantUtil.hpp" // lookup, array_has_elem, prepend_to_tuple, tuple_to_array
+#include "DynamicDispatcher.hpp"
+#include "TestHelpers.hpp"
+#include "TestHelpersWires.hpp"
+#include "Util.hpp"
 
 /**
  * @file Test_GateImplementations_Generator.cpp
@@ -29,8 +41,8 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::LightningQubit::Util;
 using namespace Pennylane::LightningQubit::Gates;
+using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 
@@ -84,8 +96,8 @@ constexpr static auto generator_gate_pairs =
 
 template <class PrecisionT, class RandomEngine>
 void testGeneratorEqualsGateDerivativeForKernel(
-    RandomEngine &re, Gates::KernelType kernel,
-    Gates::GeneratorOperation gntr_op, bool inverse) {
+    RandomEngine &re, Pennylane::Gates::KernelType kernel,
+    Pennylane::Gates::GeneratorOperation gntr_op, bool inverse) {
     using ComplexT = std::complex<PrecisionT>;
     constexpr static auto I = Pennylane::Util::IMAG<PrecisionT>();
 
@@ -142,7 +154,8 @@ void testGeneratorEqualsGateDerivativeForKernel(
 }
 
 template <typename PrecisionT, class RandomEngine>
-void testAllGeneratorsForKernel(RandomEngine &re, Gates::KernelType kernel) {
+void testAllGeneratorsForKernel(RandomEngine &re,
+                                Pennylane::Gates::KernelType kernel) {
     const auto &dispatcher = DynamicDispatcher<PrecisionT>::getInstance();
     const auto all_gntr_ops = dispatcher.registeredGeneratorsForKernel(kernel);
 

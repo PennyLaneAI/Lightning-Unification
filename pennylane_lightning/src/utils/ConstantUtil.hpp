@@ -17,9 +17,6 @@
  */
 #pragma once
 
-#include "TypeTraits.hpp"
-#include "Util.hpp"
-
 #include <algorithm>
 #include <array>
 #include <compare>
@@ -31,7 +28,10 @@
 #include <version>
 #endif
 
-namespace Pennylane::LightningQubit::Util {
+#include "TypeTraits.hpp"
+#include "Util.hpp"
+
+namespace Pennylane::Util {
 /**
  * @brief Lookup key in array of pairs. For a constexpr map-like behavior.
  *
@@ -148,4 +148,4 @@ constexpr auto reverse_pairs(const std::array<std::pair<T, U>, size> &arr)
                                           std::make_index_sequence<size>{});
 }
 
-} // namespace Pennylane::LightningQubit::Util
+} // namespace Pennylane::Util

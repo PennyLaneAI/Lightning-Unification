@@ -39,10 +39,10 @@
 
 /// @cond DEV
 namespace {
+using Pennylane::Gates::KernelType;
+using Pennylane::Util::CPUMemoryModel;
 using Pennylane::Util::for_each_enum;
 using Pennylane::Util::PairHash;
-
-using Pennylane::Util::CPUMemoryModel;
 using Pennylane::Util::Threading;
 } // namespace
 /// @endcond
@@ -57,13 +57,13 @@ int assignKernelsForMatrixOp();
 
 template <class Operation> struct AssignKernelForOp;
 
-template <> struct AssignKernelForOp<Gates::GateOperation> {
+template <> struct AssignKernelForOp<Pennylane::Gates::GateOperation> {
     static inline const int dummy = assignKernelsForGateOp();
 };
-template <> struct AssignKernelForOp<Gates::GeneratorOperation> {
+template <> struct AssignKernelForOp<Pennylane::Gates::GeneratorOperation> {
     static inline const int dummy = assignKernelsForGeneratorOp();
 };
-template <> struct AssignKernelForOp<Gates::MatrixOperation> {
+template <> struct AssignKernelForOp<Pennylane::Gates::MatrixOperation> {
     static inline const int dummy = assignKernelsForMatrixOp();
 };
 } // namespace Internal
@@ -72,12 +72,12 @@ template <> struct AssignKernelForOp<Gates::MatrixOperation> {
 ///@cond DEV
 class DispatchElement final {
   private:
-    Gates::KernelType kernel_;
+    KernelType kernel_;
     uint32_t priority_;
     Util::IntegerInterval<size_t> interval_;
 
   public:
-    DispatchElement(Gates::KernelType kernel, uint32_t priority,
+    DispatchElement(KernelType kernel, uint32_t priority,
                     Util::IntegerInterval<size_t> interval)
         : kernel_{kernel}, priority_{priority}, interval_{interval} {}
     DispatchElement(const DispatchElement &other) = default;
@@ -90,7 +90,7 @@ class DispatchElement final {
     [[nodiscard]] Util::IntegerInterval<size_t> getIntegerInterval() const {
         return interval_;
     }
-    [[nodiscard]] Gates::KernelType getKernelType() const { return kernel_; }
+    [[nodiscard]] KernelType getKernelType() const { return kernel_; }
 };
 
 inline bool higher_priority(const DispatchElement &lhs,
@@ -126,8 +126,8 @@ class PriorityDispatchSet {
     [[nodiscard]] bool
     conflict(uint32_t test_priority,
              const Util::IntegerInterval<size_t> &test_interval) const {
-        const auto test_elem = DispatchElement{Gates::KernelType::None,
-                                               test_priority, test_interval};
+        const auto test_elem =
+            DispatchElement{KernelType::None, test_priority, test_interval};
         const auto [b, e] =
             std::equal_range(ordered_vec_.begin(), ordered_vec_.end(),
                              test_elem, higher_priority);
@@ -152,7 +152,7 @@ class PriorityDispatchSet {
         ordered_vec_.insert(iter_to_insert, elem);
     }
 
-    [[nodiscard]] Gates::KernelType getKernel(size_t num_qubits) const {
+    [[nodiscard]] KernelType getKernel(size_t num_qubits) const {
         for (const auto &elem : ordered_vec_) {
             if (elem.getIntegerInterval()(num_qubits)) {
                 return elem.getKernelType();
@@ -208,7 +208,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
     using EnumDispatchKernalMap =
         std::unordered_map<std::pair<Operation, uint32_t /* dispatch_key */>,
                            PriorityDispatchSet, PairHash>;
-    using EnumKernelMap = std::unordered_map<Operation, Gates::KernelType>;
+    using EnumKernelMap = std::unordered_map<Operation, KernelType>;
 
   private:
     EnumDispatchKernalMap kernel_map_;
@@ -220,20 +220,18 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
     /**
      * @brief Allowed kernels for a given memory model
      */
-    const std::unordered_map<CPUMemoryModel, std::vector<Gates::KernelType>>
+    const std::unordered_map<CPUMemoryModel, std::vector<KernelType>>
         allowed_kernels_;
 
     OperationKernelMap()
         : allowed_kernels_{
               // LCOV_EXCL_START
-              {CPUMemoryModel::Unaligned,
-               {Gates::KernelType::LM, Gates::KernelType::PI}},
+              {CPUMemoryModel::Unaligned, {KernelType::LM, KernelType::PI}},
               {CPUMemoryModel::Aligned256,
-               {Gates::KernelType::LM, Gates::KernelType::PI,
-                Gates::KernelType::AVX2}},
+               {KernelType::LM, KernelType::PI, KernelType::AVX2}},
               {CPUMemoryModel::Aligned512,
-               {Gates::KernelType::LM, Gates::KernelType::PI,
-                Gates::KernelType::AVX2, Gates::KernelType::AVX512}},
+               {KernelType::LM, KernelType::PI, KernelType::AVX2,
+                KernelType::AVX512}},
               // LCOV_EXCL_STOP
           } {}
 
@@ -248,8 +246,8 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
      */
     [[nodiscard]] auto updateCache(const size_t num_qubits,
                                    uint32_t dispatch_key) const
-        -> std::unordered_map<Operation, Gates::KernelType> {
-        std::unordered_map<Operation, Gates::KernelType> kernel_for_op;
+        -> std::unordered_map<Operation, KernelType> {
+        std::unordered_map<Operation, KernelType> kernel_for_op;
 
         for_each_enum<Operation>([&](Operation op) {
             const auto key = std::make_pair(op, dispatch_key);
@@ -304,7 +302,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
     void assignKernelForOp(Operation op, Threading threading,
                            CPUMemoryModel memory_model, uint32_t priority,
                            const Util::IntegerInterval<size_t> &interval,
-                           Gates::KernelType kernel) {
+                           KernelType kernel) {
         const auto &dispatcher = DynamicDispatcher<double>::getInstance();
         PL_ABORT_IF(!dispatcher.isRegisteredKernel(kernel),
                     "The given kernel is not registered.");
@@ -333,7 +331,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
     void assignKernelForOp(Operation op, [[maybe_unused]] AllThreading dummy,
                            CPUMemoryModel memory_model,
                            const Util::IntegerInterval<size_t> &interval,
-                           Gates::KernelType kernel) {
+                           KernelType kernel) {
         /* Priority for all threading is 1 */
 
         for_each_enum<Threading>([=, this](Threading threading) {
@@ -348,7 +346,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
     void assignKernelForOp(Operation op, Threading threading,
                            [[maybe_unused]] AllMemoryModel dummy,
                            const Util::IntegerInterval<size_t> &interval,
-                           Gates::KernelType kernel) {
+                           KernelType kernel) {
         /* Priority for all memory model is 2 */
 
         for_each_enum<CPUMemoryModel>([=, this](CPUMemoryModel memory_model) {
@@ -363,7 +361,7 @@ template <class Operation, size_t cache_size = 16> class OperationKernelMap {
     void assignKernelForOp(Operation op, [[maybe_unused]] AllThreading dummy1,
                            [[maybe_unused]] AllMemoryModel dummy2,
                            const Util::IntegerInterval<size_t> &interval,
-                           Gates::KernelType kernel) {
+                           KernelType kernel) {
         /* Priority is 0 */
 
         for_each_enum<Threading, CPUMemoryModel>(

@@ -1,17 +1,29 @@
-#include "TestHelpers.hpp" // PrecisionToName, createProductState
-#include "TestHelpersWires.hpp"
-#include "TestKernels.hpp"
-#include "Util.hpp" // ConstMult, INVSQRT2, IMAG, ZERO
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
 
-#include <catch2/catch.hpp>
+// Licensed under the Apache License, Version 2.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include <algorithm>
 #include <complex>
-#include <iostream>
 #include <limits>
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#include <catch2/catch.hpp>
+
+#include "TestHelpers.hpp" // PrecisionToName, createProductState
+#include "TestHelpersWires.hpp"
+#include "TestKernels.hpp"
+#include "Util.hpp" // ConstMult, INVSQRT2, IMAG, ZERO
 
 /**
  * @file Test_GateImplementations_Nonparam.cpp
@@ -22,9 +34,8 @@
 
 /// @cond DEV
 namespace {
-using namespace Pennylane::Util;
 using namespace Pennylane::LightningQubit;
-using namespace Pennylane::LightningQubit::Util;
+using namespace Pennylane::Util;
 } // namespace
 /// @endcond
 
@@ -73,18 +84,19 @@ using namespace Pennylane::LightningQubit::Util;
  ******************************************************************************/
 template <typename PrecisionT, class GateImplementation>
 void testApplyIdentity() {
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
     for (size_t index = 0; index < num_qubits; index++) {
-        auto st_pre = createZeroState<PrecisionT>(num_qubits);
-        auto st_post = createZeroState<PrecisionT>(num_qubits);
+        auto st_pre = createZeroState<ComplexT>(num_qubits);
+        auto st_post = createZeroState<ComplexT>(num_qubits);
 
         GateImplementation::applyIdentity(st_pre.data(), num_qubits, {index},
                                           false);
         CHECK(std::equal(st_pre.begin(), st_pre.end(), st_post.begin()));
     }
     for (size_t index = 0; index < num_qubits; index++) {
-        auto st_pre = createZeroState<PrecisionT>(num_qubits);
-        auto st_post = createZeroState<PrecisionT>(num_qubits);
+        auto st_pre = createZeroState<ComplexT>(num_qubits);
+        auto st_post = createZeroState<ComplexT>(num_qubits);
         GateImplementation::applyHadamard(st_pre.data(), num_qubits, {index},
                                           false);
         GateImplementation::applyHadamard(st_post.data(), num_qubits, {index},
@@ -99,11 +111,12 @@ PENNYLANE_RUN_TEST(Identity);
 
 template <typename PrecisionT, class GateImplementation>
 void testApplyPauliX() {
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
     DYNAMIC_SECTION(GateImplementation::name
                     << ", PauliX - " << PrecisionToName<PrecisionT>::value) {
         for (size_t index = 0; index < num_qubits; index++) {
-            auto st = createZeroState<PrecisionT>(num_qubits);
+            auto st = createZeroState<ComplexT>(num_qubits);
 
             GateImplementation::applyPauliX(st.data(), num_qubits, {index},
                                             false);
@@ -165,9 +178,10 @@ PENNYLANE_RUN_TEST(PauliZ);
 
 template <typename PrecisionT, class GateImplementation>
 void testApplyHadamard() {
+    using ComplexT = std::complex<PrecisionT>;
     const size_t num_qubits = 3;
     for (size_t index = 0; index < num_qubits; index++) {
-        auto st = createZeroState<PrecisionT>(num_qubits);
+        auto st = createZeroState<ComplexT>(num_qubits);
 
         GateImplementation::applyHadamard(st.data(), num_qubits, {index},
                                           false);
