@@ -25,7 +25,7 @@ from pennylane_lightning import CPP_BINARY_AVAILABLE, backend_info
 if not CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
-if backend_info()["NAME"] != "lightning.qubit":
+if backend_info()["NAME"] not in ("lightning.kokkos", "lightning.qubit"):
     pytest.skip("Exclusive tests for lightning.qubit. Skipping.", allow_module_level=True)
 
 
