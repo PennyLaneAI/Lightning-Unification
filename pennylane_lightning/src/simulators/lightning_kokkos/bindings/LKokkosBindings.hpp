@@ -65,10 +65,7 @@ template <class StateVectorT, class PyClass>
 void registerGatesForStateVector(PyClass &pyclass) {
     using PrecisionT =
         typename StateVectorT::PrecisionT; // Statevector's precision
-    using ComplexT = typename StateVectorT::ComplexT;
-    using ParamT = PrecisionT; // Parameter's data precision
-    using np_arr_c = py::array_t<std::complex<ParamT>,
-                                 py::array::c_style | py::array::forcecast>;
+    using ParamT = PrecisionT;             // Parameter's data precision
 
     using Pennylane::Gates::GateOperation;
     using Pennylane::Util::for_each_enum;

@@ -41,19 +41,21 @@ class Measurements final
     : public MeasurementsBase<StateVectorT, Measurements<StateVectorT>> {
 
   private:
-    using PrecisionT = StateVectorT::PrecisionT;
+    using PrecisionT = typename StateVectorT::PrecisionT;
     using ComplexT = typename StateVectorT::ComplexT;
     using BaseType = MeasurementsBase<StateVectorT, Measurements<StateVectorT>>;
 
-    using KokkosExecSpace = StateVectorT::KokkosExecSpace;
-    using KokkosVector = StateVectorT::KokkosVector;
-    using KokkosSizeTVector = StateVectorT::KokkosSizeTVector;
-    using UnmanagedSizeTHostView = StateVectorT::UnmanagedSizeTHostView;
+    using KokkosExecSpace = typename StateVectorT::KokkosExecSpace;
+    using KokkosVector = typename StateVectorT::KokkosVector;
+    using KokkosSizeTVector = typename StateVectorT::KokkosSizeTVector;
+    using UnmanagedSizeTHostView =
+        typename StateVectorT::UnmanagedSizeTHostView;
     using UnmanagedConstComplexHostView =
-        StateVectorT::UnmanagedConstComplexHostView;
+        typename StateVectorT::UnmanagedConstComplexHostView;
     using UnmanagedConstSizeTHostView =
-        StateVectorT::UnmanagedConstSizeTHostView;
-    using UnmanagedPrecisionHostView = StateVectorT::UnmanagedPrecisionHostView;
+        typename StateVectorT::UnmanagedConstSizeTHostView;
+    using UnmanagedPrecisionHostView =
+        typename StateVectorT::UnmanagedPrecisionHostView;
 
     using ExpValFunc = std::function<PrecisionT(
         const std::vector<size_t> &, const std::vector<PrecisionT> &)>;
