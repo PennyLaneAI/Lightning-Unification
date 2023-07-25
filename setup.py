@@ -20,6 +20,9 @@ from pathlib import Path
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 
+backend = os.environ.get("BACKEND", "qubit")
+if backend not in ["kokkos", "qubit"]:
+    raise ValueError(f"Invalid backend {backend}.")
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
@@ -104,6 +107,9 @@ class CMakeBuild(build_ext):
         elif platform.system() not in ["Linux"]:
             raise RuntimeError(f"Unsupported '{platform.system()}' platform")
 
+        if backend == "kokkos":
+            configure_args += ["-DPL_BACKEND=lightning_kokkos"]
+
         if not Path(self.build_temp).exists():
             os.makedirs(self.build_temp)
 
@@ -124,10 +130,6 @@ class CMakeBuild(build_ext):
 
 with open(os.path.join("pennylane_lightning", "_version.py")) as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
-
-backend = os.environ.get("BACKEND", "qubit")
-if backend not in ["kokkos", "qubit"]:
-    raise ValueError(f"Invalid backend {backend}.")
 
 requirements = [
     "pennylane>=0.30",
@@ -150,6 +152,7 @@ info = {
     "include_package_data": True,
     "entry_points": {
         "pennylane.plugins": [
+            f"lightning.qubit = pennylane_lightning:LightningQubit", #TODO needed even with Kokkos backend
             f"lightning.{backend} = pennylane_lightning:LightningQubit",
         ],
     },
