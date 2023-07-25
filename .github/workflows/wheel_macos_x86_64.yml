@@ -112,7 +112,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-12]
-        pl_backend: ["lightning_qubit"]
+        pl_backend: ["lightning_kokkos", "lightning_qubit"]
         arch: [x86_64]
         cibw_build: ${{fromJson(needs.set_wheel_build_matrix.outputs.python_version)}}
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
@@ -157,6 +157,9 @@ jobs:
           # Python build settings
           CIBW_BEFORE_BUILD: |
             python -m pip install pybind11 ninja cmake~=3.24.0 setuptools
+
+          CIBW_ENVIRONMENT: |
+            BACKEND=${{ matrix.pl_backend }}
 
           # Testing of built wheels
           CIBW_TEST_REQUIRES: pytest pytest-cov pytest-mock flaky

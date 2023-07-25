@@ -22,7 +22,6 @@
 #include "StateVectorKokkos.hpp"
 #include "TypeList.hpp"
 
-
 /// @cond DEV
 namespace {
 using Pennylane::LightningKokkos::StateVectorKokkos;
@@ -184,20 +183,20 @@ void registerBackendSpecificMeasurements(PyClass &pyclass) {
                  const std::string &, const std::vector<size_t> &)>(
                  &Measurements<StateVectorT>::var),
              "Variance of an operation by name.");
-        // pyclass.def(
-        //     "var",
-        //     [](Measurements<StateVectorT> &M, const np_arr_sparse_ind
-        //     &row_map,
-        //        const np_arr_sparse_ind &entries, const np_arr_c &values) {
-        //         return M.var(
-        //             static_cast<sparse_index_type *>(row_map.request().ptr),
-        //             static_cast<sparse_index_type>(row_map.request().size),
-        //             static_cast<sparse_index_type *>(entries.request().ptr),
-        //             static_cast<ComplexT *>(
-        //                 values.request().ptr),
-        //             static_cast<sparse_index_type>(values.request().size));
-        //     },
-        //     "Variance of a sparse Hamiltonian.");
+    // pyclass.def(
+    //     "var",
+    //     [](Measurements<StateVectorT> &M, const np_arr_sparse_ind
+    //     &row_map,
+    //        const np_arr_sparse_ind &entries, const np_arr_c &values) {
+    //         return M.var(
+    //             static_cast<sparse_index_type *>(row_map.request().ptr),
+    //             static_cast<sparse_index_type>(row_map.request().size),
+    //             static_cast<sparse_index_type *>(entries.request().ptr),
+    //             static_cast<ComplexT *>(
+    //                 values.request().ptr),
+    //             static_cast<sparse_index_type>(values.request().size));
+    //     },
+    //     "Variance of a sparse Hamiltonian.");
 }
 
 /**
