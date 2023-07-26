@@ -475,9 +475,10 @@ class StateVectorKokkos final
         Kokkos::deep_copy(d_values, UnmanagedConstComplexHostView(
                                         values.data(), values.size()));
 
+        KokkosVector& sv_view = getView(); // circumvent error capturing this with KOKKOS_LAMBDA
         Kokkos::parallel_for(
             indices.size(), KOKKOS_LAMBDA(const std::size_t i) {
-                getView()(indices[i]) = values[i];
+                sv_view(indices[i]) = values[i];
             });
     }
 
