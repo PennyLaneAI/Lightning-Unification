@@ -401,7 +401,8 @@ struct GeneratorOpToMemberFuncPtr<PrecisionT, GateImplementation,
  */
 template <class PrecisionT, class GateImplementation, MatrixOperation mat_op>
 struct MatrixOpToMemberFuncPtr {
-    static_assert(sizeof(PrecisionT) == std::numeric_limits<size_t>::max(), "Unrecognized matrix operation");
+    static_assert(sizeof(PrecisionT) == std::numeric_limits<size_t>::max(),
+                  "Unrecognized matrix operation");
 };
 
 template <class PrecisionT, class GateImplementation>

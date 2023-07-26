@@ -22,7 +22,6 @@
 #include "AVXUtil.hpp"
 #include "Macros.hpp"
 
-
 namespace Pennylane::LightningQubit::Gates::AVXCommon {
 
 template <typename PrecisionT, size_t packed_size> struct CompileMask {
