@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <immintrin.h>
+#include <limits>
 
 #include "AVXUtil.hpp"
 
@@ -35,7 +36,7 @@ namespace Pennylane::LightningQubit::Gates::AVXCommon::Permutation {
  */
 template <typename PrecisionT, size_t packed_size> struct CompiledPermutation {
     // Cannot use unspecialized version
-    static_assert(sizeof(PrecisionT) == -1,
+    static_assert(sizeof(PrecisionT) == std::numeric_limits<size_t>::max(),
                   "Unsupported data typed and packed size.");
 };
 
@@ -199,7 +200,7 @@ constexpr auto compilePermutation(
     [[maybe_unused]] const std::array<uint8_t, packed_size> &permutation)
     -> CompiledPermutation<PrecisionT, packed_size> {
     // Raise a compile error when instantiated
-    static_assert(sizeof(PrecisionT) == -1,
+    static_assert(sizeof(PrecisionT) == std::numeric_limits<size_t>::max(),
                   "Only specialized classes can be used");
 };
 
