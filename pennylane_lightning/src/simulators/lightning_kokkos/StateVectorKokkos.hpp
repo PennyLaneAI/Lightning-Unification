@@ -462,24 +462,18 @@ class StateVectorKokkos final
      */
     void setStateVector(const std::vector<std::size_t> &indices,
                         const std::vector<ComplexT> &values) {
-
         initZeros();
-
         KokkosSizeTVector d_indices("d_indices", indices.size());
-
         KokkosVector d_values("d_values", values.size());
-
         Kokkos::deep_copy(d_indices, UnmanagedConstSizeTHostView(
                                          indices.data(), indices.size()));
-
         Kokkos::deep_copy(d_values, UnmanagedConstComplexHostView(
                                         values.data(), values.size()));
-
         KokkosVector &sv_view =
             getView(); // circumvent error capturing this with KOKKOS_LAMBDA
         Kokkos::parallel_for(
             indices.size(), KOKKOS_LAMBDA(const std::size_t i) {
-                sv_view(indices[i]) = values[i];
+                sv_view(d_indices[i]) = d_values[i];
             });
     }
 
