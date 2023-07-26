@@ -166,6 +166,7 @@ info = {
     if os.environ.get("SKIP_COMPILATION", False)
     else [CMakeExtension("pennylane_lightning_ops")],
     "cmdclass": {"build_ext": CMakeBuild},
+    "ext_package": "pennylane_lightning",
 }
 
 classifiers = [
