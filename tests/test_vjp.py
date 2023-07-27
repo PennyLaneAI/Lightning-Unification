@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Tests for the ``vjp`` method of LightningQubit.
+Tests for the ``vjp`` method of LightningKokkos.
 """
 import pytest
 import math
@@ -21,20 +21,17 @@ import pennylane as qml
 from pennylane import numpy as np
 
 from pennylane_lightning import CPP_BINARY_AVAILABLE, backend_info
+from conftest import device_name
 
 if not CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
-
-if backend_info()["NAME"] != "lightning.qubit":
-    pytest.skip("Exclusive tests for lightning.qubit. Skipping.", allow_module_level=True)
-
 
 class TestVectorJacobianProduct:
     """Tests for the `vjp` function"""
 
     @pytest.fixture(params=[np.complex64, np.complex128])
     def dev(self, request):
-        return qml.device("lightning.qubit", wires=2, c_dtype=request.param)
+        return qml.device(device_name, wires=2, c_dtype=request.param)
 
     def test_use_device_state(self, tol, dev):
         """Tests that when using the device state, the correct answer is still returned."""
@@ -77,7 +74,8 @@ class TestVectorJacobianProduct:
         vjp1 = fn1(tape)
 
         qml.execute([tape], dev, None)
-        fn2 = dev.vjp(tape.measurements, dy, starting_state=dev._pre_rotated_state)
+
+        fn2 = dev.vjp(tape.measurements, dy, starting_state=dev.state)
         vjp2 = fn2(tape)
 
         assert np.allclose(vjp1, vjp2, atol=tol, rtol=0)
@@ -154,7 +152,7 @@ class TestVectorJacobianProduct:
     def test_finite_shots_warns(self):
         """Tests warning raised when finite shots specified"""
 
-        dev = qml.device("lightning.qubit", wires=1, shots=1)
+        dev = qml.device(device_name, wires=1, shots=1)
 
         with qml.tape.QuantumTape() as tape:
             qml.expval(qml.PauliZ(0))
@@ -227,6 +225,7 @@ class TestVectorJacobianProduct:
                 qml.RY(x, wires=(0,))
             assert np.allclose(fn(tape), -0.8 * np.sin(x), atol=tol)
 
+    @pytest.mark.skipif(device_name == device_name, reason="Adjoint differentiation does not support State measurements.")
     def test_statevector_ry(self, dev, tol):
         dy = np.array(
             [[1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
@@ -244,6 +243,7 @@ class TestVectorJacobianProduct:
             assert np.allclose(fn2(tape), 0.0, atol=tol)
             assert np.allclose(fn3(tape), 0.0, atol=tol)
 
+    @pytest.mark.skipif(device_name == device_name, reason="Adjoint differentiation does not support State measurements.")
     def test_wrong_dy_statevector(self, dev):
         """Tests raise an exception when dy is incorrect"""
         x, y, z = [0.5, 0.3, -0.7]
@@ -268,6 +268,7 @@ class TestVectorJacobianProduct:
         with pytest.warns(UserWarning, match="The vjp method only works with complex-valued dy"):
             dev.vjp(tape.measurements, dy2)
 
+    @pytest.mark.skipif(device_name == device_name, reason="Adjoint differentiation does not support State measurements.")
     def test_statevector_complex_circuit(self, dev, tol):
         dy = np.array(
             [[1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
@@ -332,7 +333,8 @@ class TestVectorJacobianProduct:
 
     def test_no_trainable_parameters_NEW(self, dev):
         """A tape with no trainable parameters will simply return None"""
-        dev._state = dev._asarray(dev._state)
+        _state = dev._asarray(dev.state)
+        dev._apply_state_vector(_state, dev.wires)
 
         x = 0.4
 
@@ -430,7 +432,8 @@ class TestVectorJacobianProduct:
     def test_prob_expectation_values(self, dev):
         """Tests correct output shape and evaluation for a tape
         with prob and expval outputs"""
-        dev._state = dev._asarray(dev._state)
+        _state = dev._asarray(dev.state)
+        dev._apply_state_vector(_state, dev.wires)
 
         x = 0.543
         y = -0.654
@@ -456,7 +459,7 @@ class TestBatchVectorJacobianProduct:
 
     @pytest.fixture(params=[np.complex64, np.complex128])
     def dev(self, request):
-        return qml.device("lightning.qubit", wires=2, c_dtype=request.param)
+        return qml.device(device_name, wires=2, c_dtype=request.param)
 
     def test_one_tape_no_trainable_parameters_1(self, dev):
         """A tape with no trainable parameters will simply return None"""
@@ -534,7 +537,8 @@ class TestBatchVectorJacobianProduct:
 
     def test_reduction_append(self, dev):
         """Test the 'append' reduction strategy"""
-        dev._state = dev._asarray(dev._state)
+        _state = dev._asarray(dev.state)
+        dev._apply_state_vector(_state, dev.wires)
 
         with qml.tape.QuantumTape() as tape1:
             qml.RX(0.4, wires=0)

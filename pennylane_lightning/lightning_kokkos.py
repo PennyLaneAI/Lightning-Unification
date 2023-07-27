@@ -362,7 +362,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
             basis_states = qml.math.convert_like(basis_states, state)
             num = int(qml.math.dot(state, basis_states))
 
-            self._state = self._create_basis_state(num)
+            self._create_basis_state(num)
 
         def apply_lightning(self, operations, apply_pre_rotated_state=False):
             """Apply a list of operations to the state tensor.
@@ -592,7 +592,8 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 return None
 
             if len(measurements) == 1 and measurements[0].return_type is State:
-                return State
+                # return State
+                raise QuantumFunctionError("Not supported")
 
             # Now the return_type of measurement processes must be expectation
             if not all([m.return_type is Expectation for m in measurements]):
@@ -831,7 +832,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
                     num_params = len(tape.trainable_params)
 
                     if num_params == 0:
-                        return np.array([], dtype=self._state.dtype)
+                        return np.array([], dtype=self.state.dtype)
 
                     new_tape = tape.copy()
                     new_tape._measurements = [qml.expval(ham)]

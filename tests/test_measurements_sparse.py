@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Unit tests for Sparse Measurements in lightning.qubit.
+Unit tests for Sparse Measurements Lightning devices.
 """
 import numpy as np
 import pennylane as qml
@@ -22,11 +22,10 @@ import pytest
 
 from pennylane_lightning import CPP_BINARY_AVAILABLE, backend_info
 
+from conftest import LightningDevice, device_name
+
 if not CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
-
-if backend_info()["NAME"] not in ("lightning.kokkos", "lightning.qubit"):
-    pytest.skip("Exclusive tests for lightning.qubit. Skipping.", allow_module_level=True)
 
 
 class TestSparseExpval:
@@ -34,10 +33,10 @@ class TestSparseExpval:
 
     @pytest.fixture(params=[np.complex64, np.complex128])
     def dev(self, request):
-        return qml.device("lightning.qubit", wires=2, c_dtype=request.param)
+        return qml.device(device_name, wires=2, c_dtype=request.param)
 
     @pytest.mark.skipif(
-        backend_info()["USE_KOKKOS"], reason="Kokkos and Kokkos Kernels are present."
+        backend_info()["USE_SPMV"], reason="Sparse matrix-vector product unavailable."
     )
     def test_create_device_with_unsupported_dtype(self, dev):
         @qml.qnode(dev, diff_method="parameter-shift")
@@ -69,7 +68,7 @@ class TestSparseExpval:
         ],
     )
     @pytest.mark.skipif(
-        not backend_info()["USE_KOKKOS"], reason="Requires Kokkos and Kokkos Kernels."
+        not backend_info()["USE_SPMV"], reason="Sparse matrix-vector product available."
     )
     def test_sparse_Pauli_words(self, cases, tol, dev):
         """Test expval of some simple sparse Hamiltonian"""
@@ -108,7 +107,7 @@ class TestSparseExpvalQChem:
 
     @pytest.fixture(params=[np.complex64, np.complex128])
     def dev(self, request):
-        return qml.device("lightning.qubit", wires=12, c_dtype=request.param)
+        return qml.device(device_name, wires=12, c_dtype=request.param)
 
     @pytest.mark.parametrize(
         "qubits, wires, H_sparse, hf_state, excitations",
@@ -124,7 +123,7 @@ class TestSparseExpvalQChem:
         ],
     )
     @pytest.mark.skipif(
-        not backend_info()["USE_KOKKOS"], reason="Requires Kokkos and Kokkos Kernels."
+        not backend_info()["USE_SPMV"], reason="Sparse matrix-vector product unavailable."
     )
     def test_sparse_Pauli_words(self, qubits, wires, H_sparse, hf_state, excitations, tol, dev):
         """Test expval of some simple sparse Hamiltonian"""

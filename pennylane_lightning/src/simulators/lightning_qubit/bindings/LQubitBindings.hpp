@@ -304,7 +304,7 @@ auto getBackendInfo() -> pybind11::dict {
     using namespace pybind11::literals;
 
     return pybind11::dict("NAME"_a = "lightning.qubit",
-                          "USE_KOKKOS"_a = USE_KOKKOS);
+                          "USE_KOKKOS"_a = USE_KOKKOS, "USE_SPMV"_a = USE_KOKKOS);
 }
 
 /**

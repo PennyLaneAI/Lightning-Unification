@@ -655,7 +655,7 @@ class TestSample:
 
 
 class TestLightningDeviceIntegration:
-    """Integration tests for lightning.qubit. This test ensures it integrates
+    """Integration tests for lightning device. This test ensures it integrates
     properly with the PennyLane interface, in particular QNode."""
 
     def test_load_default_qubit_device(self):
@@ -668,7 +668,7 @@ class TestLightningDeviceIntegration:
 
     @pytest.mark.skipif(not CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     def test_no_backprop(self):
-        """Test that lightning.qubit does not support the backprop
+        """Test that lightning device does not support the backprop
         differentiation method."""
 
         dev = qml.device(device_name, wires=2)
@@ -1460,6 +1460,6 @@ class TestApplyLightningMethod:
 
 @pytest.mark.skipif(CPP_BINARY_AVAILABLE, reason="Test only applies when binaries are unavailable")
 def test_warning():
-    """Tests if a warning is raised when lightning.qubit binaries are not available"""
+    """Tests if a warning is raised when lightning device binaries are not available"""
     with pytest.warns(UserWarning, match="Pre-compiled binaries for lightning.qubit"):
         qml.device(device_name, wires=1)
