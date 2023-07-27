@@ -257,6 +257,12 @@ if backend_info()["NAME"] == "lightning.qubit":
             shape = (1 << self.num_wires,)
             return self._reshape(self._pre_rotated_state, shape)
 
+        @property
+        def state_vector(self):
+            """Returns a handle to the statevector."""
+            ket = np.ravel(self._state)
+            return StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
+
         def _apply_state_vector(self, state, device_wires):
             """Initialize the internal state vector in a specified state.
             Args:

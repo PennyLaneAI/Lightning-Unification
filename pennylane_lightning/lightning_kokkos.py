@@ -42,6 +42,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
         QuantumFunctionError,
     )
     from pennylane.operation import Tensor, Operation
+    from pennylane.ops.op_math import Adjoint
     from pennylane.measurements import MeasurementProcess, Expectation, State
     from pennylane.wires import Wires
 
@@ -207,8 +208,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
             # Create the initial state. Internally, we store the
             # state as an array of dimension [2]*wires.
-            self._state = self._create_basis_state(0)
-            self._pre_rotated_state = self._state
+            self._pre_rotated_state = _kokkos_dtype(c_dtype)(self.num_wires)
 
         @staticmethod
         def _asarray(arr, dtype=None):
@@ -239,17 +239,13 @@ if backend_info()["NAME"] == "lightning.kokkos":
             Note: This function does not support broadcasted inputs yet.
             """
             self._kokkos_state.setBasisState(index)
-            # state = np.zeros(2**self.num_wires, dtype=np.complex128)
-            # state[index] = 1
-            # state = self._asarray(state, dtype=self.C_DTYPE)
-            # return self._reshape(state, [2] * self.num_wires)
 
         def reset(self):
             """Reset the device"""
             super().reset()
 
             # init the state vector to |00..0>
-            self._kokkos_state.resetKokkos()  # Sync reset
+            self._kokkos_state.resetStateVector()  # Sync reset
 
         def syncH2D(self, state_vector):
             """Copy the state vector data on host provided by the user to the state vector on the device
@@ -296,6 +292,11 @@ if backend_info()["NAME"] == "lightning.kokkos":
             state = self._asarray(state, dtype=self.C_DTYPE)
             self.syncD2H(state)
             return state
+
+        @property
+        def state_vector(self):
+            """Returns a handle to the statevector."""
+            return self._kokkos_state
 
         def _apply_state_vector(self, state, device_wires):
             """Initialize the internal state vector in a specified state.
@@ -357,11 +358,10 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
             self._state = self._create_basis_state(num)
 
-        def apply_lightning(self, state, operations):
+        def apply_lightning(self, operations, apply_pre_rotated_state=False):
             """Apply a list of operations to the state tensor.
 
             Args:
-                state (array[complex]): the input state tensor
                 operations (list[~pennylane.operation.Operation]): operations to apply
                 dtype (type): Type of numpy ``complex`` to be used. Can be important
                 to specify for large systems for memory allocation purposes.
@@ -369,36 +369,43 @@ if backend_info()["NAME"] == "lightning.kokkos":
             Returns:
                 array[complex]: the output state tensor
             """
-            state_vector = np.ravel(state)
-            sim = (
-                StateVectorC64(state_vector) if self.use_csingle else StateVectorC128(state_vector)
-            )
-
             # Skip over identity operations instead of performing
-            # matrix multiplication with it.
+            # matrix multiplication with the identity.
+            invert_param = False
+            state = self._pre_rotated_state if apply_pre_rotated_state else self._kokkos_state
+
             for o in operations:
-                if o.name == "Identity":
+                if str(o.name) == "Identity":
                     continue
-                method = getattr(sim, o.name, None)
+                name = o.name
+                if isinstance(o, Adjoint):
+                    name = o.base.name
+                    invert_param = True
+                method = getattr(state, name, None)
 
                 wires = self.wires.indices(o.wires)
 
                 if method is None:
                     # Inverse can be set to False since qml.matrix(o) is already in inverted form
-                    method = getattr(sim, "applyMatrix")
                     try:
-                        method(qml.matrix(o), wires, False)
+                        mat = qml.matrix(o)
                     except AttributeError:  # pragma: no cover
                         # To support older versions of PL
-                        method(o.matrix, wires, False)
+                        mat = o.matrix
+
+                    if len(mat) == 0:
+                        raise Exception("Unsupported operation")
+                    state.apply(
+                        name,
+                        wires,
+                        False,
+                        [],
+                        mat.ravel(order="C"),  # inv = False: Matrix already in correct form;
+                    )  # Parameters can be ignored for explicit matrices; F-order for cuQuantum
+
                 else:
-                    inv = False
                     param = o.parameters
-                    method(wires, inv, param)
-
-                sim.DeviceToHost(state_vector.ravel(order="C"))
-
-            return np.reshape(state_vector, state.shape)
+                    method(wires, invert_param, param)
 
         def apply(self, operations, rotations=None, **kwargs):
             # State preparation is currently done in Python
@@ -415,19 +422,19 @@ if backend_info()["NAME"] == "lightning.kokkos":
             for operation in operations:
                 if isinstance(operation, (QubitStateVector, BasisState)):
                     raise DeviceError(
-                        "Operation {} cannot be used after other Operations have already been "
-                        "applied on a {} device.".format(operation.name, self.short_name)
+                        f"Operation {operation.name} cannot be used after other Operations have already been applied on a {self.short_name} device."
                     )
 
-            if operations:
-                self._pre_rotated_state = self.apply_lightning(self._state, operations)
-            else:
-                self._pre_rotated_state = self._state
+            self.apply_lightning(operations)
+            # if operations:
+            #     self._pre_rotated_state = self.apply_lightning(self._state, operations)
+            # else:
+            #     self._pre_rotated_state = self._state
 
-            if rotations:
-                self._state = self.apply_lightning(np.copy(self._pre_rotated_state), rotations)
-            else:
-                self._state = self._pre_rotated_state
+            # if rotations:
+            #     self._state = self.apply_lightning(np.copy(self._pre_rotated_state), rotations)
+            # else:
+            #     self._state = self._pre_rotated_state
 
         def expval(self, observable, shot_range=None, bin_size=None):
             """Expectation value of the supplied observable.
@@ -444,7 +451,6 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 Expectation value of the observable
             """
             if observable.name in [
-                "Identity",
                 "Projector",
             ]:
                 return super().expval(observable, shot_range=shot_range, bin_size=bin_size)
@@ -456,28 +462,21 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 return np.squeeze(np.mean(samples, axis=0))
 
             # Initialization of state
-            ket = np.ravel(self._pre_rotated_state)
+            # ket = np.ravel(self._pre_rotated_state)
 
-            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
             M = (
-                MeasurementsC64(state_vector)
+                MeasurementsC64(self._kokkos_state)
                 if self.use_csingle
-                else MeasurementsC128(state_vector)
+                else MeasurementsC128(self._kokkos_state)
             )
             if observable.name == "SparseHamiltonian":
-                if backend_info()["USE_KOKKOS"]:
-                    # ensuring CSR sparse representation.
-
-                    CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
-                        copy=False
-                    )
-                    return M.expval(
-                        CSR_SparseHamiltonian.indptr,
-                        CSR_SparseHamiltonian.indices,
-                        CSR_SparseHamiltonian.data,
-                    )
-                raise NotImplementedError(
-                    "The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels."
+                CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
+                    copy=False
+                )
+                return M.expval(
+                    CSR_SparseHamiltonian.indptr,
+                    CSR_SparseHamiltonian.indices,
+                    CSR_SparseHamiltonian.data,
                 )
 
             if (
@@ -510,7 +509,6 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 Variance of the observable
             """
             if observable.name in [
-                "Identity",
                 "Projector",
             ]:
                 return super().var(observable, shot_range=shot_range, bin_size=bin_size)
@@ -524,11 +522,10 @@ if backend_info()["NAME"] == "lightning.kokkos":
             # Initialization of state
             ket = np.ravel(self._pre_rotated_state)
 
-            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
             M = (
-                MeasurementsC64(state_vector)
+                MeasurementsC64(self._kokkos_state)
                 if self.use_csingle
-                else MeasurementsC128(state_vector)
+                else MeasurementsC128(self._kokkos_state)
             )
 
             if observable.name == "SparseHamiltonian":
@@ -568,16 +565,20 @@ if backend_info()["NAME"] == "lightning.kokkos":
             Returns:
                 array[int]: array of samples in binary representation with shape ``(dev.shots, dev.num_wires)``
             """
-            # Initialization of state
-            ket = np.ravel(self._state)
-
-            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
             M = (
-                MeasurementsC64(state_vector)
+                MeasurementsC64(self._kokkos_state)
                 if self.use_csingle
-                else MeasurementsC128(state_vector)
+                else MeasurementsC128(self._kokkos_state)
             )
             return M.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
+
+        def sample(self, observable, shot_range=None, bin_size=None, counts=False):
+            if observable.name != "PauliZ":
+                self.apply_lightning(observable.diagonalizing_gates())
+                self._samples = self.generate_samples()
+            return super().sample(
+                observable, shot_range=shot_range, bin_size=bin_size, counts=counts
+            )
 
         @staticmethod
         def _check_adjdiff_supported_measurements(measurements: List[MeasurementProcess]):

@@ -25,7 +25,7 @@ from pennylane import DeviceError
 
 from pennylane_lightning import CPP_BINARY_AVAILABLE
 
-from conftest import THETA, PHI, VARPHI, TOL_STOCHASTIC, LightningDevice
+from conftest import THETA, PHI, VARPHI, TOL_STOCHASTIC, LightningDevice, device_name
 
 
 class TestApply:
@@ -62,14 +62,19 @@ class TestApply:
     ):
         """Tests that applying an operation yields the expected output state for single wire
         operations that have no parameters."""
+        from pennylane.wires import Wires
 
         dev = qubit_device(wires=1)
-        dev._state = np.array(input).astype(dev.C_DTYPE)
+        _state = np.array(input).astype(dev.C_DTYPE)
+        dev._apply_state_vector(_state, dev.wires)
         dev.apply([operation(wires=[0])])
 
-        assert np.allclose(dev._state, np.array(expected_output), atol=tol, rtol=0)
-        assert dev._state.dtype == dev.C_DTYPE
+        assert np.allclose(dev.state, np.array(expected_output), atol=tol, rtol=0)
+        assert dev.state.dtype == dev.C_DTYPE
 
+    @pytest.mark.skipif(
+        device_name == "lightning.kokkos", reason="Only meaningful for lightning_qubit"
+    )
     @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     @pytest.mark.parametrize("operation,input,expected_output", test_data_no_parameters)
     @pytest.mark.parametrize("C", [np.complex64, np.complex128])
@@ -115,11 +120,12 @@ class TestApply:
         """Tests that applying an operation yields the expected output state for two wire
         operations that have no parameters."""
         dev = qubit_device(wires=2)
-        dev._state = np.array(input).reshape(2 * [2]).astype(dev.C_DTYPE)
+        _state = np.array(input).reshape(2 * [2]).astype(dev.C_DTYPE)
+        dev._apply_state_vector(_state, dev.wires)
         dev.apply([operation(wires=[0, 1])])
 
         assert np.allclose(dev.state, np.array(expected_output), atol=tol, rtol=0)
-        assert dev._state.dtype == dev.C_DTYPE
+        assert dev.state.dtype == dev.C_DTYPE
 
     @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     @pytest.mark.parametrize("operation,input,expected_output", test_data_two_wires_no_parameters)
@@ -153,11 +159,12 @@ class TestApply:
         operations that have no parameters."""
 
         dev = qubit_device(wires=3)
-        dev._state = np.array(input).reshape(3 * [2]).astype(dev.C_DTYPE)
+        _state = np.array(input).reshape(3 * [2]).astype(dev.C_DTYPE)
+        dev._apply_state_vector(_state, dev.wires)
         dev.apply([operation(wires=[0, 1, 2])])
 
         assert np.allclose(dev.state, np.array(expected_output), atol=tol, rtol=0)
-        assert dev._state.dtype == dev.C_DTYPE
+        assert dev.state.dtype == dev.C_DTYPE
 
     @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     @pytest.mark.parametrize("operation,input,expected_output", test_data_three_wires_no_parameters)
@@ -276,11 +283,12 @@ class TestApply:
         operations that have parameters."""
 
         dev = qubit_device(wires=1)
-        dev._state = np.array(input).astype(dev.C_DTYPE)
+        _state = np.array(input).astype(dev.C_DTYPE)
+        dev._apply_state_vector(_state, dev.wires)
         dev.apply([operation(*par, wires=[0])])
 
         assert np.allclose(dev.state, np.array(expected_output), atol=tol, rtol=0)
-        assert dev._state.dtype == dev.C_DTYPE
+        assert dev.state.dtype == dev.C_DTYPE
 
     @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     @pytest.mark.parametrize(
@@ -426,11 +434,12 @@ class TestApply:
         operations that have parameters."""
 
         dev = qubit_device(wires=2)
-        dev._state = np.array(input).reshape(2 * [2]).astype(dev.C_DTYPE)
+        _state = np.array(input).reshape(2 * [2]).astype(dev.C_DTYPE)
+        dev._apply_state_vector(_state, dev.wires)
         dev.apply([operation(*par, wires=[0, 1])])
 
         assert np.allclose(dev.state, np.array(expected_output), atol=tol, rtol=0)
-        assert dev._state.dtype == dev.C_DTYPE
+        assert dev.state.dtype == dev.C_DTYPE
 
     @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     @pytest.mark.parametrize(
@@ -521,7 +530,7 @@ class TestExpval:
 
     def test_expval_estimate(self):
         """Test that the expectation value is not analytically calculated"""
-        dev = qml.device("lightning.qubit", wires=1, shots=3)
+        dev = qml.device(device_name, wires=1, shots=3)
 
         @qml.qnode(dev)
         def circuit():
@@ -573,7 +582,7 @@ class TestVar:
     def test_var_estimate(self):
         """Test that the variance is not analytically calculated"""
 
-        dev = qml.device("lightning.qubit", wires=1, shots=3)
+        dev = qml.device(device_name, wires=1, shots=3)
 
         @qml.qnode(dev)
         def circuit():
@@ -652,17 +661,17 @@ class TestLightningDeviceIntegration:
     def test_load_default_qubit_device(self):
         """Test that the default plugin loads correctly"""
 
-        dev = qml.device("lightning.qubit", wires=2)
+        dev = qml.device(device_name, wires=2)
         assert dev.num_wires == 2
         assert dev.shots is None
-        assert dev.short_name == "lightning.qubit"
+        assert dev.short_name == device_name
 
     @pytest.mark.skipif(not CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     def test_no_backprop(self):
         """Test that lightning.qubit does not support the backprop
         differentiation method."""
 
-        dev = qml.device("lightning.qubit", wires=2)
+        dev = qml.device(device_name, wires=2)
 
         def circuit():
             """Simple quantum function."""
@@ -675,7 +684,7 @@ class TestLightningDeviceIntegration:
     def test_best_gets_lightning(self):
         """Test that the best differentiation method returns lightning
         qubit."""
-        dev = qml.device("lightning.qubit", wires=2)
+        dev = qml.device(device_name, wires=2)
 
         def circuit():
             """Simple quantum function."""
@@ -688,7 +697,7 @@ class TestLightningDeviceIntegration:
         """Test that the plugin requires correct arguments"""
 
         with pytest.raises(TypeError, match="missing 1 required positional argument: 'wires'"):
-            qml.device("lightning.qubit")
+            qml.device(device_name)
 
     def test_qubit_circuit(self, qubit_device, tol):
         """Test that the default qubit plugin provides correct result for a simple circuit"""
@@ -723,7 +732,7 @@ class TestLightningDeviceIntegration:
         """Test that the default qubit plugin provides correct result for high shot number"""
 
         shots = 10**4
-        dev = qml.device("lightning.qubit", wires=1, shots=shots)
+        dev = qml.device(device_name, wires=1, shots=shots)
 
         p = 0.543
 
@@ -1080,7 +1089,7 @@ class TestLightningDeviceIntegration:
         the correct dimensions
         """
 
-        dev = qml.device("lightning.qubit", wires=num_wires, shots=1000)
+        dev = qml.device(device_name, wires=num_wires, shots=1000)
 
         @qml.qnode(dev)
         def circuit():
@@ -1094,7 +1103,7 @@ class TestLightningDeviceIntegration:
 
     def test_snapshot_is_ignored_without_shot(self):
         """Tests if the Snapshot operator is ignored correctly"""
-        dev = qml.device("lightning.qubit", wires=4)
+        dev = qml.device(device_name, wires=4)
 
         @qml.qnode(dev)
         def circuit():
@@ -1110,7 +1119,7 @@ class TestLightningDeviceIntegration:
 
     def test_snapshot_is_ignored_with_shots(self):
         """Tests if the Snapshot operator is ignored correctly"""
-        dev = qml.device("lightning.qubit", wires=4, shots=1000)
+        dev = qml.device(device_name, wires=4, shots=1000)
 
         @qml.qnode(dev)
         def circuit():
@@ -1153,6 +1162,10 @@ class TestLightningDeviceIntegration:
         assert np.allclose(res_probs, expected_prob, atol=tol, rtol=0)
 
 
+@pytest.mark.skipif(
+    device_name == "lightning.kokkos",
+    reason="lightning_kokkos does not support apply with rotations.",
+)
 @pytest.mark.parametrize("theta,phi,varphi", list(zip(THETA, PHI, VARPHI)))
 class TestTensorExpval:
     """Test tensor expectation values"""
@@ -1229,6 +1242,10 @@ class TestTensorExpval:
         assert np.allclose(res, expected, atol=tol, rtol=0)
 
 
+@pytest.mark.skipif(
+    device_name == "lightning.kokkos",
+    reason="lightning_kokkos does not support apply with rotations.",
+)
 @pytest.mark.parametrize("theta, phi, varphi", list(zip(THETA, PHI, VARPHI)))
 class TestTensorVar:
     """Tests for variance of tensor observables"""
@@ -1291,6 +1308,10 @@ class TestTensorVar:
         assert np.allclose(res, expected, atol=tol, rtol=0)
 
 
+@pytest.mark.skipif(
+    device_name == "lightning.kokkos",
+    reason="lightning_kokkos does not support apply with rotations.",
+)
 @pytest.mark.parametrize("theta, phi, varphi", list(zip(THETA, PHI, VARPHI)))
 @pytest.mark.parametrize("shots", [None, 100000])
 class TestTensorSample:
@@ -1299,7 +1320,7 @@ class TestTensorSample:
     def test_paulix_pauliy(self, theta, phi, varphi, shots, tol):
         """Test that a tensor product involving PauliX and PauliY works correctly"""
         tolerance = tol if shots is None else TOL_STOCHASTIC
-        dev = qml.device("lightning.qubit", wires=3, shots=shots)
+        dev = qml.device(device_name, wires=3, shots=shots)
 
         obs = qml.PauliX(0) @ qml.PauliY(2)
 
@@ -1426,19 +1447,19 @@ class TestApplyLightningMethod:
 
     def test_apply_identity_skipped(self, mocker, tol):
         """Test identity operation does not perform additional computations."""
-        dev = qml.device("lightning.qubit", wires=1)
-        dev._state = dev._asarray(dev._state).astype(dev.C_DTYPE)
+        dev = qml.device(device_name, wires=1)
+        dev._apply_state_vector(dev._asarray(dev.state).astype(dev.C_DTYPE), dev.wires)
 
         starting_state = np.array([1, 0], dtype=dev.C_DTYPE)
         op = [qml.Identity(0)]
         dev.apply(op)
 
-        assert np.allclose(dev._state, starting_state, atol=tol, rtol=0)
-        assert dev._state.dtype == dev.C_DTYPE
+        assert np.allclose(dev.state, starting_state, atol=tol, rtol=0)
+        assert dev.state.dtype == dev.C_DTYPE
 
 
 @pytest.mark.skipif(CPP_BINARY_AVAILABLE, reason="Test only applies when binaries are unavailable")
 def test_warning():
     """Tests if a warning is raised when lightning.qubit binaries are not available"""
     with pytest.warns(UserWarning, match="Pre-compiled binaries for lightning.qubit"):
-        qml.device("lightning.qubit", wires=1)
+        qml.device(device_name, wires=1)

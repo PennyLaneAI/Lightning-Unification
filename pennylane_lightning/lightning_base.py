@@ -163,9 +163,7 @@ if CPP_BINARY_AVAILABLE:
                     "Lightning does not currently support out-of-order indices for probabilities"
                 )
 
-            ket = np.ravel(self._state)
-
-            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
+            state_vector = self.state_vector
             M = (
                 MeasurementsC64(state_vector)
                 if self.use_csingle

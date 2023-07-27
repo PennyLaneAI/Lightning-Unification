@@ -13,9 +13,12 @@
 // limitations under the License.
 #pragma once
 #include <sstream>
+#include <string>
 
-#include <Kokkos_Core.hpp>
-#include <pybind11/pybind11.h>
+#include <set>
+#include <tuple>
+#include <variant>
+#include <vector>
 
 #include "Constant.hpp"
 #include "ConstantUtil.hpp" // lookup
@@ -23,6 +26,11 @@
 #include "MeasurementsKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TypeList.hpp"
+
+#include "pybind11/complex.h"
+#include "pybind11/numpy.h"
+#include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
 
 /// @cond DEV
 namespace {
@@ -113,6 +121,7 @@ void registerBackendClassSpecificBindings(PyClass &pyclass) {
                          const InitializationSettings &kokkos_args) {
             return new StateVectorT(num_qubits, kokkos_args);
         }))
+        .def("resetStateVector", &StateVectorT::resetStateVector)
         .def(
             "setBasisState",
             [](StateVectorT &sv, const size_t index) {
@@ -160,7 +169,26 @@ void registerBackendClassSpecificBindings(PyClass &pyclass) {
                     device_sv.HostToDevice(data_ptr, length);
                 }
             },
-            "Synchronize data from the host device to GPU.");
+            "Synchronize data from the host device to GPU.")
+        .def(
+            "apply",
+            [](StateVectorKokkos<PrecisionT> &sv, const std::string &str,
+               const std::vector<size_t> &wires, bool inv,
+               [[maybe_unused]] const std::vector<std::vector<ParamT>> &params,
+               [[maybe_unused]] const np_arr_c &gate_matrix) {
+                const auto m_buffer = gate_matrix.request();
+                std::vector<Kokkos::complex<ParamT>> conv_matrix;
+                if (m_buffer.size) {
+                    const auto m_ptr =
+                        static_cast<const Kokkos::complex<ParamT> *>(
+                            m_buffer.ptr);
+                    conv_matrix = std::vector<Kokkos::complex<ParamT>>{
+                        m_ptr, m_ptr + m_buffer.size};
+                }
+                sv.applyOperation_std(str, wires, inv, std::vector<ParamT>{},
+                                      conv_matrix);
+            },
+            "Apply operation via the gate matrix");
 }
 
 /**
