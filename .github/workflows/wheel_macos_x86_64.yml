@@ -167,7 +167,8 @@ jobs:
           CIBW_BEFORE_TEST: python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
 
           CIBW_TEST_COMMAND: |
-            pl-device-test --device=lightning.qubit --skip-ops -x --tb=short --no-flaky-report
+            DEVICENAME=`echo lightning_qubit | sed "s/_/./g"`
+            pl-device-test --device=${DEVICENAME} --skip-ops -x --tb=short --no-flaky-report
 
           CIBW_BUILD_VERBOSITY: 1
 

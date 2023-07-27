@@ -323,8 +323,9 @@ jobs:
         run: |
           cd main/
           pytest tests/ $COVERAGE_FLAGS
-          pl-device-test --device lightning.qubit --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
-          pl-device-test --device lightning.qubit --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
+          DEVICENAME=`echo lightning_qubit | sed "s/_/./g"`
+          pl-device-test --device ${DEVICENAME} --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
+          pl-device-test --device ${DEVICENAME} --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
           mv coverage.xml coverage-${{ github.job }}.xml
 
       - name: Upload code coverage results
@@ -338,7 +339,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        pl_backend: ["lightning_kokkos", "lightning_qubit"]
+        pl_backend: ["lightning_qubit"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
 
@@ -391,7 +392,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        pl_backend: ["lightning_kokkos", "lightning_qubit"]
+        pl_backend: ["lightning_qubit"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
 
