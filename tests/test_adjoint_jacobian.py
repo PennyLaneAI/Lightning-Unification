@@ -555,7 +555,10 @@ class TestAdjointJacobian:
         ):
             dev.adjoint_jacobian(tape, starting_state=np.ones(7))
 
-    @pytest.mark.skipif(device_name == "lightning.kokkos", reason="Adjoint differentiation does not support State measurements.")
+    @pytest.mark.skipif(
+        device_name == "lightning.kokkos",
+        reason="Adjoint differentiation does not support State measurements.",
+    )
     @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     def test_state_return_type(self, dev):
         """Tests raise an exception when the return type is State"""

@@ -26,6 +26,7 @@ from conftest import device_name
 if not CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
+
 class TestVectorJacobianProduct:
     """Tests for the `vjp` function"""
 
@@ -225,7 +226,10 @@ class TestVectorJacobianProduct:
                 qml.RY(x, wires=(0,))
             assert np.allclose(fn(tape), -0.8 * np.sin(x), atol=tol)
 
-    @pytest.mark.skipif(device_name == device_name, reason="Adjoint differentiation does not support State measurements.")
+    @pytest.mark.skipif(
+        device_name == device_name,
+        reason="Adjoint differentiation does not support State measurements.",
+    )
     def test_statevector_ry(self, dev, tol):
         dy = np.array(
             [[1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
@@ -243,7 +247,10 @@ class TestVectorJacobianProduct:
             assert np.allclose(fn2(tape), 0.0, atol=tol)
             assert np.allclose(fn3(tape), 0.0, atol=tol)
 
-    @pytest.mark.skipif(device_name == device_name, reason="Adjoint differentiation does not support State measurements.")
+    @pytest.mark.skipif(
+        device_name == device_name,
+        reason="Adjoint differentiation does not support State measurements.",
+    )
     def test_wrong_dy_statevector(self, dev):
         """Tests raise an exception when dy is incorrect"""
         x, y, z = [0.5, 0.3, -0.7]
@@ -268,7 +275,10 @@ class TestVectorJacobianProduct:
         with pytest.warns(UserWarning, match="The vjp method only works with complex-valued dy"):
             dev.vjp(tape.measurements, dy2)
 
-    @pytest.mark.skipif(device_name == device_name, reason="Adjoint differentiation does not support State measurements.")
+    @pytest.mark.skipif(
+        device_name == device_name,
+        reason="Adjoint differentiation does not support State measurements.",
+    )
     def test_statevector_complex_circuit(self, dev, tol):
         dy = np.array(
             [[1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]

@@ -1,4 +1,4 @@
-// Copyright 2018-2022 Xanadu Quantum Technologies Inc.
+// Copyright 2018-2023 Xanadu Quantum Technologies Inc.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -272,7 +272,8 @@ void registerBackendSpecificAlgorithms([[maybe_unused]] py::module_ &m) {}
 auto getBackendInfo() -> pybind11::dict {
     using namespace pybind11::literals;
 
-    return pybind11::dict("NAME"_a = "lightning.kokkos", "USE_KOKKOS"_a = true, "USE_SPMV"_a = true);
+    return pybind11::dict("NAME"_a = "lightning.kokkos", "USE_KOKKOS"_a = true,
+                          "USE_SPMV"_a = true);
 }
 
 /**

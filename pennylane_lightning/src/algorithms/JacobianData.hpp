@@ -249,10 +249,10 @@ template <class StateVectorT> class JacobianData {
      * (e.g. QubitStateVector) or Hamiltonian coefficients.
      * @endrst
      */
-    JacobianData(size_t num_params, size_t num_elem, const ComplexT *ps,
+    JacobianData(size_t num_params, size_t num_elem, const ComplexT *sv_ptr,
                  std::vector<std::shared_ptr<Observable<StateVectorT>>> obs,
                  OpsData<StateVectorT> ops, std::vector<size_t> trainP)
-        : num_parameters(num_params), num_elements(num_elem), psi(ps),
+        : num_parameters(num_params), num_elements(num_elem), psi(sv_ptr),
           observables(std::move(obs)), operations(std::move(ops)),
           trainableParams(std::move(trainP)) {
         /* When the Hamiltonian has parameters, trainable parameters include
