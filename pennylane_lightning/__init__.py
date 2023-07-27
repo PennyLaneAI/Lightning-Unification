@@ -24,3 +24,5 @@ if CPP_BINARY_AVAILABLE:
         from .lightning_qubit import LightningQubit
     else:
         ValueError(f"Invalid backend name: {backend_info()['NAME']}")
+else:
+    from .lightning_qubit import LightningQubit

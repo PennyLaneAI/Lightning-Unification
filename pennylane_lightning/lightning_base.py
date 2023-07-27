@@ -201,3 +201,8 @@ else:  # binaries not available
             else:
                 raise TypeError(f"Unsupported complex Type: {c_dtype}")
             super().__init__(wires, r_dtype=r_dtype, c_dtype=c_dtype, **kwargs)
+
+        @property
+        def state_vector(self):
+            """Returns a handle to the statevector."""
+            return self._state
