@@ -137,7 +137,7 @@ requirements = [
 
 pennylane_plugins = ["lightning.qubit = pennylane_lightning:LightningQubit"] #TODO needed even with Kokkos backend
 if backend == "kokkos":
-    pennylane_plugins += [f"lightning.{backend} = pennylane_lightning:LightningQubit"]
+    pennylane_plugins = [f"lightning.{backend} = pennylane_lightning:LightningKokkos"]
     
 info = {
     "name": "PennyLane-Lightning",

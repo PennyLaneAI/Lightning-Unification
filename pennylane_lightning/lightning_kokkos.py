@@ -156,7 +156,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
     }
 
     class LightningKokkos(LightningBase):
-        """PennyLane Lightning Kokkosf device.
+        """PennyLane Lightning Kokkos device.
 
         A device that interfaces with C++ to perform fast linear algebra calculations.
 
@@ -165,24 +165,18 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
         Args:
             wires (int): the number of wires to initialize the device with
+            sync (bool): immediately sync with host-sv after applying operations
             c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
+            kokkos_args (InitializationSettings): binding for Kokkos::InitializationSettings (threading parameters).
             shots (int): How many times the circuit should be evaluated (or sampled) to estimate
                 the expectation values. Defaults to ``None`` if not specified. Setting
                 to ``None`` results in computing statistics like expectation values and
                 variances analytically.
-            mcmc (bool): Determine whether to use the approximate Markov Chain Monte Carlo sampling method when generating samples.
-            kernel_name (str): name of transition kernel. The current version supports two kernels: ``"Local"`` and ``"NonZeroRandom"``.
-                The local kernel conducts a bit-flip local transition between states. The local kernel generates a
-                random qubit site and then generates a random number to determine the new bit at that qubit site. The ``"NonZeroRandom"`` kernel
-                randomly transits between states that have nonzero probability.
-            num_burnin (int): number of steps that will be dropped. Increasing this value will
-                result in a closer approximation but increased runtime.
-            batch_obs (bool): Determine whether we process observables in parallel when computing the
-                jacobian. This value is only relevant when the lightning kokkos is built with OpenMP.
         """
 
         name = "Lightning Kokkos PennyLane plugin"
         short_name = "lightning.kokkos"
+        kokkos_config = {}
         operations = allowed_operations
         observables = allowed_observables
 
@@ -190,33 +184,31 @@ if backend_info()["NAME"] == "lightning.kokkos":
             self,
             wires,
             *,
+            sync=True,
             c_dtype=np.complex128,
             shots=None,
-            mcmc=False,
-            kernel_name="Local",
-            num_burnin=100,
             batch_obs=False,
+            kokkos_args=None,
         ):
             super().__init__(wires, shots=shots, c_dtype=c_dtype)
+
+            if kokkos_args is None:
+                self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires)
+            elif isinstance(kokkos_args, InitializationSettings):
+                self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires, kokkos_args)
+            else:
+                raise TypeError(
+                    f"Argument kokkos_args must be of {type(InitializationSettings())} but it is of {type(kokkos_args)}."
+                )
+            self._sync = sync
+
+            if not LightningKokkos.kokkos_config:
+                LightningKokkos.kokkos_config = _kokkos_configuration()
 
             # Create the initial state. Internally, we store the
             # state as an array of dimension [2]*wires.
             self._state = self._create_basis_state(0)
             self._pre_rotated_state = self._state
-
-            self._mcmc = mcmc
-            if self._mcmc:
-                if kernel_name not in [
-                    "Local",
-                    "NonZeroRandom",
-                ]:
-                    raise NotImplementedError(
-                        f"The {kernel_name} is not supported and currently only 'Local' and 'NonZeroRandom' kernels are supported."
-                    )
-                if num_burnin >= shots:
-                    raise ValueError("Shots should be greater than num_burnin.")
-                self._kernel_name = kernel_name
-                self._num_burnin = num_burnin
 
         @staticmethod
         def _asarray(arr, dtype=None):
@@ -246,24 +238,64 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 representing the statevector of the basis state
             Note: This function does not support broadcasted inputs yet.
             """
-            state = np.zeros(2**self.num_wires, dtype=np.complex128)
-            state[index] = 1
-            state = self._asarray(state, dtype=self.C_DTYPE)
-            return self._reshape(state, [2] * self.num_wires)
+            self._kokkos_state.setBasisState(index)
+            # state = np.zeros(2**self.num_wires, dtype=np.complex128)
+            # state[index] = 1
+            # state = self._asarray(state, dtype=self.C_DTYPE)
+            # return self._reshape(state, [2] * self.num_wires)
 
         def reset(self):
             """Reset the device"""
             super().reset()
 
             # init the state vector to |00..0>
-            self._state = self._create_basis_state(0)
-            self._pre_rotated_state = self._state
+            self._kokkos_state.resetKokkos()  # Sync reset
+
+        def syncH2D(self, state_vector):
+            """Copy the state vector data on host provided by the user to the state vector on the device
+            Args:
+                state_vector(array[complex]): the state vector array on host.
+            **Example**
+            >>> dev = qml.device('lightning.kokkos', wires=3)
+            >>> obs = qml.Identity(0) @ qml.PauliX(1) @ qml.PauliY(2)
+            >>> obs1 = qml.Identity(1)
+            >>> H = qml.Hamiltonian([1.0, 1.0], [obs1, obs])
+            >>> state_vector = np.array([0.0 + 0.0j, 0.0 + 0.1j, 0.1 + 0.1j, 0.1 + 0.2j,
+                0.2 + 0.2j, 0.3 + 0.3j, 0.3 + 0.4j, 0.4 + 0.5j,], dtype=np.complex64,)
+            >>> dev.syncH2D(state_vector)
+            >>> res = dev.expval(H)
+            >>> print(res)
+            1.0
+            """
+            self._kokkos_state.HostToDevice(state_vector.ravel(order="C"))
+
+        def syncD2H(self, state_vector):
+            """Copy the state vector data on device to a state vector on the host provided by the user
+            Args:
+                state_vector(array[complex]): the state vector array on host
+            **Example**
+            >>> dev = qml.device('lightning.kokkos', wires=1)
+            >>> dev.apply([qml.PauliX(wires=[0])])
+            >>> state_vector = np.zeros(2**dev.num_wires).astype(dev.C_DTYPE)
+            >>> dev.syncD2H(state_vector)
+            >>> print(state_vector)
+            [0.+0.j 1.+0.j]
+            """
+            self._kokkos_state.DeviceToHost(state_vector.ravel(order="C"))
 
         @property
         def state(self):
-            # Flattening the state.
-            shape = (1 << self.num_wires,)
-            return self._reshape(self._pre_rotated_state, shape)
+            """Copy the state vector data from the device to the host. A state vector Numpy array is explicitly allocated on the host to store and return the data.
+            **Example**
+            >>> dev = qml.device('lightning.kokkos', wires=1)
+            >>> dev.apply([qml.PauliX(wires=[0])])
+            >>> print(dev.state)
+            [0.+0.j 1.+0.j]
+            """
+            state = np.zeros(2**self.num_wires, dtype=self.C_DTYPE)
+            state = self._asarray(state, dtype=self.C_DTYPE)
+            self.syncD2H(state)
+            return state
 
         def _apply_state_vector(self, state, device_wires):
             """Initialize the internal state vector in a specified state.
@@ -281,7 +313,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
             if len(device_wires) == self.num_wires and Wires(sorted(device_wires)) == device_wires:
                 # Initialize the entire device state with the input state
-                self._state = self._reshape(state, output_shape)
+                self.syncH2D(self._reshape(state, output_shape))
                 return
 
             # generate basis states on subset of qubits via the cartesian product
@@ -294,9 +326,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
             # get indices for which the state is changed to input state vector elements
             ravelled_indices = np.ravel_multi_index(unravelled_indices.T, [2] * self.num_wires)
 
-            state = self._scatter(ravelled_indices, state, [2**self.num_wires])
-            state = self._reshape(state, output_shape)
-            self._state = self._asarray(state, dtype=self.C_DTYPE)
+            self._kokkos_state.setStateVector(ravelled_indices, state)  # this operation on device
 
         def _apply_basis_state(self, state, wires):
             """Initialize the state vector in a specified computational basis state.
@@ -547,10 +577,6 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 if self.use_csingle
                 else MeasurementsC128(state_vector)
             )
-            if self._mcmc:
-                return M.generate_mcmc_samples(
-                    len(self.wires), self._kernel_name, self._num_burnin, self.shots
-                ).astype(int, copy=False)
             return M.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
 
         @staticmethod
