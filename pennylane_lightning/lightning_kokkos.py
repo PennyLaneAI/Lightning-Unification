@@ -462,12 +462,10 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 return np.squeeze(np.mean(samples, axis=0))
 
             # Initialization of state
-            # ket = np.ravel(self._pre_rotated_state)
-
             M = (
-                MeasurementsC64(self._kokkos_state)
+                MeasurementsC64(self.state_vector)
                 if self.use_csingle
-                else MeasurementsC128(self._kokkos_state)
+                else MeasurementsC128(self.state_vector)
             )
             if observable.name == "SparseHamiltonian":
                 CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
@@ -647,12 +645,10 @@ if backend_info()["NAME"] == "lightning.kokkos":
                         "The number of qubits of starting_state must be the same as "
                         "that of the device."
                     )
-                ket = self._asarray(starting_state, dtype=self.C_DTYPE)
-            else:
-                if not use_device_state:
-                    self.reset()
-                    self.apply(tape.operations)
-                ket = self._pre_rotated_state
+                self._apply_state_vector(starting_state, self.wires)
+            elif not use_device_state:
+                self.reset()
+                self.apply(tape.operations)
 
             obs_serialized = _serialize_observables(
                 tape, self.wire_map, use_csingle=self.use_csingle
@@ -685,8 +681,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 # whether there must be only one state preparation...
                 tp_shift = [i - 1 for i in tp_shift]
 
-            ket = ket.reshape(-1)
-            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
+            state_vector = self.state_vector
             return {
                 "state_vector": state_vector,
                 "obs_serialized": obs_serialized,
