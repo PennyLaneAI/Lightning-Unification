@@ -584,7 +584,8 @@ template <class StateVectorT> void lightningClassBindings(py::module_ &m) {
     std::string class_name = "StateVectorC" + bitsize;
     auto pyclass =
         py::class_<StateVectorT>(m, class_name.c_str(), py::module_local());
-    pyclass.def(py::init(&createStateVectorFromNumpyData<StateVectorT>));
+    pyclass.def(py::init(&createStateVectorFromNumpyData<StateVectorT>))
+        .def_property_readonly("size", &StateVectorT::getLength);
 
     registerBackendClassSpecificBindings<StateVectorT>(pyclass);
 

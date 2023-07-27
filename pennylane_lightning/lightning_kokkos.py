@@ -306,6 +306,12 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 device_wires (Wires): wires that get initialized in the state
             """
 
+            if isinstance(state, self._kokkos_state.__class__):
+                state_data = np.zeros(state.size, dtype=self.C_DTYPE)
+                state_data = self._asarray(state_data, dtype=self.C_DTYPE)
+                state.DeviceToHost(state_data.ravel(order="C"))
+                state = state_data
+
             # translate to wire labels used by device
             device_wires = self.map_wires(device_wires)
 
@@ -521,25 +527,19 @@ if backend_info()["NAME"] == "lightning.kokkos":
             ket = np.ravel(self._pre_rotated_state)
 
             M = (
-                MeasurementsC64(self._kokkos_state)
+                MeasurementsC64(self.state_vector)
                 if self.use_csingle
-                else MeasurementsC128(self._kokkos_state)
+                else MeasurementsC128(self.state_vector)
             )
 
             if observable.name == "SparseHamiltonian":
-                if backend_info()["USE_KOKKOS"]:
-                    # ensuring CSR sparse representation.
-
-                    CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
-                        copy=False
-                    )
-                    return M.var(
-                        CSR_SparseHamiltonian.indptr,
-                        CSR_SparseHamiltonian.indices,
-                        CSR_SparseHamiltonian.data,
-                    )
-                raise NotImplementedError(
-                    "The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels."
+                CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
+                    copy=False
+                )
+                return M.var(
+                    CSR_SparseHamiltonian.indptr,
+                    CSR_SparseHamiltonian.indices,
+                    CSR_SparseHamiltonian.data,
                 )
 
             if (
@@ -702,7 +702,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
             tape_return_type = self._check_adjdiff_supported_measurements(tape.measurements)
 
             if not tape_return_type:  # the tape does not have measurements
-                return np.array([], dtype=self._state.dtype)
+                return np.array([], dtype=self.state.dtype)
 
             if tape_return_type is State:
                 raise QuantumFunctionError(
@@ -715,7 +715,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
             processed_data = self._process_jacobian_tape(tape, starting_state, use_device_state)
 
             if not processed_data:  # training_params is empty
-                return np.array([], dtype=self._state.dtype)
+                return np.array([], dtype=self.state.dtype)
 
             trainable_params = processed_data["tp_shift"]
 

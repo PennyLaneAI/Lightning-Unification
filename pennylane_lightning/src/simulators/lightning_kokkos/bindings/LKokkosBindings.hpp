@@ -172,7 +172,7 @@ void registerBackendClassSpecificBindings(PyClass &pyclass) {
             "Synchronize data from the host device to GPU.")
         .def(
             "apply",
-            [](StateVectorKokkos<PrecisionT> &sv, const std::string &str,
+            [](StateVectorT &sv, const std::string &str,
                const std::vector<size_t> &wires, bool inv,
                [[maybe_unused]] const std::vector<std::vector<ParamT>> &params,
                [[maybe_unused]] const np_arr_c &gate_matrix) {
