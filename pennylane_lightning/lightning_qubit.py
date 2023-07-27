@@ -21,7 +21,7 @@ from warnings import warn
 
 from .lightning_base import backend_info, CPP_BINARY_AVAILABLE, LightningBase
 
-if backend_info()["NAME"] in ("lightning.kokkos", "lightning.qubit"):
+if backend_info()["NAME"] == "lightning.qubit":
     from typing import List
     from itertools import islice, product
     from os import getenv
@@ -59,15 +59,11 @@ if backend_info()["NAME"] in ("lightning.kokkos", "lightning.qubit"):
     from .pennylane_lightning_ops.algorithms import (
         AdjointJacobianC64,
         create_ops_listC64,
+        VectorJacobianProductC64,
         AdjointJacobianC128,
         create_ops_listC128,
+        VectorJacobianProductC128,
     )
-
-    if backend_info()["NAME"] == "lightning.qubit":
-        from .pennylane_lightning_ops.algorithms import (
-            VectorJacobianProductC64,
-            VectorJacobianProductC128,
-        )
 
     from ._serialize import _serialize_ob, _serialize_observables, _serialize_ops
 
@@ -348,7 +344,6 @@ if backend_info()["NAME"] in ("lightning.kokkos", "lightning.qubit"):
                 method = getattr(sim, o.name, None)
 
                 wires = self.wires.indices(o.wires)
-
                 if method is None:
                     # Inverse can be set to False since qml.matrix(o) is already in inverted form
                     method = getattr(sim, "applyMatrix")
@@ -361,9 +356,6 @@ if backend_info()["NAME"] in ("lightning.kokkos", "lightning.qubit"):
                     inv = False
                     param = o.parameters
                     method(wires, inv, param)
-
-                if backend_info()["NAME"] == "lightning.kokkos":
-                    sim.DeviceToHost(state_vector.ravel(order="C"))
 
             return np.reshape(state_vector, state.shape)
 

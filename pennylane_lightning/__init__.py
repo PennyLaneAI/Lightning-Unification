@@ -17,4 +17,10 @@ from ._version import __version__
 
 from .lightning_base import CPP_BINARY_AVAILABLE, backend_info
 
-from .lightning_qubit import LightningQubit
+if CPP_BINARY_AVAILABLE:
+    if backend_info()["NAME"] == "lightning.kokkos":
+        from .lightning_kokkos import LightningKokkos
+    elif backend_info()["NAME"] == "lightning.qubit":
+        from .lightning_qubit import LightningQubit
+    else:
+        ValueError(f"Invalid backend name: {backend_info()['NAME']}")
