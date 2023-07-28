@@ -167,7 +167,8 @@ jobs:
 
           CIBW_ENVIRONMENT: |
             PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH
-            BACKEND=${{ matrix.pl_backend }}
+            
+          BACKEND: ${{ matrix.pl_backend }}
 
           # Testing of built wheels
           CIBW_TEST_REQUIRES: pytest pytest-cov pytest-mock flaky
