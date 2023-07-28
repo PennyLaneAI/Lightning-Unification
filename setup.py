@@ -132,6 +132,8 @@ with open(os.path.join("pennylane_lightning", "_version.py")) as f:
 
 requirements = [
     "pennylane>=0.30",
+    "jax<=0.4.13",
+    "jaxlib<=0.4.13",
 ]
 
 
