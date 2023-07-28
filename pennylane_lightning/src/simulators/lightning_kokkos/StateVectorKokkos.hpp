@@ -432,7 +432,6 @@ class StateVectorKokkos final
                 Kokkos::initialize(kokkos_args);
             }
         }
-
         if (num_qubits > 0) {
             data_ = std::make_unique<KokkosVector>("data_", exp2(num_qubits));
             setBasisState(0U);
@@ -450,8 +449,12 @@ class StateVectorKokkos final
      * @param index Index of the target element.
      */
     void setBasisState(const size_t index) {
-        initZeros();
-        getView()(index) = ComplexT{1.0, 0.0};
+        KokkosVector sv_view =
+            getView(); // circumvent error capturing this with KOKKOS_LAMBDA
+        Kokkos::parallel_for(
+            sv_view.size(), KOKKOS_LAMBDA(const size_t i) {
+                sv_view(i) = ComplexT{(i == index) * 1.0, 0.0};
+            });
     }
 
     /**
@@ -469,7 +472,7 @@ class StateVectorKokkos final
                                          indices.data(), indices.size()));
         Kokkos::deep_copy(d_values, UnmanagedConstComplexHostView(
                                         values.data(), values.size()));
-        KokkosVector &sv_view =
+        KokkosVector sv_view =
             getView(); // circumvent error capturing this with KOKKOS_LAMBDA
         Kokkos::parallel_for(
             indices.size(), KOKKOS_LAMBDA(const std::size_t i) {
