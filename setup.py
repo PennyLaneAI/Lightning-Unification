@@ -20,16 +20,19 @@ from pathlib import Path
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 
+default_backend = "lightning_qubit"
+supported_backends = ("lightning_kokkos", "lightning_qubit")
+
 def get_backend():
     if "CMAKE_ARGS" in os.environ:
         cmake_args = os.environ["CMAKE_ARGS"].split(" ")
         arg = [x for x in cmake_args if "PL_BACKEND" in x]
-        backend = arg[0].split("=")[1]
+        backend = arg[0].split("=")[1] if arg else default_backend
     elif "BACKEND" in os.environ:
-        backend = os.environ.get("BACKEND", "qubit")
+        backend = os.environ.get("BACKEND", default_backend)
     else:
-        backend = "lightning_qubit"
-    if backend not in ["lightning_kokkos", "lightning_qubit"]:
+        backend = default_backend
+    if backend not in supported_backends:
         raise ValueError(f"Invalid backend {backend}.")
     return backend
 
