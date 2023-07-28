@@ -147,7 +147,6 @@ if backend_info()["NAME"] == "lightning.kokkos":
         "Hadamard",
         "Hermitian",
         "Identity",
-        "Projector",
         "SparseHamiltonian",
         "Hamiltonian",
         "Sum",
