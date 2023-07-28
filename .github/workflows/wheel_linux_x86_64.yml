@@ -176,7 +176,7 @@ jobs:
             pip install git+https://github.com/PennyLaneAI/pennylane.git@master
 
           CIBW_TEST_COMMAND: |
-            DEVICENAME=`echo lightning_qubit | sed "s/_/./g"`
+            DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
             pl-device-test --device=${DEVICENAME} --skip-ops -x --tb=short --no-flaky-report
 
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
