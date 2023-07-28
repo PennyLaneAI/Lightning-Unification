@@ -322,9 +322,9 @@ jobs:
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
-          pytest tests/ $COVERAGE_FLAGS
           DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
           echo ${DEVICENAME}
+          pytest tests/ $COVERAGE_FLAGS
           pl-device-test --device ${DEVICENAME} --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
           pl-device-test --device ${DEVICENAME} --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
           mv coverage.xml coverage-${{ github.job }}.xml
