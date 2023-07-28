@@ -20,10 +20,21 @@ from pathlib import Path
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 
-backend = os.environ.get("BACKEND", "qubit")
-backend = backend.replace("lightning_", "")
-if backend not in ["kokkos", "qubit"]:
-    raise ValueError(f"Invalid backend {backend}.")
+def get_backend():
+    if "CMAKE_ARGS" in os.environ:
+        cmake_args = os.environ["CMAKE_ARGS"].split(" ")
+        arg = [x for x in cmake_args if "PL_BACKEND" in x]
+        backend = arg[0].split("=")[1]
+    elif "BACKEND" in os.environ:
+        backend = os.environ.get("BACKEND", "qubit")
+    else:
+        backend = "lightning_qubit"
+    if backend not in ["lightning_kokkos", "lightning_qubit"]:
+        raise ValueError(f"Invalid backend {backend}.")
+    return backend
+
+backend = get_backend()
+device_name = backend.replace("_", ".")
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
@@ -82,7 +93,7 @@ class CMakeBuild(build_ext):
                 f"-DCMAKE_MAKE_PROGRAM={ninja_path}",
             ]
 
-        configure_args += [f"-DPL_BACKEND=lightning_{backend}"]
+        configure_args += [f"-DPL_BACKEND={backend}"]
         configure_args += self.cmake_defines
 
         # Add more platform dependent options
@@ -136,10 +147,9 @@ requirements = [
     "jaxlib<=0.4.13",
 ]
 
-
-pennylane_plugins = ["lightning.qubit = pennylane_lightning:LightningQubit"] #TODO needed even with Kokkos backend
-if backend == "kokkos":
-    pennylane_plugins = [f"lightning.{backend} = pennylane_lightning:LightningKokkos"]
+suffix = backend.replace("lightning_","")
+suffix = suffix[0].upper() + suffix[1:]
+pennylane_plugins = [f"{device_name} = pennylane_lightning:Lightning{suffix}"]
     
 info = {
     "name": "PennyLane-Lightning",

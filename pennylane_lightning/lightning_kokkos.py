@@ -588,7 +588,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
             Returns:
                 Expectation or State: a common return type of measurements.
             """
-            if len(measurements) == 0:
+            if not measurements:
                 return None
 
             if len(measurements) == 1 and measurements[0].return_type is State:
@@ -596,23 +596,22 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 raise QuantumFunctionError("Not supported")
 
             # Now the return_type of measurement processes must be expectation
-            if not all([m.return_type is Expectation for m in measurements]):
+            if any(m.return_type is not Expectation for m in measurements):
                 raise QuantumFunctionError(
                     "Adjoint differentiation method does not support expectation return type "
                     "mixed with other return types"
                 )
 
             for m in measurements:
-                if not isinstance(m.obs, Tensor):
-                    if isinstance(m.obs, Projector):
+                if isinstance(m.obs, Tensor):
+                    if any(isinstance(o, Projector) for o in m.obs.non_identity_obs):
                         raise QuantumFunctionError(
                             "Adjoint differentiation method does not support the Projector observable"
                         )
-                else:
-                    if any([isinstance(o, Projector) for o in m.obs.non_identity_obs]):
-                        raise QuantumFunctionError(
-                            "Adjoint differentiation method does not support the Projector observable"
-                        )
+                elif isinstance(m.obs, Projector):
+                    raise QuantumFunctionError(
+                        "Adjoint differentiation method does not support the Projector observable"
+                    )
             return Expectation
 
         @staticmethod
@@ -838,38 +837,6 @@ if backend_info()["NAME"] == "lightning.kokkos":
                     new_tape._measurements = [qml.expval(ham)]
 
                     return self.adjoint_jacobian(new_tape, starting_state, use_device_state)
-
-                return processing_fn
-
-            if tape_return_type is State:
-                if len(dy) != 2 ** len(self.wires):
-                    raise ValueError(
-                        "Size of the provided vector dy must be the same as the size of the statevector"
-                    )
-                if np.isrealobj(dy):
-                    warn(
-                        "The vjp method only works with complex-valued dy when the tape is returning a statevector. Upcasting dy."
-                    )
-
-                dy = dy.astype(self.C_DTYPE)
-
-                def processing_fn(tape):
-                    nonlocal dy
-                    processed_data = self._process_jacobian_tape(
-                        tape, starting_state, use_device_state
-                    )
-                    calculate_vjp = (
-                        VectorJacobianProductC64()
-                        if self.use_csingle
-                        else VectorJacobianProductC128()
-                    )
-
-                    return calculate_vjp(
-                        processed_data["state_vector"],
-                        processed_data["ops_serialized"],
-                        dy,
-                        processed_data["tp_shift"],
-                    )
 
                 return processing_fn
 

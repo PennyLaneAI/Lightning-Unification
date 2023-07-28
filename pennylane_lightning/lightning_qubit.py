@@ -380,8 +380,7 @@ if backend_info()["NAME"] == "lightning.qubit":
             for operation in operations:
                 if isinstance(operation, (QubitStateVector, BasisState)):
                     raise DeviceError(
-                        "Operation {} cannot be used after other Operations have already been "
-                        "applied on a {} device.".format(operation.name, self.short_name)
+                        f"Operation {operation.name} cannot be used after other Operations have already been applied on a {self.short_name} device."
                     )
 
             if operations:
@@ -558,30 +557,29 @@ if backend_info()["NAME"] == "lightning.qubit":
             Returns:
                 Expectation or State: a common return type of measurements.
             """
-            if len(measurements) == 0:
+            if not measurements:
                 return None
 
             if len(measurements) == 1 and measurements[0].return_type is State:
                 return State
 
             # Now the return_type of measurement processes must be expectation
-            if not all([m.return_type is Expectation for m in measurements]):
+            if any(m.return_type is not Expectation for m in measurements):
                 raise QuantumFunctionError(
                     "Adjoint differentiation method does not support expectation return type "
                     "mixed with other return types"
                 )
 
             for m in measurements:
-                if not isinstance(m.obs, Tensor):
-                    if isinstance(m.obs, Projector):
+                if isinstance(m.obs, Tensor):
+                    if any(isinstance(o, Projector) for o in m.obs.non_identity_obs):
                         raise QuantumFunctionError(
                             "Adjoint differentiation method does not support the Projector observable"
                         )
-                else:
-                    if any([isinstance(o, Projector) for o in m.obs.non_identity_obs]):
-                        raise QuantumFunctionError(
-                            "Adjoint differentiation method does not support the Projector observable"
-                        )
+                elif isinstance(m.obs, Projector):
+                    raise QuantumFunctionError(
+                        "Adjoint differentiation method does not support the Projector observable"
+                    )
             return Expectation
 
         @staticmethod
