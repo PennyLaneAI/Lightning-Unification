@@ -168,7 +168,7 @@ jobs:
           CIBW_ENVIRONMENT: |
             PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH
             
-          BACKEND: ${{ matrix.pl_backend }}
+          CMAKE_ARGS: "-DPL_BACKEND=${{ matrix.pl_backend }}"
 
           # Testing of built wheels
           CIBW_TEST_REQUIRES: pytest pytest-cov pytest-mock flaky
@@ -178,7 +178,6 @@ jobs:
 
           CIBW_TEST_COMMAND: |
             DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
-            echo ${DEVICENAME}
             pl-device-test --device=${DEVICENAME} --skip-ops -x --tb=short --no-flaky-report
 
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
