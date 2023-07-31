@@ -24,13 +24,17 @@ default_backend = "lightning_qubit"
 supported_backends = ("lightning_kokkos", "lightning_qubit")
 
 def get_backend():
+    backend = None
+    if "PL_BACKEND" in os.environ:
+        backend = os.environ.get("PL_BACKEND", default_backend)
     if "CMAKE_ARGS" in os.environ:
         cmake_args = os.environ["CMAKE_ARGS"].split(" ")
         arg = [x for x in cmake_args if "PL_BACKEND" in x]
-        backend = arg[0].split("=")[1] if arg else default_backend
-    elif "BACKEND" in os.environ:
-        backend = os.environ.get("BACKEND", default_backend)
-    else:
+        cmake_backend = arg[0].split("=")[1] if arg else default_backend
+        if backend is not None and backend != cmake_backend:
+            raise ValueError(f"Backends {backend} and {cmake_backend} specified by PL_BACKEND and CMAKE_ARGS respectively do not match.")
+        backend = cmake_backend
+    if backend is None:
         backend = default_backend
     if backend not in supported_backends:
         raise ValueError(f"Invalid backend {backend}.")
