@@ -252,6 +252,7 @@ jobs:
             cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
             cmake --build ./Build
             ls ./Build
+            cd ./Build
             echo mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
             mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
             echo OMP_PROC_BIND=false
