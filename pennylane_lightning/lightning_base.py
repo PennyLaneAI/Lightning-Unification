@@ -33,7 +33,13 @@ if CPP_BINARY_AVAILABLE:
 else:
 
     def backend_info():
+        # pylint: disable=missing-function-docstring
         return {"NAME": "NONE"}
+
+def _chunk_iterable(iteration, num_chunks):
+    "Lazy-evaluated chunking of given iterable from https://stackoverflow.com/a/22045226"
+    iteration = iter(iteration)
+    return iter(lambda: tuple(islice(iteration, num_chunks)), ())
 
 
 if CPP_BINARY_AVAILABLE:
@@ -51,11 +57,6 @@ if CPP_BINARY_AVAILABLE:
     )
 
     from ._serialize import _serialize_observables, _serialize_ops
-
-    def _chunk_iterable(iteration, num_chunks):
-        "Lazy-evaluated chunking of given iterable from https://stackoverflow.com/a/22045226"
-        iteration = iter(iteration)
-        return iter(lambda: tuple(islice(iteration, num_chunks)), ())
 
     class LightningBase(QubitDevice):
         """PennyLane Lightning Base device.

@@ -375,10 +375,15 @@ jobs:
       - name: Build and run unit tests
         run: |
             cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DBUILD_TESTS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
-            cmake --build ./Build
+            cmake --build ./Build --verbose
+            ls ./Build
+            echo cd ./Build 
             cd ./Build
+            echo mkdir -p ./tests/results
             mkdir -p ./tests/results
-            for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results/report_$file.xml; done;
+            echo for file in *runner ; do ./$file; done;
+            for file in *runner ; do OMP_PROC_BIND=false ./$file; done;
+            for file in *runner ; do OMP_PROC_BIND=false ./$file --order lex --reporter junit --out ./tests/results/report_$file.xml; done;
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
