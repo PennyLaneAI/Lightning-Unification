@@ -26,12 +26,6 @@ if backend_info()["NAME"] == "lightning.qubit":
     from itertools import islice
     from os import getenv
 
-    from .pennylane_lightning_ops import (
-        allocate_aligned_array,
-        get_alignment,
-        best_alignment,
-    )
-
     from pennylane import (
         math,
         BasisState,
@@ -50,6 +44,9 @@ if backend_info()["NAME"] == "lightning.qubit":
     from ._version import __version__
 
     from .pennylane_lightning_ops import (
+        allocate_aligned_array,
+        get_alignment,
+        best_alignment,
         MeasurementsC64,
         StateVectorC64,
         MeasurementsC128,
@@ -58,8 +55,10 @@ if backend_info()["NAME"] == "lightning.qubit":
 
     from .pennylane_lightning_ops.algorithms import (
         AdjointJacobianC64,
+        create_ops_listC64,
         VectorJacobianProductC64,
         AdjointJacobianC128,
+        create_ops_listC128,
         VectorJacobianProductC128,
     )
 
@@ -248,6 +247,21 @@ if backend_info()["NAME"] == "lightning.qubit":
             # init the state vector to |00..0>
             self._state = self._create_basis_state(0)
             self._pre_rotated_state = self._state
+
+        @property
+        def create_ops_list(self):
+            return create_ops_listC64 if self.use_csingle else create_ops_listC128
+
+        @property
+        def measurements(self):
+            ket = np.ravel(self._state)
+            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
+            # state_vector = self.state_vector
+            return (
+                MeasurementsC64(state_vector)
+                if self.use_csingle
+                else MeasurementsC128(state_vector)
+            )
 
         @property
         def state(self):
@@ -517,6 +531,23 @@ if backend_info()["NAME"] == "lightning.qubit":
                     len(self.wires), self._kernel_name, self._num_burnin, self.shots
                 ).astype(int, copy=False)
             return M.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
+
+        def probability_lightning(self, wires):
+            """Return the probability of each computational basis state.
+
+            Args:
+                wires (Iterable[Number, str], Number, str, Wires): wires to return
+                    marginal probabilities for. Wires not provided are traced out of the system.
+
+            Returns:
+                array[float]: list of the probabilities
+            """
+            state_vector = self.state_vector
+            return (
+                MeasurementsC64(state_vector)
+                if self.use_csingle
+                else MeasurementsC128(state_vector)
+            ).probs(wires)
 
         @staticmethod
         def _check_adjdiff_supported_measurements(measurements: List[MeasurementProcess]):

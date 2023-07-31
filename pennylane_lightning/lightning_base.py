@@ -18,23 +18,22 @@ and interfaces with C++ for improved performance.
 """
 import numpy as np
 from pennylane.measurements import MeasurementProcess
+from pathlib import Path
 
 from ._version import __version__
+import pennylane_lightning
 
-try:
-    from .pennylane_lightning_ops import (
-        backend_info,
-        MeasurementsC64,
-        MeasurementsC128,
-    )
-
-    CPP_BINARY_AVAILABLE = True
-except ModuleNotFoundError:
+libpath = Path(pennylane_lightning.__file__)
+libpath = libpath.parents[0].glob("pennylane_lightning_ops.*")
+CPP_BINARY_AVAILABLE = len(list(libpath)) > 0
+if not CPP_BINARY_AVAILABLE:
 
     def backend_info():
         return {"NAME": "NONE"}
 
-    CPP_BINARY_AVAILABLE = False
+else:
+    from .pennylane_lightning_ops import backend_info
+
 
 if CPP_BINARY_AVAILABLE:
     from typing import List
@@ -48,11 +47,6 @@ if CPP_BINARY_AVAILABLE:
     from pennylane import (
         BasisState,
         QubitStateVector,
-    )
-
-    from .pennylane_lightning_ops.algorithms import (
-        create_ops_listC64,
-        create_ops_listC128,
     )
 
     from ._serialize import _serialize_observables, _serialize_ops
@@ -174,14 +168,7 @@ if CPP_BINARY_AVAILABLE:
                 raise RuntimeError(
                     "Lightning does not currently support out-of-order indices for probabilities"
                 )
-
-            state_vector = self.state_vector
-            M = (
-                MeasurementsC64(state_vector)
-                if self.use_csingle
-                else MeasurementsC128(state_vector)
-            )
-            return M.probs(device_wires)
+            return self.probability_lightning(device_wires)
 
         def _get_diagonalizing_gates(self, circuit: qml.tape.QuantumTape) -> List[Operation]:
             skip_diagonalizing = lambda obs: isinstance(obs, qml.Hamiltonian) or (
@@ -258,11 +245,7 @@ if CPP_BINARY_AVAILABLE:
             return int(qml.math.dot(state, basis_states))
 
         def _process_jacobian_tape(self, tape, starting_state, use_device_state):
-            # To support np.complex64 based on the type of self._state
-            if self.use_csingle:
-                create_ops_list = create_ops_listC64
-            else:
-                create_ops_list = create_ops_listC128
+            create_ops_list = self.create_ops_list
 
             state_vector = self._init_process_jacobian_tape(tape, starting_state, use_device_state)
 

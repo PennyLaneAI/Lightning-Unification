@@ -16,8 +16,8 @@ r"""
 This module contains the :class:`~.LightningQubit` class, a PennyLane simulator device that
 interfaces with C++ for fast linear algebra calculations.
 """
-import numpy as np
 from warnings import warn
+import numpy as np
 
 from .lightning_base import backend_info, LightningBase
 
@@ -25,12 +25,6 @@ if backend_info()["NAME"] == "lightning.kokkos":
     from typing import List
     from itertools import islice
     from os import getenv
-
-    from .pennylane_lightning_ops import (
-        allocate_aligned_array,
-        get_alignment,
-        best_alignment,
-    )
 
     from pennylane import (
         math,
@@ -41,7 +35,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
         DeviceError,
         QuantumFunctionError,
     )
-    from pennylane.operation import Tensor, Operation
+    from pennylane.operation import Tensor
     from pennylane.ops.op_math import Adjoint
     from pennylane.measurements import MeasurementProcess, Expectation, State
     from pennylane.wires import Wires
@@ -50,7 +44,11 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
     from ._version import __version__
 
+    # pylint: disable=import-error, no-name-in-module
     from .pennylane_lightning_ops import (
+        allocate_aligned_array,
+        get_alignment,
+        best_alignment,
         InitializationSettings,
         print_configuration,
         MeasurementsC64,
@@ -59,6 +57,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
         StateVectorC128,
     )
 
+    # pylint: disable=import-error, no-name-in-module
     from .pennylane_lightning_ops.algorithms import (
         AdjointJacobianC64,
         create_ops_listC64,
@@ -66,7 +65,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
         create_ops_listC128,
     )
 
-    from ._serialize import _serialize_ob, _serialize_observables, _serialize_ops
+    from ._serialize import _serialize_ob
 
     def _kokkos_dtype(dtype):
         if dtype not in [np.complex128, np.complex64]:
@@ -166,8 +165,10 @@ if backend_info()["NAME"] == "lightning.kokkos":
         Args:
             wires (int): the number of wires to initialize the device with
             sync (bool): immediately sync with host-sv after applying operations
-            c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
-            kokkos_args (InitializationSettings): binding for Kokkos::InitializationSettings (threading parameters).
+            c_dtype: Datatypes for statevector representation. Must be one of
+                ``np.complex64`` or ``np.complex128``.
+            kokkos_args (InitializationSettings): binding for Kokkos::InitializationSettings
+                (threading parameters).
             shots (int): How many times the circuit should be evaluated (or sampled) to estimate
                 the expectation values. Defaults to ``None`` if not specified. Setting
                 to ``None`` results in computing statistics like expectation values and
@@ -197,8 +198,9 @@ if backend_info()["NAME"] == "lightning.kokkos":
             elif isinstance(kokkos_args, InitializationSettings):
                 self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires, kokkos_args)
             else:
+                type0 = type(InitializationSettings())
                 raise TypeError(
-                    f"Argument kokkos_args must be of {type(InitializationSettings())} but it is of {type(kokkos_args)}."
+                    f"Argument kokkos_args must be of {type0} but it is of {type(kokkos_args)}."
                 )
             self._sync = sync
 
@@ -219,7 +221,8 @@ if backend_info()["NAME"] == "lightning.kokkos":
             if not dtype:
                 dtype = arr.dtype
 
-            # We allocate a new aligned memory and copy data to there if alignment or dtype mismatches
+            # We allocate a new aligned memory and copy data to there if alignment
+            # or dtype mismatches
             # Note that get_alignment does not necessarily return CPUMemoryModel(Unaligned) even for
             # numpy allocated memory as the memory location happens to be aligned.
             if int(get_alignment(arr)) < int(best_alignment()) or arr.dtype != dtype:
@@ -246,10 +249,14 @@ if backend_info()["NAME"] == "lightning.kokkos":
             # init the state vector to |00..0>
             self._kokkos_state.resetStateVector()  # Sync reset
 
-        def syncH2D(self, state_vector):
-            """Copy the state vector data on host provided by the user to the state vector on the device
+        def sync_h2d(self, state_vector):
+            """Copy the state vector data on host provided by the user to the state
+            vector on the device
+
             Args:
                 state_vector(array[complex]): the state vector array on host.
+
+
             **Example**
             >>> dev = qml.device('lightning.kokkos', wires=3)
             >>> obs = qml.Identity(0) @ qml.PauliX(1) @ qml.PauliY(2)
@@ -257,30 +264,51 @@ if backend_info()["NAME"] == "lightning.kokkos":
             >>> H = qml.Hamiltonian([1.0, 1.0], [obs1, obs])
             >>> state_vector = np.array([0.0 + 0.0j, 0.0 + 0.1j, 0.1 + 0.1j, 0.1 + 0.2j,
                 0.2 + 0.2j, 0.3 + 0.3j, 0.3 + 0.4j, 0.4 + 0.5j,], dtype=np.complex64,)
-            >>> dev.syncH2D(state_vector)
+            >>> dev.sync_h2d(state_vector)
             >>> res = dev.expval(H)
             >>> print(res)
             1.0
             """
             self._kokkos_state.HostToDevice(state_vector.ravel(order="C"))
 
-        def syncD2H(self, state_vector):
-            """Copy the state vector data on device to a state vector on the host provided by the user
+        def sync_d2h(self, state_vector):
+            """Copy the state vector data on device to a state vector on the host provided
+            by the user
+
             Args:
                 state_vector(array[complex]): the state vector array on host
+
+
             **Example**
             >>> dev = qml.device('lightning.kokkos', wires=1)
             >>> dev.apply([qml.PauliX(wires=[0])])
             >>> state_vector = np.zeros(2**dev.num_wires).astype(dev.C_DTYPE)
-            >>> dev.syncD2H(state_vector)
+            >>> dev.sync_d2h(state_vector)
             >>> print(state_vector)
             [0.+0.j 1.+0.j]
             """
             self._kokkos_state.DeviceToHost(state_vector.ravel(order="C"))
 
         @property
+        def create_ops_list(self):
+            return create_ops_listC64 if self.use_csingle else create_ops_listC128
+
+        @property
+        def measurements(self):
+            state_vector = self.state_vector
+            return (
+                MeasurementsC64(state_vector)
+                if self.use_csingle
+                else MeasurementsC128(state_vector)
+            )
+
+        @property
         def state(self):
-            """Copy the state vector data from the device to the host. A state vector Numpy array is explicitly allocated on the host to store and return the data.
+            """Copy the state vector data from the device to the host.
+
+            A state vector Numpy array is explicitly allocated on the host to store and return
+            the data.
+
             **Example**
             >>> dev = qml.device('lightning.kokkos', wires=1)
             >>> dev.apply([qml.PauliX(wires=[0])])
@@ -289,7 +317,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
             """
             state = np.zeros(2**self.num_wires, dtype=self.C_DTYPE)
             state = self._asarray(state, dtype=self.C_DTYPE)
-            self.syncD2H(state)
+            self.sync_d2h(state)
             return state
 
         @property
@@ -320,7 +348,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
             if len(device_wires) == self.num_wires and Wires(sorted(device_wires)) == device_wires:
                 # Initialize the entire device state with the input state
-                self.syncH2D(self._reshape(state, output_shape))
+                self.sync_h2d(self._reshape(state, output_shape))
                 return
 
             self._kokkos_state.setStateVector(ravelled_indices, state)  # this operation on device
@@ -406,15 +434,6 @@ if backend_info()["NAME"] == "lightning.kokkos":
                     )
 
             self.apply_lightning(operations)
-            # if operations:
-            #     self._pre_rotated_state = self.apply_lightning(self._state, operations)
-            # else:
-            #     self._pre_rotated_state = self._state
-
-            # if rotations:
-            #     self._state = self.apply_lightning(np.copy(self._pre_rotated_state), rotations)
-            # else:
-            #     self._state = self._pre_rotated_state
 
         def expval(self, observable, shot_range=None, bin_size=None):
             """Expectation value of the supplied observable.
@@ -448,13 +467,11 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 else MeasurementsC128(self.state_vector)
             )
             if observable.name == "SparseHamiltonian":
-                CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
-                    copy=False
-                )
+                csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
                 return M.expval(
-                    CSR_SparseHamiltonian.indptr,
-                    CSR_SparseHamiltonian.indices,
-                    CSR_SparseHamiltonian.data,
+                    csr_hamiltonian.indptr,
+                    csr_hamiltonian.indices,
+                    csr_hamiltonian.data,
                 )
 
             if (
@@ -498,8 +515,6 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 return np.squeeze(np.var(samples, axis=0))
 
             # Initialization of state
-            ket = np.ravel(self._pre_rotated_state)
-
             M = (
                 MeasurementsC64(self.state_vector)
                 if self.use_csingle
@@ -507,13 +522,11 @@ if backend_info()["NAME"] == "lightning.kokkos":
             )
 
             if observable.name == "SparseHamiltonian":
-                CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
-                    copy=False
-                )
+                csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
                 return M.var(
-                    CSR_SparseHamiltonian.indptr,
-                    CSR_SparseHamiltonian.indices,
-                    CSR_SparseHamiltonian.data,
+                    csr_hamiltonian.indptr,
+                    csr_hamiltonian.indices,
+                    csr_hamiltonian.data,
                 )
 
             if (
@@ -535,7 +548,8 @@ if backend_info()["NAME"] == "lightning.kokkos":
             """Generate samples
 
             Returns:
-                array[int]: array of samples in binary representation with shape ``(dev.shots, dev.num_wires)``
+                array[int]: array of samples in binary representation with shape
+                ``(dev.shots, dev.num_wires)``
             """
             M = (
                 MeasurementsC64(self._kokkos_state)
@@ -543,6 +557,18 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 else MeasurementsC128(self._kokkos_state)
             )
             return M.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
+
+        def probability_lightning(self, wires):
+            """Return the probability of each computational basis state.
+
+            Args:
+                wires (Iterable[Number, str], Number, str, Wires): wires to return
+                    marginal probabilities for. Wires not provided are traced out of the system.
+
+            Returns:
+                array[float]: list of the probabilities
+            """
+            return self.measurements.probs(wires)
 
         def sample(self, observable, shot_range=None, bin_size=None, counts=False):
             if observable.name != "PauliZ":
@@ -580,7 +606,8 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 if isinstance(m.obs, Tensor):
                     if any(isinstance(o, Projector) for o in m.obs.non_identity_obs):
                         raise QuantumFunctionError(
-                            "Adjoint differentiation method does not support the Projector observable"
+                            "Adjoint differentiation method does not support the "
+                            "Projector observable"
                         )
                 elif isinstance(m.obs, Projector):
                     raise QuantumFunctionError(
@@ -623,7 +650,8 @@ if backend_info()["NAME"] == "lightning.kokkos":
             if self.shots is not None:
                 warn(
                     "Requested adjoint differentiation to be computed with finite shots."
-                    " The derivative is always exact when using the adjoint differentiation method.",
+                    " The derivative is always exact when using the adjoint "
+                    "differentiation method.",
                     UserWarning,
                 )
 
@@ -680,11 +708,13 @@ if backend_info()["NAME"] == "lightning.kokkos":
             jac_r[:, processed_data["record_tp_rows"]] = jac
             return self._adjoint_jacobian_processing(jac_r) if qml.active_return() else jac_r
 
+        # pylint: disable=inconsistent-return-statements
         def vjp(self, measurements, dy, starting_state=None, use_device_state=False):
-            """Generate the processing function required to compute the vector-Jacobian products of a tape.
+            """Generate the processing function required to compute the vector-Jacobian products
+            of a tape.
 
-            This function can be used with multiple expectation values or a quantum state. When a quantum state
-            is given,
+            This function can be used with multiple expectation values or a quantum state.
+            When a quantum state is given,
 
             .. code-block:: python
 
@@ -697,17 +727,21 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
                 w_k = \\langle v| \\frac{\\partial}{\\partial \\theta_k} | \\psi_{\\pmb{\\theta}} \\rangle.
 
-            Here, :math:`m` is the total number of trainable parameters, :math:`\\pmb{\\theta}` is the vector of trainable parameters and :math:`\\psi_{\\pmb{\\theta}}`
-            is the output quantum state.
+            Here, :math:`m` is the total number of trainable parameters,
+            :math:`\\pmb{\\theta}` is the vector of trainable parameters and
+            :math:`\\psi_{\\pmb{\\theta}}` is the output quantum state.
 
             Args:
-                measurements (list): List of measurement processes for vector-Jacobian product. Now it must be expectation values or a quantum state.
-                dy (tensor_like): Gradient-output vector. Must have shape matching the output shape of the corresponding tape, i.e. number of measurements if the return type is expectation or :math:`2^N` if the return type is statevector
-                starting_state (tensor_like): post-forward pass state to start execution with. It should be
-                    complex-valued. Takes precedence over ``use_device_state``.
-                use_device_state (bool): use current device state to initialize. A forward pass of the same
-                    circuit should be the last thing the device has executed. If a ``starting_state`` is
-                    provided, that takes precedence.
+                measurements (list): List of measurement processes for vector-Jacobian product.
+                    Now it must be expectation values or a quantum state.
+                dy (tensor_like): Gradient-output vector. Must have shape matching the output
+                    shape of the corresponding tape, i.e. number of measurements if the return
+                    type is expectation or :math:`2^N` if the return type is statevector
+                starting_state (tensor_like): post-forward pass state to start execution with.
+                    It should be complex-valued. Takes precedence over ``use_device_state``.
+                use_device_state (bool): use current device state to initialize.
+                    A forward pass of the same circuit should be the last thing the device
+                    has executed. If a ``starting_state`` is provided, that takes precedence.
 
             Returns:
                 The processing function required to compute the vector-Jacobian products of a tape.
@@ -715,7 +749,8 @@ if backend_info()["NAME"] == "lightning.kokkos":
             if self.shots is not None:
                 warn(
                     "Requested adjoint differentiation to be computed with finite shots."
-                    " The derivative is always exact when using the adjoint differentiation method.",
+                    " The derivative is always exact when using the adjoint "
+                    "differentiation method.",
                     UserWarning,
                 )
 
@@ -727,16 +762,19 @@ if backend_info()["NAME"] == "lightning.kokkos":
             if tape_return_type is Expectation:
                 if len(dy) != len(measurements):
                     raise ValueError(
-                        "Number of observables in the tape must be the same as the length of dy in the vjp method"
+                        "Number of observables in the tape must be the same as the "
+                        "length of dy in the vjp method"
                     )
 
                 if np.iscomplexobj(dy):
                     raise ValueError(
-                        "The vjp method only works with a real-valued dy when the tape is returning an expectation value"
+                        "The vjp method only works with a real-valued dy when "
+                        "the tape is returning an expectation value"
                     )
 
                 ham = qml.Hamiltonian(dy, [m.obs for m in measurements])
 
+                # pylint: disable=protected-access
                 def processing_fn(tape):
                     nonlocal ham
                     num_params = len(tape.trainable_params)
@@ -754,6 +792,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
 else:
 
     class LightningKokkos(LightningBase):  # pragma: no cover
+        # pylint: disable=missing-class-docstring
         name = "Lightning Kokkos PennyLane plugin [No binaries found - Fallback: default.qubit]"
         short_name = "lightning.kokkos"
 
