@@ -188,7 +188,24 @@ void registerBackendClassSpecificBindings(PyClass &pyclass) {
                 sv.applyOperation_std(str, wires, inv, std::vector<ParamT>{},
                                       conv_matrix);
             },
-            "Apply operation via the gate matrix");
+            "Apply operation via the gate matrix")
+        .def("GenerateSamples",
+             [](StateVectorT &sv, size_t num_wires, size_t num_shots) {
+                 auto &&result = Measurements(sv).generate_samples(num_shots);
+                 const size_t ndim = 2;
+                 const std::vector<size_t> shape{num_shots, num_wires};
+                 constexpr auto sz = sizeof(size_t);
+                 const std::vector<size_t> strides{sz * num_wires, sz};
+                 // return 2-D NumPy array
+                 return py::array(py::buffer_info(
+                     result.data(), /* data as contiguous array  */
+                     sz,            /* size of one scalar        */
+                     py::format_descriptor<size_t>::format(), /* data type */
+                     ndim,   /* number of dimensions      */
+                     shape,  /* shape of the matrix       */
+                     strides /* strides for each axis     */
+                     ));
+             });
 }
 
 /**

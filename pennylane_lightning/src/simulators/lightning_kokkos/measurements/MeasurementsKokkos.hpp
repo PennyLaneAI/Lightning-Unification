@@ -727,25 +727,54 @@ class Measurements final
      * number between 0 and num_samples-1.
      */
     auto generate_samples(size_t num_samples) -> std::vector<size_t> {
-
+        // printf("\nEnter generate_samples\n");
         const size_t num_qubits = this->_statevector.getNumQubits();
         const size_t N = this->_statevector.getLength();
 
+        // printf("\nInit views\n");
         Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
         Kokkos::View<PrecisionT *> probability("probability", N);
+        Kokkos::View<PrecisionT *> cumprob("cumprob", N);
         Kokkos::View<size_t *> samples("num_samples", num_samples * num_qubits);
 
+        // printf("\ngetProb\n");
+        Kokkos::fence();
         // Compute probability distribution from StateVector
-        Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
-                             getProbFunctor<PrecisionT>(arr_data, probability));
+        Kokkos::parallel_for(
+            "getProb", Kokkos::RangePolicy<KokkosExecSpace>(0, N),
+            //  getProbFunctor<PrecisionT>(arr_data, probability)
+            KOKKOS_LAMBDA(const size_t k) {
+                PrecisionT REAL = arr_data[k].real();
+                PrecisionT IMAG = arr_data[k].imag();
+                probability[k] = REAL * REAL + IMAG * IMAG;
+            });
+        Kokkos::fence();
+
+        // printf("\ngetCDF\n");
+
+        typename Kokkos::View<PrecisionT *>::HostMirror probability_h =
+        Kokkos::create_mirror_view(probability);
+        Kokkos::deep_copy(probability_h,probability);
+        for (size_t k=1; k < N; k++){
+            probability_h(k) += probability_h(k - 1);
+        }
+        Kokkos::deep_copy(probability,probability_h);
 
         // Convert probability distribution to cumulative distribution
-        Kokkos::parallel_scan(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
-                              getCDFFunctor<PrecisionT>(probability));
+        // Kokkos::parallel_scan(
+        //     "getCDF", Kokkos::RangePolicy<KokkosExecSpace>(0, N),
+        //     KOKKOS_LAMBDA(const size_t k, PrecisionT &update_value,
+        //                   bool is_final) {
+        //         update_value += probability(k);
+        //         if (is_final)
+        //             cumprob(k) = update_value;
+        //     });
 
         // Sampling using Random_XorShift64_Pool
+        // printf("\nInit rand_pool\n");
         Kokkos::Random_XorShift64_Pool<> rand_pool(5374857);
 
+        // printf("\nSampler\n");
         Kokkos::parallel_for(
             Kokkos::RangePolicy<KokkosExecSpace>(0, num_samples),
             Sampler<PrecisionT, Kokkos::Random_XorShift64_Pool>(
@@ -757,6 +786,7 @@ class Measurements final
             Kokkos::View<size_t *, Kokkos::HostSpace,
                          Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
+        // printf("\ndeep_copy\n");
         Kokkos::deep_copy(
             UnmanagedSize_tHostView(samples_h.data(), samples_h.size()),
             samples);
