@@ -30,6 +30,10 @@ CPP_BINARY_AVAILABLE = len(list(libpath)) > 0
 if CPP_BINARY_AVAILABLE:
     # pylint: disable=import-error, no-name-in-module, unused-import
     from .pennylane_lightning_ops import backend_info
+else:
+
+    def backend_info():
+        return {"NAME": "NONE"}
 
 
 if CPP_BINARY_AVAILABLE:

@@ -33,9 +33,9 @@
 
 /// @cond DEV
 namespace {
+using Pennylane::LightningQubit::Util::Threading;
 using Pennylane::Util::CPUMemoryModel;
 using Pennylane::Util::exp2;
-using Pennylane::Util::Threading;
 
 using namespace Pennylane::LightningQubit::Gates;
 } // namespace
