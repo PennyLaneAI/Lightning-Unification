@@ -16,28 +16,25 @@ r"""
 This module contains the base class for all PennyLane Lightning simulator devices,
 and interfaces with C++ for improved performance.
 """
+from pathlib import Path
 import numpy as np
 from pennylane.measurements import MeasurementProcess
-from pathlib import Path
 
-from ._version import __version__
 import pennylane_lightning
+from ._version import __version__
 
 libpath = Path(pennylane_lightning.__file__)
 libpath = libpath.parents[0].glob("pennylane_lightning_ops.*")
 CPP_BINARY_AVAILABLE = len(list(libpath)) > 0
-if not CPP_BINARY_AVAILABLE:
 
-    def backend_info():
-        return {"NAME": "NONE"}
-
-else:
+if CPP_BINARY_AVAILABLE:
+    # pylint: disable=import-error, no-name-in-module, unused-import
     from .pennylane_lightning_ops import backend_info
 
 
 if CPP_BINARY_AVAILABLE:
     from typing import List
-    from itertools import product
+    from itertools import islice, product
 
     import pennylane as qml
     from pennylane import QubitDevice
@@ -51,6 +48,11 @@ if CPP_BINARY_AVAILABLE:
 
     from ._serialize import _serialize_observables, _serialize_ops
 
+    def _chunk_iterable(iteration, num_chunks):
+        "Lazy-evaluated chunking of given iterable from https://stackoverflow.com/a/22045226"
+        iteration = iter(iteration)
+        return iter(lambda: tuple(islice(iteration, num_chunks)), ())
+
     class LightningBase(QubitDevice):
         """PennyLane Lightning Base device.
 
@@ -61,13 +63,15 @@ if CPP_BINARY_AVAILABLE:
 
         Args:
             wires (int): the number of wires to initialize the device with
-            c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
+            c_dtype: Datatypes for statevector representation. Must be one of
+                ``np.complex64`` or ``np.complex128``.
             shots (int): How many times the circuit should be evaluated (or sampled) to estimate
                 stochastic return values. Defaults to ``None`` if not specified. Setting
                 to ``None`` results in computing statistics like expectation values and
                 variances analytically.
-            batch_obs (bool): Determine whether we process observables in parallel when computing the
-                jacobian. This value is only relevant when the lightning qubit is built with OpenMP.
+            batch_obs (bool): Determine whether we process observables in parallel when computing
+                the jacobian. This value is only relevant when the lightning qubit is built with
+                OpenMP.
         """
 
         pennylane_requires = ">=0.30"
@@ -125,10 +129,28 @@ if CPP_BINARY_AVAILABLE:
         # To be able to validate the adjoint method [_validate_adjoint_method(device)],
         #  the qnode requires the definition of:
         # ["_apply_operation", "_apply_unitary", "adjoint_jacobian"]
+        # pylint: disable=no-method-argument
         def _apply_operation():
             pass
 
+        # pylint: disable=no-method-argument, missing-function-docstring
         def _apply_unitary():
+            pass
+
+        # pylint: disable=no-method-argument, missing-function-docstring, assignment-from-no-return
+        def _init_process_jacobian_tape():
+            pass
+
+        # pylint: disable=no-method-argument, missing-function-docstring
+        def create_ops_list():
+            pass
+
+        # pylint: disable=no-method-argument, missing-function-docstring
+        def probability_lightning(self, wires):
+            pass
+
+        # pylint: disable=no-method-argument, missing-function-docstring
+        def vjp(self, tapes, grad_vecs, starting_state=None, use_device_state=False):
             pass
 
         def probability(self, wires=None, shot_range=None, bin_size=None):
@@ -171,9 +193,12 @@ if CPP_BINARY_AVAILABLE:
             return self.probability_lightning(device_wires)
 
         def _get_diagonalizing_gates(self, circuit: qml.tape.QuantumTape) -> List[Operation]:
-            skip_diagonalizing = lambda obs: isinstance(obs, qml.Hamiltonian) or (
-                isinstance(obs, qml.ops.Sum) and obs._pauli_rep is not None
-            )
+            # pylint: disable=no-member, protected-access
+            def skip_diagonalizing(obs):
+                return isinstance(obs, qml.Hamiltonian) or (
+                    isinstance(obs, qml.ops.Sum) and obs._pauli_rep is not None
+                )
+
             meas_filtered = list(
                 filter(
                     lambda m: m.obs is None or not skip_diagonalizing(m.obs), circuit.measurements
@@ -244,9 +269,8 @@ if CPP_BINARY_AVAILABLE:
             basis_states = qml.math.convert_like(basis_states, state)
             return int(qml.math.dot(state, basis_states))
 
+        # pylint: disable=too-many-function-args
         def _process_jacobian_tape(self, tape, starting_state, use_device_state):
-            create_ops_list = self.create_ops_list
-
             state_vector = self._init_process_jacobian_tape(tape, starting_state, use_device_state)
 
             obs_serialized = _serialize_observables(
@@ -254,7 +278,7 @@ if CPP_BINARY_AVAILABLE:
             )
             ops_serialized, use_sp = _serialize_ops(tape, self.wire_map)
 
-            ops_serialized = create_ops_list(*ops_serialized)
+            ops_serialized = self.create_ops_list(*ops_serialized)
 
             # We need to filter out indices in trainable_params which do not
             # correspond to operators.
@@ -266,12 +290,14 @@ if CPP_BINARY_AVAILABLE:
             record_tp_rows = []
             all_params = 0
 
-            for op_idx, tp in enumerate(trainable_params):
+            for op_idx, trainable_param in enumerate(trainable_params):
                 # get op_idx-th operator among differentiable operators
-                op, _, _ = tape.get_operation(op_idx)
-                if isinstance(op, Operation) and not isinstance(op, (BasisState, QubitStateVector)):
+                operation, _, _ = tape.get_operation(op_idx)
+                if isinstance(operation, Operation) and not isinstance(
+                    operation, (BasisState, QubitStateVector)
+                ):
                     # We now just ignore non-op or state preps
-                    tp_shift.append(tp)
+                    tp_shift.append(trainable_param)
                     record_tp_rows.append(all_params)
                 all_params += 1
 
@@ -289,6 +315,7 @@ if CPP_BINARY_AVAILABLE:
                 "all_params": all_params,
             }
 
+        # pylint: disable=unnecessary-pass
         @staticmethod
         def _check_adjdiff_supported_measurements(measurements: List[MeasurementProcess]):
             """Check whether given list of measurement is supported by adjoint_differentiation.
@@ -318,46 +345,48 @@ if CPP_BINARY_AVAILABLE:
             # must be 2-dimensional
             return tuple(tuple(np.array(j_) for j_ in j) for j in jac)
 
+        # pylint: disable=too-many-arguments
         def batch_vjp(
-            self, tapes, dys, reduction="append", starting_state=None, use_device_state=False
+            self, tapes, grad_vecs, reduction="append", starting_state=None, use_device_state=False
         ):
             """Generate the processing function required to compute the vector-Jacobian products
             of a batch of tapes.
 
             Args:
                 tapes (Sequence[.QuantumTape]): sequence of quantum tapes to differentiate
-                dys (Sequence[tensor_like]): Sequence of gradient-output vectors ``dy``. Must be the
-                    same length as ``tapes``. Each ``dy`` tensor should have shape
-                    matching the output shape of the corresponding tape.
+                grad_vecs (Sequence[tensor_like]): Sequence of gradient-output vectors ``grad_vec``.
+                    Must be the same length as ``tapes``. Each ``grad_vec`` tensor should have
+                    shape matching the output shape of the corresponding tape.
                 reduction (str): Determines how the vector-Jacobian products are returned.
                     If ``append``, then the output of the function will be of the form
                     ``List[tensor_like]``, with each element corresponding to the VJP of each
                     input tape. If ``extend``, then the output VJPs will be concatenated.
-                starting_state (tensor_like): post-forward pass state to start execution with. It should be
-                    complex-valued. Takes precedence over ``use_device_state``.
-                use_device_state (bool): use current device state to initialize. A forward pass of the same
-                    circuit should be the last thing the device has executed. If a ``starting_state`` is
-                    provided, that takes precedence.
+                starting_state (tensor_like): post-forward pass state to start execution with.
+                    It should be complex-valued. Takes precedence over ``use_device_state``.
+                use_device_state (bool): use current device state to initialize. A forward pass of
+                    the same circuit should be the last thing the device has executed.
+                    If a ``starting_state`` is provided, that takes precedence.
 
             Returns:
-                The processing function required to compute the vector-Jacobian products of a batch of tapes.
+                The processing function required to compute the vector-Jacobian products
+                of a batch of tapes.
             """
             fns = []
 
-            # Loop through the tapes and dys vector
-            for tape, dy in zip(tapes, dys):
-                fn = self.vjp(
+            # Loop through the tapes and grad_vecs vector
+            for tape, grad_vec in zip(tapes, grad_vecs):
+                fun = self.vjp(
                     tape.measurements,
-                    dy,
+                    grad_vec,
                     starting_state=starting_state,
                     use_device_state=use_device_state,
                 )
-                fns.append(fn)
+                fns.append(fun)
 
             def processing_fns(tapes):
                 vjps = []
-                for t, f in zip(tapes, fns):
-                    vjp = f(t)
+                for tape, fun in zip(tapes, fns):
+                    vjp = fun(tape)
 
                     # make sure vjp is iterable if using extend reduction
                     if (
@@ -379,6 +408,7 @@ else:  # binaries not available
     from pennylane.devices import DefaultQubit
 
     class LightningBase(DefaultQubit):  # pragma: no cover
+        # pylint: disable=missing-class-docstring
         pennylane_requires = ">=0.30"
         version = __version__
         author = "Xanadu Inc."

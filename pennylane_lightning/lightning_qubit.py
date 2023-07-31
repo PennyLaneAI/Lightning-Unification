@@ -19,11 +19,10 @@ interfaces with C++ for fast linear algebra calculations.
 import numpy as np
 from warnings import warn
 
-from .lightning_base import backend_info, LightningBase
+from .lightning_base import backend_info, LightningBase, _chunk_iterable
 
 if backend_info()["NAME"] == "lightning.qubit":
     from typing import List
-    from itertools import islice
     from os import getenv
 
     from pennylane import (
@@ -63,11 +62,6 @@ if backend_info()["NAME"] == "lightning.qubit":
     )
 
     from ._serialize import _serialize_ob
-
-    def _chunk_iterable(it, num_chunks):
-        "Lazy-evaluated chunking of given iterable from https://stackoverflow.com/a/22045226"
-        it = iter(it)
-        return iter(lambda: tuple(islice(it, num_chunks)), ())
 
     allowed_operations = {
         "Identity",

@@ -19,11 +19,10 @@ interfaces with C++ for fast linear algebra calculations.
 from warnings import warn
 import numpy as np
 
-from .lightning_base import backend_info, LightningBase
+from .lightning_base import backend_info, LightningBase, _chunk_iterable
 
 if backend_info()["NAME"] == "lightning.kokkos":
     from typing import List
-    from itertools import islice
     from os import getenv
 
     from pennylane import (
@@ -74,11 +73,6 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
     def _kokkos_configuration():
         return print_configuration()
-
-    def _chunk_iterable(it, num_chunks):
-        "Lazy-evaluated chunking of given iterable from https://stackoverflow.com/a/22045226"
-        it = iter(it)
-        return iter(lambda: tuple(islice(it, num_chunks)), ())
 
     allowed_operations = {
         "Identity",
@@ -291,10 +285,12 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
         @property
         def create_ops_list(self):
+            """Returns create_ops_list function of the matching precision."""
             return create_ops_listC64 if self.use_csingle else create_ops_listC128
 
         @property
         def measurements(self):
+            """Returns Measurements constructor of the matching precision."""
             state_vector = self.state_vector
             return (
                 MeasurementsC64(state_vector)
@@ -382,27 +378,27 @@ if backend_info()["NAME"] == "lightning.kokkos":
             invert_param = False
             state = self.state_vector
 
-            for o in operations:
-                if str(o.name) == "Identity":
+            for ops in operations:
+                if str(ops.name) == "Identity":
                     continue
-                name = o.name
-                if isinstance(o, Adjoint):
-                    name = o.base.name
+                name = ops.name
+                if isinstance(ops, Adjoint):
+                    name = ops.base.name
                     invert_param = True
                 method = getattr(state, name, None)
 
-                wires = self.wires.indices(o.wires)
+                wires = self.wires.indices(ops.wires)
 
                 if method is None:
-                    # Inverse can be set to False since qml.matrix(o) is already in inverted form
+                    # Inverse can be set to False since qml.matrix(ops) is already in inverted form
                     try:
-                        mat = qml.matrix(o)
+                        mat = qml.matrix(ops)
                     except AttributeError:  # pragma: no cover
                         # To support older versions of PL
-                        mat = o.matrix
+                        mat = ops.matrix
 
                     if len(mat) == 0:
-                        raise Exception("Unsupported operation")
+                        raise ValueError("Unsupported operation")
                     state.apply(
                         name,
                         wires,
@@ -412,9 +408,10 @@ if backend_info()["NAME"] == "lightning.kokkos":
                     )  # Parameters can be ignored for explicit matrices; F-order for cuQuantum
 
                 else:
-                    param = o.parameters
+                    param = ops.parameters
                     method(wires, invert_param, param)
 
+        # pylint: disable=unused-argument
         def apply(self, operations, rotations=None, **kwargs):
             # State preparation is currently done in Python
             if operations:  # make sure operations[0] exists
@@ -430,7 +427,8 @@ if backend_info()["NAME"] == "lightning.kokkos":
             for operation in operations:
                 if isinstance(operation, (QubitStateVector, BasisState)):
                     raise DeviceError(
-                        f"Operation {operation.name} cannot be used after other Operations have already been applied on a {self.short_name} device."
+                        f"Operation {operation.name} cannot be used after other "
+                        + f"Operations have already been applied on a {self.short_name} device."
                     )
 
             self.apply_lightning(operations)
@@ -461,14 +459,14 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 return np.squeeze(np.mean(samples, axis=0))
 
             # Initialization of state
-            M = (
+            measure = (
                 MeasurementsC64(self.state_vector)
                 if self.use_csingle
                 else MeasurementsC128(self.state_vector)
             )
             if observable.name == "SparseHamiltonian":
                 csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
-                return M.expval(
+                return measure.expval(
                     csr_hamiltonian.indptr,
                     csr_hamiltonian.indices,
                     csr_hamiltonian.data,
@@ -482,12 +480,12 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 ob_serialized = _serialize_ob(
                     observable, self.wire_map, use_csingle=self.use_csingle
                 )
-                return M.expval(ob_serialized)
+                return measure.expval(ob_serialized)
 
             # translate to wire labels used by device
             observable_wires = self.map_wires(observable.wires)
 
-            return M.expval(observable.name, observable_wires)
+            return measure.expval(observable.name, observable_wires)
 
         def var(self, observable, shot_range=None, bin_size=None):
             """Variance of the supplied observable.
@@ -515,7 +513,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 return np.squeeze(np.var(samples, axis=0))
 
             # Initialization of state
-            M = (
+            measure = (
                 MeasurementsC64(self.state_vector)
                 if self.use_csingle
                 else MeasurementsC128(self.state_vector)
@@ -523,7 +521,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
             if observable.name == "SparseHamiltonian":
                 csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
-                return M.var(
+                return measure.var(
                     csr_hamiltonian.indptr,
                     csr_hamiltonian.indices,
                     csr_hamiltonian.data,
@@ -537,12 +535,12 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 ob_serialized = _serialize_ob(
                     observable, self.wire_map, use_csingle=self.use_csingle
                 )
-                return M.var(ob_serialized)
+                return measure.var(ob_serialized)
 
             # translate to wire labels used by device
             observable_wires = self.map_wires(observable.wires)
 
-            return M.var(observable.name, observable_wires)
+            return measure.var(observable.name, observable_wires)
 
         def generate_samples(self):
             """Generate samples
@@ -551,12 +549,12 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 array[int]: array of samples in binary representation with shape
                 ``(dev.shots, dev.num_wires)``
             """
-            M = (
+            measure = (
                 MeasurementsC64(self._kokkos_state)
                 if self.use_csingle
                 else MeasurementsC128(self._kokkos_state)
             )
-            return M.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
+            return measure.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
 
         def probability_lightning(self, wires):
             """Return the probability of each computational basis state.
@@ -602,14 +600,14 @@ if backend_info()["NAME"] == "lightning.kokkos":
                     "mixed with other return types"
                 )
 
-            for m in measurements:
-                if isinstance(m.obs, Tensor):
-                    if any(isinstance(o, Projector) for o in m.obs.non_identity_obs):
+            for measurement in measurements:
+                if isinstance(measurement.obs, Tensor):
+                    if any(isinstance(o, Projector) for o in measurement.obs.non_identity_obs):
                         raise QuantumFunctionError(
                             "Adjoint differentiation method does not support the "
                             "Projector observable"
                         )
-                elif isinstance(m.obs, Projector):
+                elif isinstance(measurement.obs, Projector):
                     raise QuantumFunctionError(
                         "Adjoint differentiation method does not support the Projector observable"
                     )
@@ -625,10 +623,10 @@ if backend_info()["NAME"] == "lightning.kokkos":
             Args:
                 tape (.QuantumTape): quantum tape to differentiate.
             """
-            for op in operations:
-                if op.num_params > 1 and not isinstance(op, Rot):
+            for operation in operations:
+                if operation.num_params > 1 and not isinstance(operation, Rot):
                     raise QuantumFunctionError(
-                        f"The {op.name} operation is not supported using "
+                        f"The {operation.name} operation is not supported using "
                         'the "adjoint" differentiation method'
                     )
 
@@ -708,8 +706,8 @@ if backend_info()["NAME"] == "lightning.kokkos":
             jac_r[:, processed_data["record_tp_rows"]] = jac
             return self._adjoint_jacobian_processing(jac_r) if qml.active_return() else jac_r
 
-        # pylint: disable=inconsistent-return-statements
-        def vjp(self, measurements, dy, starting_state=None, use_device_state=False):
+        # pylint: disable=inconsistent-return-statements, line-too-long
+        def vjp(self, measurements, grad_vec, starting_state=None, use_device_state=False):
             """Generate the processing function required to compute the vector-Jacobian products
             of a tape.
 
@@ -718,7 +716,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
             .. code-block:: python
 
-                vjp_f = dev.vjp([qml.state()], dy)
+                vjp_f = dev.vjp([qml.state()], grad_vec)
                 vjp = vjp_f(tape)
 
             computes :math:`w = (w_1,\\cdots,w_m)` where
@@ -734,7 +732,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
             Args:
                 measurements (list): List of measurement processes for vector-Jacobian product.
                     Now it must be expectation values or a quantum state.
-                dy (tensor_like): Gradient-output vector. Must have shape matching the output
+                grad_vec (tensor_like): Gradient-output vector. Must have shape matching the output
                     shape of the corresponding tape, i.e. number of measurements if the return
                     type is expectation or :math:`2^N` if the return type is statevector
                 starting_state (tensor_like): post-forward pass state to start execution with.
@@ -756,23 +754,25 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
             tape_return_type = self._check_adjdiff_supported_measurements(measurements)
 
-            if math.allclose(dy, 0) or tape_return_type is None:
-                return lambda tape: math.convert_like(np.zeros(len(tape.trainable_params)), dy)
+            if math.allclose(grad_vec, 0) or tape_return_type is None:
+                return lambda tape: math.convert_like(
+                    np.zeros(len(tape.trainable_params)), grad_vec
+                )
 
             if tape_return_type is Expectation:
-                if len(dy) != len(measurements):
+                if len(grad_vec) != len(measurements):
                     raise ValueError(
                         "Number of observables in the tape must be the same as the "
                         "length of dy in the vjp method"
                     )
 
-                if np.iscomplexobj(dy):
+                if np.iscomplexobj(grad_vec):
                     raise ValueError(
                         "The vjp method only works with a real-valued dy when "
                         "the tape is returning an expectation value"
                     )
 
-                ham = qml.Hamiltonian(dy, [m.obs for m in measurements])
+                ham = qml.Hamiltonian(grad_vec, [m.obs for m in measurements])
 
                 # pylint: disable=protected-access
                 def processing_fn(tape):
