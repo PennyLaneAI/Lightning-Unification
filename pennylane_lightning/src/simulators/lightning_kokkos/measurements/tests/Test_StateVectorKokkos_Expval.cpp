@@ -35,6 +35,7 @@ namespace {
 using namespace Pennylane::LightningKokkos::Measures;
 using namespace Pennylane::LightningKokkos::Observables;
 using Pennylane::Util::createNonTrivialState;
+using Pennylane::Util::write_CSR_vectors;
 } // namespace
 /// @endcond
 
@@ -535,5 +536,40 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
                                indices.data(), values.data(), values.size());
         auto expected = TestType(3.1415);
         CHECK(expected == Approx(result).epsilon(1e-7));
+    }
+
+    SECTION("Testing Sparse Hamiltonian:") {
+        using StateVectorT = StateVectorKokkos<TestType>;
+        using PrecisionT = typename StateVectorT::PrecisionT;
+        using ComplexT = typename StateVectorT::ComplexT;
+
+        // Defining the statevector that will be measured.
+        auto statevector_data = createNonTrivialState<StateVectorT>();
+        StateVectorT statevector(statevector_data.data(),
+                                 statevector_data.size());
+
+        // Initializing the measurements class.
+        // This object attaches to the statevector allowing several
+        // measurements.
+        Measurements<StateVectorT> Measurer(statevector);
+        const size_t num_qubits = 3;
+        const size_t data_size = Pennylane::Util::exp2(num_qubits);
+
+        std::vector<size_t> row_map;
+        std::vector<size_t> entries;
+        std::vector<ComplexT> values;
+        write_CSR_vectors(row_map, entries, values, data_size);
+
+        PrecisionT exp_values =
+            Measurer.expval(row_map.data(), row_map.size(), entries.data(),
+                            values.data(), values.size());
+        PrecisionT exp_values_ref = 0.5930885;
+        REQUIRE(exp_values == Approx(exp_values_ref).margin(1e-6));
+
+        PrecisionT var_values =
+            Measurer.var(row_map.data(), row_map.size(), entries.data(),
+                         values.data(), values.size());
+        PrecisionT var_values_ref = 2.4624654;
+        REQUIRE(var_values == Approx(var_values_ref).margin(1e-6));
     }
 }

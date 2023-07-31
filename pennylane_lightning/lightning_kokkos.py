@@ -338,7 +338,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
             num = self._get_basis_state_index(state, wires)
             self._create_basis_state(num)
 
-        def apply_lightning(self, operations, apply_pre_rotated_state=False):
+        def apply_lightning(self, operations):
             """Apply a list of operations to the state tensor.
 
             Args:
@@ -352,7 +352,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
             # Skip over identity operations instead of performing
             # matrix multiplication with the identity.
             invert_param = False
-            state = self._pre_rotated_state if apply_pre_rotated_state else self._kokkos_state
+            state = self.state_vector
 
             for o in operations:
                 if str(o.name) == "Identity":

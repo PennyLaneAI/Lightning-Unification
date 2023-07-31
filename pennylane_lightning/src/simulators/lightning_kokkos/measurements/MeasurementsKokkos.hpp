@@ -30,6 +30,7 @@ using namespace Pennylane::Measures;
 using namespace Pennylane::Observables;
 using Pennylane::LightningKokkos::StateVectorKokkos;
 using Pennylane::LightningKokkos::Util::getRealOfComplexInnerProduct;
+using Pennylane::LightningKokkos::Util::SparseMV_Kokkos;
 using Pennylane::Util::exp2;
 } // namespace
 /// @endcond
@@ -583,6 +584,45 @@ class Measurements final
         }
 
         return expected_value_list;
+    };
+
+    /**
+     * @brief Variance of a sparse Hamiltonian.
+     *
+     * @tparam index_type integer type used as indices of the sparse matrix.
+     * @param row_map_ptr   row_map array pointer.
+     *                      The j element encodes the number of non-zeros
+     above
+     * row j.
+     * @param row_map_size  row_map array size.
+     * @param entries_ptr   pointer to an array with column indices of the
+     * non-zero elements.
+     * @param values_ptr    pointer to an array with the non-zero elements.
+     * @param numNNZ        number of non-zero elements.
+     * @return Floating point with the variance of the sparse Hamiltonian.
+     */
+    template <class index_type>
+    PrecisionT var(const index_type *row_map_ptr, const index_type row_map_size,
+                   const index_type *entries_ptr, const ComplexT *values_ptr,
+                   const index_type numNNZ) {
+        PL_ABORT_IF(
+            (this->_statevector.getLength() != (size_t(row_map_size) - 1)),
+            "Statevector and Hamiltonian have incompatible sizes.");
+
+        StateVectorT ob_sv(this->_statevector.getNumQubits());
+        ob_sv.DeviceToDevice(this->_statevector.getView());
+
+        SparseMV_Kokkos<PrecisionT>(this->_statevector.getView(),
+                                    ob_sv.getView(), row_map_ptr, row_map_size,
+                                    entries_ptr, values_ptr, numNNZ);
+
+        const PrecisionT mean_square =
+            getRealOfComplexInnerProduct(ob_sv.getView(), ob_sv.getView());
+        const PrecisionT squared_mean = static_cast<PrecisionT>(
+            std::pow(getRealOfComplexInnerProduct(this->_statevector.getView(),
+                                                  ob_sv.getView()),
+                     2));
+        return (mean_square - squared_mean);
     };
 
     /**

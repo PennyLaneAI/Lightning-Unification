@@ -40,7 +40,7 @@ template <class PrecisionT> struct axpy_KokkosFunctor {
         x = x_;
         y = y_;
     }
-    KOKKOS_INLINE_FUNCTION void operator()(const std::size_t k) const {
+    KOKKOS_INLINE_FUNCTION void operator()(const size_t k) const {
         y[k] += alpha * x[k];
     }
 };
@@ -58,7 +58,7 @@ template <class PrecisionT>
 inline auto axpy_Kokkos(Kokkos::complex<PrecisionT> alpha,
                         Kokkos::View<Kokkos::complex<PrecisionT> *> x,
                         Kokkos::View<Kokkos::complex<PrecisionT> *> y,
-                        std::size_t length) {
+                        size_t length) {
     Kokkos::parallel_for(length, axpy_KokkosFunctor<PrecisionT>(alpha, x, y));
 }
 
@@ -70,7 +70,7 @@ inline auto axpy_Kokkos(Kokkos::complex<PrecisionT> alpha,
 template <class PrecisionT> struct SparseMV_KokkosFunctor {
 
     using KokkosVector = Kokkos::View<Kokkos::complex<PrecisionT> *>;
-    using KokkosSizeTVector = Kokkos::View<std::size_t *>;
+    using KokkosSizeTVector = Kokkos::View<size_t *>;
 
     KokkosVector x;
     KokkosVector y;
@@ -90,7 +90,7 @@ template <class PrecisionT> struct SparseMV_KokkosFunctor {
     }
 
     KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t row) const {
+    void operator()(const size_t row) const {
         Kokkos::complex<PrecisionT> tmp = {0.0, 0.0};
         for (size_t j = indptr[row]; j < indptr[row + 1]; j++) {
             tmp += data[j] * x[indices[j]];
@@ -105,48 +105,43 @@ template <class PrecisionT> struct SparseMV_KokkosFunctor {
  * @endrst
  * @param x Input vector
  * @param y Result vector
- * @param data Vector of non-zeros elements of the sparse matrix A.
- * @param indices Vector of column indices of data.
- * @param indptr Vector of offsets.
+ * @param row_map_ptr   row_map array pointer.
+ *                      The j element encodes the number of non-zeros
+ above
+ * row j.
+ * @param row_map_size  row_map array size.
+ * @param entries_ptr   pointer to an array with column indices of the
+ * non-zero elements.
+ * @param values_ptr    pointer to an array with the non-zero elements.
+ * @param numNNZ        number of non-zero elements.
  */
-template <class PrecisionT>
-inline void SparseMV_Kokkos(Kokkos::View<Kokkos::complex<PrecisionT> *> x,
-                            Kokkos::View<Kokkos::complex<PrecisionT> *> y,
-                            const std::vector<std::complex<PrecisionT>> &data,
-                            const std::vector<std::size_t> &indices,
-                            const std::vector<std::size_t> &indptr) {
+template <class PrecisionT, class ComplexT>
+void SparseMV_Kokkos(Kokkos::View<ComplexT *> x, Kokkos::View<ComplexT *> y,
+                     const size_t *row_map, const size_t row_map_size,
+                     const size_t *entries_ptr, const ComplexT *values_ptr,
+                     const size_t numNNZ) {
 
     using ConstComplexHostView =
-        Kokkos::View<const Kokkos::complex<PrecisionT> *, Kokkos::HostSpace,
+        Kokkos::View<const ComplexT *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using ConstSizeTHostView =
         Kokkos::View<const size_t *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using KokkosSizeTVector = Kokkos::View<size_t *>;
-    using KokkosVector = Kokkos::View<Kokkos::complex<PrecisionT> *>;
+    using KokkosVector = Kokkos::View<ComplexT *>;
 
-    KokkosVector kok_data("kokkos_sparese_matrix_vals", data.size());
-    KokkosSizeTVector kok_indices("kokkos_indices", indices.size());
-    KokkosSizeTVector kok_indptr("kokkos_offsets", indptr.size());
+    KokkosVector kok_data("kokkos_sparese_matrix_vals", numNNZ);
+    KokkosSizeTVector kok_entries_ptr("kokkos_entries_ptr", numNNZ);
+    KokkosSizeTVector kok_row_map("kokkos_offsets", row_map_size);
 
-    auto data_ptr =
-        reinterpret_cast<const Kokkos::complex<PrecisionT> *>(data.data());
+    Kokkos::deep_copy(kok_data, ConstComplexHostView(values_ptr, numNNZ));
 
-    const std::vector<Kokkos::complex<PrecisionT>> kok_complex_data =
-        std::vector<Kokkos::complex<PrecisionT>>{data_ptr,
-                                                 data_ptr + data.size()};
+    Kokkos::deep_copy(kok_entries_ptr, ConstSizeTHostView(entries_ptr, numNNZ));
+    Kokkos::deep_copy(kok_row_map, ConstSizeTHostView(row_map, row_map_size));
 
-    Kokkos::deep_copy(
-        kok_data, ConstComplexHostView(kok_complex_data.data(), data.size()));
-
-    Kokkos::deep_copy(kok_indices,
-                      ConstSizeTHostView(indices.data(), indices.size()));
-    Kokkos::deep_copy(kok_indptr,
-                      ConstSizeTHostView(indptr.data(), indptr.size()));
-
-    Kokkos::parallel_for(indptr.size() - 1,
+    Kokkos::parallel_for(row_map_size - 1,
                          SparseMV_KokkosFunctor<PrecisionT>(
-                             x, y, kok_data, kok_indices, kok_indptr));
+                             x, y, kok_data, kok_entries_ptr, kok_row_map));
 }
 
 /**
@@ -167,7 +162,7 @@ template <class PrecisionT> struct getRealOfComplexInnerProductFunctor {
     }
 
     KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t k, PrecisionT &inner) const {
+    void operator()(const size_t k, PrecisionT &inner) const {
         inner += real(x[k]) * real(y[k]) + imag(x[k]) * imag(y[k]);
     }
 };
@@ -211,7 +206,7 @@ template <class PrecisionT> struct getImagOfComplexInnerProductFunctor {
     }
 
     KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t k, PrecisionT &inner) const {
+    void operator()(const size_t k, PrecisionT &inner) const {
         inner += real(x[k]) * imag(y[k]) - imag(x[k]) * real(y[k]);
     }
 };

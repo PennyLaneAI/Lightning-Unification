@@ -70,6 +70,13 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values - Sparse Hamiltonian [Kokkos]",
                 static_cast<long>(values.size()));
             PrecisionT exp_values_ref = 0.5930885;
             REQUIRE(exp_values == Approx(exp_values_ref).margin(1e-6));
+
+            PrecisionT var_values =
+                Measurer.var(row_map.data(), static_cast<long>(row_map.size()),
+                             entries.data(), values.data(),
+                             static_cast<long>(values.size()));
+            PrecisionT var_values_ref = 2.4624654;
+            REQUIRE(var_values == Approx(var_values_ref).margin(1e-6));
         }
 
         SECTION("Testing Sparse Hamiltonian (incompatible sizes):") {

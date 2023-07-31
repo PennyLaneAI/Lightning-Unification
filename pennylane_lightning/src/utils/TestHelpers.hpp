@@ -426,12 +426,11 @@ auto createNonTrivialState(size_t num_qubits = 3)
  * @param values  matrix non-zero elements.
  * @param numRows matrix number of rows.
  */
-template <class PrecisionT, class IndexT>
+template <class ComplexT, class IndexT>
 void write_CSR_vectors(std::vector<IndexT> &row_map,
                        std::vector<IndexT> &entries,
-                       std::vector<std::complex<PrecisionT>> &values,
-                       IndexT numRows) {
-    const std::complex<PrecisionT> SC_ONE = 1.0;
+                       std::vector<ComplexT> &values, IndexT numRows) {
+    const ComplexT SC_ONE = 1.0;
 
     row_map.resize(numRows + 1);
     for (IndexT rowIdx = 1; rowIdx < (IndexT)row_map.size(); ++rowIdx) {
