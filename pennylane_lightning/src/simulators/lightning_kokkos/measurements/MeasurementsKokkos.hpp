@@ -673,8 +673,13 @@ class Measurements final
 
         Kokkos::parallel_for(
             "Set_Prob", mdpolicy_2d0,
-            getSubProbFunctor<PrecisionT>(arr_data, d_probabilities,
-                                          d_all_indices, d_all_offsets));
+            KOKKOS_LAMBDA(const size_t i, const size_t j) {
+                const size_t index = d_all_indices(i) + d_all_offsets(j);
+                const PrecisionT REAL = arr_data(index).real();
+                const PrecisionT IMAG = arr_data(index).imag();
+                const PrecisionT value = REAL * REAL + IMAG * IMAG;
+                Kokkos::atomic_add(&d_probabilities(i), value);
+            });
 
         std::vector<PrecisionT> probabilities(all_indices.size(), 0);
 
@@ -740,8 +745,15 @@ class Measurements final
                              getProbFunctor<PrecisionT>(arr_data, probability));
 
         // Convert probability distribution to cumulative distribution
-        Kokkos::parallel_scan(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
-                              getCDFFunctor<PrecisionT>(probability));
+        Kokkos::parallel_scan(
+            Kokkos::RangePolicy<KokkosExecSpace>(0, N),
+            KOKKOS_LAMBDA(const size_t k, PrecisionT &update_value,
+                          const bool is_final) {
+                const PrecisionT val_k = probability(k);
+                if (is_final)
+                    probability(k) = update_value;
+                update_value += val_k;
+            });
 
         // Sampling using Random_XorShift64_Pool
         Kokkos::Random_XorShift64_Pool<> rand_pool(5374857);

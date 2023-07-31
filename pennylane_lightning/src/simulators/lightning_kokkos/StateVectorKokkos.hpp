@@ -453,7 +453,8 @@ class StateVectorKokkos final
             getView(); // circumvent error capturing this with KOKKOS_LAMBDA
         Kokkos::parallel_for(
             sv_view.size(), KOKKOS_LAMBDA(const size_t i) {
-                sv_view(i) = ComplexT{(i == index) * 1.0, 0.0};
+                sv_view(i) =
+                    (i == index) ? ComplexT{1.0, 0.0} : ComplexT{0.0, 0.0};
             });
     }
 
