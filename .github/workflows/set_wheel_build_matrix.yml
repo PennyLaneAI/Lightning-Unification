@@ -48,7 +48,7 @@ jobs:
 
       - name: Kokkos execution strategy
         id: exec_model
-        run: echo "exec_model=[\"SERIAL\"]" >> $GITHUB_OUTPUT # We may also adopt [OPENMP, THREADS] in later iterations
+        run: echo "exec_model=[\"SERIAL\", \"OPENMP\"]" >> $GITHUB_OUTPUT # We may also adopt [OPENMP, THREADS] in later iterations
 
       - name: Kokkos version
         id: kokkos_version

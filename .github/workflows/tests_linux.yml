@@ -340,7 +340,7 @@ jobs:
       matrix:
         os: [ubuntu-22.04]
         pl_backend: ["lightning_qubit"]
-        exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
+        exec_model: ["SERIAL"]
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
 
     name: C++ tests (OpenBLAS, Kokkos and Kokkos Kernels)
@@ -393,7 +393,7 @@ jobs:
       matrix:
         os: [ubuntu-22.04]
         pl_backend: ["lightning_qubit"]
-        exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
+        exec_model: ["SERIAL"]
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
 
     name: Python tests with OpenBLAS, Kokkos and Kokkos Kernels

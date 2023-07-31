@@ -29,7 +29,7 @@ jobs:
     steps:
       - name: Kokkos execution strategy
         id: exec_model
-        run: echo "exec_model=[\"SERIAL\"]" >> $GITHUB_OUTPUT
+        run: echo "exec_model=[\"SERIAL\", \"OPENMP\"]" >> $GITHUB_OUTPUT
 
       - name: Kokkos version
         id: kokkos_version
@@ -82,6 +82,7 @@ jobs:
           cd kokkos
           cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
                           -DKokkos_ENABLE_COMPLEX_ALIGN=OFF \
+                          -DKokkos_ENABLE_SERIAL=ON \
                           -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
                           -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
                           -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" \
@@ -98,6 +99,7 @@ jobs:
           mkdir -p ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
           cd kokkos-kernels
           cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
+                          -DKokkos_ENABLE_SERIAL=ON \
                           -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
                           -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" \
                           -DCMAKE_CXX_STANDARD=20 \
