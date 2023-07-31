@@ -251,9 +251,12 @@ jobs:
         run: |
             cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
             cmake --build ./Build
-            cd ./Build
+            ls ./Build
+            echo mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
             mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
-            for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
+            echo for file in *runner ; do OMP_PROC_BIND=false ./$file; done;
+            for file in *runner ; do OMP_PROC_BIND=false ./$file; done;
+            for file in *runner ; do OMP_PROC_BIND=false ./$file --order lex --reporter junit --out ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
@@ -376,14 +379,9 @@ jobs:
         run: |
             cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DBUILD_TESTS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
             cmake --build ./Build --verbose
-            ls ./Build
-            echo cd ./Build 
             cd ./Build
-            echo mkdir -p ./tests/results
             mkdir -p ./tests/results
-            echo for file in *runner ; do ./$file; done;
-            for file in *runner ; do OMP_PROC_BIND=false ./$file; done;
-            for file in *runner ; do OMP_PROC_BIND=false ./$file --order lex --reporter junit --out ./tests/results/report_$file.xml; done;
+            for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results/report_$file.xml; done;
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
