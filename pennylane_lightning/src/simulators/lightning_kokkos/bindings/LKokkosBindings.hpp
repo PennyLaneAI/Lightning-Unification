@@ -185,7 +185,7 @@ void registerBackendClassSpecificBindings(PyClass &pyclass) {
                     conv_matrix = std::vector<Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
-                sv.applyOperation_std(str, wires, inv, std::vector<ParamT>{},
+                sv.applyOperation(str, wires, inv, std::vector<ParamT>{},
                                       conv_matrix);
             },
             "Apply operation via the gate matrix");
