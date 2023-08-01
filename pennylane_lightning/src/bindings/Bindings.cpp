@@ -19,8 +19,14 @@
 
 #include "pybind11/pybind11.h"
 
-#if defined(_ENABLE_PLQUBIT) || _ENABLE_PLKOKKOS == 1
+// Defining the module name.
+#if defined(_ENABLE_PLQUBIT)
+#define pennylane_lightning_ops lightning_qubit_ops
+#elif _ENABLE_PLKOKKOS == 1
+#define pennylane_lightning_ops lightning_kokkos_ops
+#endif
 
+#if defined(pennylane_lightning_ops)
 /// @cond DEV
 namespace {
 using namespace Pennylane;
