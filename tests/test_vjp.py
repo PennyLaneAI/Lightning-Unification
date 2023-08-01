@@ -15,15 +15,13 @@
 Tests for the ``vjp`` method of LightningKokkos.
 """
 import pytest
-import math
+from conftest import device_name, LightningDevice as ld
 
+import math
 import pennylane as qml
 from pennylane import numpy as np
 
-from pennylane_lightning import CPP_BINARY_AVAILABLE, backend_info
-from conftest import device_name
-
-if not CPP_BINARY_AVAILABLE:
+if not ld._CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
 

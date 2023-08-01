@@ -16,15 +16,12 @@ Integration tests that compare the output states of the
 compiled Lightning device with the ``default.qubit``.
 """
 import pytest
+from conftest import device_name, LightningDevice as ld
 
 import itertools
 import numpy as np
 import os
-
 import pennylane as qml
-from pennylane_lightning import CPP_BINARY_AVAILABLE
-
-from conftest import device_name
 
 
 def lightning_backend_dev(wires):
@@ -67,7 +64,7 @@ class TestComparison:
     @pytest.mark.parametrize(
         "lightning_dev_version", [lightning_backend_dev, lightning_backend_batch_obs_dev]
     )
-    @pytest.mark.skipif(not CPP_BINARY_AVAILABLE, reason="Lightning binary required")
+    @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     @pytest.mark.parametrize("num_threads", [1, 2])
     def test_one_qubit_circuit(
         self, monkeypatch, wires, lightning_dev_version, basis_state, num_threads
@@ -104,7 +101,7 @@ class TestComparison:
         "lightning_dev_version", [lightning_backend_dev, lightning_backend_batch_obs_dev]
     )
     @pytest.mark.parametrize("num_threads", [1, 2])
-    @pytest.mark.skipif(not CPP_BINARY_AVAILABLE, reason="Lightning binary required")
+    @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     def test_two_qubit_circuit(
         self, monkeypatch, wires, lightning_dev_version, basis_state, num_threads
     ):
@@ -148,7 +145,7 @@ class TestComparison:
         "lightning_dev_version", [lightning_backend_dev, lightning_backend_batch_obs_dev]
     )
     @pytest.mark.parametrize("num_threads", [1, 2])
-    @pytest.mark.skipif(not CPP_BINARY_AVAILABLE, reason="Lightning binary required")
+    @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     def test_three_qubit_circuit(
         self, monkeypatch, wires, lightning_dev_version, basis_state, num_threads
     ):
@@ -200,7 +197,7 @@ class TestComparison:
         "lightning_dev_version", [lightning_backend_dev, lightning_backend_batch_obs_dev]
     )
     @pytest.mark.parametrize("num_threads", [1, 2])
-    @pytest.mark.skipif(not CPP_BINARY_AVAILABLE, reason="Lightning binary required")
+    @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     def test_four_qubit_circuit(
         self, monkeypatch, wires, lightning_dev_version, basis_state, num_threads
     ):
@@ -256,7 +253,7 @@ class TestComparison:
     )
     @pytest.mark.parametrize("wires", range(1, 17))
     @pytest.mark.parametrize("num_threads", [1, 2])
-    @pytest.mark.skipif(not CPP_BINARY_AVAILABLE, reason="Lightning binary required")
+    @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     def test_n_qubit_circuit(self, monkeypatch, wires, lightning_dev_version, num_threads):
         """Test an n-qubit circuit"""
         monkeypatch.setenv("OMP_NUM_THREADS", str(num_threads))

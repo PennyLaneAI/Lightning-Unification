@@ -15,15 +15,13 @@
 Tests for ``adjoint_jacobian`` method on Lightning devices.
 """
 import pytest
+from conftest import device_name, LightningDevice as ld
 
 import math
 from scipy.stats import unitary_group
-
 import pennylane as qml
 from pennylane import numpy as np
 from pennylane import QNode, qnode
-
-from conftest import device_name, LightningDevice as ld
 
 I, X, Y, Z = (
     np.eye(2),

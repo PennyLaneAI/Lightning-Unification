@@ -15,11 +15,10 @@
 Unit tests for the expval method of Lightning devices.
 """
 import pytest
+from conftest import THETA, PHI, VARPHI
 
 import numpy as np
 import pennylane as qml
-
-from conftest import THETA, PHI, VARPHI
 
 
 @pytest.mark.parametrize("theta, phi", list(zip(THETA, PHI)))

@@ -21,9 +21,12 @@ if platform.machine() != "x86_64":
     pytest.skip("Expected to fail on non x86 systems. Skipping.", allow_module_level=True)
 
 try:
-    from pennylane_lightning.pennylane_lightning_ops import runtime_info, compile_info
+    from pennylane_lightning.lightning_qubit_ops import runtime_info, compile_info
 except (ImportError, ModuleNotFoundError):
-    pytest.skip("No binary module found. Skipping.", allow_module_level=True)
+    try:
+        from pennylane_lightning.lightning_kokkos_ops import runtime_info, compile_info
+    except (ImportError, ModuleNotFoundError):
+        pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
 
 def test_runtime_info():
