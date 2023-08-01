@@ -191,6 +191,7 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
         state_vector_1.applyMatrix(mkvec.data(), wires);
         // state_vector_1.applyOperation("matrix", wires, false, {}, mkvec);
         state_vector_2.applyMultiQubitOp(mkview, wires);
+        Kokkos::fence();
 
         PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
         REQUIRE(isApproxEqual(
