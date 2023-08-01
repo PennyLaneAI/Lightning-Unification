@@ -19,9 +19,25 @@ interfaces with C++ for fast linear algebra calculations.
 import numpy as np
 from warnings import warn
 
-from .lightning_base import backend_info, LightningBase, _chunk_iterable
+from .lightning_base import LightningBase, LightningBaseFallBack, _chunk_iterable
 
-if backend_info()["NAME"] == "lightning.qubit":
+try:
+    from .lightning_qubit_ops import (
+        allocate_aligned_array,
+        get_alignment,
+        best_alignment,
+        MeasurementsC64,
+        StateVectorC64,
+        MeasurementsC128,
+        StateVectorC128,
+        backend_info,
+    )
+
+    LQ_CPP_BINARY_AVAILABLE = True
+except:
+    LQ_CPP_BINARY_AVAILABLE = False
+
+if LQ_CPP_BINARY_AVAILABLE:
     from typing import List
     from os import getenv
 
@@ -42,17 +58,7 @@ if backend_info()["NAME"] == "lightning.qubit":
 
     from ._version import __version__
 
-    from .pennylane_lightning_ops import (
-        allocate_aligned_array,
-        get_alignment,
-        best_alignment,
-        MeasurementsC64,
-        StateVectorC64,
-        MeasurementsC128,
-        StateVectorC128,
-    )
-
-    from .pennylane_lightning_ops.algorithms import (
+    from .lightning_qubit_ops.algorithms import (
         AdjointJacobianC64,
         create_ops_listC64,
         VectorJacobianProductC64,
@@ -61,7 +67,7 @@ if backend_info()["NAME"] == "lightning.qubit":
         VectorJacobianProductC128,
     )
 
-    from ._serialize import _serialize_ob
+    from ._serialize import _Serialize
 
     allowed_operations = {
         "Identity",
@@ -168,6 +174,7 @@ if backend_info()["NAME"] == "lightning.qubit":
         short_name = "lightning.qubit"
         operations = allowed_operations
         observables = allowed_observables
+        _backend_info = backend_info
 
         def __init__(
             self,
@@ -408,7 +415,7 @@ if backend_info()["NAME"] == "lightning.qubit":
                 else MeasurementsC128(state_vector)
             )
             if observable.name == "SparseHamiltonian":
-                if backend_info()["USE_KOKKOS"]:
+                if self._backend_info()["USE_KOKKOS"]:
                     # ensuring CSR sparse representation.
 
                     CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
@@ -428,7 +435,7 @@ if backend_info()["NAME"] == "lightning.qubit":
                 or (observable.arithmetic_depth > 0)
                 or isinstance(observable.name, List)
             ):
-                ob_serialized = _serialize_ob(
+                ob_serialized = _Serialize(self.short_name)._ob(
                     observable, self.wire_map, use_csingle=self.use_csingle
                 )
                 return M.expval(ob_serialized)
@@ -475,7 +482,7 @@ if backend_info()["NAME"] == "lightning.qubit":
             )
 
             if observable.name == "SparseHamiltonian":
-                if backend_info()["USE_KOKKOS"]:
+                if self._backend_info()["USE_KOKKOS"]:
                     # ensuring CSR sparse representation.
 
                     CSR_SparseHamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
@@ -495,7 +502,7 @@ if backend_info()["NAME"] == "lightning.qubit":
                 or (observable.arithmetic_depth > 0)
                 or isinstance(observable.name, List)
             ):
-                ob_serialized = _serialize_ob(
+                ob_serialized = _Serialize(self.short_name)._ob(
                     observable, self.wire_map, use_csingle=self.use_csingle
                 )
                 return M.var(ob_serialized)
@@ -778,7 +785,7 @@ if backend_info()["NAME"] == "lightning.qubit":
 
 else:
 
-    class LightningQubit(LightningBase):  # pragma: no cover
+    class LightningQubit(LightningBaseFallBack):  # pragma: no cover
         name = "Lightning qubit PennyLane plugin [No binaries found - Fallback: default.qubit]"
         short_name = "lightning.qubit"
 
