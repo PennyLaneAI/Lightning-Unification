@@ -187,7 +187,13 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
                 reinterpret_cast<ComplexT *>(m.data()) + m.size());
             KokkosVector mkview(reinterpret_cast<ComplexT *>(m.data()),
                                 m.size());
-            state_vector_1.applyMatrix(mkvec, wires);
+
+// const std::string &opName, const std::vector<size_t> &wires,
+//         bool adjoint = false, const std::vector<fp_t> &params = {0.0},
+//         [[maybe_unused]] const std::vector<ComplexT> &gate_matrix = {}
+
+            // state_vector_1.applyMatrix(mkvec, wires);
+            state_vector_1.applyOperation("matrix", wires, false, {}, mkvec);
             state_vector_2.applyMultiQubitOp(mkview, wires);
 
             PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
