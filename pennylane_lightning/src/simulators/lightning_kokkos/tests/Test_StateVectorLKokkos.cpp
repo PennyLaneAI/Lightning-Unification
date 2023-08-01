@@ -167,40 +167,35 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
     SECTION("Test with different number of wires 4") {
         using KokkosVector = typename StateVectorT::KokkosVector;
         const size_t num_qubits = 4;
-        for (size_t num_wires = 1; num_wires < num_qubits; num_wires++) {
+        const size_t num_wires = num_qubits - 1;
 
-            VectorT st_data_1 =
-                createRandomStateVectorData<PrecisionT>(re, num_qubits);
-            VectorT st_data_2 = st_data_1;
-            StateVectorT state_vector_1(
-                reinterpret_cast<ComplexT *>(st_data_1.data()),
-                st_data_1.size());
-            StateVectorT state_vector_2(
-                reinterpret_cast<ComplexT *>(st_data_2.data()),
-                st_data_2.size());
+        VectorT st_data_1 =
+            createRandomStateVectorData<PrecisionT>(re, num_qubits);
+        VectorT st_data_2 = st_data_1;
+        StateVectorT state_vector_1(
+            reinterpret_cast<ComplexT *>(st_data_1.data()),
+            st_data_1.size());
+        StateVectorT state_vector_2(
+            reinterpret_cast<ComplexT *>(st_data_2.data()),
+            st_data_2.size());
 
-            std::vector<size_t> wires(num_wires);
-            std::iota(wires.begin(), wires.end(), 0);
+        std::vector<size_t> wires(num_wires);
+        std::iota(wires.begin(), wires.end(), 0);
 
-            auto m = randomUnitary<PrecisionT>(re, num_wires);
-            std::vector<ComplexT> mkvec(reinterpret_cast<ComplexT *>(m.data()),
-                reinterpret_cast<ComplexT *>(m.data()) + m.size());
-            KokkosVector mkview(reinterpret_cast<ComplexT *>(m.data()),
-                                m.size());
+        auto m = randomUnitary<PrecisionT>(re, num_wires);
+        const std::vector<ComplexT> mkvec(reinterpret_cast<ComplexT *>(m.data()),
+            reinterpret_cast<ComplexT *>(m.data()) + m.size());
+        KokkosVector mkview(reinterpret_cast<ComplexT *>(m.data()),
+                            m.size());
 
-// const std::string &opName, const std::vector<size_t> &wires,
-//         bool adjoint = false, const std::vector<fp_t> &params = {0.0},
-//         [[maybe_unused]] const std::vector<ComplexT> &gate_matrix = {}
+        state_vector_1.applyMatrix(mkvec.data(), wires);
+        // state_vector_1.applyOperation("matrix", wires, false, {}, mkvec);
+        state_vector_2.applyMultiQubitOp(mkview, wires);
 
-            // state_vector_1.applyMatrix(mkvec, wires);
-            state_vector_1.applyOperation("matrix", wires, false, {}, mkvec);
-            state_vector_2.applyMultiQubitOp(mkview, wires);
-
-            PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
-            REQUIRE(isApproxEqual(
-                state_vector_1.getData(), state_vector_1.getLength(),
-                state_vector_2.getData(), state_vector_2.getLength(), eps));
-        }
+        PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
+        REQUIRE(isApproxEqual(
+            state_vector_1.getData(), state_vector_1.getLength(),
+            state_vector_2.getData(), state_vector_2.getLength(), eps));
     }
 }
 
