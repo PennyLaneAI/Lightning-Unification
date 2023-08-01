@@ -249,7 +249,7 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
             cmake --build ./Build
             ls ./Build
             cd ./Build
