@@ -42,7 +42,7 @@ help:
 clean:
 	find . -type d -name '__pycache__' -exec rm -r {} \+
 	rm -rf build Build BuildTests BuildTidy BuildGBench
-	rm -rf pennylane_lightning/pennylane_lightning_ops*
+	rm -rf pennylane_lightning/*_ops*
 
 test-builtin:
 	$(PYTHON) -I $(TESTRUNNER)
