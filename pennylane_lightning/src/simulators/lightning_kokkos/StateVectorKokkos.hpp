@@ -566,35 +566,9 @@ class StateVectorKokkos final
      * @param wires Wires to apply gate to.
      * @param adjoint Indicates whether to use adjoint of gate.
      * @param params Optional parameter list for parametric gates.
-     * @param gate_matrix Optional gate matrix if opName doesn't exist
-     */
-    void applyOperation(const std::string &opName,
-                        const std::vector<size_t> &wires, bool adjoint = false,
-                        const std::vector<fp_t> &params = {0.0},
-                        [[maybe_unused]] const KokkosVector &gate_matrix = {}) {
-        if (opName == "Identity") {
-            // No op
-        } else if (gates_.find(opName) != gates_.end()) {
-            gates_.at(opName)(wires, adjoint, params);
-        } else {
-            KokkosVector matrix("gate_matrix", gate_matrix.size());
-            Kokkos::deep_copy(matrix,
-                              UnmanagedComplexHostView(gate_matrix.data(),
-                                                       gate_matrix.size()));
-            return applyMultiQubitOp(matrix, wires, adjoint);
-        }
-    }
-
-    /**
-     * @brief Apply a single gate to the state vector.
-     *
-     * @param opName Name of gate to apply.
-     * @param wires Wires to apply gate to.
-     * @param adjoint Indicates whether to use adjoint of gate.
-     * @param params Optional parameter list for parametric gates.
      * @param params Optional std gate matrix if opName doesn't exist.
      */
-    void applyOperation_std(
+    void applyOperation(
         const std::string &opName, const std::vector<size_t> &wires,
         bool adjoint = false, const std::vector<fp_t> &params = {0.0},
         [[maybe_unused]] const std::vector<ComplexT> &gate_matrix = {}) {
@@ -717,19 +691,6 @@ class StateVectorKokkos final
                                                     wires_view));
             }
         }
-    }
-
-    /**
-     * @brief Apply a multi qubit operator to the state vector using a matrix
-     *
-     * @param matrix Kokkos gate matrix in the device space
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     */
-    inline void applyMatrix(const KokkosVector &matrix,
-                            const std::vector<size_t> &wires,
-                            bool inverse = false) {
-        applyMultiQubitOp(matrix, wires, inverse);
     }
 
     /**
