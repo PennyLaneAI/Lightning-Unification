@@ -67,7 +67,7 @@ if LQ_CPP_BINARY_AVAILABLE:
         VectorJacobianProductC128,
     )
 
-    from ._serialize import _Serialize
+    from ._serialize import QuantumScriptSerializer
 
     allowed_operations = {
         "Identity",
@@ -435,8 +435,8 @@ if LQ_CPP_BINARY_AVAILABLE:
                 or (observable.arithmetic_depth > 0)
                 or isinstance(observable.name, List)
             ):
-                ob_serialized = _Serialize(self.short_name)._ob(
-                    observable, self.wire_map, use_csingle=self.use_csingle
+                ob_serialized = QuantumScriptSerializer(self.short_name, self.use_csingle)._ob(
+                    observable, self.wire_map
                 )
                 return M.expval(ob_serialized)
 
@@ -502,8 +502,8 @@ if LQ_CPP_BINARY_AVAILABLE:
                 or (observable.arithmetic_depth > 0)
                 or isinstance(observable.name, List)
             ):
-                ob_serialized = _Serialize(self.short_name)._ob(
-                    observable, self.wire_map, use_csingle=self.use_csingle
+                ob_serialized = QuantumScriptSerializer(self.short_name, self.use_csingle)._ob(
+                    observable, self.wire_map
                 )
                 return M.var(ob_serialized)
 

@@ -70,7 +70,7 @@ if LK_CPP_BINARY_AVAILABLE:
         create_ops_listC128,
     )
 
-    from ._serialize import _Serialize
+    from ._serialize import QuantumScriptSerializer
 
     def _kokkos_dtype(dtype):
         if dtype not in [np.complex128, np.complex64]:
@@ -484,8 +484,8 @@ if LK_CPP_BINARY_AVAILABLE:
                 or (observable.arithmetic_depth > 0)
                 or isinstance(observable.name, List)
             ):
-                ob_serialized = _Serialize(self.short_name)._ob(
-                    observable, self.wire_map, use_csingle=self.use_csingle
+                ob_serialized = QuantumScriptSerializer(self.short_name, self.use_csingle)._ob(
+                    observable, self.wire_map
                 )
                 return measure.expval(ob_serialized)
 
@@ -539,8 +539,8 @@ if LK_CPP_BINARY_AVAILABLE:
                 or (observable.arithmetic_depth > 0)
                 or isinstance(observable.name, List)
             ):
-                ob_serialized = _Serialize(self.short_name)._ob(
-                    observable, self.wire_map, use_csingle=self.use_csingle
+                ob_serialized = QuantumScriptSerializer(self.short_name, self.use_csingle)._ob(
+                    observable, self.wire_map
                 )
                 return measure.var(ob_serialized)
 

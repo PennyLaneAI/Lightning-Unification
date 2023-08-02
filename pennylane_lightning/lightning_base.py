@@ -41,7 +41,7 @@ from pennylane import (
     QubitStateVector,
 )
 
-from ._serialize import _Serialize
+from ._serialize import QuantumScriptSerializer
 
 
 class LightningBase(QubitDevice):
@@ -259,10 +259,12 @@ class LightningBase(QubitDevice):
     def _process_jacobian_tape(self, tape, starting_state, use_device_state):
         state_vector = self._init_process_jacobian_tape(tape, starting_state, use_device_state)
 
-        obs_serialized = _Serialize(self.short_name)._observables(
-            tape, self.wire_map, use_csingle=self.use_csingle
-        )
-        ops_serialized, use_sp = _Serialize(self.short_name)._ops(tape, self.wire_map)
+        obs_serialized = QuantumScriptSerializer(
+            self.short_name, self.use_csingle
+        ).serialize_observables(tape, self.wire_map)
+        ops_serialized, use_sp = QuantumScriptSerializer(
+            self.short_name, self.use_csingle
+        ).serialize_ops(tape, self.wire_map)
 
         ops_serialized = self.create_ops_list(*ops_serialized)
 
