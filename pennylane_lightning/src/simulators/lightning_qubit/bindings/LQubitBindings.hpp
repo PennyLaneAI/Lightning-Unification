@@ -19,6 +19,7 @@
  */
 
 #pragma once
+#include "BindingsBase.hpp"
 #include "Constant.hpp"
 #include "ConstantUtil.hpp" // lookup
 #include "DynamicDispatcher.hpp"
@@ -28,13 +29,12 @@
 #include "TypeList.hpp"
 #include "VectorJacobianProduct.hpp"
 
-#include "pybind11/pybind11.h"
-
 /// @cond DEV
 namespace {
-using Pennylane::LightningQubit::StateVectorLQubitRaw;
 using namespace Pennylane::LightningQubit::Measures;
 using namespace Pennylane::LightningQubit::Algorithms;
+using namespace Pennylane::Bindings;
+using Pennylane::LightningQubit::StateVectorLQubitRaw;
 } // namespace
 /// @endcond
 
@@ -45,56 +45,6 @@ namespace Pennylane::LightningQubit {
 using StateVectorBackends =
     Pennylane::Util::TypeList<StateVectorLQubitRaw<float>,
                               StateVectorLQubitRaw<double>, void>;
-
-/**
- * @brief Register matrix.
- */
-template <class StateVectorT>
-void registerMatrix(
-    StateVectorT &st,
-    const py::array_t<std::complex<typename StateVectorT::PrecisionT>,
-                      py::array::c_style | py::array::forcecast> &matrix,
-    const std::vector<size_t> &wires, bool inverse = false) {
-    using PrecisionT = typename StateVectorT::PrecisionT;
-    st.applyMatrix(
-        static_cast<const std::complex<PrecisionT> *>(matrix.request().ptr),
-        wires, inverse);
-}
-
-/**
- * @brief Register StateVector class to pybind.
- *
- * @tparam StateVectorT Statevector type to register
- * @tparam Pyclass Pybind11's class object type
- *
- * @param pyclass Pybind11's class object to bind statevector
- */
-template <class StateVectorT, class PyClass>
-void registerGatesForStateVector(PyClass &pyclass) {
-    using PrecisionT =
-        typename StateVectorT::PrecisionT; // Statevector's precision
-    using ParamT = PrecisionT;             // Parameter's data precision
-
-    using Pennylane::Gates::GateOperation;
-    using Pennylane::Util::for_each_enum;
-    namespace Constant = Pennylane::Gates::Constant;
-
-    pyclass.def("applyMatrix", &registerMatrix<StateVectorT>,
-                "Apply a given matrix to wires.");
-
-    for_each_enum<GateOperation>([&pyclass](GateOperation gate_op) {
-        using Pennylane::Util::lookup;
-        const auto gate_name =
-            std::string(lookup(Constant::gate_names, gate_op));
-        const std::string doc = "Apply the " + gate_name + " gate.";
-        auto func = [gate_name = gate_name](
-                        StateVectorT &sv, const std::vector<size_t> &wires,
-                        bool inverse, const std::vector<ParamT> &params) {
-            sv.applyOperation(gate_name, wires, inverse, params);
-        };
-        pyclass.def(gate_name.c_str(), func, doc.c_str());
-    });
-}
 
 /**
  * @brief Get a gate kernel map for a statevector.

@@ -6,10 +6,9 @@ add_library(${PL_BACKEND}_bindings INTERFACE)
 
 target_include_directories(${PL_BACKEND}_bindings INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(${PL_BACKEND}_bindings INTERFACE  lightning_utils
-                                                        )
-
-target_link_libraries(${PL_BACKEND}_bindings INTERFACE  ${PL_BACKEND}
+target_link_libraries(${PL_BACKEND}_bindings INTERFACE  lightning_bindings
+                                                        lightning_utils
+                                                        ${PL_BACKEND}
                                                         ${PL_BACKEND}_gates
                                                         ${PL_BACKEND}_utils
                                                         )

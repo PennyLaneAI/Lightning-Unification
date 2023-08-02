@@ -19,25 +19,25 @@
  */
 
 #pragma once
+#include <set>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <vector>
+
+#include <pybind11/complex.h>
+#include <pybind11/functional.h>
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
+
 #include "CPUMemoryModel.hpp" // CPUMemoryModel, getMemoryModel, bestCPUMemoryModel, getAlignment
 #include "JacobianData.hpp"
 #include "Macros.hpp" // CPUArch
 #include "Memory.hpp" // alignedAlloc
 #include "Observables.hpp"
 #include "Util.hpp" // for_each_enum
-
-#include "pybind11/complex.h"
-#include "pybind11/functional.h"
-#include "pybind11/numpy.h"
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
-#include "pybind11/stl_bind.h"
-
-#include <set>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <vector>
 
 #ifdef _ENABLE_PLQUBIT
 
