@@ -18,25 +18,26 @@ endif
 .PHONY: help
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
-	@echo "  docs                   to generate documents"
-	@echo "  clean                  to delete all temporary, cache, and build files"
-	@echo "  clean-docs             to delete all built documentation"
-	@echo "  test                   to run the test suite"
-	@echo "  test-cpp [backend=?]   to run the C++ test suite (requires CMake)"
-	@echo "                         Default: lightning_qubit"
-	@echo "  test-cpp [verbose=1]   to run the C++ test suite (requires CMake)"
-	@echo "                         use with 'verbose=1' for building with verbose flag"
-	@echo "  test-cpp [target=?]    to run a specific C++ test target (requires CMake)."
-	@echo "  test-python            to run the Python test suite"
-	@echo "  format [check=1]       to apply C++ and Python formatter;"
-	@echo "                         use with 'check=1' to check instead of modify (requires black and clang-format)"
-	@echo "  format [version=?]     to apply C++ and Python formatter;"
-	@echo "                         use with 'version={version}' to check or modify with clang-format-{version} instead of clang-format"
-	@echo "  check-tidy [backend=?] to build PennyLane-Lightning with ENABLE_CLANG_TIDY=ON (requires clang-tidy & CMake)"
-	@echo "                         Default: lightning_qubit"
-	@echo "  check-tidy [verbose=1] to build PennyLane-Lightning with ENABLE_CLANG_TIDY=ON (requires clang-tidy & CMake)"
-	@echo "                         use with 'verbose=1' for building with verbose flag"
-	@echo "  check-tidy [target=?]  to build a specific PennyLane-Lightning target with ENABLE_CLANG_TIDY=ON (requires clang-tidy & CMake)"
+	@echo "  docs                    to generate documents"
+	@echo "  clean                   to delete all temporary, cache, and build files"
+	@echo "  clean-docs              to delete all built documentation"
+	@echo "  test                    to run the test suite"
+	@echo "  test-cpp [backend=?]    to run the C++ test suite (requires CMake)"
+	@echo "                          Default: lightning_qubit"
+	@echo "  test-cpp [verbose=1]    to run the C++ test suite (requires CMake)"
+	@echo "                          use with 'verbose=1' for building with verbose flag"
+	@echo "  test-cpp [target=?]     to run a specific C++ test target (requires CMake)."
+	@echo "  test-python [device=?]  to run the Python test suite"
+	@echo "                          Default: lightning.qubit"
+	@echo "  format [check=1]        to apply C++ and Python formatter;"
+	@echo "                          use with 'check=1' to check instead of modify (requires black and clang-format)"
+	@echo "  format [version=?]      to apply C++ and Python formatter;"
+	@echo "                          use with 'version={version}' to check or modify with clang-format-{version} instead of clang-format"
+	@echo "  check-tidy [backend=?]  to build PennyLane-Lightning with ENABLE_CLANG_TIDY=ON (requires clang-tidy & CMake)"
+	@echo "                          Default: lightning_qubit"
+	@echo "  check-tidy [verbose=1]  to build PennyLane-Lightning with ENABLE_CLANG_TIDY=ON (requires clang-tidy & CMake)"
+	@echo "                          use with 'verbose=1' for building with verbose flag"
+	@echo "  check-tidy [target=?]   to build a specific PennyLane-Lightning target with ENABLE_CLANG_TIDY=ON (requires clang-tidy & CMake)"
 
 .PHONY : clean
 clean:
@@ -48,8 +49,8 @@ test-builtin:
 	$(PYTHON) -I $(TESTRUNNER)
 
 test-suite:
-	pl-device-test --device lightning.qubit --skip-ops --shots=20000
-	pl-device-test --device lightning.qubit --shots=None --skip-ops
+	pl-device-test --device $(if $(device:-=),$(device),lightning.qubit) --skip-ops --shots=20000
+	pl-device-test --device $(if $(device:-=),$(device),lightning.qubit) --shots=None --skip-ops
 
 test-python: test-builtin test-suite
 
