@@ -105,7 +105,6 @@ class CMakeBuild(build_ext):
                 f"-DCMAKE_MAKE_PROGRAM={ninja_path}",
             ]
 
-        backend = ext.name.replace("_ops", "")
         configure_args += [f"-DPL_BACKEND={backend}"]
         configure_args += self.cmake_defines
 
