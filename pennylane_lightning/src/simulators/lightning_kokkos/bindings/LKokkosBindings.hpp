@@ -55,9 +55,8 @@ using StateVectorBackends =
 template <class StateVectorT>
 void registerMatrix(
     StateVectorT &st,
-    const pybind11::array_t<std::complex<typename StateVectorT::PrecisionT>,
-                            pybind11::array::c_style |
-                                pybind11::array::forcecast> &matrix,
+    const py::array_t<std::complex<typename StateVectorT::PrecisionT>,
+                      py::array::c_style | py::array::forcecast> &matrix,
     const std::vector<size_t> &wires, bool inverse = false) {
     using ComplexT = typename StateVectorT::ComplexT;
     st.applyMatrix(static_cast<const ComplexT *>(matrix.request().ptr), wires,
@@ -267,11 +266,11 @@ void registerBackendSpecificAlgorithms([[maybe_unused]] py::module_ &m) {}
 /**
  * @brief Provide backend information.
  */
-auto getBackendInfo() -> pybind11::dict {
-    using namespace pybind11::literals;
+auto getBackendInfo() -> py::dict {
+    using namespace py::literals;
 
-    return pybind11::dict("NAME"_a = "lightning.kokkos", "USE_KOKKOS"_a = true,
-                          "USE_SPMV"_a = true);
+    return py::dict("NAME"_a = "lightning.kokkos", "USE_KOKKOS"_a = true,
+                    "USE_SPMV"_a = true);
 }
 
 /**

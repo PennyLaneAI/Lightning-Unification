@@ -98,10 +98,10 @@ namespace Pennylane {
  */
 template <class StateVectorT>
 auto createStateVectorFromNumpyData(
-    const pybind11::array_t<std::complex<typename StateVectorT::PrecisionT>>
+    const py::array_t<std::complex<typename StateVectorT::PrecisionT>>
         &numpyArray) -> StateVectorT {
     using ComplexT = typename StateVectorT::ComplexT;
-    pybind11::buffer_info numpyArrayInfo = numpyArray.request();
+    py::buffer_info numpyArrayInfo = numpyArray.request();
     if (numpyArrayInfo.ndim != 1) {
         throw std::invalid_argument(
             "NumPy array must be a 1-dimensional array");
@@ -121,8 +121,7 @@ auto createStateVectorFromNumpyData(
  * @param numpyArray Pybind11's numpy array type.
  * @return CPUMemoryModel Memory model describing alignment
  */
-auto getNumpyArrayAlignment(const pybind11::array &numpyArray)
-    -> CPUMemoryModel {
+auto getNumpyArrayAlignment(const py::array &numpyArray) -> CPUMemoryModel {
     return getMemoryModel(numpyArray.request().ptr);
 }
 
@@ -136,21 +135,18 @@ auto getNumpyArrayAlignment(const pybind11::array &numpyArray)
  * @return Numpy array
  */
 template <typename T>
-auto alignedNumpyArray(CPUMemoryModel memory_model, size_t size)
-    -> pybind11::array {
+auto alignedNumpyArray(CPUMemoryModel memory_model, size_t size) -> py::array {
     using Pennylane::Util::alignedAlloc;
     if (getAlignment<T>(memory_model) > alignof(std::max_align_t)) {
         void *ptr =
             alignedAlloc(getAlignment<T>(memory_model), sizeof(T) * size);
-        auto capsule = pybind11::capsule(ptr, &Util::alignedFree);
-        return pybind11::array{
-            pybind11::dtype::of<T>(), {size}, {sizeof(T)}, ptr, capsule};
+        auto capsule = py::capsule(ptr, &Util::alignedFree);
+        return py::array{py::dtype::of<T>(), {size}, {sizeof(T)}, ptr, capsule};
     }
     void *ptr = static_cast<void *>(new T[size]);
     auto capsule =
-        pybind11::capsule(ptr, [](void *p) { delete static_cast<T *>(p); });
-    return pybind11::array{
-        pybind11::dtype::of<T>(), {size}, {sizeof(T)}, ptr, capsule};
+        py::capsule(ptr, [](void *p) { delete static_cast<T *>(p); });
+    return py::array{py::dtype::of<T>(), {size}, {sizeof(T)}, ptr, capsule};
 }
 /**
  * @brief Create a numpy array whose underlying data is allocated by
@@ -162,23 +158,22 @@ auto alignedNumpyArray(CPUMemoryModel memory_model, size_t size)
  * @param size Size of the array to create
  * @param dt Pybind11's datatype object
  */
-auto allocateAlignedArray(size_t size, const pybind11::dtype &dt)
-    -> pybind11::array {
+auto allocateAlignedArray(size_t size, const py::dtype &dt) -> py::array {
     auto memory_model = bestCPUMemoryModel();
 
-    if (dt.is(pybind11::dtype::of<float>())) {
+    if (dt.is(py::dtype::of<float>())) {
         return alignedNumpyArray<float>(memory_model, size);
     }
-    if (dt.is(pybind11::dtype::of<double>())) {
+    if (dt.is(py::dtype::of<double>())) {
         return alignedNumpyArray<double>(memory_model, size);
     }
-    if (dt.is(pybind11::dtype::of<std::complex<float>>())) {
+    if (dt.is(py::dtype::of<std::complex<float>>())) {
         return alignedNumpyArray<std::complex<float>>(memory_model, size);
     }
-    if (dt.is(pybind11::dtype::of<std::complex<double>>())) {
+    if (dt.is(py::dtype::of<std::complex<double>>())) {
         return alignedNumpyArray<std::complex<double>>(memory_model, size);
     }
-    throw pybind11::type_error("Unsupported datatype.");
+    throw py::type_error("Unsupported datatype.");
 }
 
 /**
@@ -188,7 +183,7 @@ auto allocateAlignedArray(size_t size, const pybind11::dtype &dt)
  */
 void registerArrayAlignmentBindings(py::module_ &m) {
     /* Add CPUMemoryModel enum class */
-    pybind11::enum_<CPUMemoryModel>(m, "CPUMemoryModel")
+    py::enum_<CPUMemoryModel>(m, "CPUMemoryModel")
         .value("Unaligned", CPUMemoryModel::Unaligned)
         .value("Aligned256", CPUMemoryModel::Aligned256)
         .value("Aligned512", CPUMemoryModel::Aligned512);
@@ -205,9 +200,9 @@ void registerArrayAlignmentBindings(py::module_ &m) {
 /**
  * @brief Return basic information of the compiled binary.
  */
-auto getCompileInfo() -> pybind11::dict {
+auto getCompileInfo() -> py::dict {
     using namespace Pennylane::Util;
-    using namespace pybind11::literals;
+    using namespace py::literals;
 
     const std::string_view cpu_arch_str = [] {
         switch (cpu_arch) {
@@ -241,22 +236,22 @@ auto getCompileInfo() -> pybind11::dict {
 
     const auto compiler_version_str = getCompilerVersion<compiler>();
 
-    return pybind11::dict("cpu.arch"_a = cpu_arch_str,
-                          "compiler.name"_a = compiler_name_str,
-                          "compiler.version"_a = compiler_version_str,
-                          "AVX2"_a = use_avx2, "AVX512F"_a = use_avx512f);
+    return py::dict("cpu.arch"_a = cpu_arch_str,
+                    "compiler.name"_a = compiler_name_str,
+                    "compiler.version"_a = compiler_version_str,
+                    "AVX2"_a = use_avx2, "AVX512F"_a = use_avx512f);
 }
 
 /**
  * @brief Return basic information of runtime environment.
  */
-auto getRuntimeInfo() -> pybind11::dict {
+auto getRuntimeInfo() -> py::dict {
     using Pennylane::Util::RuntimeInfo;
-    using namespace pybind11::literals;
+    using namespace py::literals;
 
-    return pybind11::dict("AVX"_a = RuntimeInfo::AVX(),
-                          "AVX2"_a = RuntimeInfo::AVX2(),
-                          "AVX512F"_a = RuntimeInfo::AVX512F());
+    return py::dict("AVX"_a = RuntimeInfo::AVX(),
+                    "AVX2"_a = RuntimeInfo::AVX2(),
+                    "AVX512F"_a = RuntimeInfo::AVX512F());
 }
 
 /**

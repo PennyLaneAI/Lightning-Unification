@@ -52,9 +52,8 @@ using StateVectorBackends =
 template <class StateVectorT>
 void registerMatrix(
     StateVectorT &st,
-    const pybind11::array_t<std::complex<typename StateVectorT::PrecisionT>,
-                            pybind11::array::c_style |
-                                pybind11::array::forcecast> &matrix,
+    const py::array_t<std::complex<typename StateVectorT::PrecisionT>,
+                      py::array::c_style | py::array::forcecast> &matrix,
     const std::vector<size_t> &wires, bool inverse = false) {
     using PrecisionT = typename StateVectorT::PrecisionT;
     st.applyMatrix(
@@ -101,10 +100,10 @@ void registerGatesForStateVector(PyClass &pyclass) {
  * @brief Get a gate kernel map for a statevector.
  */
 template <class StateVectorT>
-auto svKernelMap(const StateVectorT &sv) -> pybind11::dict {
+auto svKernelMap(const StateVectorT &sv) -> py::dict {
     using PrecisionT =
         typename StateVectorT::PrecisionT; // Statevector's precision
-    pybind11::dict res_map;
+    py::dict res_map;
     namespace Constant = Pennylane::Gates::Constant;
     using Pennylane::Util::lookup;
 
@@ -300,12 +299,11 @@ void registerBackendSpecificAlgorithms(py::module_ &m) {
 /**
  * @brief Provide backend information.
  */
-auto getBackendInfo() -> pybind11::dict {
-    using namespace pybind11::literals;
+auto getBackendInfo() -> py::dict {
+    using namespace py::literals;
 
-    return pybind11::dict("NAME"_a = "lightning.qubit",
-                          "USE_KOKKOS"_a = USE_KOKKOS,
-                          "USE_SPMV"_a = USE_KOKKOS);
+    return py::dict("NAME"_a = "lightning.qubit", "USE_KOKKOS"_a = USE_KOKKOS,
+                    "USE_SPMV"_a = USE_KOKKOS);
 }
 
 /**
