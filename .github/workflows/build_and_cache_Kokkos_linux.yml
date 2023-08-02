@@ -88,12 +88,6 @@ jobs:
                           -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" \
                           -DCMAKE_CXX_STANDARD=20 \
                           -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                          -DBUILD_SHARED_LIBS:BOOL=ON \
-                          -DBUILD_TESTING:BOOL=OFF \
-                          -DKokkos_ENABLE_EXAMPLES:BOOL=OFF \
-                          -DKokkos_ENABLE_TESTS:BOOL=OFF \
-                          -DKokkos_ENABLE_LIBDL:BOOL=OFF \
-                          -DKokkos_ENABLE_DEPRECATED_CODE_3:BOOL=ON \
                           -G Ninja
           cmake --build ./Build --verbose
           cmake --install ./Build
@@ -105,9 +99,9 @@ jobs:
           mkdir -p ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
           cd kokkos-kernels
           cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
+                          -DKokkos_ENABLE_SERIAL=ON \
+                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
                           -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" \
-                          -DBUILD_SHARED_LIBS:BOOL=ON \
-                          -DBUILD_TESTING:BOOL=OFF \
                           -DCMAKE_CXX_STANDARD=20 \
                           -DCMAKE_PREFIX_PATH=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
                           -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
