@@ -17,191 +17,191 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # cpptests:
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-22.04]
-  #       pl_backend: ["lightning_qubit"]
+  cpptests:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        pl_backend: ["lightning_qubit"]
 
-  #   name: C++ tests
-  #   runs-on: ${{ matrix.os }}
+    name: C++ tests
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - uses: actions/setup-python@v4
-  #       name: Install Python
-  #       with:
-  #         python-version: '3.9'
+    steps:
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.9'
 
-  #     - name: Checkout PennyLane-Lightning
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 2
+      - name: Checkout PennyLane-Lightning
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
-  #     - name: Install dependencies
-  #       run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  ninja-build gcovr lcov
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  ninja-build gcovr lcov
 
-  #     - name: Build and run unit tests
-  #       run: |
-  #           cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
-  #           cmake --build ./Build
-  #           cd ./Build
-  #           mkdir -p ./tests/results
-  #           for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results/report_$file.xml; done;
+      - name: Build and run unit tests
+        run: |
+            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake --build ./Build
+            cd ./Build
+            mkdir -p ./tests/results
+            for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results/report_$file.xml; done;
 
-  #     - name: Upload test results
-  #       uses: actions/upload-artifact@v3
-  #       if: always()
-  #       with:
-  #         name: ubuntu-tests-reports-${{ github.job }}-${{ matrix.pl_backend }}
-  #         path: ./Build/tests/results/
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ubuntu-tests-reports-${{ github.job }}-${{ matrix.pl_backend }}
+          path: ./Build/tests/results/
 
-  # pythontests:
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-22.04]
-  #       pl_backend: ["lightning_qubit"]
+  pythontests:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        pl_backend: ["lightning_qubit"]
 
-  #   name: Python tests
-  #   runs-on: ${{ matrix.os }}
+    name: Python tests
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - name: Checkout PennyLane-Lightning
-  #       uses: actions/checkout@v3
-  #       with:
-  #         path: main
-  #         fetch-depth: 2
+    steps:
+      - name: Checkout PennyLane-Lightning
+        uses: actions/checkout@v3
+        with:
+          path: main
+          fetch-depth: 2
 
-  #     - uses: actions/setup-python@v4
-  #       name: Install Python
-  #       with:
-  #         python-version: '3.9'
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.9'
 
-  #     - name: Install dependencies
-  #       run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION
 
-  #     - name: Get required Python packages
-  #       run: |
-  #         cd main
-  #         python -m pip install --upgrade pip
-  #         pip install -r requirements-dev.txt
+      - name: Get required Python packages
+        run: |
+          cd main
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
 
-  #     - name: Install ML libraries for interfaces
-  #       run: |
-  #         pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
-  #         pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-  #         pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
+      - name: Install ML libraries for interfaces
+        run: |
+          pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
-  #     - name: Install backend device
-  #       run: |
-  #         cd main
-  #         CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+      - name: Install backend device
+        run: |
+          cd main
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
 
-  #     - name: Run PennyLane-Lightning unit tests
-  #       run: |
-  #         cd main/
-  #         pytest tests/ $COVERAGE_FLAGS
-  #         pl-device-test --device lightning.qubit --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
-  #         pl-device-test --device lightning.qubit --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
-  #         mv coverage.xml coverage-${{ github.job }}.xml
+      - name: Run PennyLane-Lightning unit tests
+        run: |
+          cd main/
+          pytest tests/ $COVERAGE_FLAGS
+          pl-device-test --device lightning.qubit --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
+          pl-device-test --device lightning.qubit --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
+          mv coverage.xml coverage-${{ github.job }}.xml
 
-  #     - name: Upload code coverage results
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: ubuntu-codecov-results-python
-  #         path: ./main/coverage-${{ github.job }}.xml
+      - name: Upload code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-codecov-results-python
+          path: ./main/coverage-${{ github.job }}.xml
 
-  # cpptestswithOpenBLAS:
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-22.04]
-  #       pl_backend: ["lightning_qubit"]
+  cpptestswithOpenBLAS:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        pl_backend: ["lightning_qubit"]
 
-  #   name: C++ tests (OpenBLAS)
-  #   runs-on: ${{ matrix.os }}
+    name: C++ tests (OpenBLAS)
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - uses: actions/setup-python@v4
-  #       name: Install Python
-  #       with:
-  #         python-version: '3.9'
+    steps:
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.9'
 
-  #     - name: Checkout PennyLane-Lightning
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 2
+      - name: Checkout PennyLane-Lightning
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
-  #     - name: Install dependencies
-  #       run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  libopenblas-dev ninja-build gcovr lcov
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  libopenblas-dev ninja-build gcovr lcov
 
-  #     - name: Build and run unit tests
-  #       run: |
-  #           cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DENABLE_BLAS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DBUILD_TESTS=ON -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
-  #           cmake --build ./Build
-  #           cd ./Build
-  #           mkdir -p ./tests/results
-  #           for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results/report_$file.xml; done;
+      - name: Build and run unit tests
+        run: |
+            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DENABLE_BLAS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DBUILD_TESTS=ON -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake --build ./Build
+            cd ./Build
+            mkdir -p ./tests/results
+            for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results/report_$file.xml; done;
 
-  #     - name: Upload test results
-  #       uses: actions/upload-artifact@v3
-  #       if: always()
-  #       with:
-  #         name: ubuntu-tests-reports-${{ github.job }}-${{ matrix.pl_backend }}
-  #         path: ./Build/tests/results/
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ubuntu-tests-reports-${{ github.job }}-${{ matrix.pl_backend }}
+          path: ./Build/tests/results/
 
-  # pythontestswithOpenBLAS:
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-22.04]
-  #       pl_backend: ["lightning_qubit"]
+  pythontestswithOpenBLAS:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        pl_backend: ["lightning_qubit"]
 
-  #   name: Python tests with OpenBLAS
-  #   runs-on: ${{ matrix.os }}
+    name: Python tests with OpenBLAS
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - name: Checkout PennyLane-Lightning
-  #       uses: actions/checkout@v3
-  #       with:
-  #         path: main
-  #         fetch-depth: 2
+    steps:
+      - name: Checkout PennyLane-Lightning
+        uses: actions/checkout@v3
+        with:
+          path: main
+          fetch-depth: 2
 
-  #     - uses: actions/setup-python@v4
-  #       name: Install Python
-  #       with:
-  #         python-version: '3.9'
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.9'
 
-  #     - name: Install dependencies
-  #       run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  libopenblas-dev
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  libopenblas-dev
 
-  #     - name: Get required Python packages
-  #       run: |
-  #         cd main
-  #         python -m pip install --upgrade pip
-  #         pip install -r requirements-dev.txt
+      - name: Get required Python packages
+        run: |
+          cd main
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
 
-  #     - name: Install ML libraries for interfaces
-  #       run: |
-  #         pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
-  #         pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-  #         pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
+      - name: Install ML libraries for interfaces
+        run: |
+          pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
-  #     - name: Install backend device
-  #       run: |
-  #         cd main
-  #         CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+      - name: Install backend device
+        run: |
+          cd main
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
 
-  #     - name: Run PennyLane-Lightning unit tests
-  #       run: |
-  #         cd main/
-  #         pytest tests/ $COVERAGE_FLAGS
-  #         pl-device-test --device lightning.qubit --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
-  #         pl-device-test --device lightning.qubit --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
-  #         mv coverage.xml coverage-${{ github.job }}.xml
+      - name: Run PennyLane-Lightning unit tests
+        run: |
+          cd main/
+          pytest tests/ $COVERAGE_FLAGS
+          pl-device-test --device lightning.qubit --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
+          pl-device-test --device lightning.qubit --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
+          mv coverage.xml coverage-${{ github.job }}.xml
 
-  #     - name: Upload code coverage results
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: ubuntu-codecov-results-python
-  #         path: ./main/coverage-${{ github.job }}.xml
+      - name: Upload code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-codecov-results-python
+          path: ./main/coverage-${{ github.job }}.xml
 
   build_and_cache_Kokkos:
     name: "Build and cache Kokkos and Kokkos Kernels"
@@ -249,15 +249,10 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
             cmake --build ./Build
-            ls ./Build
             cd ./Build
-            echo mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
             mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
-            echo OMP_PROC_BIND=false
-            export OMP_PROC_BIND=false
-            for file in *runner ; do ./$file; done;
             for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}/report_$file.xml; done;
 
       - name: Upload test results
@@ -267,198 +262,198 @@ jobs:
           name: ubuntu-tests-reports-${{ github.job }}_${{ matrix.pl_backend }}
           path: ./Build/tests/results_${{ github.job }}_${{ matrix.pl_backend }}
 
-  # pythontestswithKokkos:
-  #   needs: [build_and_cache_Kokkos]
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-22.04]
-  #       pl_backend: ["lightning_kokkos", "lightning_qubit"]
-  #       exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
-  #       kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+  pythontestswithKokkos:
+    needs: [build_and_cache_Kokkos]
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        pl_backend: ["lightning_kokkos", "lightning_qubit"]
+        exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
+        kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
 
-  #   name: Python tests with Kokkos and Kokkos Kernels
-  #   runs-on: ${{ matrix.os }}
+    name: Python tests with Kokkos and Kokkos Kernels
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - name: Checkout PennyLane-Lightning
-  #       uses: actions/checkout@v3
-  #       with:
-  #         path: main
-  #         fetch-depth: 2
+    steps:
+      - name: Checkout PennyLane-Lightning
+        uses: actions/checkout@v3
+        with:
+          path: main
+          fetch-depth: 2
 
-  #     - uses: actions/setup-python@v4
-  #       name: Install Python
-  #       with:
-  #         python-version: '3.9'
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.9'
 
-  #     - name: Restoring cached dependencies
-  #       id: kokkos-cache
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
-  #         key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+      - name: Restoring cached dependencies
+        id: kokkos-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
+          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
 
-  #     - name: Copy cached libraries
-  #       run: |
-  #         mkdir Kokkos/
-  #         cp -rf ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
-  #         pwd
+      - name: Copy cached libraries
+        run: |
+          mkdir Kokkos/
+          cp -rf ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
+          pwd
 
-  #     - name: Install dependencies
-  #       run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION
 
-  #     - name: Get required Python packages
-  #       run: |
-  #         cd main
-  #         python -m pip install --upgrade pip
-  #         pip install -r requirements-dev.txt
+      - name: Get required Python packages
+        run: |
+          cd main
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
 
-  #     - name: Install ML libraries for interfaces
-  #       run: |
-  #         pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
-  #         pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-  #         pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
+      - name: Install ML libraries for interfaces
+        run: |
+          pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
-  #     - name: Install backend device
-  #       run: |
-  #         cd main
-  #         CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+      - name: Install backend device
+        run: |
+          cd main
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
 
-  #     - name: Run PennyLane-Lightning unit tests
-  #       run: |
-  #         cd main/
-  #         DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
-  #         pytest tests/ $COVERAGE_FLAGS
-  #         pl-device-test --device ${DEVICENAME} --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
-  #         pl-device-test --device ${DEVICENAME} --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
-  #         mv coverage.xml coverage-${{ github.job }}.xml
+      - name: Run PennyLane-Lightning unit tests
+        run: |
+          cd main/
+          DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
+          pytest tests/ $COVERAGE_FLAGS
+          pl-device-test --device ${DEVICENAME} --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
+          pl-device-test --device ${DEVICENAME} --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
+          mv coverage.xml coverage-${{ github.job }}.xml
 
-  #     - name: Upload code coverage results
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: ubuntu-codecov-results-python
-  #         path: ./main/coverage-${{ github.job }}.xml
+      - name: Upload code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-codecov-results-python
+          path: ./main/coverage-${{ github.job }}.xml
 
-  # cpptestswithKokkosAndOpenBLAS:
-  #   needs: [build_and_cache_Kokkos]
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-22.04]
-  #       pl_backend: ["lightning_qubit"]
-  #       exec_model: ["SERIAL"]
-  #       kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+  cpptestswithKokkosAndOpenBLAS:
+    needs: [build_and_cache_Kokkos]
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        pl_backend: ["lightning_qubit"]
+        exec_model: ["SERIAL"]
+        kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
 
-  #   name: C++ tests (OpenBLAS, Kokkos and Kokkos Kernels)
-  #   runs-on: ${{ matrix.os }}
+    name: C++ tests (OpenBLAS, Kokkos and Kokkos Kernels)
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - uses: actions/setup-python@v4
-  #       name: Install Python
-  #       with:
-  #         python-version: '3.9'
+    steps:
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.9'
 
-  #     - name: Checkout PennyLane-Lightning
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 2
+      - name: Checkout PennyLane-Lightning
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
-  #     - name: Restoring cached dependencies
-  #       id: kokkos-cache
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
-  #         key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+      - name: Restoring cached dependencies
+        id: kokkos-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
+          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
 
-  #     - name: Copy cached libraries
-  #       run: |
-  #         mkdir Kokkos/
-  #         cp -rf ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
+      - name: Copy cached libraries
+        run: |
+          mkdir Kokkos/
+          cp -rf ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
 
-  #     - name: Install dependencies
-  #       run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  libopenblas-dev ninja-build gcovr lcov
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  libopenblas-dev ninja-build gcovr lcov
 
-  #     - name: Build and run unit tests
-  #       run: |
-  #           cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DBUILD_TESTS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
-  #           cmake --build ./Build --verbose
-  #           cd ./Build
-  #           mkdir -p ./tests/results
-  #           for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results/report_$file.xml; done;
+      - name: Build and run unit tests
+        run: |
+            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DBUILD_TESTS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake --build ./Build
+            cd ./Build
+            mkdir -p ./tests/results
+            for file in *runner ; do ./$file --order lex --reporter junit --out ./tests/results/report_$file.xml; done;
 
-  #     - name: Upload test results
-  #       uses: actions/upload-artifact@v3
-  #       if: always()
-  #       with:
-  #         name: ubuntu-tests-reports-${{ github.job }}-${{ matrix.pl_backend }}
-  #         path: ./Build/tests/results/
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ubuntu-tests-reports-${{ github.job }}-${{ matrix.pl_backend }}
+          path: ./Build/tests/results/
 
-  # pythontestswithKokkosAndOpenBLAS:
-  #   needs: [build_and_cache_Kokkos]
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-22.04]
-  #       pl_backend: ["lightning_qubit"]
-  #       exec_model: ["SERIAL"]
-  #       kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+  pythontestswithKokkosAndOpenBLAS:
+    needs: [build_and_cache_Kokkos]
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        pl_backend: ["lightning_qubit"]
+        exec_model: ["SERIAL"]
+        kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
 
-  #   name: Python tests with OpenBLAS, Kokkos and Kokkos Kernels
-  #   runs-on: ${{ matrix.os }}
+    name: Python tests with OpenBLAS, Kokkos and Kokkos Kernels
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - name: Checkout PennyLane-Lightning
-  #       uses: actions/checkout@v3
-  #       with:
-  #         path: main
-  #         fetch-depth: 2
+    steps:
+      - name: Checkout PennyLane-Lightning
+        uses: actions/checkout@v3
+        with:
+          path: main
+          fetch-depth: 2
 
-  #     - uses: actions/setup-python@v4
-  #       name: Install Python
-  #       with:
-  #         python-version: '3.9'
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.9'
 
-  #     - name: Restoring cached dependencies
-  #       id: kokkos-cache
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
-  #         key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+      - name: Restoring cached dependencies
+        id: kokkos-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
+          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
 
-  #     - name: Copy cached libraries
-  #       run: |
-  #         mkdir Kokkos/
-  #         cp -rf ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
-  #         pwd
+      - name: Copy cached libraries
+        run: |
+          mkdir Kokkos/
+          cp -rf ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
+          pwd
 
-  #     - name: Install dependencies
-  #       run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  libopenblas-dev
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-$GCC_VERSION  g++-$GCC_VERSION  libopenblas-dev
 
-  #     - name: Get required Python packages
-  #       run: |
-  #         cd main
-  #         python -m pip install --upgrade pip
-  #         pip install -r requirements-dev.txt
+      - name: Get required Python packages
+        run: |
+          cd main
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
 
-  #     - name: Install ML libraries for interfaces
-  #       run: |
-  #         pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
-  #         pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-  #         pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
+      - name: Install ML libraries for interfaces
+        run: |
+          pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
-  #     - name: Install backend device
-  #       run: |
-  #         cd main
-  #         CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+      - name: Install backend device
+        run: |
+          cd main
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
 
-  #     - name: Run PennyLane-Lightning unit tests
-  #       run: |
-  #         cd main/
-  #         pytest tests/ $COVERAGE_FLAGS
-  #         pl-device-test --device lightning.qubit --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
-  #         pl-device-test --device lightning.qubit --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
-  #         mv coverage.xml coverage-${{ github.job }}.xml
+      - name: Run PennyLane-Lightning unit tests
+        run: |
+          cd main/
+          pytest tests/ $COVERAGE_FLAGS
+          pl-device-test --device lightning.qubit --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
+          pl-device-test --device lightning.qubit --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
+          mv coverage.xml coverage-${{ github.job }}.xml
 
-  #     - name: Upload code coverage results
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: ubuntu-codecov-results-python
-  #         path: ./main/coverage-${{ github.job }}.xml
+      - name: Upload code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-codecov-results-python
+          path: ./main/coverage-${{ github.job }}.xml
