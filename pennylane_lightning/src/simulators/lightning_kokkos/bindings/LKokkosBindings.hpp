@@ -186,7 +186,7 @@ void registerBackendClassSpecificBindings(PyClass &pyclass) {
                         m_ptr, m_ptr + m_buffer.size};
                 }
                 sv.applyOperation(str, wires, inv, std::vector<ParamT>{},
-                                      conv_matrix);
+                                  conv_matrix);
             },
             "Apply operation via the gate matrix");
 }

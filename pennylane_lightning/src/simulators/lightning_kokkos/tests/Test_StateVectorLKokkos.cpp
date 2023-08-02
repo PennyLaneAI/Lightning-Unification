@@ -152,7 +152,8 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
 
             auto m = randomUnitary<PrecisionT>(re, num_wires);
             std::vector<ComplexT> mkvec(reinterpret_cast<ComplexT *>(m.data()),
-                reinterpret_cast<ComplexT *>(m.data()) + m.size());
+                                        reinterpret_cast<ComplexT *>(m.data()) +
+                                            m.size());
             KokkosVector mkview(reinterpret_cast<ComplexT *>(m.data()),
                                 m.size());
             state_vector_1.applyMatrix(mkvec, wires);
@@ -173,20 +174,18 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
             createRandomStateVectorData<PrecisionT>(re, num_qubits);
         VectorT st_data_2 = st_data_1;
         StateVectorT state_vector_1(
-            reinterpret_cast<ComplexT *>(st_data_1.data()),
-            st_data_1.size());
+            reinterpret_cast<ComplexT *>(st_data_1.data()), st_data_1.size());
         StateVectorT state_vector_2(
-            reinterpret_cast<ComplexT *>(st_data_2.data()),
-            st_data_2.size());
+            reinterpret_cast<ComplexT *>(st_data_2.data()), st_data_2.size());
 
         std::vector<size_t> wires(num_wires);
         std::iota(wires.begin(), wires.end(), 0);
 
         auto m = randomUnitary<PrecisionT>(re, num_wires);
-        const std::vector<ComplexT> mkvec(reinterpret_cast<ComplexT *>(m.data()),
+        const std::vector<ComplexT> mkvec(
+            reinterpret_cast<ComplexT *>(m.data()),
             reinterpret_cast<ComplexT *>(m.data()) + m.size());
-        KokkosVector mkview(reinterpret_cast<ComplexT *>(m.data()),
-                            m.size());
+        KokkosVector mkview(reinterpret_cast<ComplexT *>(m.data()), m.size());
 
         state_vector_1.applyMatrix(mkvec.data(), wires);
         // state_vector_1.applyOperation("matrix", wires, false, {}, mkvec);
