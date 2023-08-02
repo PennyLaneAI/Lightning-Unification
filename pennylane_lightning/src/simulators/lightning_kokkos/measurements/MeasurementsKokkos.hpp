@@ -425,8 +425,8 @@ class Measurements final
                           UnmanagedConstComplexHostView(values_ptr, numNNZ));
         Kokkos::deep_copy(kok_indices,
                           UnmanagedConstSizeTHostView(entries_ptr, numNNZ));
-        Kokkos::deep_copy(kok_row_map,
-                          UnmanagedConstSizeTHostView(row_map_ptr, row_map_size));
+        Kokkos::deep_copy(kok_row_map, UnmanagedConstSizeTHostView(
+                                           row_map_ptr, row_map_size));
 
         Kokkos::parallel_reduce(
             row_map_size - 1,
