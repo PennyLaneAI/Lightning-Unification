@@ -223,9 +223,7 @@ class TestVectorJacobianProduct:
         obs = np.array([[1, 0], [0, -1]], dtype=dev.C_DTYPE, requires_grad=False)
         dy = np.array([0.8])
 
-        fn = dev.vjp(
-            [qml.expval(qml.Hermitian(obs, wires=(0,)) @ qml.PauliZ(wires=1))], dy
-        )
+        fn = dev.vjp([qml.expval(qml.Hermitian(obs, wires=(0,)) @ qml.PauliZ(wires=1))], dy)
 
         for x in np.linspace(-2 * math.pi, 2 * math.pi, 7):
             with qml.tape.QuantumTape() as tape:
