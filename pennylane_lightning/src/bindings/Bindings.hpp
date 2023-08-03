@@ -183,7 +183,7 @@ auto allocateAlignedArray(size_t size, const py::dtype &dt) -> py::array {
  */
 void registerArrayAlignmentBindings(py::module_ &m) {
     /* Add CPUMemoryModel enum class */
-    py::enum_<CPUMemoryModel>(m, "CPUMemoryModel")
+    py::enum_<CPUMemoryModel>(m, "CPUMemoryModel", py::module_local())
         .value("Unaligned", CPUMemoryModel::Unaligned)
         .value("Aligned256", CPUMemoryModel::Aligned256)
         .value("Aligned512", CPUMemoryModel::Aligned512);
