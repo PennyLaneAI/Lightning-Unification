@@ -41,7 +41,7 @@ pauli_name_map = {
 
 
 class QuantumScriptSerializer:
-    """Quantum serializer class. For serializing quantum scripts.
+    """Serializer class for `pennylane.tape.QuantumScript` data.
 
     Args:
     device_name: device shortname.
