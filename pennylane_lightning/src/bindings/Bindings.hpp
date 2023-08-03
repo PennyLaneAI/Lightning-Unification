@@ -19,6 +19,19 @@
  */
 
 #pragma once
+#include <set>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <vector>
+
+#include <pybind11/complex.h>
+#include <pybind11/functional.h>
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
+
 #include "CPUMemoryModel.hpp" // CPUMemoryModel, getMemoryModel, bestCPUMemoryModel, getAlignment
 #include "JacobianData.hpp"
 #include "Macros.hpp" // CPUArch
@@ -26,20 +39,8 @@
 #include "Observables.hpp"
 #include "Util.hpp" // for_each_enum
 
-#include "pybind11/complex.h"
-#include "pybind11/functional.h"
-#include "pybind11/numpy.h"
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
-#include "pybind11/stl_bind.h"
-
-#include <set>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <vector>
-
 #ifdef _ENABLE_PLQUBIT
+
 #include "AdjointJacobianLQubit.hpp"
 #include "LQubitBindings.hpp" // StateVectorBackends, registerBackendClassSpecificBindings, registerBackendSpecificMeasurements, registerBackendSpecificAlgorithms
 #include "MeasurementsLQubit.hpp"
@@ -53,6 +54,28 @@ using namespace Pennylane::LightningQubit::Observables;
 using namespace Pennylane::LightningQubit::Measures;
 } // namespace
 /// @endcond
+
+#elif _ENABLE_PLKOKKOS == 1
+
+#include "AdjointJacobianKokkos.hpp"
+#include "LKokkosBindings.hpp" // StateVectorBackends, registerBackendClassSpecificBindings, registerBackendSpecificMeasurements, registerBackendSpecificAlgorithms
+#include "MeasurementsKokkos.hpp"
+#include "ObservablesKokkos.hpp"
+
+/// @cond DEV
+namespace {
+using namespace Pennylane::LightningKokkos;
+using namespace Pennylane::LightningKokkos::Algorithms;
+using namespace Pennylane::LightningKokkos::Observables;
+using namespace Pennylane::LightningKokkos::Measures;
+} // namespace
+  /// @endcond
+
+#else
+
+static_assert(false, "Backend not found.");
+
+#endif
 
 /// @cond DEV
 namespace {
@@ -75,20 +98,19 @@ namespace Pennylane {
  */
 template <class StateVectorT>
 auto createStateVectorFromNumpyData(
-    const pybind11::array_t<std::complex<typename StateVectorT::PrecisionT>>
+    const py::array_t<std::complex<typename StateVectorT::PrecisionT>>
         &numpyArray) -> StateVectorT {
-    using PrecisionT = typename StateVectorT::PrecisionT;
-    pybind11::buffer_info numpyArrayInfo = numpyArray.request();
+    using ComplexT = typename StateVectorT::ComplexT;
+    py::buffer_info numpyArrayInfo = numpyArray.request();
     if (numpyArrayInfo.ndim != 1) {
         throw std::invalid_argument(
             "NumPy array must be a 1-dimensional array");
     }
-    if (numpyArrayInfo.itemsize != sizeof(std::complex<PrecisionT>)) {
+    if (numpyArrayInfo.itemsize != sizeof(ComplexT)) {
         throw std::invalid_argument(
             "NumPy array must be of type np.complex64 or np.complex128");
     }
-    auto *data_ptr =
-        static_cast<std::complex<PrecisionT> *>(numpyArrayInfo.ptr);
+    auto *data_ptr = static_cast<ComplexT *>(numpyArrayInfo.ptr);
     return StateVectorT(
         {data_ptr, static_cast<size_t>(numpyArrayInfo.shape[0])});
 }
@@ -99,8 +121,7 @@ auto createStateVectorFromNumpyData(
  * @param numpyArray Pybind11's numpy array type.
  * @return CPUMemoryModel Memory model describing alignment
  */
-auto getNumpyArrayAlignment(const pybind11::array &numpyArray)
-    -> CPUMemoryModel {
+auto getNumpyArrayAlignment(const py::array &numpyArray) -> CPUMemoryModel {
     return getMemoryModel(numpyArray.request().ptr);
 }
 
@@ -114,21 +135,18 @@ auto getNumpyArrayAlignment(const pybind11::array &numpyArray)
  * @return Numpy array
  */
 template <typename T>
-auto alignedNumpyArray(CPUMemoryModel memory_model, size_t size)
-    -> pybind11::array {
+auto alignedNumpyArray(CPUMemoryModel memory_model, size_t size) -> py::array {
     using Pennylane::Util::alignedAlloc;
     if (getAlignment<T>(memory_model) > alignof(std::max_align_t)) {
         void *ptr =
             alignedAlloc(getAlignment<T>(memory_model), sizeof(T) * size);
-        auto capsule = pybind11::capsule(ptr, &Util::alignedFree);
-        return pybind11::array{
-            pybind11::dtype::of<T>(), {size}, {sizeof(T)}, ptr, capsule};
+        auto capsule = py::capsule(ptr, &Util::alignedFree);
+        return py::array{py::dtype::of<T>(), {size}, {sizeof(T)}, ptr, capsule};
     }
     void *ptr = static_cast<void *>(new T[size]);
     auto capsule =
-        pybind11::capsule(ptr, [](void *p) { delete static_cast<T *>(p); });
-    return pybind11::array{
-        pybind11::dtype::of<T>(), {size}, {sizeof(T)}, ptr, capsule};
+        py::capsule(ptr, [](void *p) { delete static_cast<T *>(p); });
+    return py::array{py::dtype::of<T>(), {size}, {sizeof(T)}, ptr, capsule};
 }
 /**
  * @brief Create a numpy array whose underlying data is allocated by
@@ -140,23 +158,22 @@ auto alignedNumpyArray(CPUMemoryModel memory_model, size_t size)
  * @param size Size of the array to create
  * @param dt Pybind11's datatype object
  */
-auto allocateAlignedArray(size_t size, const pybind11::dtype &dt)
-    -> pybind11::array {
+auto allocateAlignedArray(size_t size, const py::dtype &dt) -> py::array {
     auto memory_model = bestCPUMemoryModel();
 
-    if (dt.is(pybind11::dtype::of<float>())) {
+    if (dt.is(py::dtype::of<float>())) {
         return alignedNumpyArray<float>(memory_model, size);
     }
-    if (dt.is(pybind11::dtype::of<double>())) {
+    if (dt.is(py::dtype::of<double>())) {
         return alignedNumpyArray<double>(memory_model, size);
     }
-    if (dt.is(pybind11::dtype::of<std::complex<float>>())) {
+    if (dt.is(py::dtype::of<std::complex<float>>())) {
         return alignedNumpyArray<std::complex<float>>(memory_model, size);
     }
-    if (dt.is(pybind11::dtype::of<std::complex<double>>())) {
+    if (dt.is(py::dtype::of<std::complex<double>>())) {
         return alignedNumpyArray<std::complex<double>>(memory_model, size);
     }
-    throw pybind11::type_error("Unsupported datatype.");
+    throw py::type_error("Unsupported datatype.");
 }
 
 /**
@@ -166,7 +183,7 @@ auto allocateAlignedArray(size_t size, const pybind11::dtype &dt)
  */
 void registerArrayAlignmentBindings(py::module_ &m) {
     /* Add CPUMemoryModel enum class */
-    pybind11::enum_<CPUMemoryModel>(m, "CPUMemoryModel")
+    py::enum_<CPUMemoryModel>(m, "CPUMemoryModel", py::module_local())
         .value("Unaligned", CPUMemoryModel::Unaligned)
         .value("Aligned256", CPUMemoryModel::Aligned256)
         .value("Aligned512", CPUMemoryModel::Aligned512);
@@ -183,9 +200,9 @@ void registerArrayAlignmentBindings(py::module_ &m) {
 /**
  * @brief Return basic information of the compiled binary.
  */
-auto getCompileInfo() -> pybind11::dict {
+auto getCompileInfo() -> py::dict {
     using namespace Pennylane::Util;
-    using namespace pybind11::literals;
+    using namespace py::literals;
 
     const std::string_view cpu_arch_str = [] {
         switch (cpu_arch) {
@@ -219,22 +236,22 @@ auto getCompileInfo() -> pybind11::dict {
 
     const auto compiler_version_str = getCompilerVersion<compiler>();
 
-    return pybind11::dict("cpu.arch"_a = cpu_arch_str,
-                          "compiler.name"_a = compiler_name_str,
-                          "compiler.version"_a = compiler_version_str,
-                          "AVX2"_a = use_avx2, "AVX512F"_a = use_avx512f);
+    return py::dict("cpu.arch"_a = cpu_arch_str,
+                    "compiler.name"_a = compiler_name_str,
+                    "compiler.version"_a = compiler_version_str,
+                    "AVX2"_a = use_avx2, "AVX512F"_a = use_avx512f);
 }
 
 /**
  * @brief Return basic information of runtime environment.
  */
-auto getRuntimeInfo() -> pybind11::dict {
+auto getRuntimeInfo() -> py::dict {
     using Pennylane::Util::RuntimeInfo;
-    using namespace pybind11::literals;
+    using namespace py::literals;
 
-    return pybind11::dict("AVX"_a = RuntimeInfo::AVX(),
-                          "AVX2"_a = RuntimeInfo::AVX2(),
-                          "AVX512F"_a = RuntimeInfo::AVX512F());
+    return py::dict("AVX"_a = RuntimeInfo::AVX(),
+                    "AVX2"_a = RuntimeInfo::AVX2(),
+                    "AVX512F"_a = RuntimeInfo::AVX512F());
 }
 
 /**
@@ -259,7 +276,9 @@ void registerInfo(py::module_ &m) {
 template <class StateVectorT> void registerObservables(py::module_ &m) {
     using PrecisionT =
         typename StateVectorT::PrecisionT; // Statevector's precision.
-    using ParamT = PrecisionT;             // Parameter's data precision
+    using ComplexT =
+        typename StateVectorT::ComplexT; // Statevector's complex type.
+    using ParamT = PrecisionT;           // Parameter's data precision
 
     const std::string bitsize =
         std::to_string(sizeof(std::complex<PrecisionT>) * 8);
@@ -301,15 +320,13 @@ template <class StateVectorT> void registerObservables(py::module_ &m) {
                std::shared_ptr<HermitianObs<StateVectorT>>,
                Observable<StateVectorT>>(m, class_name.c_str(),
                                          py::module_local())
-        .def(py::init([](const np_arr_c &matrix,
-                         const std::vector<size_t> &wires) {
-            auto buffer = matrix.request();
-            const auto *ptr =
-                static_cast<std::complex<PrecisionT> *>(buffer.ptr);
-            return HermitianObs<StateVectorT>(
-                std::vector<std::complex<PrecisionT>>(ptr, ptr + buffer.size),
-                wires);
-        }))
+        .def(py::init(
+            [](const np_arr_c &matrix, const std::vector<size_t> &wires) {
+                auto buffer = matrix.request();
+                const auto *ptr = static_cast<ComplexT *>(buffer.ptr);
+                return HermitianObs<StateVectorT>(
+                    std::vector<ComplexT>(ptr, ptr + buffer.size), wires);
+            }))
         .def("__repr__", &HermitianObs<StateVectorT>::getObsName)
         .def("get_wires", &HermitianObs<StateVectorT>::getWires,
              "Get wires of observables")
@@ -468,7 +485,9 @@ template <class StateVectorT>
 void registerBackendAgnosticAlgorithms(py::module_ &m) {
     using PrecisionT =
         typename StateVectorT::PrecisionT; // Statevector's precision
-    using ParamT = PrecisionT;             // Parameter's data precision
+    using ComplexT =
+        typename StateVectorT::ComplexT; // Statevector's complex type
+    using ParamT = PrecisionT;           // Parameter's data precision
 
     using np_arr_c = py::array_t<std::complex<ParamT>, py::array::c_style>;
 
@@ -483,12 +502,11 @@ void registerBackendAgnosticAlgorithms(py::module_ &m) {
 
     class_name = "OpsStructC" + bitsize;
     py::class_<OpsData<StateVectorT>>(m, class_name.c_str(), py::module_local())
-        .def(py::init<
-             const std::vector<std::string> &,
-             const std::vector<std::vector<ParamT>> &,
-             const std::vector<std::vector<size_t>> &,
-             const std::vector<bool> &,
-             const std::vector<std::vector<std::complex<PrecisionT>>> &>())
+        .def(py::init<const std::vector<std::string> &,
+                      const std::vector<std::vector<ParamT>> &,
+                      const std::vector<std::vector<size_t>> &,
+                      const std::vector<bool> &,
+                      const std::vector<std::vector<ComplexT>> &>())
         .def("__repr__", [](const OpsData<StateVectorT> &ops) {
             using namespace Pennylane::Util;
             std::ostringstream ops_stream;
@@ -515,15 +533,15 @@ void registerBackendAgnosticAlgorithms(py::module_ &m) {
            const std::vector<std::vector<size_t>> &ops_wires,
            const std::vector<bool> &ops_inverses,
            const std::vector<np_arr_c> &ops_matrices) {
-            std::vector<std::vector<std::complex<PrecisionT>>> conv_matrices(
+            std::vector<std::vector<ComplexT>> conv_matrices(
                 ops_matrices.size());
             for (size_t op = 0; op < ops_name.size(); op++) {
                 const auto m_buffer = ops_matrices[op].request();
                 if (m_buffer.size) {
                     const auto m_ptr =
-                        static_cast<const std::complex<ParamT> *>(m_buffer.ptr);
-                    conv_matrices[op] = std::vector<std::complex<ParamT>>{
-                        m_ptr, m_ptr + m_buffer.size};
+                        static_cast<const ComplexT *>(m_buffer.ptr);
+                    conv_matrices[op] =
+                        std::vector<ComplexT>{m_ptr, m_ptr + m_buffer.size};
                 }
             }
             return OpsData<StateVectorT>{ops_name, ops_params, ops_wires,
@@ -561,7 +579,8 @@ template <class StateVectorT> void lightningClassBindings(py::module_ &m) {
     std::string class_name = "StateVectorC" + bitsize;
     auto pyclass =
         py::class_<StateVectorT>(m, class_name.c_str(), py::module_local());
-    pyclass.def(py::init(&createStateVectorFromNumpyData<StateVectorT>));
+    pyclass.def(py::init(&createStateVectorFromNumpyData<StateVectorT>))
+        .def_property_readonly("size", &StateVectorT::getLength);
 
     registerBackendClassSpecificBindings<StateVectorT>(pyclass);
 
@@ -603,8 +622,3 @@ void registerLightningClassBindings(py::module_ &m) {
     }
 }
 } // namespace Pennylane
-
-#elif _ENABLE_PLKOKKOS == 1
-#else
-static_assert(false, "Backend not found.");
-#endif

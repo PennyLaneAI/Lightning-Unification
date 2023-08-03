@@ -15,15 +15,13 @@
 Tests for ``adjoint_jacobian`` method on Lightning devices.
 """
 import pytest
+from conftest import device_name, LightningDevice as ld
 
 import math
 from scipy.stats import unitary_group
-
 import pennylane as qml
 from pennylane import numpy as np
 from pennylane import QNode, qnode
-
-from conftest import device_name, LightningDevice as ld
 
 I, X, Y, Z = (
     np.eye(2),
@@ -529,6 +527,8 @@ class TestAdjointJacobian:
 
         dM1 = dev.adjoint_jacobian(tape)
 
+        dev._pre_rotated_state = dev.state_vector  # necessary for lightning.kokkos
+
         qml.execute([tape], dev, None)
         dM2 = dev.adjoint_jacobian(tape, starting_state=dev._pre_rotated_state)
 
@@ -553,6 +553,10 @@ class TestAdjointJacobian:
         ):
             dev.adjoint_jacobian(tape, starting_state=np.ones(7))
 
+    @pytest.mark.skipif(
+        device_name == "lightning.kokkos",
+        reason="Adjoint differentiation does not support State measurements.",
+    )
     @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     def test_state_return_type(self, dev):
         """Tests raise an exception when the return type is State"""

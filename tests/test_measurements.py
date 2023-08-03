@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Unit tests for Measurements in lightning.qubit.
+Unit tests for Measurements in Lightning devices.
 """
 import pytest
+from conftest import device_name, LightningDevice as ld
 
 import numpy as np
 import math
@@ -24,11 +25,8 @@ from pennylane.measurements import (
     Variance,
     Expectation,
 )
-from pennylane_lightning import CPP_BINARY_AVAILABLE
 
-from conftest import device_name
-
-if not CPP_BINARY_AVAILABLE:
+if not ld._CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
 
@@ -55,12 +53,13 @@ class TestProbs:
 
     def test_probs_dtype64(self, dev):
         """Test if probs changes the state dtype"""
-        dev._state = dev._asarray(
+        _state = dev._asarray(
             np.array([1 / math.sqrt(2), 1 / math.sqrt(2), 0, 0]).astype(dev.C_DTYPE)
         )
+        dev._apply_state_vector(_state, dev.wires)
         p = dev.probability(wires=[0, 1])
 
-        assert dev._state.dtype == dev.C_DTYPE
+        assert dev.state.dtype == dev.C_DTYPE
         assert np.allclose(p, [0.5, 0.5, 0, 0])
 
     def test_probs_H(self, tol, dev):
@@ -231,10 +230,11 @@ class TestExpval:
 
     def test_expval_dtype64(self, dev):
         """Test if expval changes the state dtype"""
-        dev._state = np.array([1, 0]).astype(dev.C_DTYPE)
+        _state = np.array([1, 0, 0, 0]).astype(dev.C_DTYPE)
+        dev._apply_state_vector(_state, dev.wires)
         e = dev.expval(qml.PauliX(0))
 
-        assert dev._state.dtype == dev.C_DTYPE
+        assert dev.state.dtype == dev.C_DTYPE
         assert np.allclose(e, 0.0)
 
     @pytest.mark.parametrize(
@@ -366,10 +366,10 @@ class TestVar:
 
     def test_var_dtype64(self, dev):
         """Test if var changes the state dtype"""
-        dev._state = np.array([1, 0]).astype(np.complex64)
+        _state = np.array([1, 0, 0, 0]).astype(np.complex64)
+        dev._apply_state_vector(_state, dev.wires)
         v = dev.var(qml.PauliX(0))
 
-        assert dev._state.dtype == np.complex64
         assert np.allclose(v, 1.0)
 
     @pytest.mark.parametrize(
@@ -495,10 +495,12 @@ class TestWiresInExpval:
     def test_wires_expval(self, wires1, wires2, C, tol):
         """Test that the expectation of a circuit is independent from the wire labels used."""
         dev1 = qml.device(device_name, wires=wires1, c_dtype=C)
-        dev1._state = dev1._asarray(dev1._state, C)
+        _state = dev1._asarray(dev1.state, C)
+        dev1._apply_state_vector(_state, dev1.wires)
 
         dev2 = qml.device(device_name, wires=wires2)
-        dev2._state = dev2._asarray(dev2._state, C)
+        _state = dev2._asarray(dev2.state, C)
+        dev2._apply_state_vector(_state, dev2.wires)
 
         n_wires = len(wires1)
 
@@ -536,10 +538,13 @@ class TestWiresInExpval:
     def test_wires_expval_hermitian(self, wires1, wires2, C, tol):
         """Test that the expectation of a circuit is independent from the wire labels used."""
         dev1 = qml.device(device_name, wires=wires1, c_dtype=C)
-        dev1._state = dev1._asarray(dev1._state, C)
+        _state = dev1._asarray(dev1.state, C)
+        dev1._apply_state_vector(_state, dev1.wires)
 
         dev2 = qml.device(device_name, wires=wires2)
-        dev2._state = dev2._asarray(dev2._state, C)
+        _state = dev2._asarray(dev2.state, C)
+        dev2._apply_state_vector(_state, dev2.wires)
+
         ob_mat = [
             [1.0, 2.0, 0.0, 1.0],
             [2.0, -1.0, 0.0, 0.0],
@@ -630,10 +635,12 @@ class TestWiresInVar:
     def test_wires_var(self, wires1, wires2, C, tol):
         """Test that the expectation of a circuit is independent from the wire labels used."""
         dev1 = qml.device(device_name, wires=wires1)
-        dev1._state = dev1._asarray(dev1._state, C)
+        _state = dev1._asarray(dev1.state, C)
+        dev1._apply_state_vector(_state, dev1.wires)
 
         dev2 = qml.device(device_name, wires=wires2)
-        dev2._state = dev2._asarray(dev2._state, C)
+        _state = dev2._asarray(dev2.state, C)
+        dev2._apply_state_vector(_state, dev2.wires)
 
         n_wires = len(wires1)
 

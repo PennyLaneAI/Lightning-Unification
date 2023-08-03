@@ -38,7 +38,7 @@ option(PLKOKKOS_ENABLE_WARNINGS "Enable warnings" ON)
 
 # Include macro and functions supporting Kokkos libraries.
 include("${CMAKE_SOURCE_DIR}/cmake/support_kokkos.cmake")
-FindKokkosAndKokkosKernels(lightning_external_libs)
+FindKokkos(lightning_external_libs)
 
 if(PLKOKKOS_ENABLE_SANITIZER)
     add_compile_options(-fsanitize=address)

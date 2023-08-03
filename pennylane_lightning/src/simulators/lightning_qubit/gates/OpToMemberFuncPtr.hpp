@@ -20,6 +20,7 @@
 
 #pragma once
 #include <complex>
+#include <limits>
 #include <vector>
 
 #include "Error.hpp"
@@ -40,7 +41,7 @@ template <class PrecisionT, class ParamT, class GateImplementation,
           GateOperation gate_op>
 struct GateOpToMemberFuncPtr {
     // raises compile error when this struct is instantiated.
-    static_assert(sizeof(PrecisionT) == -1,
+    static_assert(sizeof(PrecisionT) == std::numeric_limits<size_t>::max(),
                   "GateOpToMemberFuncPtr is not defined for the given gate. "
                   "When you define a new GateOperation, check that you also "
                   "have added the corresponding entry in "
@@ -267,7 +268,7 @@ template <class PrecisionT, class GateImplementation,
 struct GeneratorOpToMemberFuncPtr {
     // raises compile error when this struct is instantiated.
     static_assert(
-        sizeof(GateImplementation) == -1,
+        sizeof(GateImplementation) == std::numeric_limits<size_t>::max(),
         "GeneratorOpToMemberFuncPtr is not defined for the given generator. "
         "When you define a new GeneratorOperation, check that you also "
         "have added the corresponding entry in GeneratorOpToMemberFuncPtr.");
@@ -400,7 +401,8 @@ struct GeneratorOpToMemberFuncPtr<PrecisionT, GateImplementation,
  */
 template <class PrecisionT, class GateImplementation, MatrixOperation mat_op>
 struct MatrixOpToMemberFuncPtr {
-    static_assert(sizeof(PrecisionT) == -1, "Unrecognized matrix operation");
+    static_assert(sizeof(PrecisionT) == std::numeric_limits<size_t>::max(),
+                  "Unrecognized matrix operation");
 };
 
 template <class PrecisionT, class GateImplementation>

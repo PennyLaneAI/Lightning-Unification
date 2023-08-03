@@ -40,10 +40,10 @@
 /// @cond DEV
 namespace {
 using Pennylane::Gates::KernelType;
+using Pennylane::LightningQubit::Util::Threading;
 using Pennylane::Util::CPUMemoryModel;
 using Pennylane::Util::for_each_enum;
 using Pennylane::Util::PairHash;
-using Pennylane::Util::Threading;
 } // namespace
 /// @endcond
 

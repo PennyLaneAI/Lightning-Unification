@@ -34,35 +34,9 @@ template <class PrecisionT> struct getProbFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const size_t k) const {
-        PrecisionT REAL = arr[k].real();
-        PrecisionT IMAG = arr[k].imag();
-        probability[k] = REAL * REAL + IMAG * IMAG;
-    }
-};
-
-/**
- *@brief Compute cumulative probability distribution from discrete probability
- *distribution and the cumulative probability distribution is then stored into
- *probabilities_.
- *
- *@param probabilities_ Discrete probability distribution.
- */
-template <class PrecisionT> struct getCDFFunctor {
-
-    Kokkos::View<PrecisionT *> probability;
-
-    getCDFFunctor(Kokkos::View<PrecisionT *> probability_)
-        : probability(probability_) {}
-
-    KOKKOS_INLINE_FUNCTION
-    void operator()(const size_t &k, PrecisionT &update_value,
-                    const bool fin) const {
-        const PrecisionT val_k = probability[k];
-
-        if (fin)
-            probability[k] = update_value;
-
-        update_value += val_k;
+        const PrecisionT REAL = arr(k).real();
+        const PrecisionT IMAG = arr(k).imag();
+        probability(k) = REAL * REAL + IMAG * IMAG;
     }
 };
 
@@ -104,7 +78,7 @@ struct Sampler {
 
         // Binary search for the bin index of cumulative probability
         // distribution that generated random number U falls into.
-        if (U_rand <= cdf[1]) {
+        if (U_rand <= cdf(1)) {
             index = 0;
         } else {
             size_t low_idx = 1, high_idx = length;
@@ -115,7 +89,7 @@ struct Sampler {
                 if (mid_idx == length)
                     cdf_t = 1;
                 else
-                    cdf_t = cdf[mid_idx];
+                    cdf_t = cdf(mid_idx);
                 if (cdf_t < U_rand)
                     low_idx = mid_idx;
                 else
@@ -124,40 +98,8 @@ struct Sampler {
             index = high_idx - 1;
         }
         for (size_t j = 0; j < num_qubits; j++) {
-            samples[k * num_qubits + (num_qubits - 1 - j)] = (index >> j) & 1U;
+            samples(k * num_qubits + (num_qubits - 1 - j)) = (index >> j) & 1U;
         }
-    }
-};
-
-/**
- * @brief Compute probability distribution of a subset of the full system from
- * StateVector.
- *
- * @param arr_ StateVector data.
- * @param probability_ Discrete probability distribution of a subset of the
- * full system.
- */
-template <class PrecisionT> struct getSubProbFunctor {
-
-    Kokkos::View<Kokkos::complex<PrecisionT> *> arr;
-    Kokkos::View<PrecisionT *> probability;
-    Kokkos::View<size_t *> all_indices;
-    Kokkos::View<size_t *> all_offsets;
-
-    getSubProbFunctor(Kokkos::View<Kokkos::complex<PrecisionT> *> arr_,
-                      Kokkos::View<PrecisionT *> probability_,
-                      Kokkos::View<size_t *> all_indices_,
-                      Kokkos::View<size_t *> all_offsets_)
-        : arr(arr_), probability(probability_), all_indices(all_indices_),
-          all_offsets(all_offsets_) {}
-
-    KOKKOS_INLINE_FUNCTION
-    void operator()(const size_t i, const size_t j) const {
-        size_t index = all_indices[i] + all_offsets[j];
-        PrecisionT REAL = arr[index].real();
-        PrecisionT IMAG = arr[index].imag();
-        PrecisionT value = REAL * REAL + IMAG * IMAG;
-        Kokkos::atomic_add(&probability[i], value);
     }
 };
 
@@ -182,12 +124,11 @@ struct getTransposedIndexFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const size_t i, const size_t j) const {
-
-        size_t axis = sorted_ind_wires[j];
-        size_t index = i / (1L << (max_index_sorted_ind_wires - j));
-        size_t sub_index = (index % 2) << (max_index_sorted_ind_wires - axis);
-
-        Kokkos::atomic_add(&trans_index[i], sub_index);
+        const size_t axis = sorted_ind_wires(j);
+        const size_t index = i / (1L << (max_index_sorted_ind_wires - j));
+        const size_t sub_index = (index % 2)
+                                 << (max_index_sorted_ind_wires - axis);
+        Kokkos::atomic_add(&trans_index(i), sub_index);
     }
 };
 
@@ -213,9 +154,8 @@ template <class PrecisionT> struct getTransposedFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const size_t i) const {
-
-        size_t new_index = trans_index[i];
-        transProb[i] = probability[new_index];
+        const size_t new_index = trans_index(i);
+        transProb(i) = probability(new_index);
     }
 };
 

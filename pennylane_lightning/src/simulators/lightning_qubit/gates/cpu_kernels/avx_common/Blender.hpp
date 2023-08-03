@@ -16,15 +16,16 @@
  * Defines utility functions for all AVX blend functions
  */
 #pragma once
+#include <immintrin.h>
+#include <limits>
+
 #include "AVXUtil.hpp"
 #include "Macros.hpp"
-
-#include <immintrin.h>
 
 namespace Pennylane::LightningQubit::Gates::AVXCommon {
 
 template <typename PrecisionT, size_t packed_size> struct CompileMask {
-    static_assert(sizeof(PrecisionT) == -1,
+    static_assert(sizeof(PrecisionT) == std::numeric_limits<size_t>::max(),
                   "Unsupported type and/or packed size.");
 };
 

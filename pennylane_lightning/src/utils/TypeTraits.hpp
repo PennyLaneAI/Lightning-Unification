@@ -17,6 +17,7 @@
  */
 #pragma once
 #include <complex>
+#include <limits>
 
 namespace Pennylane::Util {
 template <typename T> struct remove_complex { using type = T; };
@@ -46,7 +47,7 @@ template <typename T> constexpr bool is_complex_v = is_complex<T>::value;
 
 template <class F> struct FuncReturn {
     // When instantiated
-    static_assert(sizeof(F) == -1,
+    static_assert(sizeof(F) == std::numeric_limits<size_t>::max(),
                   "The given type is not a function. Currently, lambda"
                   "functions are not supported.");
 };

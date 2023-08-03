@@ -36,6 +36,8 @@ jobs:
         os: [windows-2022]
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
+        exclude:
+          - exec_model: OPENMP
 
     name: Kokkos core & kernels (${{ matrix.exec_model }})
     runs-on: ${{ matrix.os }}
@@ -78,6 +80,7 @@ jobs:
           cd D:\a\kokkos
           cmake -BBuild . -DCMAKE_INSTALL_PREFIX=D:\a\install_dir\${{ matrix.exec_model }} `
                           -DKokkos_ENABLE_COMPLEX_ALIGN=OFF `
+                          -DKokkos_ENABLE_SERIAL=ON `
                           -DKokkos_ENABLE_${{ matrix.exec_model }}=ON `
                           -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF `
                           -DCMAKE_CXX_STANDARD=20 `
@@ -92,6 +95,7 @@ jobs:
         run: |
           cd D:\a\kokkos-kernels
           cmake -BBuild . -DCMAKE_INSTALL_PREFIX=D:\a\install_dir\${{ matrix.exec_model }} `
+                          -DKokkos_ENABLE_SERIAL=ON `
                           -DKokkos_ENABLE_${{ matrix.exec_model }}=ON `
                           -DCMAKE_CXX_STANDARD=20 `
                           -DCMAKE_PREFIX_PATH=D:\a\install_dir\${{ matrix.exec_model }} `
@@ -112,6 +116,9 @@ jobs:
         cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
+        exclude:
+          - exec_model: OPENMP
+
     name: ${{ matrix.os }} - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
     runs-on: ${{ matrix.os }}
 

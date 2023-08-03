@@ -52,7 +52,7 @@ TEMPLATE_TEST_CASE("Linear Algebra::SparseMV", "[Linear Algebra]", float,
     std::vector<size_t> indptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
     std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
                                    4, 7, 5, 6, 5, 6, 4, 7};
-    std::vector<std::complex<TestType>> values = {
+    std::vector<ComplexT> values = {
         {1.0, 0.0},  {0.0, -1.0}, {1.0, 0.0}, {0.0, 1.0},
         {0.0, -1.0}, {1.0, 0.0},  {0.0, 1.0}, {1.0, 0.0},
         {1.0, 0.0},  {0.0, -1.0}, {1.0, 0.0}, {0.0, 1.0},
@@ -66,7 +66,8 @@ TEMPLATE_TEST_CASE("Linear Algebra::SparseMV", "[Linear Algebra]", float,
     SECTION("Testing sparse matrix vector product:") {
         std::vector<ComplexT> result(data_size);
         Util::SparseMV_Kokkos<TestType>(
-            kokkos_vx.getView(), kokkos_vy.getView(), values, indices, indptr);
+            kokkos_vx.getView(), kokkos_vy.getView(), indptr.data(),
+            indptr.size(), indices.data(), values.data(), values.size());
         kokkos_vy.DeviceToHost(result.data(), result.size());
 
         for (std::size_t j = 0; j < exp2(num_qubits); j++) {

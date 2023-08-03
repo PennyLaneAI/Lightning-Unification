@@ -42,7 +42,13 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -G Ninja \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DBUILD_TESTS=ON \
+              -DENABLE_KOKKOS=OFF \
+              -DENABLE_PYTHON=OFF \
+              -DPL_BACKEND=${{ matrix.pl_backend }} \
+              -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
             cmake --build ./Build
             cd ./Build
             mkdir -p ./tests/results
@@ -94,7 +100,8 @@ jobs:
       - name: Install backend device
         run: |
           cd main
-          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
+          pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -135,7 +142,14 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DENABLE_BLAS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DBUILD_TESTS=ON -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -G Ninja \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DENABLE_KOKKOS=OFF \
+              -DENABLE_PYTHON=OFF \
+              -DENABLE_BLAS=ON \
+              -DPL_BACKEND=${{ matrix.pl_backend }} \
+              -DBUILD_TESTS=ON \
+              -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
             cmake --build ./Build
             cd ./Build
             mkdir -p ./tests/results
@@ -187,7 +201,8 @@ jobs:
       - name: Install backend device
         run: |
           cd main
-          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
+          pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -214,9 +229,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
+        pl_backend: ["lightning_kokkos", "lightning_qubit"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
-        pl_backend: ["lightning_qubit", "lightning_kokkos"]
+        exclude:
+          - pl_backend: lightning_qubit
+            exec_model: OPENMP
 
     name: C++ tests (Kokkos)
     runs-on: ${{ matrix.os }}
@@ -249,7 +267,14 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -G Ninja \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DBUILD_TESTS=ON \
+              -DENABLE_KOKKOS=ON \
+              -DENABLE_PYTHON=OFF \
+              -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos \
+              -DPL_BACKEND=${{ matrix.pl_backend }} \
+              -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
             cmake --build ./Build
             cd ./Build
             mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
@@ -267,9 +292,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        pl_backend: ["lightning_qubit"]
+        pl_backend: ["lightning_kokkos", "lightning_qubit"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+        exclude:
+          - pl_backend: lightning_qubit
+            exec_model: OPENMP
 
     name: Python tests with Kokkos and Kokkos Kernels
     runs-on: ${{ matrix.os }}
@@ -317,14 +345,16 @@ jobs:
       - name: Install backend device
         run: |
           cd main
-          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
+          pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
+          DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
           pytest tests/ $COVERAGE_FLAGS
-          pl-device-test --device lightning.qubit --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
-          pl-device-test --device lightning.qubit --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
+          pl-device-test --device ${DEVICENAME} --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
+          pl-device-test --device ${DEVICENAME} --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
           mv coverage.xml coverage-${{ github.job }}.xml
 
       - name: Upload code coverage results
@@ -338,9 +368,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        pl_backend: ["lightning_qubit", "lightning_kokkos"]
+        pl_backend: ["lightning_qubit"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+        exclude:
+          - exec_model: OPENMP
 
     name: C++ tests (OpenBLAS, Kokkos and Kokkos Kernels)
     runs-on: ${{ matrix.os }}
@@ -373,7 +405,15 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DBUILD_TESTS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -G Ninja \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DENABLE_BLAS=ON \
+              -DENABLE_KOKKOS=ON \
+              -DENABLE_PYTHON=OFF \
+              -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos \
+              -DBUILD_TESTS=ON \
+              -DPL_BACKEND=${{ matrix.pl_backend }} \
+              -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
             cmake --build ./Build
             cd ./Build
             mkdir -p ./tests/results
@@ -394,6 +434,8 @@ jobs:
         pl_backend: ["lightning_qubit"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+        exclude:
+          - exec_model: OPENMP
 
     name: Python tests with OpenBLAS, Kokkos and Kokkos Kernels
     runs-on: ${{ matrix.os }}
@@ -441,7 +483,8 @@ jobs:
       - name: Install backend device
         run: |
           cd main
-          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
+          pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |

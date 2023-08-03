@@ -35,6 +35,7 @@ namespace {
 using namespace Pennylane::LightningKokkos::Measures;
 using namespace Pennylane::LightningKokkos::Observables;
 using Pennylane::Util::createNonTrivialState;
+using Pennylane::Util::write_CSR_vectors;
 } // namespace
 /// @endcond
 
@@ -380,7 +381,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
                 matrix[i] = ComplexT{0, 0};
         }
 
-        auto results = m.getExpectationValue(wires, matrix);
+        auto results = m.expval(matrix, wires);
         ComplexT expected = {1, 0};
         CHECK(real(expected) == Approx(results).epsilon(1e-7));
     }
@@ -408,7 +409,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
             {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},
             {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0}};
 
-        auto results = m.getExpectationValue(wires, matrix);
+        auto results = m.expval(matrix, wires);
         ComplexT expected(1.263000, -1.011000);
         CHECK(real(expected) == Approx(results).epsilon(1e-7));
     }
@@ -492,27 +493,6 @@ TEMPLATE_TEST_CASE("Test expectation value of TensorProdObs",
 TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
                    "[StateVectorKokkos_Expval]", float, double) {
     using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-    SECTION("GetExpectationSparse") {
-        std::vector<ComplexT> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
-                                         {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
-                                         {0.3, 0.4}, {0.4, 0.5}};
-        StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
-                                              init_state.size()};
-        auto m = Measurements(kokkos_sv);
-
-        std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
-        std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
-                                       4, 7, 5, 6, 5, 6, 4, 7};
-        std::vector<ComplexT> values = {
-            {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
-            {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0},
-            {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
-            {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0}};
-
-        auto result = m.getExpectationValue(values, indices, index_ptr);
-        auto expected = TestType(3.1415);
-        CHECK(expected == Approx(result).epsilon(1e-7));
-    }
 
     SECTION("Sparse expval") {
         std::vector<ComplexT> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
@@ -535,5 +515,40 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
                                indices.data(), values.data(), values.size());
         auto expected = TestType(3.1415);
         CHECK(expected == Approx(result).epsilon(1e-7));
+    }
+
+    SECTION("Testing Sparse Hamiltonian:") {
+        using StateVectorT = StateVectorKokkos<TestType>;
+        using PrecisionT = typename StateVectorT::PrecisionT;
+        using ComplexT = typename StateVectorT::ComplexT;
+
+        // Defining the statevector that will be measured.
+        auto statevector_data = createNonTrivialState<StateVectorT>();
+        StateVectorT statevector(statevector_data.data(),
+                                 statevector_data.size());
+
+        // Initializing the measurements class.
+        // This object attaches to the statevector allowing several
+        // measurements.
+        Measurements<StateVectorT> Measurer(statevector);
+        const size_t num_qubits = 3;
+        const size_t data_size = Pennylane::Util::exp2(num_qubits);
+
+        std::vector<size_t> row_map;
+        std::vector<size_t> entries;
+        std::vector<ComplexT> values;
+        write_CSR_vectors(row_map, entries, values, data_size);
+
+        PrecisionT exp_values =
+            Measurer.expval(row_map.data(), row_map.size(), entries.data(),
+                            values.data(), values.size());
+        PrecisionT exp_values_ref = 0.5930885;
+        REQUIRE(exp_values == Approx(exp_values_ref).margin(1e-6));
+
+        PrecisionT var_values =
+            Measurer.var(row_map.data(), row_map.size(), entries.data(),
+                         values.data(), values.size());
+        PrecisionT var_values_ref = 2.4624654;
+        REQUIRE(var_values == Approx(var_values_ref).margin(1e-6));
     }
 }

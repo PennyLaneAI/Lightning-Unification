@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run:
             python -m pip install --upgrade pip
-            pip install click==8.0.4 black
+            pip install click==8.0.4 black==23.7.0
 
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
@@ -54,9 +54,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
+        pl_backend: ["lightning_qubit"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
-        pl_backend: ["lightning_qubit"]
+        exclude:
+          - exec_model: OPENMP
 
     name: Tidy (C++)
     runs-on: ${{ matrix.os }}
@@ -89,5 +91,11 @@ jobs:
 
       - name: Run clang-tidy compilation
         run: |
-          cmake -BBuild -DENABLE_CLANG_TIDY=ON -DCLANG_TIDY_BINARY=clang-tidy-14 -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-10)" -G Ninja .
+          cmake -BBuild -G Ninja . \
+            -DENABLE_CLANG_TIDY=ON \
+            -DCLANG_TIDY_BINARY=clang-tidy-14 \
+            -DBUILD_TESTS=ON \
+            -DENABLE_WARNINGS=ON \
+            -DPL_BACKEND=${{ matrix.pl_backend }} \
+            -DCMAKE_CXX_COMPILER="$(which g++-10)"
           cmake --build ./Build

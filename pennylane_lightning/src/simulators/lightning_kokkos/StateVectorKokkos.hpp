@@ -432,7 +432,6 @@ class StateVectorKokkos final
                 Kokkos::initialize(kokkos_args);
             }
         }
-
         if (num_qubits > 0) {
             data_ = std::make_unique<KokkosVector>("data_", exp2(num_qubits));
             setBasisState(0U);
@@ -450,8 +449,13 @@ class StateVectorKokkos final
      * @param index Index of the target element.
      */
     void setBasisState(const size_t index) {
-        initZeros();
-        getView()(index) = ComplexT{1.0, 0.0};
+        KokkosVector sv_view =
+            getView(); // circumvent error capturing this with KOKKOS_LAMBDA
+        Kokkos::parallel_for(
+            sv_view.size(), KOKKOS_LAMBDA(const size_t i) {
+                sv_view(i) =
+                    (i == index) ? ComplexT{1.0, 0.0} : ComplexT{0.0, 0.0};
+            });
     }
 
     /**
@@ -462,22 +466,18 @@ class StateVectorKokkos final
      */
     void setStateVector(const std::vector<std::size_t> &indices,
                         const std::vector<ComplexT> &values) {
-
         initZeros();
-
         KokkosSizeTVector d_indices("d_indices", indices.size());
-
         KokkosVector d_values("d_values", values.size());
-
         Kokkos::deep_copy(d_indices, UnmanagedConstSizeTHostView(
                                          indices.data(), indices.size()));
-
         Kokkos::deep_copy(d_values, UnmanagedConstComplexHostView(
                                         values.data(), values.size()));
-
+        KokkosVector sv_view =
+            getView(); // circumvent error capturing this with KOKKOS_LAMBDA
         Kokkos::parallel_for(
             indices.size(), KOKKOS_LAMBDA(const std::size_t i) {
-                getView()(indices[i]) = values[i];
+                sv_view(d_indices[i]) = d_values[i];
             });
     }
 
@@ -566,35 +566,9 @@ class StateVectorKokkos final
      * @param wires Wires to apply gate to.
      * @param adjoint Indicates whether to use adjoint of gate.
      * @param params Optional parameter list for parametric gates.
-     * @param gate_matrix Optional gate matrix if opName doesn't exist
-     */
-    void applyOperation(const std::string &opName,
-                        const std::vector<size_t> &wires, bool adjoint = false,
-                        const std::vector<fp_t> &params = {0.0},
-                        [[maybe_unused]] const KokkosVector &gate_matrix = {}) {
-        if (opName == "Identity") {
-            // No op
-        } else if (gates_.find(opName) != gates_.end()) {
-            gates_.at(opName)(wires, adjoint, params);
-        } else {
-            KokkosVector matrix("gate_matrix", gate_matrix.size());
-            Kokkos::deep_copy(matrix,
-                              UnmanagedComplexHostView(gate_matrix.data(),
-                                                       gate_matrix.size()));
-            return applyMultiQubitOp(matrix, wires, adjoint);
-        }
-    }
-
-    /**
-     * @brief Apply a single gate to the state vector.
-     *
-     * @param opName Name of gate to apply.
-     * @param wires Wires to apply gate to.
-     * @param adjoint Indicates whether to use adjoint of gate.
-     * @param params Optional parameter list for parametric gates.
      * @param params Optional std gate matrix if opName doesn't exist.
      */
-    void applyOperation_std(
+    void applyOperation(
         const std::string &opName, const std::vector<size_t> &wires,
         bool adjoint = false, const std::vector<fp_t> &params = {0.0},
         [[maybe_unused]] const std::vector<ComplexT> &gate_matrix = {}) {
@@ -717,19 +691,6 @@ class StateVectorKokkos final
                                                     wires_view));
             }
         }
-    }
-
-    /**
-     * @brief Apply a multi qubit operator to the state vector using a matrix
-     *
-     * @param matrix Kokkos gate matrix in the device space
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     */
-    inline void applyMatrix(const KokkosVector &matrix,
-                            const std::vector<size_t> &wires,
-                            bool inverse = false) {
-        applyMultiQubitOp(matrix, wires, inverse);
     }
 
     /**

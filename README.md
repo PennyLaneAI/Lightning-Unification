@@ -163,6 +163,15 @@ All contributors to this plugin will be listed as authors on the releases.
 We also encourage bug reports, suggestions for new features and enhancements, and even links to cool projects
 or applications built on PennyLane.
 
+### Black & Pylint
+
+If you contribute to the Python code, please mind the following.
+The Python code is formatted with the PEP 8 compliant opinionated formatter [Black](https://github.com/psf/black) (`black==23.7.0`).
+We set a **line width of a 100 characters**.
+The Python code is statically analyzed with [Pylint](https://pylint.readthedocs.io/en/stable/).
+We set up a pre-commit hook (see [Git hooks](https://git-scm.com/docs/githooks)) to run both of these on `git commit`.
+Please make your best effort to comply with `black` and `pylint` before using disabling pragmas (e.g. `# pylint: disable=missing-function-docstring`).
+
 ## Authors
 
 PennyLane-Lightning is the work of [many contributors](https://github.com/PennyLaneAI/pennylane-lightning/graphs/contributors).

@@ -15,15 +15,12 @@
 Unit tests for operation decomposition with Lightning devices.
 """
 import pytest
+from conftest import LightningDevice as ld
 
 import numpy as np
-
 import pennylane as qml
-from pennylane_lightning import CPP_BINARY_AVAILABLE
 
-from conftest import LightningDevice
-
-if not CPP_BINARY_AVAILABLE:
+if not ld._CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
 
@@ -42,4 +39,4 @@ class TestDenseMatrixDecompositionThreshold:
     def test_threshold(self, op, n_wires, condition):
         wires = np.linspace(0, n_wires - 1, n_wires, dtype=int)
         op = op(wires=wires)
-        assert LightningDevice.stopping_condition.__get__(op)(op) == condition
+        assert ld.stopping_condition.__get__(op)(op) == condition

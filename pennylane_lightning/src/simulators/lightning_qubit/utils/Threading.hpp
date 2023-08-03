@@ -26,7 +26,13 @@
 #include <omp.h>
 #endif
 
-namespace Pennylane::Util {
+/// @cond DEV
+namespace {
+using Pennylane::Util::CPUMemoryModel;
+} // namespace
+/// @endcond
+
+namespace Pennylane::LightningQubit::Util {
 enum class Threading : uint8_t {
     SingleThread,
     MultiThread,
@@ -63,4 +69,4 @@ inline auto bestThreading() -> Threading {
     return Threading::SingleThread;
 }
 
-} // namespace Pennylane::Util
+} // namespace Pennylane::LightningQubit::Util

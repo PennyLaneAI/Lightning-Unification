@@ -15,13 +15,11 @@
 Unit tests for the correct application of gates with a Lightning device.
 """
 import pytest
+from conftest import LightningDevice, device_name
 
 import itertools
 import numpy as np
-
 import pennylane as qml
-
-from conftest import LightningDevice, device_name
 
 
 @pytest.fixture
@@ -83,7 +81,7 @@ def op(op_name):
 
 @pytest.mark.parametrize("op_name", LightningDevice.operations)
 def test_gate_unitary_correct(op, op_name):
-    """Test if lightning.qubit correctly applies gates by reconstructing the unitary matrix and
+    """Test if lightning device correctly applies gates by reconstructing the unitary matrix and
     comparing to the expected version"""
 
     if op_name in ("BasisState", "QubitStateVector"):
@@ -114,7 +112,7 @@ def test_gate_unitary_correct(op, op_name):
 
 @pytest.mark.parametrize("op_name", LightningDevice.operations)
 def test_inverse_unitary_correct(op, op_name):
-    """Test if lightning.qubit correctly applies inverse gates by reconstructing the unitary matrix
+    """Test if lightning device correctly applies inverse gates by reconstructing the unitary matrix
     and comparing to the expected version"""
 
     if op_name in ("BasisState", "QubitStateVector"):
@@ -174,7 +172,7 @@ random_unitary = np.array(
 
 
 def test_arbitrary_unitary_correct():
-    """Test if lightning.qubit correctly applies an arbitrary unitary by reconstructing its
+    """Test if lightning device correctly applies an arbitrary unitary by reconstructing its
     matrix"""
     wires = 2
     dev = qml.device(device_name, wires=wires)
@@ -195,7 +193,7 @@ def test_arbitrary_unitary_correct():
 
 
 def test_arbitrary_inv_unitary_correct():
-    """Test if lightning.qubit correctly applies the inverse of an arbitrary unitary by
+    """Test if lightning device correctly applies the inverse of an arbitrary unitary by
     reconstructing its matrix"""
     wires = 2
     dev = qml.device(device_name, wires=wires)
