@@ -98,14 +98,9 @@ jobs:
           pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
-        env:
-          CMAKE_ARGS: |
-            -DPL_BACKEND=${{ matrix.pl_backend }} \
-            -DENABLE_KOKKOS=OFF \
-            -DENABLE_PYTHON=ON \
-            -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
         run: |
           cd main
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
@@ -204,15 +199,9 @@ jobs:
           pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
-        env:
-          CMAKE_ARGS: |
-            -DPL_BACKEND=${{ matrix.pl_backend }} \
-            -DENABLE_BLAS=ON \
-            -DENABLE_KOKKOS=OFF \
-            -DENABLE_PYTHON=ON \
-            -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
         run: |
           cd main
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
@@ -354,15 +343,9 @@ jobs:
           pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
-        env:
-          CMAKE_ARGS: |
-            -DPL_BACKEND=${{ matrix.pl_backend }} \
-            -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos \
-            -DENABLE_KOKKOS=ON \
-            -DENABLE_PYTHON=ON \
-            -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
         run: |
           cd main
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
@@ -498,16 +481,9 @@ jobs:
           pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
-        env:
-          CMAKE_ARGS: |
-            -DPL_BACKEND=${{ matrix.pl_backend }} \
-            -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos \
-            -DENABLE_BLAS=ON \
-            -DENABLE_KOKKOS=ON \
-            -DENABLE_PYTHON=ON \
-            -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
         run: |
           cd main
+          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
