@@ -21,8 +21,8 @@ from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 
 default_backend = "lightning_qubit"
-supported_backends = ["lightning_kokkos", "lightning_qubit"]
-supported_backends += [sb.replace("_", ".") for sb in supported_backends]
+supported_backends = {"lightning_kokkos", "lightning_qubit"}
+supported_backends.update({sb.replace("_", ".") for sb in supported_backends})
 
 
 def get_backend():
