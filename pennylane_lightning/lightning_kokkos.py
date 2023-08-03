@@ -74,7 +74,9 @@ if LK_CPP_BINARY_AVAILABLE:
 
     def _kokkos_dtype(dtype):
         if dtype not in [np.complex128, np.complex64]:
-            raise ValueError(f"Data type is not supported for state-vector computation: {dtype}")
+            raise ValueError(
+                f"Data type is not supported for state-vector computation: {dtype}"
+            )
         return StateVectorC128 if dtype == np.complex128 else StateVectorC64
 
     def _kokkos_configuration():
@@ -227,7 +229,9 @@ if LK_CPP_BINARY_AVAILABLE:
             # Note that get_alignment does not necessarily return CPUMemoryModel(Unaligned) even for
             # numpy allocated memory as the memory location happens to be aligned.
             if int(get_alignment(arr)) < int(best_alignment()) or arr.dtype != dtype:
-                new_arr = allocate_aligned_array(arr.size, np.dtype(dtype)).reshape(arr.shape)
+                new_arr = allocate_aligned_array(arr.size, np.dtype(dtype)).reshape(
+                    arr.shape
+                )
                 np.copyto(new_arr, arr)
                 arr = new_arr
             return arr
@@ -349,12 +353,17 @@ if LK_CPP_BINARY_AVAILABLE:
             device_wires = self.map_wires(device_wires)
             output_shape = [2] * self.num_wires
 
-            if len(device_wires) == self.num_wires and Wires(sorted(device_wires)) == device_wires:
+            if (
+                len(device_wires) == self.num_wires
+                and Wires(sorted(device_wires)) == device_wires
+            ):
                 # Initialize the entire device state with the input state
                 self.sync_h2d(self._reshape(state, output_shape))
                 return
 
-            self._kokkos_state.setStateVector(ravelled_indices, state)  # this operation on device
+            self._kokkos_state.setStateVector(
+                ravelled_indices, state
+            )  # this operation on device
 
         def _apply_basis_state(self, state, wires):
             """Initialize the state vector in a specified computational basis state.
@@ -411,7 +420,9 @@ if LK_CPP_BINARY_AVAILABLE:
                         wires,
                         False,
                         [],
-                        mat.ravel(order="C"),  # inv = False: Matrix already in correct form;
+                        mat.ravel(
+                            order="C"
+                        ),  # inv = False: Matrix already in correct form;
                     )  # Parameters can be ignored for explicit matrices; F-order for cuQuantum
 
                 else:
@@ -428,7 +439,9 @@ if LK_CPP_BINARY_AVAILABLE:
                     )
                     del operations[0]
                 elif isinstance(operations[0], BasisState):
-                    self._apply_basis_state(operations[0].parameters[0], operations[0].wires)
+                    self._apply_basis_state(
+                        operations[0].parameters[0], operations[0].wires
+                    )
                     del operations[0]
 
             for operation in operations:
@@ -458,12 +471,16 @@ if LK_CPP_BINARY_AVAILABLE:
             if observable.name in [
                 "Projector",
             ]:
-                return super().expval(observable, shot_range=shot_range, bin_size=bin_size)
+                return super().expval(
+                    observable, shot_range=shot_range, bin_size=bin_size
+                )
 
             if self.shots is not None:
                 # estimate the expectation value
                 # LightningQubit doesn't support sampling yet
-                samples = self.sample(observable, shot_range=shot_range, bin_size=bin_size)
+                samples = self.sample(
+                    observable, shot_range=shot_range, bin_size=bin_size
+                )
                 return np.squeeze(np.mean(samples, axis=0))
 
             # Initialization of state
@@ -473,7 +490,9 @@ if LK_CPP_BINARY_AVAILABLE:
                 else MeasurementsC128(self.state_vector)
             )
             if observable.name == "SparseHamiltonian":
-                csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
+                csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
+                    copy=False
+                )
                 return measure.expval(
                     csr_hamiltonian.indptr,
                     csr_hamiltonian.indices,
@@ -485,9 +504,9 @@ if LK_CPP_BINARY_AVAILABLE:
                 or (observable.arithmetic_depth > 0)
                 or isinstance(observable.name, List)
             ):
-                ob_serialized = QuantumScriptSerializer(self.short_name, self.use_csingle)._ob(
-                    observable, self.wire_map
-                )
+                ob_serialized = QuantumScriptSerializer(
+                    self.short_name, self.use_csingle
+                )._ob(observable, self.wire_map)
                 return measure.expval(ob_serialized)
 
             # translate to wire labels used by device
@@ -517,7 +536,9 @@ if LK_CPP_BINARY_AVAILABLE:
             if self.shots is not None:
                 # estimate the var
                 # LightningKokkos doesn't support sampling yet
-                samples = self.sample(observable, shot_range=shot_range, bin_size=bin_size)
+                samples = self.sample(
+                    observable, shot_range=shot_range, bin_size=bin_size
+                )
                 return np.squeeze(np.var(samples, axis=0))
 
             # Initialization of state
@@ -528,7 +549,9 @@ if LK_CPP_BINARY_AVAILABLE:
             )
 
             if observable.name == "SparseHamiltonian":
-                csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
+                csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
+                    copy=False
+                )
                 return measure.var(
                     csr_hamiltonian.indptr,
                     csr_hamiltonian.indices,
@@ -540,9 +563,9 @@ if LK_CPP_BINARY_AVAILABLE:
                 or (observable.arithmetic_depth > 0)
                 or isinstance(observable.name, List)
             ):
-                ob_serialized = QuantumScriptSerializer(self.short_name, self.use_csingle)._ob(
-                    observable, self.wire_map
-                )
+                ob_serialized = QuantumScriptSerializer(
+                    self.short_name, self.use_csingle
+                )._ob(observable, self.wire_map)
                 return measure.var(ob_serialized)
 
             # translate to wire labels used by device
@@ -562,7 +585,9 @@ if LK_CPP_BINARY_AVAILABLE:
                 if self.use_csingle
                 else MeasurementsC128(self._kokkos_state)
             )
-            return measure.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
+            return measure.generate_samples(len(self.wires), self.shots).astype(
+                int, copy=False
+            )
 
         def probability_lightning(self, wires):
             """Return the probability of each computational basis state.
@@ -585,7 +610,9 @@ if LK_CPP_BINARY_AVAILABLE:
             )
 
         @staticmethod
-        def _check_adjdiff_supported_measurements(measurements: List[MeasurementProcess]):
+        def _check_adjdiff_supported_measurements(
+            measurements: List[MeasurementProcess],
+        ):
             """Check whether given list of measurement is supported by adjoint_differentiation.
 
             Args:
@@ -610,7 +637,10 @@ if LK_CPP_BINARY_AVAILABLE:
 
             for measurement in measurements:
                 if isinstance(measurement.obs, Tensor):
-                    if any(isinstance(o, Projector) for o in measurement.obs.non_identity_obs):
+                    if any(
+                        isinstance(o, Projector)
+                        for o in measurement.obs.non_identity_obs
+                    ):
                         raise QuantumFunctionError(
                             "Adjoint differentiation method does not support the "
                             "Projector observable"
@@ -661,7 +691,9 @@ if LK_CPP_BINARY_AVAILABLE:
                     UserWarning,
                 )
 
-            tape_return_type = self._check_adjdiff_supported_measurements(tape.measurements)
+            tape_return_type = self._check_adjdiff_supported_measurements(
+                tape.measurements
+            )
 
             if not tape_return_type:  # the tape does not have measurements
                 return np.array([], dtype=self.state.dtype)
@@ -674,7 +706,9 @@ if LK_CPP_BINARY_AVAILABLE:
 
             self._check_adjdiff_supported_operations(tape.operations)
 
-            processed_data = self._process_jacobian_tape(tape, starting_state, use_device_state)
+            processed_data = self._process_jacobian_tape(
+                tape, starting_state, use_device_state
+            )
 
             if not processed_data:  # training_params is empty
                 return np.array([], dtype=self.state.dtype)
@@ -686,7 +720,9 @@ if LK_CPP_BINARY_AVAILABLE:
             # numbers of observables, enabling choice between compute time and memory use.
             requested_threads = int(getenv("OMP_NUM_THREADS", "1"))
 
-            adjoint_jacobian = AdjointJacobianC64() if self.use_csingle else AdjointJacobianC128()
+            adjoint_jacobian = (
+                AdjointJacobianC64() if self.use_csingle else AdjointJacobianC128()
+            )
 
             if self._batch_obs and requested_threads > 1:
                 obs_partitions = _chunk_iterable(
@@ -712,10 +748,16 @@ if LK_CPP_BINARY_AVAILABLE:
             jac = jac.reshape(-1, len(trainable_params))
             jac_r = np.zeros((jac.shape[0], processed_data["all_params"]))
             jac_r[:, processed_data["record_tp_rows"]] = jac
-            return self._adjoint_jacobian_processing(jac_r) if qml.active_return() else jac_r
+            return (
+                self._adjoint_jacobian_processing(jac_r)
+                if qml.active_return()
+                else jac_r
+            )
 
         # pylint: disable=inconsistent-return-statements, line-too-long
-        def vjp(self, measurements, grad_vec, starting_state=None, use_device_state=False):
+        def vjp(
+            self, measurements, grad_vec, starting_state=None, use_device_state=False
+        ):
             """Generate the processing function required to compute the vector-Jacobian products
             of a tape.
 
@@ -771,12 +813,12 @@ if LK_CPP_BINARY_AVAILABLE:
                 if len(grad_vec) != len(measurements):
                     raise ValueError(
                         "Number of observables in the tape must be the same as the "
-                        "length of dy in the vjp method"
+                        "length of grad_vec in the vjp method"
                     )
 
                 if np.iscomplexobj(grad_vec):
                     raise ValueError(
-                        "The vjp method only works with a real-valued dy when "
+                        "The vjp method only works with a real-valued grad_vec when "
                         "the tape is returning an expectation value"
                     )
 
@@ -793,7 +835,9 @@ if LK_CPP_BINARY_AVAILABLE:
                     new_tape = tape.copy()
                     new_tape._measurements = [qml.expval(ham)]
 
-                    return self.adjoint_jacobian(new_tape, starting_state, use_device_state)
+                    return self.adjoint_jacobian(
+                        new_tape, starting_state, use_device_state
+                    )
 
                 return processing_fn
 

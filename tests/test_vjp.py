@@ -131,7 +131,9 @@ class TestVectorJacobianProduct:
             dev.vjp(tape1.measurements, dy1)
 
         dy2 = np.array([1.0 + 3.0j, 0.3 + 2.0j, 0.5 + 0.1j])
-        with pytest.raises(ValueError, match="The vjp method only works with a real-valued dy"):
+        with pytest.raises(
+            ValueError, match="The vjp method only works with a real-valued grad_vec"
+        ):
             dev.vjp(tape1.measurements, dy2)
 
     def test_not_expval(self, dev):
@@ -159,7 +161,8 @@ class TestVectorJacobianProduct:
         dy = np.array([1.0])
 
         with pytest.warns(
-            UserWarning, match="Requested adjoint differentiation to be computed with finite shots."
+            UserWarning,
+            match="Requested adjoint differentiation to be computed with finite shots.",
         ):
             dev.vjp(tape.measurements, dy)(tape)
 
@@ -174,7 +177,8 @@ class TestVectorJacobianProduct:
         dy = np.array([1.0])
 
         with pytest.raises(
-            qml.QuantumFunctionError, match="The CRot operation is not supported using the"
+            qml.QuantumFunctionError,
+            match="The CRot operation is not supported using the",
         ):
             dev.vjp(tape.measurements, dy)(tape)
 
@@ -188,7 +192,8 @@ class TestVectorJacobianProduct:
         dy = np.array([1.0])
 
         with pytest.raises(
-            qml.QuantumFunctionError, match="differentiation method does not support the Projector"
+            qml.QuantumFunctionError,
+            match="differentiation method does not support the Projector",
         ):
             dev.vjp(tape.measurements, dy)(tape)
 
@@ -197,7 +202,8 @@ class TestVectorJacobianProduct:
             qml.expval(qml.Projector([0], wires=[0]) @ qml.PauliZ(0))
 
         with pytest.raises(
-            qml.QuantumFunctionError, match="differentiation method does not support the Projector"
+            qml.QuantumFunctionError,
+            match="differentiation method does not support the Projector",
         ):
             dev.vjp(tape.measurements, dy)(tape)
 
@@ -217,7 +223,9 @@ class TestVectorJacobianProduct:
         obs = np.array([[1, 0], [0, -1]], dtype=dev.C_DTYPE, requires_grad=False)
         dy = np.array([0.8])
 
-        fn = dev.vjp([qml.expval(qml.Hermitian(obs, wires=(0,)) @ qml.PauliZ(wires=1))], dy)
+        fn = dev.vjp(
+            [qml.expval(qml.Hermitian(obs, wires=(0,)) @ qml.PauliZ(wires=1))], dy
+        )
 
         for x in np.linspace(-2 * math.pi, 2 * math.pi, 7):
             with qml.tape.QuantumTape() as tape:
@@ -230,7 +238,12 @@ class TestVectorJacobianProduct:
     )
     def test_statevector_ry(self, dev, tol):
         dy = np.array(
-            [[1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
+            [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ]
         )
         fn0 = dev.vjp([qml.state()], dy[0, :])
         fn1 = dev.vjp([qml.state()], dy[1, :])
@@ -264,13 +277,16 @@ class TestVectorJacobianProduct:
         dy1 = np.ones(3, dtype=dev.C_DTYPE)
 
         with pytest.raises(
-            ValueError, match="Size of the provided vector dy must be the same as the size of"
+            ValueError,
+            match="Size of the provided vector grad_vec must be the same as the size of",
         ):
             dev.vjp(tape.measurements, dy1)
 
         dy2 = np.ones(4, dtype=dev.R_DTYPE)
 
-        with pytest.warns(UserWarning, match="The vjp method only works with complex-valued dy"):
+        with pytest.warns(
+            UserWarning, match="The vjp method only works with complex-valued grad_vec"
+        ):
             dev.vjp(tape.measurements, dy2)
 
     @pytest.mark.skipif(
@@ -279,7 +295,12 @@ class TestVectorJacobianProduct:
     )
     def test_statevector_complex_circuit(self, dev, tol):
         dy = np.array(
-            [[1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
+            [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ]
         )
         fn0 = dev.vjp([qml.state()], dy[0, :])
         fn1 = dev.vjp([qml.state()], dy[1, :])
@@ -457,7 +478,8 @@ class TestVectorJacobianProduct:
         dy = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
 
         with pytest.raises(
-            qml.QuantumFunctionError, match="Adjoint differentiation method does not support"
+            qml.QuantumFunctionError,
+            match="Adjoint differentiation method does not support",
         ):
             dev.vjp(tape.measurements, dy)(tape)
 
