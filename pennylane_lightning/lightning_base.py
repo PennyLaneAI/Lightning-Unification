@@ -16,32 +16,31 @@ r"""
 This module contains the base class for all PennyLane Lightning simulator devices,
 and interfaces with C++ for improved performance.
 """
+from typing import List
+from itertools import islice, product
 import numpy as np
+
+
+import pennylane as qml
+from pennylane import (
+    BasisState,
+    QubitDevice,
+    QubitStateVector,
+)
+from pennylane.devices import DefaultQubit
 from pennylane.measurements import MeasurementProcess
+from pennylane.operation import Operation
+from pennylane.wires import Wires
+
 
 from ._version import __version__
+from ._serialize import QuantumScriptSerializer
 
 
 def _chunk_iterable(iteration, num_chunks):
     "Lazy-evaluated chunking of given iterable from https://stackoverflow.com/a/22045226"
     iteration = iter(iteration)
     return iter(lambda: tuple(islice(iteration, num_chunks)), ())
-
-
-from typing import List
-from itertools import islice, product
-
-import pennylane as qml
-from pennylane import QubitDevice
-from pennylane.operation import Operation
-from pennylane.wires import Wires
-
-from pennylane import (
-    BasisState,
-    QubitStateVector,
-)
-
-from ._serialize import QuantumScriptSerializer
 
 
 class LightningBase(QubitDevice):
@@ -121,29 +120,28 @@ class LightningBase(QubitDevice):
     # To be able to validate the adjoint method [_validate_adjoint_method(device)],
     #  the qnode requires the definition of:
     # ["_apply_operation", "_apply_unitary", "adjoint_jacobian"]
-    # pylint: disable=no-method-argument
-    def _apply_operation():
+    # pylint: disable=missing-function-docstring
+    def _apply_operation(self):
         pass
 
-    # pylint: disable=no-method-argument, missing-function-docstring
-    def _apply_unitary():
+    # pylint: disable=missing-function-docstring
+    def _apply_unitary(self):
         pass
 
-    # pylint: disable=no-method-argument, missing-function-docstring, assignment-from-no-return
-    def _init_process_jacobian_tape():
-        pass
+    def _init_process_jacobian_tape(self):
+        """Generate an initial state vector for ``_process_jacobian_tape``."""
 
-    # pylint: disable=no-method-argument, missing-function-docstring
-    def create_ops_list():
-        pass
+    @property
+    def create_ops_list(self):
+        """Returns create_ops_list function of the matching precision."""
 
-    # pylint: disable=no-method-argument, missing-function-docstring
     def probability_lightning(self, wires):
-        pass
+        """Return the probability of each computational basis state."""
 
-    # pylint: disable=no-method-argument, missing-function-docstring
     def vjp(self, tapes, grad_vecs, starting_state=None, use_device_state=False):
-        pass
+        """Generate the processing function required to compute the vector-Jacobian
+        products of a tape.
+        """
 
     def probability(self, wires=None, shot_range=None, bin_size=None):
         """Return the probability of each computational basis state.
@@ -255,7 +253,7 @@ class LightningBase(QubitDevice):
         basis_states = qml.math.convert_like(basis_states, state)
         return int(qml.math.dot(state, basis_states))
 
-    # pylint: disable=too-many-function-args
+    # pylint: disable=too-many-function-args, assignment-from-no-return
     def _process_jacobian_tape(self, tape, starting_state, use_device_state):
         state_vector = self._init_process_jacobian_tape(tape, starting_state, use_device_state)
 
@@ -391,9 +389,6 @@ class LightningBase(QubitDevice):
             return vjps
 
         return processing_fns
-
-
-from pennylane.devices import DefaultQubit
 
 
 class LightningBaseFallBack(DefaultQubit):  # pragma: no cover

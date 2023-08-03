@@ -638,7 +638,7 @@ if LK_CPP_BINARY_AVAILABLE:
                     )
 
         def _init_process_jacobian_tape(self, tape, starting_state, use_device_state):
-            # Initialization of state
+            """Generate an initial state vector for ``_process_jacobian_tape``."""
             if starting_state is not None:
                 if starting_state.size != 2 ** len(self.wires):
                     raise QuantumFunctionError(

@@ -251,6 +251,7 @@ if LQ_CPP_BINARY_AVAILABLE:
 
         @property
         def create_ops_list(self):
+            """Returns create_ops_list function of the matching precision."""
             return create_ops_listC64 if self.use_csingle else create_ops_listC128
 
         @property
@@ -603,7 +604,7 @@ if LQ_CPP_BINARY_AVAILABLE:
                     )
 
         def _init_process_jacobian_tape(self, tape, starting_state, use_device_state):
-            # Initialization of state
+            """Generate an initial state vector for ``_process_jacobian_tape``."""
             if starting_state is not None:
                 if starting_state.size != 2 ** len(self.wires):
                     raise QuantumFunctionError(
