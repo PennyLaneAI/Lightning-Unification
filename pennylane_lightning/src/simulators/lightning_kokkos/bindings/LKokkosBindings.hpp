@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+#include <set>
 #include <sstream>
 #include <string>
-
-#include <set>
 #include <tuple>
 #include <variant>
 #include <vector>
 
+#include "BindingsBase.hpp"
 #include "Constant.hpp"
 #include "ConstantUtil.hpp" // lookup
 #include "GateOperation.hpp"
@@ -27,17 +27,13 @@
 #include "StateVectorKokkos.hpp"
 #include "TypeList.hpp"
 
-#include "pybind11/complex.h"
-#include "pybind11/numpy.h"
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
-
 /// @cond DEV
 namespace {
-using Pennylane::LightningKokkos::StateVectorKokkos;
-using namespace Pennylane::LightningKokkos::Measures;
+using namespace Pennylane::Bindings;
 using namespace Pennylane::LightningKokkos::Algorithms;
+using namespace Pennylane::LightningKokkos::Measures;
 using Kokkos::InitializationSettings;
+using Pennylane::LightningKokkos::StateVectorKokkos;
 } // namespace
 /// @endcond
 
@@ -48,56 +44,6 @@ namespace Pennylane::LightningKokkos {
 using StateVectorBackends =
     Pennylane::Util::TypeList<StateVectorKokkos<float>,
                               StateVectorKokkos<double>, void>;
-
-/**
- * @brief Register matrix.
- */
-template <class StateVectorT>
-void registerMatrix(
-    StateVectorT &st,
-    const pybind11::array_t<std::complex<typename StateVectorT::PrecisionT>,
-                            pybind11::array::c_style |
-                                pybind11::array::forcecast> &matrix,
-    const std::vector<size_t> &wires, bool inverse = false) {
-    using ComplexT = typename StateVectorT::ComplexT;
-    st.applyMatrix(static_cast<const ComplexT *>(matrix.request().ptr), wires,
-                   inverse);
-}
-
-/**
- * @brief Register StateVector class to pybind.
- *
- * @tparam StateVectorT Statevector type to register
- * @tparam Pyclass Pybind11's class object type
- *
- * @param pyclass Pybind11's class object to bind statevector
- */
-template <class StateVectorT, class PyClass>
-void registerGatesForStateVector(PyClass &pyclass) {
-    using PrecisionT =
-        typename StateVectorT::PrecisionT; // Statevector's precision
-    using ParamT = PrecisionT;             // Parameter's data precision
-
-    using Pennylane::Gates::GateOperation;
-    using Pennylane::Util::for_each_enum;
-    namespace Constant = Pennylane::Gates::Constant;
-
-    pyclass.def("applyMatrix", &registerMatrix<StateVectorT>,
-                "Apply a given matrix to wires.");
-
-    for_each_enum<GateOperation>([&pyclass](GateOperation gate_op) {
-        using Pennylane::Util::lookup;
-        const auto gate_name =
-            std::string(lookup(Constant::gate_names, gate_op));
-        const std::string doc = "Apply the " + gate_name + " gate.";
-        auto func = [gate_name = gate_name](
-                        StateVectorT &sv, const std::vector<size_t> &wires,
-                        bool inverse, const std::vector<ParamT> &params) {
-            sv.applyOperation(gate_name, wires, inverse, params);
-        };
-        pyclass.def(gate_name.c_str(), func, doc.c_str());
-    });
-}
 
 /**
  * @brief Get a gate kernel map for a statevector.
@@ -240,19 +186,19 @@ void registerBackendSpecificMeasurements(PyClass &pyclass) {
              static_cast<PrecisionT (Measurements<StateVectorT>::*)(
                  const std::string &, const std::vector<size_t> &)>(
                  &Measurements<StateVectorT>::var),
-             "Variance of an operation by name.");
-    pyclass.def(
-        "var",
-        [](Measurements<StateVectorT> &M, const np_arr_sparse_ind &row_map,
-           const np_arr_sparse_ind &entries, const np_arr_c &values) {
-            return M.var(
-                static_cast<sparse_index_type *>(row_map.request().ptr),
-                static_cast<sparse_index_type>(row_map.request().size),
-                static_cast<sparse_index_type *>(entries.request().ptr),
-                static_cast<ComplexT *>(values.request().ptr),
-                static_cast<sparse_index_type>(values.request().size));
-        },
-        "Variance of a sparse Hamiltonian.");
+             "Variance of an operation by name.")
+        .def(
+            "var",
+            [](Measurements<StateVectorT> &M, const np_arr_sparse_ind &row_map,
+               const np_arr_sparse_ind &entries, const np_arr_c &values) {
+                return M.var(
+                    static_cast<sparse_index_type *>(row_map.request().ptr),
+                    static_cast<sparse_index_type>(row_map.request().size),
+                    static_cast<sparse_index_type *>(entries.request().ptr),
+                    static_cast<ComplexT *>(values.request().ptr),
+                    static_cast<sparse_index_type>(values.request().size));
+            },
+            "Variance of a sparse Hamiltonian.");
 }
 
 /**
@@ -267,11 +213,11 @@ void registerBackendSpecificAlgorithms([[maybe_unused]] py::module_ &m) {}
 /**
  * @brief Provide backend information.
  */
-auto getBackendInfo() -> pybind11::dict {
-    using namespace pybind11::literals;
+auto getBackendInfo() -> py::dict {
+    using namespace py::literals;
 
-    return pybind11::dict("NAME"_a = "lightning.kokkos", "USE_KOKKOS"_a = true,
-                          "USE_SPMV"_a = true);
+    return py::dict("NAME"_a = "lightning.kokkos", "USE_KOKKOS"_a = true,
+                    "USE_SPMV"_a = true);
 }
 
 /**

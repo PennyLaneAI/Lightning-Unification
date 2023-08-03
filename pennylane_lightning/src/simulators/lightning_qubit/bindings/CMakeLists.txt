@@ -6,11 +6,10 @@ add_library(lightning_qubit_bindings INTERFACE)
 
 target_include_directories(lightning_qubit_bindings INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(lightning_qubit_bindings INTERFACE    lightning_utils
-                                                            )
-
-target_link_libraries(lightning_qubit_bindings INTERFACE    lightning_qubit
+target_link_libraries(lightning_qubit_bindings INTERFACE    lightning_bindings
+                                                            lightning_qubit
                                                             lightning_gates 
+                                                            lightning_utils
                                                             lightning_qubit_gates
                                                             lightning_qubit_utils
                                                             )

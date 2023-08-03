@@ -21,18 +21,26 @@ from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 
 default_backend = "lightning_qubit"
-supported_backends = ("lightning_kokkos", "lightning_qubit")
+supported_backends = ["lightning_kokkos", "lightning_qubit"]
+supported_backends += [sb.replace("_", ".") for sb in supported_backends]
+
 
 def get_backend():
     backend = None
     if "PL_BACKEND" in os.environ:
         backend = os.environ.get("PL_BACKEND", default_backend)
+        backend = backend.replace(".", "_")
     if "CMAKE_ARGS" in os.environ:
         cmake_args = os.environ["CMAKE_ARGS"].split(" ")
         arg = [x for x in cmake_args if "PL_BACKEND" in x]
-        cmake_backend = arg[0].split("=")[1] if arg else default_backend
+        if not arg and backend is not None:
+            cmake_backend = backend
+        else:
+            cmake_backend = arg[0].split("=")[1].replace(".", "_") if arg else default_backend
         if backend is not None and backend != cmake_backend:
-            raise ValueError(f"Backends {backend} and {cmake_backend} specified by PL_BACKEND and CMAKE_ARGS respectively do not match.")
+            raise ValueError(
+                f"Backends {backend} and {cmake_backend} specified by PL_BACKEND and CMAKE_ARGS respectively do not match."
+            )
         backend = cmake_backend
     if backend is None:
         backend = default_backend
@@ -40,8 +48,10 @@ def get_backend():
         raise ValueError(f"Invalid backend {backend}.")
     return backend
 
+
 backend = get_backend()
 device_name = backend.replace("_", ".")
+
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
@@ -153,7 +163,7 @@ requirements = [
     "jaxlib<=0.4.13",
 ]
 
-suffix = backend.replace("lightning_","")
+suffix = backend.replace("lightning_", "")
 suffix = suffix[0].upper() + suffix[1:]
 pennylane_plugins = [f"{device_name} = pennylane_lightning:Lightning{suffix}"]
 
@@ -172,9 +182,7 @@ info = {
         ]
     },
     "include_package_data": True,
-    "entry_points": {
-        "pennylane.plugins": pennylane_plugins
-    },
+    "entry_points": {"pennylane.plugins": pennylane_plugins},
     "description": "PennyLane-Lightning plugin",
     "long_description": open("README.md").read(),
     "long_description_content_type": "text/markdown",

@@ -214,9 +214,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
+        pl_backend: ["lightning_kokkos", "lightning_qubit"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
-        pl_backend: ["lightning_kokkos", "lightning_qubit"]
+        exclude:
+          - pl_backend: lightning_qubit
+            exec_model: OPENMP
 
     name: C++ tests (Kokkos)
     runs-on: ${{ matrix.os }}
@@ -270,6 +273,9 @@ jobs:
         pl_backend: ["lightning_kokkos", "lightning_qubit"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+        exclude:
+          - pl_backend: lightning_qubit
+            exec_model: OPENMP
 
     name: Python tests with Kokkos and Kokkos Kernels
     runs-on: ${{ matrix.os }}
@@ -340,8 +346,10 @@ jobs:
       matrix:
         os: [ubuntu-22.04]
         pl_backend: ["lightning_qubit"]
-        exec_model: ["SERIAL"]
+        exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+        exclude:
+          - exec_model: OPENMP
 
     name: C++ tests (OpenBLAS, Kokkos and Kokkos Kernels)
     runs-on: ${{ matrix.os }}
@@ -393,8 +401,10 @@ jobs:
       matrix:
         os: [ubuntu-22.04]
         pl_backend: ["lightning_qubit"]
-        exec_model: ["SERIAL"]
+        exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+        exclude:
+          - exec_model: OPENMP
 
     name: Python tests with OpenBLAS, Kokkos and Kokkos Kernels
     runs-on: ${{ matrix.os }}
