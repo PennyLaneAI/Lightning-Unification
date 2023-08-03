@@ -1158,7 +1158,7 @@ class TestLightningDeviceIntegration:
 
 @pytest.mark.skipif(
     device_name == "lightning.kokkos",
-    reason="lightning_kokkos does not support apply with rotations.",
+    reason="lightning.kokkos does not support apply with rotations.",
 )
 @pytest.mark.parametrize("theta,phi,varphi", list(zip(THETA, PHI, VARPHI)))
 class TestTensorExpval:
