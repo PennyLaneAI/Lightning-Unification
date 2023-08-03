@@ -42,7 +42,13 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -G Ninja \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DBUILD_TESTS=ON \
+              -DENABLE_KOKKOS=OFF \
+              -DENABLE_PYTHON=OFF \
+              -DPL_BACKEND=${{ matrix.pl_backend }} \
+              -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
             cmake --build ./Build
             cd ./Build
             mkdir -p ./tests/results
@@ -92,9 +98,15 @@ jobs:
           pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
+        env:
+          CMAKE_ARGS: |
+            -DPL_BACKEND=${{ matrix.pl_backend }} \
+            -DENABLE_KOKKOS=OFF \
+            -DENABLE_PYTHON=ON \
+            -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
         run: |
           cd main
-          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+          pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -135,7 +147,14 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=OFF -DENABLE_BLAS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DBUILD_TESTS=ON -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -G Ninja \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DENABLE_KOKKOS=OFF \
+              -DENABLE_PYTHON=OFF \
+              -DENABLE_BLAS=ON \
+              -DPL_BACKEND=${{ matrix.pl_backend }} \
+              -DBUILD_TESTS=ON \
+              -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
             cmake --build ./Build
             cd ./Build
             mkdir -p ./tests/results
@@ -185,9 +204,16 @@ jobs:
           pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
+        env:
+          CMAKE_ARGS: |
+            -DPL_BACKEND=${{ matrix.pl_backend }} \
+            -DENABLE_BLAS=ON \
+            -DENABLE_KOKKOS=OFF \
+            -DENABLE_PYTHON=ON \
+            -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
         run: |
           cd main
-          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+          pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -252,7 +278,14 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -G Ninja \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DBUILD_TESTS=ON \
+              -DENABLE_KOKKOS=ON \
+              -DENABLE_PYTHON=OFF \
+              -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos \
+              -DPL_BACKEND=${{ matrix.pl_backend }} \
+              -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
             cmake --build ./Build
             cd ./Build
             mkdir -p ./tests/results_${{ github.job }}_${{ matrix.pl_backend }}
@@ -321,9 +354,16 @@ jobs:
           pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
+        env:
+          CMAKE_ARGS: |
+            -DPL_BACKEND=${{ matrix.pl_backend }} \
+            -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos \
+            -DENABLE_KOKKOS=ON \
+            -DENABLE_PYTHON=ON \
+            -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
         run: |
           cd main
-          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+          pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -382,7 +422,15 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=OFF -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DBUILD_TESTS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-$GCC_VERSION)" -G Ninja
+            cmake . -BBuild -G Ninja \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DENABLE_BLAS=ON \
+              -DENABLE_KOKKOS=ON \
+              -DENABLE_PYTHON=OFF \
+              -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos \
+              -DBUILD_TESTS=ON \
+              -DPL_BACKEND=${{ matrix.pl_backend }} \
+              -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
             cmake --build ./Build
             cd ./Build
             mkdir -p ./tests/results
@@ -450,9 +498,17 @@ jobs:
           pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
+        env:
+          CMAKE_ARGS: |
+            -DPL_BACKEND=${{ matrix.pl_backend }} \
+            -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos \
+            -DENABLE_BLAS=ON \
+            -DENABLE_KOKKOS=ON \
+            -DENABLE_PYTHON=ON \
+            -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)
         run: |
           cd main
-          CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" pip install -e . -vv
+          pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |

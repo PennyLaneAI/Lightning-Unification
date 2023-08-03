@@ -89,5 +89,11 @@ jobs:
 
       - name: Run clang-tidy compilation
         run: |
-          cmake -BBuild -DENABLE_CLANG_TIDY=ON -DCLANG_TIDY_BINARY=clang-tidy-14 -DBUILD_TESTS=ON -DENABLE_WARNINGS=ON -DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_CXX_COMPILER="$(which g++-10)" -G Ninja .
+          cmake -BBuild -G Ninja . \
+            -DENABLE_CLANG_TIDY=ON \
+            -DCLANG_TIDY_BINARY=clang-tidy-14 \
+            -DBUILD_TESTS=ON \
+            -DENABLE_WARNINGS=ON \
+            -DPL_BACKEND=${{ matrix.pl_backend }} \
+            -DCMAKE_CXX_COMPILER="$(which g++-10)"
           cmake --build ./Build
