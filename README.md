@@ -169,7 +169,7 @@ If you contribute to the Python code, please mind the following.
 The Python code is formatted with the PEP 8 compliant opinionated formatter [Black](https://github.com/psf/black) (`black==23.7.0`).
 We set a **line width of a 100 characters**.
 The Python code is statically analyzed with [Pylint](https://pylint.pycqa.org/en/latest).
-We set up a pre-commit hook (see [how-to](https://moserei.de/2020/10/28/pylint-pre-commit-hook.html)) to run both of these on `git commit`.
+We set up a pre-commit hook (see [Git hooks](https://git-scm.com/docs/githooks)) to run both of these on `git commit`.
 Please make your best effort to comply with `black` and `pylint` before using disabling pragmas (e.g. `# pylint: disable=missing-function-docstring`).
 
 ## Authors
