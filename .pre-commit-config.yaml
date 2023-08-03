@@ -1,9 +1,9 @@
 repos:
 -   repo: https://github.com/psf/black
-    rev: 23.7.0
+    rev: 22.3.0
     hooks:
     - id: black
-      exclude: ^doc/
+      exclude: ^(doc/|scripts/)
 - repo: local
   hooks:
     - id: pylint
@@ -17,4 +17,4 @@ repos:
           "-sn", # Don't display the score
           "--rcfile=.pylintrc", # Link to your config file
         ]
-      exclude: ^(doc/|tests/)
+      exclude: ^(doc/|scripts/|tests/)
