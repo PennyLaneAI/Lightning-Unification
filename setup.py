@@ -21,11 +21,21 @@ from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 
 default_backend = "lightning_qubit"
-supported_backends = ["lightning_kokkos", "lightning_qubit"]
-supported_backends += [sb.replace("_", ".") for sb in supported_backends]
+supported_backends = {"lightning_kokkos", "lightning_qubit"}
+supported_backends.update({sb.replace("_", ".") for sb in supported_backends})
 
 
 def get_backend():
+    """Return backend.
+
+    The backend is ``lightning_qubit`` by default.
+    Allowed values are: "lightning_kokkos", "lightning_qubit".
+    A dot can also be used instead of an underscore.
+    If the environment variable ``PL_BACKEND`` is defined, its value is used.
+    Otherwise, if the environment variable ``CMAKE_ARGS`` is defined and it
+    contains the CMake option ``PL_BACKEND``, its value is used.
+    Dots are replaced by underscores upon exiting.
+    """
     backend = None
     if "PL_BACKEND" in os.environ:
         backend = os.environ.get("PL_BACKEND", default_backend)
@@ -154,8 +164,12 @@ class CMakeBuild(build_ext):
             env=os.environ,
         )
 
-with open(os.path.join("pennylane_lightning", "_version.py")) as f:
+
+with open(os.path.join("pennylane_lightning", "_version.py"), encoding="utf-8") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
+
+with open("README.md", encoding="utf-8") as f:
+    readme = f.read()
 
 requirements = [
     "pennylane>=0.30",
@@ -184,13 +198,13 @@ info = {
     "include_package_data": True,
     "entry_points": {"pennylane.plugins": pennylane_plugins},
     "description": "PennyLane-Lightning plugin",
-    "long_description": open("README.md").read(),
+    "long_description": readme,
     "long_description_content_type": "text/markdown",
     "provides": ["pennylane_lightning"],
     "install_requires": requirements,
     "ext_modules": []
     if os.environ.get("SKIP_COMPILATION", False)
-    else [CMakeExtension(backend+"_ops")],
+    else [CMakeExtension(backend + "_ops")],
     "cmdclass": {"build_ext": CMakeBuild},
     "ext_package": "pennylane_lightning",
 }
