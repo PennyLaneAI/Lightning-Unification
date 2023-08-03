@@ -25,19 +25,19 @@ try:
     # pylint: disable=import-error, no-name-in-module
     from .lightning_kokkos_ops import (
         allocate_aligned_array,
-        get_alignment,
-        best_alignment,
-        InitializationSettings,
-        print_configuration,
-        MeasurementsC64,
-        StateVectorC64,
-        MeasurementsC128,
-        StateVectorC128,
         backend_info,
+        best_alignment,
+        get_alignment,
+        InitializationSettings,
+        MeasurementsC128,
+        MeasurementsC64,
+        print_configuration,
+        StateVectorC128,
+        StateVectorC64,
     )
 
     LK_CPP_BINARY_AVAILABLE = True
-except:
+except ImportError:
     LK_CPP_BINARY_AVAILABLE = False
 
 if LK_CPP_BINARY_AVAILABLE:
@@ -440,6 +440,7 @@ if LK_CPP_BINARY_AVAILABLE:
 
             self.apply_lightning(operations)
 
+        # pylint: disable=protected-access
         def expval(self, observable, shot_range=None, bin_size=None):
             """Expectation value of the supplied observable.
 

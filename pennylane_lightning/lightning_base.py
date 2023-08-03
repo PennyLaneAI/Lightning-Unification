@@ -128,7 +128,7 @@ class LightningBase(QubitDevice):
     def _apply_unitary(self):
         pass
 
-    def _init_process_jacobian_tape(self):
+    def _init_process_jacobian_tape(self, tape, starting_state, use_device_state):
         """Generate an initial state vector for ``_process_jacobian_tape``."""
 
     @property
@@ -138,7 +138,7 @@ class LightningBase(QubitDevice):
     def probability_lightning(self, wires):
         """Return the probability of each computational basis state."""
 
-    def vjp(self, tapes, grad_vecs, starting_state=None, use_device_state=False):
+    def vjp(self, measurements, grad_vec, starting_state=None, use_device_state=False):
         """Generate the processing function required to compute the vector-Jacobian
         products of a tape.
         """
