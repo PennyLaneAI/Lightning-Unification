@@ -154,7 +154,6 @@ class CMakeBuild(build_ext):
             env=os.environ,
         )
 
-
 with open(os.path.join("pennylane_lightning", "_version.py")) as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
@@ -191,7 +190,7 @@ info = {
     "install_requires": requirements,
     "ext_modules": []
     if os.environ.get("SKIP_COMPILATION", False)
-    else [CMakeExtension("pennylane_lightning_ops")],
+    else [CMakeExtension(backend+"_ops")],
     "cmdclass": {"build_ext": CMakeBuild},
     "ext_package": "pennylane_lightning",
 }

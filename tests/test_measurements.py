@@ -15,6 +15,7 @@
 Unit tests for Measurements in Lightning devices.
 """
 import pytest
+from conftest import device_name, LightningDevice as ld
 
 import numpy as np
 import math
@@ -24,11 +25,8 @@ from pennylane.measurements import (
     Variance,
     Expectation,
 )
-from pennylane_lightning import CPP_BINARY_AVAILABLE
 
-from conftest import device_name
-
-if not CPP_BINARY_AVAILABLE:
+if not ld._CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
 

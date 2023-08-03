@@ -14,17 +14,14 @@
 """
 Unit tests for Sparse Measurements Lightning devices.
 """
+import pytest
+from conftest import device_name, LightningDevice as ld
+
 import numpy as np
 import pennylane as qml
 from pennylane import qchem
 
-import pytest
-
-from pennylane_lightning import CPP_BINARY_AVAILABLE, backend_info
-
-from conftest import LightningDevice, device_name
-
-if not CPP_BINARY_AVAILABLE:
+if not ld._CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
 
@@ -36,7 +33,8 @@ class TestSparseExpval:
         return qml.device(device_name, wires=2, c_dtype=request.param)
 
     @pytest.mark.skipif(
-        backend_info()["USE_SPMV"], reason="Sparse matrix-vector product unavailable."
+        ld._backend_info()["USE_SPMV"],
+        reason="Sparse matrix-vector product unavailable.",
     )
     def test_create_device_with_unsupported_dtype(self, dev):
         @qml.qnode(dev, diff_method="parameter-shift")
@@ -68,7 +66,8 @@ class TestSparseExpval:
         ],
     )
     @pytest.mark.skipif(
-        not backend_info()["USE_SPMV"], reason="Sparse matrix-vector product available."
+        not ld._backend_info()["USE_SPMV"],
+        reason="Sparse matrix-vector product available.",
     )
     def test_sparse_Pauli_words(self, cases, tol, dev):
         """Test expval of some simple sparse Hamiltonian"""
@@ -135,7 +134,8 @@ class TestSparseExpvalQChem:
         ],
     )
     @pytest.mark.skipif(
-        not backend_info()["USE_SPMV"], reason="Sparse matrix-vector product unavailable."
+        not ld._backend_info()["USE_SPMV"],
+        reason="Sparse matrix-vector product unavailable.",
     )
     def test_sparse_Pauli_words(self, qubits, wires, H_sparse, hf_state, excitations, tol, dev):
         """Test expval of some simple sparse Hamiltonian"""

@@ -15,11 +15,10 @@
 Integration tests for the ``execute`` method of Lightning devices.
 """
 import pytest
+from conftest import device_name
 
 import pennylane as qml
 from pennylane import numpy as np
-
-from conftest import device_name
 
 
 @pytest.mark.parametrize("diff_method", ("param_shift", "finite_diff"))

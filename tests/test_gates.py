@@ -15,13 +15,11 @@
 Unit tests for the correct application of gates with a Lightning device.
 """
 import pytest
+from conftest import LightningDevice, device_name
 
 import itertools
 import numpy as np
-
 import pennylane as qml
-
-from conftest import LightningDevice, device_name
 
 
 @pytest.fixture

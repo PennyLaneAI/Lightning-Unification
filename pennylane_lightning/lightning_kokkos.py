@@ -19,9 +19,28 @@ interfaces with C++ for fast linear algebra calculations.
 from warnings import warn
 import numpy as np
 
-from .lightning_base import backend_info, LightningBase, _chunk_iterable
+from .lightning_base import LightningBase, LightningBaseFallBack, _chunk_iterable
 
-if backend_info()["NAME"] == "lightning.kokkos":
+try:
+    # pylint: disable=import-error, no-name-in-module
+    from .lightning_kokkos_ops import (
+        allocate_aligned_array,
+        get_alignment,
+        best_alignment,
+        InitializationSettings,
+        print_configuration,
+        MeasurementsC64,
+        StateVectorC64,
+        MeasurementsC128,
+        StateVectorC128,
+        backend_info,
+    )
+
+    LK_CPP_BINARY_AVAILABLE = True
+except:
+    LK_CPP_BINARY_AVAILABLE = False
+
+if LK_CPP_BINARY_AVAILABLE:
     from typing import List
     from os import getenv
 
@@ -44,27 +63,14 @@ if backend_info()["NAME"] == "lightning.kokkos":
     from ._version import __version__
 
     # pylint: disable=import-error, no-name-in-module
-    from .pennylane_lightning_ops import (
-        allocate_aligned_array,
-        get_alignment,
-        best_alignment,
-        InitializationSettings,
-        print_configuration,
-        MeasurementsC64,
-        StateVectorC64,
-        MeasurementsC128,
-        StateVectorC128,
-    )
-
-    # pylint: disable=import-error, no-name-in-module
-    from .pennylane_lightning_ops.algorithms import (
+    from .lightning_kokkos_ops.algorithms import (
         AdjointJacobianC64,
         create_ops_listC64,
         AdjointJacobianC128,
         create_ops_listC128,
     )
 
-    from ._serialize import _serialize_ob
+    from ._serialize import QuantumScriptSerializer
 
     def _kokkos_dtype(dtype):
         if dtype not in [np.complex128, np.complex64]:
@@ -174,6 +180,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
         kokkos_config = {}
         operations = allowed_operations
         observables = allowed_observables
+        _backend_info = backend_info
 
         def __init__(
             self,
@@ -477,8 +484,8 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 or (observable.arithmetic_depth > 0)
                 or isinstance(observable.name, List)
             ):
-                ob_serialized = _serialize_ob(
-                    observable, self.wire_map, use_csingle=self.use_csingle
+                ob_serialized = QuantumScriptSerializer(self.short_name, self.use_csingle)._ob(
+                    observable, self.wire_map
                 )
                 return measure.expval(ob_serialized)
 
@@ -508,7 +515,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
             if self.shots is not None:
                 # estimate the var
-                # LightningQubit doesn't support sampling yet
+                # LightningKokkos doesn't support sampling yet
                 samples = self.sample(observable, shot_range=shot_range, bin_size=bin_size)
                 return np.squeeze(np.var(samples, axis=0))
 
@@ -532,8 +539,8 @@ if backend_info()["NAME"] == "lightning.kokkos":
                 or (observable.arithmetic_depth > 0)
                 or isinstance(observable.name, List)
             ):
-                ob_serialized = _serialize_ob(
-                    observable, self.wire_map, use_csingle=self.use_csingle
+                ob_serialized = QuantumScriptSerializer(self.short_name, self.use_csingle)._ob(
+                    observable, self.wire_map
                 )
                 return measure.var(ob_serialized)
 
@@ -791,7 +798,7 @@ if backend_info()["NAME"] == "lightning.kokkos":
 
 else:
 
-    class LightningKokkos(LightningBase):  # pragma: no cover
+    class LightningKokkos(LightningBaseFallBack):  # pragma: no cover
         # pylint: disable=missing-class-docstring
         name = "Lightning Kokkos PennyLane plugin [No binaries found - Fallback: default.qubit]"
         short_name = "lightning.kokkos"

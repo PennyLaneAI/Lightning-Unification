@@ -16,24 +16,18 @@ Unit tests for Lightning devices.
 """
 # pylint: disable=protected-access,cell-var-from-loop
 import pytest
+from conftest import THETA, PHI, VARPHI, TOL_STOCHASTIC, LightningDevice as ld, device_name
 
 import math
 import numpy as np
-
 import pennylane as qml
 from pennylane import DeviceError
-
-from pennylane_lightning import CPP_BINARY_AVAILABLE
-
-from conftest import THETA, PHI, VARPHI, TOL_STOCHASTIC, LightningDevice, device_name
 
 
 class TestApply:
     """Tests that operations of certain operations are applied correctly or
     that the proper errors are raised.
     """
-
-    ld = LightningDevice
 
     test_data_no_parameters = [
         (qml.PauliX, [1, 0], np.array([0, 1])),
@@ -666,7 +660,7 @@ class TestLightningDeviceIntegration:
         assert dev.shots is None
         assert dev.short_name == device_name
 
-    @pytest.mark.skipif(not CPP_BINARY_AVAILABLE, reason="Lightning binary required")
+    @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     def test_no_backprop(self):
         """Test that lightning device does not support the backprop
         differentiation method."""
@@ -680,7 +674,7 @@ class TestLightningDeviceIntegration:
         with pytest.raises(qml.QuantumFunctionError):
             qml.QNode(circuit, dev, diff_method="backprop")
 
-    @pytest.mark.skipif(not CPP_BINARY_AVAILABLE, reason="Lightning binary required")
+    @pytest.mark.skipif(not ld._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
     def test_best_gets_lightning(self):
         """Test that the best differentiation method returns lightning
         qubit."""
@@ -691,7 +685,7 @@ class TestLightningDeviceIntegration:
             return qml.expval(qml.PauliZ(0))
 
         qnode = qml.QNode(circuit, dev, diff_method="best")
-        assert isinstance(qnode.device, LightningDevice)
+        assert isinstance(qnode.device, ld)
 
     def test_args(self):
         """Test that the plugin requires correct arguments"""
@@ -1458,7 +1452,9 @@ class TestApplyLightningMethod:
         assert dev.state.dtype == dev.C_DTYPE
 
 
-@pytest.mark.skipif(CPP_BINARY_AVAILABLE, reason="Test only applies when binaries are unavailable")
+@pytest.mark.skipif(
+    ld._CPP_BINARY_AVAILABLE, reason="Test only applies when binaries are unavailable"
+)
 def test_warning():
     """Tests if a warning is raised when lightning device binaries are not available"""
     with pytest.warns(UserWarning, match="Pre-compiled binaries for lightning.qubit"):

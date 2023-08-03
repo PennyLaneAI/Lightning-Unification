@@ -15,15 +15,12 @@
 Unit tests for Lightning devices creation.
 """
 import pytest
+from conftest import device_name, LightningDevice as ld
 
 import numpy as np
-
 import pennylane as qml
-from pennylane_lightning import CPP_BINARY_AVAILABLE
 
-from conftest import device_name
-
-if not CPP_BINARY_AVAILABLE:
+if not ld._CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
 
 
