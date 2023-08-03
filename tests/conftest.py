@@ -90,7 +90,7 @@ def n_subsystems(request):
 # Checking binaries:
 if hasattr(pennylane_lightning, "lightning_qubit_ops"):
     LightningDevice = pennylane_lightning.LightningQubit
-elif hasattr(pennylane_lightning, "lightning_qubit_ops"):
+elif hasattr(pennylane_lightning, "lightning_kokkos_ops"):
     LightningDevice = pennylane_lightning.LightningKokkos
 else:
     # with no binaries we fallback to LightningQubit, and this one will fallback to default.
