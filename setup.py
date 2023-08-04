@@ -179,10 +179,14 @@ requirements = [
 
 suffix = backend.replace("lightning_", "")
 suffix = suffix[0].upper() + suffix[1:]
-pennylane_plugins = [f"lightning.qubit = pennylane_lightning:LightningQubit",
-                     f"lightning.kokkos = pennylane_lightning:LightningKokkos"]
+# pennylane_plugins = [f"lightning.qubit = pennylane_lightning:LightningQubit",
+#                      f"lightning.kokkos = pennylane_lightning:LightningKokkos"]
+# info = {
+#     "name": f"PennyLane-Lightning-{suffix}",
+pennylane_plugins = [f"{device_name} = pennylane_lightning:Lightning{suffix}"]
+
 info = {
-    "name": f"PennyLane-Lightning-{suffix}",
+    "name": "PennyLane-Lightning",
     "version": version,
     "maintainer": "Xanadu Inc.",
     "maintainer_email": "software@xanadu.ai",
