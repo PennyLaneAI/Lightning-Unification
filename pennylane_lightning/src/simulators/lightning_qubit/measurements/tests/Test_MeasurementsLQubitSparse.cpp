@@ -38,7 +38,7 @@ using namespace Pennylane::LightningQubit::Measures;
 }; // namespace
 /// @endcond
 
-TEMPLATE_PRODUCT_TEST_CASE("Expected Values - Sparse Hamiltonian [Kokkos]",
+TEMPLATE_PRODUCT_TEST_CASE("Expected Values - Sparse Hamiltonian",
                            "[Measurements]",
                            (StateVectorLQubitManaged, StateVectorLQubitRaw),
                            (float, double)) {
@@ -55,40 +55,39 @@ TEMPLATE_PRODUCT_TEST_CASE("Expected Values - Sparse Hamiltonian [Kokkos]",
     Measurements<StateVectorT> Measurer(statevector);
 
     SECTION("Testing Sparse Hamiltonian:") {
-        long num_qubits = 3;
-        long data_size = Pennylane::Util::exp2(num_qubits);
+        size_t num_qubits = 3;
+        size_t data_size = Pennylane::Util::exp2(num_qubits);
 
-        std::vector<long> row_map;
-        std::vector<long> entries;
+        std::vector<size_t> row_map;
+        std::vector<size_t> entries;
         std::vector<ComplexT> values;
         write_CSR_vectors(row_map, entries, values, data_size);
 
-        PrecisionT exp_values = Measurer.expval(
-            row_map.data(), static_cast<long>(row_map.size()), entries.data(),
-            values.data(), static_cast<long>(values.size()));
+        PrecisionT exp_values =
+            Measurer.expval(row_map.data(), row_map.size(), entries.data(),
+                            values.data(), values.size());
         PrecisionT exp_values_ref = 0.5930885;
         REQUIRE(exp_values == Approx(exp_values_ref).margin(1e-6));
 
-        PrecisionT var_values = Measurer.var(
-            row_map.data(), static_cast<long>(row_map.size()), entries.data(),
-            values.data(), static_cast<long>(values.size()));
+        PrecisionT var_values =
+            Measurer.var(row_map.data(), row_map.size(), entries.data(),
+                         values.data(), values.size());
         PrecisionT var_values_ref = 2.4624654;
         REQUIRE(var_values == Approx(var_values_ref).margin(1e-6));
     }
 
     SECTION("Testing Sparse Hamiltonian (incompatible sizes):") {
-        long num_qubits = 4;
-        long data_size = Pennylane::Util::exp2(num_qubits);
+        size_t num_qubits = 4;
+        size_t data_size = Pennylane::Util::exp2(num_qubits);
 
-        std::vector<long> row_map;
-        std::vector<long> entries;
+        std::vector<size_t> row_map;
+        std::vector<size_t> entries;
         std::vector<ComplexT> values;
         write_CSR_vectors(row_map, entries, values, data_size);
 
         PL_CHECK_THROWS_MATCHES(
-            Measurer.expval(row_map.data(), static_cast<long>(row_map.size()),
-                            entries.data(), values.data(),
-                            static_cast<long>(values.size())),
+            Measurer.expval(row_map.data(), row_map.size(), entries.data(),
+                            values.data(), values.size()),
             LightningException,
             "Statevector and Hamiltonian have incompatible sizes.");
     }

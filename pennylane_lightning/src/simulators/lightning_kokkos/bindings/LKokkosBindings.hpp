@@ -216,7 +216,7 @@ void registerBackendSpecificAlgorithms([[maybe_unused]] py::module_ &m) {}
 auto getBackendInfo() -> py::dict {
     using namespace py::literals;
 
-    return py::dict("NAME"_a = "lightning.kokkos", "USE_KOKKOS"_a = true);
+    return py::dict("NAME"_a = "lightning.kokkos");
 }
 
 /**
@@ -225,7 +225,6 @@ auto getBackendInfo() -> py::dict {
  * @param m Pybind11 module.
  */
 void registerBackendSpecificInfo(py::module_ &m) {
-    /* Add Kokkos and Kokkos Kernels info */
     m.def("backend_info", &getBackendInfo, "Backend-specific information.");
     m.def(
         "print_configuration",

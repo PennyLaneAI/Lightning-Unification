@@ -112,8 +112,7 @@ void registerBackendSpecificMeasurements(PyClass &pyclass) {
 
     using np_arr_c = py::array_t<std::complex<ParamT>,
                                  py::array::c_style | py::array::forcecast>;
-    using sparse_index_type =
-        long int; // Kokkos Kernels needs signed int as Ordinal type.
+    using sparse_index_type = size_t;
     using np_arr_sparse_ind =
         py::array_t<sparse_index_type,
                     py::array::c_style | py::array::forcecast>;
@@ -252,7 +251,7 @@ void registerBackendSpecificAlgorithms(py::module_ &m) {
 auto getBackendInfo() -> py::dict {
     using namespace py::literals;
 
-    return py::dict("NAME"_a = "lightning.qubit", "USE_KOKKOS"_a = USE_KOKKOS);
+    return py::dict("NAME"_a = "lightning.qubit");
 }
 
 /**
@@ -261,7 +260,6 @@ auto getBackendInfo() -> py::dict {
  * @param m Pybind11 module.
  */
 void registerBackendSpecificInfo(py::module_ &m) {
-    /* Add Kokkos and Kokkos Kernels info */
     m.def("backend_info", &getBackendInfo, "Backend-specific information.");
 }
 

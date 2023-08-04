@@ -40,9 +40,9 @@ using std::vector;
 } // namespace
 /// @endcond
 
-TEMPLATE_TEST_CASE("apply_Sparse_Matrix", "[Kokkos Sparse]", float, double) {
-    long num_qubits = 3;
-    long data_size = Util::exp2(num_qubits);
+TEMPLATE_TEST_CASE("apply_Sparse_Matrix", "[Sparse]", float, double) {
+    size_t num_qubits = 3;
+    size_t data_size = Util::exp2(num_qubits);
 
     std::vector<std::vector<complex<TestType>>> vectors = {
         {0.33160916, 0.90944626, 0.81097291, 0.46112135, 0.42801563, 0.38077181,
@@ -68,18 +68,16 @@ TEMPLATE_TEST_CASE("apply_Sparse_Matrix", "[Kokkos Sparse]", float, double) {
          {-0.45507653, -0.41765428},
          {-0.78213328, -0.28539948}}};
 
-    std::vector<long> row_map;
-    std::vector<long> entries;
+    std::vector<size_t> row_map;
+    std::vector<size_t> entries;
     std::vector<complex<TestType>> values;
     write_CSR_vectors(row_map, entries, values, data_size);
 
     SECTION("Testing sparse matrix dense vector product:") {
         for (size_t vec = 0; vec < vectors.size(); vec++) {
             std::vector<complex<TestType>> result = apply_Sparse_Matrix(
-                vectors[vec].data(), static_cast<long>(vectors[vec].size()),
-                row_map.data(), static_cast<long>(row_map.size()),
-                entries.data(), values.data(),
-                static_cast<long>(values.size()));
+                vectors[vec].data(), vectors[vec].size(), row_map.data(),
+                row_map.size(), entries.data(), values.data(), values.size());
             REQUIRE(result_refs[vec] == approx(result).margin(1e-6));
         };
     }
