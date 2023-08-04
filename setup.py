@@ -24,7 +24,6 @@ default_backend = "lightning_qubit"
 supported_backends = {"lightning_kokkos", "lightning_qubit"}
 supported_backends.update({sb.replace("_", ".") for sb in supported_backends})
 
-
 def get_backend():
     """Return backend.
 
@@ -181,8 +180,10 @@ suffix = backend.replace("lightning_", "")
 suffix = suffix[0].upper() + suffix[1:]
 pennylane_plugins = [f"lightning.qubit = pennylane_lightning:LightningQubit",
                      f"lightning.kokkos = pennylane_lightning:LightningKokkos"]
+# info = {
+#     "name": f"PennyLane-Lightning-{suffix}",
 info = {
-    "name": f"PennyLane-Lightning-{suffix}",
+    "name": f"PennyLane-Lightning",
     "version": version,
     "maintainer": "Xanadu Inc.",
     "maintainer_email": "software@xanadu.ai",
