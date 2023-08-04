@@ -430,19 +430,11 @@ if LQ_CPP_BINARY_AVAILABLE:
                 else MeasurementsC128(state_vector)
             )
             if observable.name == "SparseHamiltonian":
-                if self._backend_info()["USE_KOKKOS"]:
-                    # ensuring CSR sparse representation.
-
-                    csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
-                        copy=False
-                    )
-                    return measurements.expval(
-                        csr_hamiltonian.indptr,
-                        csr_hamiltonian.indices,
-                        csr_hamiltonian.data,
-                    )
-                raise NotImplementedError(
-                    "The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels."
+                csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
+                return measurements.expval(
+                    csr_hamiltonian.indptr,
+                    csr_hamiltonian.indices,
+                    csr_hamiltonian.data,
                 )
 
             if (
@@ -497,19 +489,11 @@ if LQ_CPP_BINARY_AVAILABLE:
             )
 
             if observable.name == "SparseHamiltonian":
-                if self._backend_info()["USE_KOKKOS"]:
-                    # ensuring CSR sparse representation.
-
-                    csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
-                        copy=False
-                    )
-                    return measurements.var(
-                        csr_hamiltonian.indptr,
-                        csr_hamiltonian.indices,
-                        csr_hamiltonian.data,
-                    )
-                raise NotImplementedError(
-                    "The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels."
+                csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
+                return measurements.var(
+                    csr_hamiltonian.indptr,
+                    csr_hamiltonian.indices,
+                    csr_hamiltonian.data,
                 )
 
             if (

@@ -252,8 +252,7 @@ void registerBackendSpecificAlgorithms(py::module_ &m) {
 auto getBackendInfo() -> py::dict {
     using namespace py::literals;
 
-    return py::dict("NAME"_a = "lightning.qubit", "USE_KOKKOS"_a = USE_KOKKOS,
-                    "USE_SPMV"_a = USE_KOKKOS);
+    return py::dict("NAME"_a = "lightning.qubit", "USE_KOKKOS"_a = USE_KOKKOS);
 }
 
 /**

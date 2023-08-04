@@ -18,7 +18,7 @@ set(LQUBIT_FILES    StateVectorLQubitManaged.cpp
 
 add_library(lightning_qubit STATIC ${LQUBIT_FILES})
 
-option(ENABLE_KOKKOS "Enable Kokkos" ON)
+option(ENABLE_KOKKOS "Enable Kokkos" OFF)
 option(ENABLE_BLAS "Enable BLAS" OFF)
 option(ENABLE_GATE_DISPATCHER "Enable gate kernel dispatching on AVX/AVX2/AVX512" ON)
 

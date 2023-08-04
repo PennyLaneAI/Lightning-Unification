@@ -216,8 +216,7 @@ void registerBackendSpecificAlgorithms([[maybe_unused]] py::module_ &m) {}
 auto getBackendInfo() -> py::dict {
     using namespace py::literals;
 
-    return py::dict("NAME"_a = "lightning.kokkos", "USE_KOKKOS"_a = true,
-                    "USE_SPMV"_a = true);
+    return py::dict("NAME"_a = "lightning.kokkos", "USE_KOKKOS"_a = true);
 }
 
 /**
