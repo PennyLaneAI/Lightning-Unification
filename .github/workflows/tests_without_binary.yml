@@ -34,19 +34,19 @@ jobs:
       - name: Get required Python packages
         run: |
           cd main
-          pip install pip==23.0
+          python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
       - name: Install lightning.qubit device
         run: |
           cd main
-          pip install -e .
+          pip install -e . -vv
         env:
           SKIP_COMPILATION: True
 
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
-          pytest tests/ $COVERAGE_FLAGS
+          python -m pytest tests/ $COVERAGE_FLAGS
           pl-device-test --device lightning.qubit --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
           pl-device-test --device lightning.qubit --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
