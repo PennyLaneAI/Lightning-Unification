@@ -25,6 +25,8 @@ jobs:
         pl_backend: ["lightning_qubit"]
 
     name: ${{ matrix.os }} - Pure Python wheels - ${{ matrix.pl_backend }} (Python 3.9)
+    runs-on: ${{ matrix.os }}
+
     steps:
       - name: Checkout PennyLane-Lightning
         uses: actions/checkout@v3
