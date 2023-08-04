@@ -350,7 +350,7 @@ jobs:
           pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
-        if: ${{ (((matrix.pl_backend != "all") }}
+        if: ${{ matrix.pl_backend != "all" }}
         run: |
           cd main/
           DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
