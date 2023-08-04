@@ -292,11 +292,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        pl_backend: ["lightning_kokkos", "lightning_qubit"]
+        pl_backend: ["lightning_kokkos", "lightning_qubit", "all"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
         exclude:
-          - pl_backend: lightning_qubit
+          - pl_backend: ["lightning_qubit", "all"]
             exec_model: OPENMP
 
     name: Python tests with Kokkos and Kokkos Kernels
@@ -343,15 +343,37 @@ jobs:
           pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
+        if: ${{ (((matrix.pl_backend != "all")
         run: |
           cd main
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
+        if: ${{ (((matrix.pl_backend != "all")
         run: |
           cd main/
           DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
+          pytest tests/ $COVERAGE_FLAGS
+          pl-device-test --device ${DEVICENAME} --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
+          pl-device-test --device ${DEVICENAME} --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
+          mv coverage.xml coverage-${{ github.job }}.xml
+
+      - name: Install all backend devices
+        if: ${{ (((matrix.pl_backend == "all")
+        run: |
+          cd main
+          CMAKE_ARGS="-DPL_BACKEND="lightning_qubit" -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
+          pip install -e . -vv
+          rm -rf build
+          CMAKE_ARGS="-DPL_BACKEND="lightning_kokkos" -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
+          pip install -e . -vv
+
+      - name: Run PennyLane-Lightning unit tests for lightning.qubit with all devices installed
+        if: ${{ (((matrix.pl_backend == "all")
+        run: |
+          cd main/
+          DEVICENAME= "lightning.qubit"
           pytest tests/ $COVERAGE_FLAGS
           pl-device-test --device ${DEVICENAME} --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
           pl-device-test --device ${DEVICENAME} --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
