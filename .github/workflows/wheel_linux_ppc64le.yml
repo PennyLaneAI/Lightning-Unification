@@ -33,7 +33,7 @@ jobs:
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
         container_img: ["quay.io/pypa/manylinux2014_ppc64le"]
 
-    name: Kokkos core & kernels (${{ matrix.exec_model }}::${{ matrix.arch }} )
+    name: Kokkos core (${{ matrix.exec_model }}::${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
 
     steps:
