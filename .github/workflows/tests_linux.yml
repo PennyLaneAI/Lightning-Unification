@@ -343,7 +343,7 @@ jobs:
           pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
-        if: ${{ (((matrix.pl_backend != "all") }}
+        if: ${{ matrix.pl_backend != "all" }}
         run: |
           cd main
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
