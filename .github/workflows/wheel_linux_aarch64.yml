@@ -54,10 +54,6 @@ jobs:
           git checkout ${{ matrix.kokkos_version }}
           cd -
           pushd . &> /dev/null
-          git clone https://github.com/kokkos/kokkos-kernels.git
-          cd kokkos-kernels
-          git checkout ${{ matrix.kokkos_version }}
-          cd -
 
       - uses: docker/setup-qemu-action@v2
         name: Set up QEMU
@@ -82,30 +78,6 @@ jobs:
                             -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
                             -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
                             -DCMAKE_CXX_STANDARD=20 \
-                            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                            -G Ninja && \
-            cmake --build ./Build --verbose && \
-            cmake --install ./Build; "
-          cd -
-      - name: Build Kokkos kernels library
-        if: steps.kokkos-cache.outputs.cache-hit != 'true'
-        run: |
-          cd kokkos-kernels
-          docker run --platform linux/aarch64 \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v `pwd`:/io \
-            -v ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}:/install \
-            -i ${{ matrix.container_img }} \
-            bash -c "git config --global --add safe.directory /io && \
-            cd /io && \
-            python3.9 -m pip install ninja && \
-            ln -s /opt/python/cp39-cp39/bin/ninja /usr/bin/ninja && \
-            cmake -BBuild . -DCMAKE_INSTALL_PREFIX=/install \
-                            -DKokkos_ENABLE_SERIAL=ON \
-                            -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
-                            -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
-                            -DCMAKE_CXX_STANDARD=20 \
-                            -DCMAKE_PREFIX_PATH=/install \
                             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
                             -G Ninja && \
             cmake --build ./Build --verbose && \

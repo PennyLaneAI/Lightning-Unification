@@ -59,10 +59,6 @@ jobs:
           git checkout ${{ matrix.kokkos_version }}
           cd -
           pushd . &> /dev/null
-          git clone https://github.com/kokkos/kokkos-kernels.git
-          cd kokkos-kernels
-          git checkout ${{ matrix.kokkos_version }}
-          cd -
 
       - uses: actions/setup-python@v4
         name: Install Python
@@ -82,26 +78,6 @@ jobs:
                           -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
                           -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
                           -DCMAKE_CXX_STANDARD=20 \
-                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                          -DCMAKE_CXX_COMPILER=g++ \
-                          -DOpenMP_ROOT=$(brew --prefix libomp) \
-                          -G Ninja
-          cmake --build ./Build --verbose
-          cmake --install ./Build
-          cd -
-
-      - name: Build Kokkos kernels library
-        if: steps.kokkos-cache.outputs.cache-hit != 'true'
-        run: |
-          cd kokkos-kernels
-          python -m pip install cmake ninja
-
-          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
-                          -DKokkos_ENABLE_SERIAL=ON \
-                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
-                          -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
-                          -DCMAKE_CXX_STANDARD=20 \
-                          -DCMAKE_PREFIX_PATH=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
                           -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
                           -DCMAKE_CXX_COMPILER=g++ \
                           -DOpenMP_ROOT=$(brew --prefix libomp) \

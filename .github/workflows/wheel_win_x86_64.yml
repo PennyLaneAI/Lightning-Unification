@@ -57,10 +57,6 @@ jobs:
           git clone https://github.com/kokkos/kokkos.git
           cd D:\a\kokkos
           git checkout ${{ matrix.kokkos_version }}
-          cd D:\a\
-          git clone https://github.com/kokkos/kokkos-kernels.git
-          cd D:\a\kokkos-kernels
-          git checkout ${{ matrix.kokkos_version }}
           cd ..
 
       - name: Create installation directory
@@ -84,21 +80,6 @@ jobs:
                           -DKokkos_ENABLE_${{ matrix.exec_model }}=ON `
                           -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF `
                           -DCMAKE_CXX_STANDARD=20 `
-                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
-                          -DCMAKE_BUILD_TYPE=RelWithDebInfo `
-                          -T clangcl
-          cmake --build ./Build --config RelWithDebInfo --verbose
-          cmake --install ./Build --config RelWithDebInfo --verbose
-
-      - name: Build Kokkos kernels library
-        if: steps.kokkos-cache.outputs.cache-hit != 'true'
-        run: |
-          cd D:\a\kokkos-kernels
-          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=D:\a\install_dir\${{ matrix.exec_model }} `
-                          -DKokkos_ENABLE_SERIAL=ON `
-                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON `
-                          -DCMAKE_CXX_STANDARD=20 `
-                          -DCMAKE_PREFIX_PATH=D:\a\install_dir\${{ matrix.exec_model }} `
                           -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
                           -DCMAKE_BUILD_TYPE=RelWithDebInfo `
                           -T clangcl
