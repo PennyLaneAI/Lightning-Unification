@@ -20,7 +20,7 @@ target_link_libraries(base_tests INTERFACE  Catch2::Catch2)
 ProcessTestOptions(base_tests)
 
 # Create dependency on the dynamically defined simulator/backend target.
-target_link_libraries(base_tests INTERFACE   ${PL_BACKEND})
+target_link_libraries(base_tests INTERFACE ${PL_BACKEND})
 
 target_sources(base_tests INTERFACE runner_base.cpp)
 

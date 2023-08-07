@@ -54,6 +54,7 @@ ENDIF()
 target_link_libraries(${PL_BACKEND} PUBLIC  lightning_compile_options
                                             lightning_external_libs
                                             lightning_base
+                                            lightning_gates
                                             lightning_utils
                                             ${PL_BACKEND}_utils
                                             ${PL_BACKEND}_gates

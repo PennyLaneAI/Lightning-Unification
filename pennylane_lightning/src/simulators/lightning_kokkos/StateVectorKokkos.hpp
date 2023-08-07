@@ -18,6 +18,8 @@
 
 #pragma once
 #include <cstdlib>
+#include <map>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -28,11 +30,13 @@
 #include "BitUtil.hpp" // isPerfectPowerOf2
 #include "Error.hpp"
 #include "GateFunctors.hpp"
+#include "GateOperation.hpp"
 #include "StateVectorBase.hpp"
 #include "Util.hpp"
 
 /// @cond DEV
 namespace {
+using Pennylane::Gates::GateOperation;
 using Pennylane::Util::exp2;
 using Pennylane::Util::isPerfectPowerOf2;
 using Pennylane::Util::log2;
@@ -81,213 +85,6 @@ class StateVectorKokkos final
     StateVectorKokkos(size_t num_qubits,
                       const Kokkos::InitializationSettings &kokkos_args = {})
         : BaseType{num_qubits},
-          gates_{{"PauliX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPauliX(std::forward<decltype(wires)>(wires),
-                                  std::forward<decltype(adjoint)>(adjoint),
-                                  std::forward<decltype(params)>(params));
-                  }},
-                 {"PauliY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPauliY(std::forward<decltype(wires)>(wires),
-                                  std::forward<decltype(adjoint)>(adjoint),
-                                  std::forward<decltype(params)>(params));
-                  }},
-                 {"PauliZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPauliZ(std::forward<decltype(wires)>(wires),
-                                  std::forward<decltype(adjoint)>(adjoint),
-                                  std::forward<decltype(params)>(params));
-                  }},
-                 {"Hadamard",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyHadamard(std::forward<decltype(wires)>(wires),
-                                    std::forward<decltype(adjoint)>(adjoint),
-                                    std::forward<decltype(params)>(params));
-                  }},
-                 {"S",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyS(std::forward<decltype(wires)>(wires),
-                             std::forward<decltype(adjoint)>(adjoint),
-                             std::forward<decltype(params)>(params));
-                  }},
-                 {"T",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyT(std::forward<decltype(wires)>(wires),
-                             std::forward<decltype(adjoint)>(adjoint),
-                             std::forward<decltype(params)>(params));
-                  }},
-                 {"RX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRX(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"RY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"RZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"PhaseShift",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPhaseShift(std::forward<decltype(wires)>(wires),
-                                      std::forward<decltype(adjoint)>(adjoint),
-                                      std::forward<decltype(params)>(params));
-                  }},
-                 {"Rot",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRot(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"CZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"CNOT",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCNOT(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                  }},
-                 {"SWAP",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySWAP(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                  }},
-                 {"ControlledPhaseShift",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyControlledPhaseShift(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"CRX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRX(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CRY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRY(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CRZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRZ(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CRot",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRot(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                  }},
-                 {"IsingXX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingXX(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"IsingXY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingXY(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-
-                 {"IsingYY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingYY(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-
-                 {"IsingZZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingZZ(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"SingleExcitation",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitation(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"SingleExcitationMinus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitationMinus(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"SingleExcitationPlus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitationPlus(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"DoubleExcitation",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitation(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"DoubleExcitationMinus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitationMinus(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"DoubleExcitationPlus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitationPlus(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"MultiRZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyMultiRZ(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"CSWAP",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCSWAP(std::forward<decltype(wires)>(wires),
-                                 std::forward<decltype(adjoint)>(adjoint),
-                                 std::forward<decltype(params)>(params));
-                  }},
-                 {"Toffoli",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyToffoli(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }}},
           generator_{
               {"RX",
                [&](auto &&wires, auto &&adjoint, auto &&params) {
@@ -436,6 +233,8 @@ class StateVectorKokkos final
             data_ = std::make_unique<KokkosVector>("data_", exp2(num_qubits));
             setBasisState(0U);
         }
+
+        init_gates_indices_();
     };
 
     /**
@@ -559,6 +358,181 @@ class StateVectorKokkos final
         }
     }
 
+    void applyNamedOperation(const std::string &opName,
+                             const std::vector<size_t> &wires,
+                             bool adjoint = false,
+                             const std::vector<fp_t> &params = {0.0}) {
+        switch (gates_indices_[opName]) {
+        case GateOperation::PauliX:
+            applyGateFunctor<pauliXFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::PauliY:
+            applyGateFunctor<pauliYFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::PauliZ:
+            applyGateFunctor<pauliZFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::Hadamard:
+            applyGateFunctor<hadamardFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::S:
+            applyGateFunctor<sFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::T:
+            applyGateFunctor<tFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::RX:
+            applyGateFunctor<rxFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::RY:
+            applyGateFunctor<ryFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::RZ:
+            applyGateFunctor<rzFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::PhaseShift:
+            applyGateFunctor<phaseShiftFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::Rot:
+            applyGateFunctor<rotFunctor, 1>(wires, adjoint, params);
+            return;
+        case GateOperation::CY:
+            applyGateFunctor<cyFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::CZ:
+            applyGateFunctor<czFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::CNOT:
+            applyGateFunctor<cnotFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::SWAP:
+            applyGateFunctor<swapFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::ControlledPhaseShift:
+            applyGateFunctor<controlledPhaseShiftFunctor, 2>(wires, adjoint,
+                                                             params);
+            return;
+        case GateOperation::CRX:
+            applyGateFunctor<crxFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::CRY:
+            applyGateFunctor<cryFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::CRZ:
+            applyGateFunctor<crzFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::CRot:
+            applyGateFunctor<cRotFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::IsingXX:
+            applyGateFunctor<isingXXFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::IsingXY:
+            applyGateFunctor<isingXYFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::IsingYY:
+            applyGateFunctor<isingYYFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::IsingZZ:
+            applyGateFunctor<isingZZFunctor, 2>(wires, adjoint, params);
+            return;
+        case GateOperation::SingleExcitation:
+            applyGateFunctor<singleExcitationFunctor, 2>(wires, adjoint,
+                                                         params);
+            return;
+        case GateOperation::SingleExcitationMinus:
+            applyGateFunctor<singleExcitationMinusFunctor, 2>(wires, adjoint,
+                                                              params);
+            return;
+        case GateOperation::SingleExcitationPlus:
+            applyGateFunctor<singleExcitationPlusFunctor, 2>(wires, adjoint,
+                                                             params);
+            return;
+        case GateOperation::DoubleExcitation:
+            applyGateFunctor<doubleExcitationFunctor, 4>(wires, adjoint,
+                                                         params);
+            return;
+        case GateOperation::DoubleExcitationMinus:
+            applyGateFunctor<doubleExcitationMinusFunctor, 4>(wires, adjoint,
+                                                              params);
+            return;
+        case GateOperation::DoubleExcitationPlus:
+            applyGateFunctor<doubleExcitationPlusFunctor, 4>(wires, adjoint,
+                                                             params);
+            return;
+        case GateOperation::MultiRZ:
+            applyMultiRZ(wires, adjoint, params);
+            return;
+        case GateOperation::CSWAP:
+            applyGateFunctor<cSWAPFunctor, 3>(wires, adjoint, params);
+            return;
+        case GateOperation::Toffoli:
+            applyGateFunctor<toffoliFunctor, 3>(wires, adjoint, params);
+            return;
+        // case "generatorPhaseShift":
+        //     applyGateFunctor<generatorPhaseShiftFunctor, 1>(wires, adjoint,
+        //                                                     params);
+        //     return static_cast<fp_t>(1.0);
+        // case "generatorIsingXX":
+        //     applyGateFunctor<generatorIsingXXFunctor, 2>(wires, adjoint,
+        //                                                  params);
+        //     return -static_cast<fp_t>(0.5);
+        // case "generatorIsingXY":
+        //     applyGateFunctor<generatorIsingXYFunctor, 2>(wires, adjoint,
+        //                                                  params);
+        //     return static_cast<fp_t>(0.5);
+        // case "generatorIsingYY":
+        //     applyGateFunctor<generatorIsingYYFunctor, 2>(wires, adjoint,
+        //                                                  params);
+        //     return -static_cast<fp_t>(0.5);
+        // case "generatorIsingZZ":
+        //     applyGateFunctor<generatorIsingZZFunctor, 2>(wires, adjoint,
+        //                                                  params);
+        //     return -static_cast<fp_t>(0.5);
+        // case "generatorSingleExcitation":
+        //     applyGateFunctor<generatorSingleExcitationFunctor, 2>(
+        //         wires, adjoint, params);
+        //     return -static_cast<fp_t>(0.5);
+        // case "generatorSingleExcitationMinus":
+        //     applyGateFunctor<generatorSingleExcitationMinusFunctor, 2>(
+        //         wires, adjoint, params);
+        //     return -static_cast<fp_t>(0.5);
+        // case "generatorSingleExcitationPlus":
+        //     applyGateFunctor<generatorSingleExcitationPlusFunctor, 2>(
+        //         wires, adjoint, params);
+        //     return -static_cast<fp_t>(0.5);
+        // case "generatorDoubleExcitation":
+        //     applyGateFunctor<generatorDoubleExcitationFunctor, 4>(
+        //         wires, adjoint, params);
+        //     return -static_cast<fp_t>(0.5);
+        // case "generatorDoubleExcitationMinus":
+        //     applyGateFunctor<generatorDoubleExcitationMinusFunctor, 4>(
+        //         wires, adjoint, params);
+        //     return -static_cast<fp_t>(0.5);
+        // case "generatorDoubleExcitationPlus":
+        //     applyGateFunctor<generatorDoubleExcitationPlusFunctor, 4>(
+        //         wires, adjoint, params);
+        //     return static_cast<fp_t>(0.5);
+        // case "generatorControlledPhaseShift":
+        //     applyGateFunctor<generatorControlledPhaseShiftFunctor, 2>(
+        //         wires, adjoint, params);
+        //     return static_cast<fp_t>(1);
+        // case "generatorCRX":
+        //     applyGateFunctor<generatorCRXFunctor, 2>(wires, adjoint, params);
+        //     return -static_cast<fp_t>(0.5);
+        // case "generatorCRY":
+        //     applyGateFunctor<generatorCRYFunctor, 2>(wires, adjoint, params);
+        //     return -static_cast<fp_t>(0.5);
+        // case "generatorCRZ":
+        //     applyGateFunctor<generatorCRZFunctor, 2>(wires, adjoint, params);
+        //     return -static_cast<fp_t>(0.5);
+        default:
+            PL_ABORT("Undefined gate.");
+            // gates_.at(opName)(wires, adjoint, params);
+            return;
+        }
+    }
+
     /**
      * @brief Apply a single gate to the state vector.
      *
@@ -575,8 +549,9 @@ class StateVectorKokkos final
 
         if (opName == "Identity") {
             // No op
-        } else if (gates_.find(opName) != gates_.end()) {
-            gates_.at(opName)(wires, adjoint, params);
+        } else if (gates_indices_.contains(opName)) {
+            applyNamedOperation(opName, wires, adjoint, params);
+            // gates_.at(opName)(wires, adjoint, params);
         } else {
             KokkosVector matrix("gate_matrix", gate_matrix.size());
             Kokkos::deep_copy(
@@ -1395,7 +1370,7 @@ class StateVectorKokkos final
                           bool inverse = false,
                           [[maybe_unused]] const std::vector<fp_t> &params = {})
         -> fp_t {
-        applyPauliX(wires, inverse, params);
+        applyGateFunctor<pauliXFunctor, 1>(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
     }
 
@@ -1410,7 +1385,7 @@ class StateVectorKokkos final
                           bool inverse = false,
                           [[maybe_unused]] const std::vector<fp_t> &params = {})
         -> fp_t {
-        applyPauliY(wires, inverse, params);
+        applyGateFunctor<pauliYFunctor, 1>(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
     }
 
@@ -1425,7 +1400,7 @@ class StateVectorKokkos final
                           bool inverse = false,
                           [[maybe_unused]] const std::vector<fp_t> &params = {})
         -> fp_t {
-        applyPauliZ(wires, inverse, params);
+        applyGateFunctor<pauliZFunctor, 1>(wires, inverse, params);
         return -static_cast<fp_t>(0.5);
     }
 
@@ -1625,10 +1600,12 @@ class StateVectorKokkos final
     }
 
   private:
-    using GateFunc = std::function<void(const std::vector<size_t> &, bool,
-                                        const std::vector<fp_t> &)>;
-    using GateMap = std::unordered_map<std::string, GateFunc>;
-    const GateMap gates_;
+    // using GateFunc = std::function<void(const std::vector<size_t> &, bool,
+    //                                     const std::vector<fp_t> &)>;
+    // using GateMap = std::unordered_map<std::string, GateFunc>;
+    // const GateMap gates_;
+
+    std::map<std::string, GateOperation> gates_indices_;
 
     using GeneratorFunc = std::function<fp_t(const std::vector<size_t> &, bool,
                                              const std::vector<fp_t> &)>;
@@ -1640,6 +1617,47 @@ class StateVectorKokkos final
     std::mutex init_mutex_;
     std::unique_ptr<KokkosVector> data_;
     inline static bool is_exit_reg_ = false;
+
+    void init_gates_indices_() {
+        gates_indices_["PauliX"] = GateOperation::PauliX;
+        gates_indices_["PauliY"] = GateOperation::PauliY;
+        gates_indices_["PauliZ"] = GateOperation::PauliZ;
+        gates_indices_["Hadamard"] = GateOperation::Hadamard;
+        gates_indices_["S"] = GateOperation::S;
+        gates_indices_["T"] = GateOperation::T;
+        gates_indices_["RX"] = GateOperation::RX;
+        gates_indices_["RY"] = GateOperation::RY;
+        gates_indices_["RZ"] = GateOperation::RZ;
+        gates_indices_["PhaseShift"] = GateOperation::PhaseShift;
+        gates_indices_["Rot"] = GateOperation::Rot;
+        gates_indices_["CY"] = GateOperation::CY;
+        gates_indices_["CZ"] = GateOperation::CZ;
+        gates_indices_["CNOT"] = GateOperation::CNOT;
+        gates_indices_["SWAP"] = GateOperation::SWAP;
+        gates_indices_["ControlledPhaseShift"] =
+            GateOperation::ControlledPhaseShift;
+        gates_indices_["CRX"] = GateOperation::CRX;
+        gates_indices_["CRY"] = GateOperation::CRY;
+        gates_indices_["CRZ"] = GateOperation::CRZ;
+        gates_indices_["CRot"] = GateOperation::CRot;
+        gates_indices_["IsingXX"] = GateOperation::IsingXX;
+        gates_indices_["IsingXY"] = GateOperation::IsingXY;
+        gates_indices_["IsingYY"] = GateOperation::IsingYY;
+        gates_indices_["IsingZZ"] = GateOperation::IsingZZ;
+        gates_indices_["SingleExcitation"] = GateOperation::SingleExcitation;
+        gates_indices_["SingleExcitationMinus"] =
+            GateOperation::SingleExcitationMinus;
+        gates_indices_["SingleExcitationPlus"] =
+            GateOperation::SingleExcitationPlus;
+        gates_indices_["DoubleExcitation"] = GateOperation::DoubleExcitation;
+        gates_indices_["DoubleExcitationMinus"] =
+            GateOperation::DoubleExcitationMinus;
+        gates_indices_["DoubleExcitationPlus"] =
+            GateOperation::DoubleExcitationPlus;
+        gates_indices_["MultiRZ"] = GateOperation::MultiRZ;
+        gates_indices_["CSWAP"] = GateOperation::CSWAP;
+        gates_indices_["Toffoli"] = GateOperation::Toffoli;
+    }
 };
 
 }; // namespace Pennylane::LightningKokkos
