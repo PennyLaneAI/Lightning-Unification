@@ -173,8 +173,6 @@ with open("README.md", encoding="utf-8") as f:
 
 requirements = [
     "pennylane>=0.30",
-    "jax<=0.4.13",
-    "jaxlib<=0.4.13",
 ]
 
 suffix = backend.replace("lightning_", "")
