@@ -37,6 +37,7 @@
 /// @cond DEV
 namespace {
 using Pennylane::Gates::GateOperation;
+using Pennylane::Gates::GeneratorOperation;
 using Pennylane::Util::exp2;
 using Pennylane::Util::isPerfectPowerOf2;
 using Pennylane::Util::log2;
@@ -84,142 +85,7 @@ class StateVectorKokkos final
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits,
                       const Kokkos::InitializationSettings &kokkos_args = {})
-        : BaseType{num_qubits},
-          generator_{
-              {"RX",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorRX(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"RY",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorRY(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"RZ",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorRZ(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"ControlledPhaseShift",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorControlledPhaseShift(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"CRX",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorCRX(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"CRY",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorCRY(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"CRZ",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorCRZ(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"IsingXX",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorIsingXX(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"IsingXY",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorIsingXY(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"IsingYY",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorIsingYY(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"IsingZZ",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorIsingZZ(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"SingleExcitation",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorSingleExcitation(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"SingleExcitationMinus",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorSingleExcitationMinus(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"SingleExcitationPlus",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorSingleExcitationPlus(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"DoubleExcitation",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorDoubleExcitation(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"DoubleExcitationMinus",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorDoubleExcitationMinus(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"DoubleExcitationPlus",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorDoubleExcitationPlus(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"PhaseShift",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorPhaseShift(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"MultiRZ",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorMultiRZ(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-          } {
+        : BaseType{num_qubits} {
         num_qubits_ = num_qubits;
         length_ = exp2(num_qubits);
 
@@ -235,6 +101,7 @@ class StateVectorKokkos final
         }
 
         init_gates_indices_();
+        init_generators_indices_();
     };
 
     /**
@@ -469,67 +336,8 @@ class StateVectorKokkos final
         case GateOperation::Toffoli:
             applyGateFunctor<toffoliFunctor, 3>(wires, adjoint, params);
             return;
-        // case "generatorPhaseShift":
-        //     applyGateFunctor<generatorPhaseShiftFunctor, 1>(wires, adjoint,
-        //                                                     params);
-        //     return static_cast<fp_t>(1.0);
-        // case "generatorIsingXX":
-        //     applyGateFunctor<generatorIsingXXFunctor, 2>(wires, adjoint,
-        //                                                  params);
-        //     return -static_cast<fp_t>(0.5);
-        // case "generatorIsingXY":
-        //     applyGateFunctor<generatorIsingXYFunctor, 2>(wires, adjoint,
-        //                                                  params);
-        //     return static_cast<fp_t>(0.5);
-        // case "generatorIsingYY":
-        //     applyGateFunctor<generatorIsingYYFunctor, 2>(wires, adjoint,
-        //                                                  params);
-        //     return -static_cast<fp_t>(0.5);
-        // case "generatorIsingZZ":
-        //     applyGateFunctor<generatorIsingZZFunctor, 2>(wires, adjoint,
-        //                                                  params);
-        //     return -static_cast<fp_t>(0.5);
-        // case "generatorSingleExcitation":
-        //     applyGateFunctor<generatorSingleExcitationFunctor, 2>(
-        //         wires, adjoint, params);
-        //     return -static_cast<fp_t>(0.5);
-        // case "generatorSingleExcitationMinus":
-        //     applyGateFunctor<generatorSingleExcitationMinusFunctor, 2>(
-        //         wires, adjoint, params);
-        //     return -static_cast<fp_t>(0.5);
-        // case "generatorSingleExcitationPlus":
-        //     applyGateFunctor<generatorSingleExcitationPlusFunctor, 2>(
-        //         wires, adjoint, params);
-        //     return -static_cast<fp_t>(0.5);
-        // case "generatorDoubleExcitation":
-        //     applyGateFunctor<generatorDoubleExcitationFunctor, 4>(
-        //         wires, adjoint, params);
-        //     return -static_cast<fp_t>(0.5);
-        // case "generatorDoubleExcitationMinus":
-        //     applyGateFunctor<generatorDoubleExcitationMinusFunctor, 4>(
-        //         wires, adjoint, params);
-        //     return -static_cast<fp_t>(0.5);
-        // case "generatorDoubleExcitationPlus":
-        //     applyGateFunctor<generatorDoubleExcitationPlusFunctor, 4>(
-        //         wires, adjoint, params);
-        //     return static_cast<fp_t>(0.5);
-        // case "generatorControlledPhaseShift":
-        //     applyGateFunctor<generatorControlledPhaseShiftFunctor, 2>(
-        //         wires, adjoint, params);
-        //     return static_cast<fp_t>(1);
-        // case "generatorCRX":
-        //     applyGateFunctor<generatorCRXFunctor, 2>(wires, adjoint, params);
-        //     return -static_cast<fp_t>(0.5);
-        // case "generatorCRY":
-        //     applyGateFunctor<generatorCRYFunctor, 2>(wires, adjoint, params);
-        //     return -static_cast<fp_t>(0.5);
-        // case "generatorCRZ":
-        //     applyGateFunctor<generatorCRZFunctor, 2>(wires, adjoint, params);
-        //     return -static_cast<fp_t>(0.5);
         default:
-            PL_ABORT("Undefined gate.");
-            // gates_.at(opName)(wires, adjoint, params);
-            return;
+            PL_ABORT(std::string("Generator does not exist for ") + opName);
         }
     }
 
@@ -551,7 +359,6 @@ class StateVectorKokkos final
             // No op
         } else if (gates_indices_.contains(opName)) {
             applyNamedOperation(opName, wires, adjoint, params);
-            // gates_.at(opName)(wires, adjoint, params);
         } else {
             KokkosVector matrix("gate_matrix", gate_matrix.size());
             Kokkos::deep_copy(
@@ -573,10 +380,78 @@ class StateVectorKokkos final
     auto applyGenerator(const std::string &opName,
                         const std::vector<size_t> &wires, bool adjoint = false,
                         const std::vector<fp_t> &params = {0.0}) -> fp_t {
-        const auto it = generator_.find(opName);
-        PL_ABORT_IF(it == generator_.end(),
-                    std::string("Generator does not exist for ") + opName);
-        return (it->second)(wires, adjoint, params);
+        switch (generators_indices_[opName]) {
+        case GeneratorOperation::RX:
+            applyGateFunctor<pauliXFunctor, 1>(wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::RY:
+            applyGateFunctor<pauliYFunctor, 1>(wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::RZ:
+            applyGateFunctor<pauliZFunctor, 1>(wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::PhaseShift:
+            applyGateFunctor<generatorPhaseShiftFunctor, 1>(wires, adjoint,
+                                                            params);
+            return static_cast<fp_t>(1.0);
+        case GeneratorOperation::IsingXX:
+            applyGateFunctor<generatorIsingXXFunctor, 2>(wires, adjoint,
+                                                         params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::IsingXY:
+            applyGateFunctor<generatorIsingXYFunctor, 2>(wires, adjoint,
+                                                         params);
+            return static_cast<fp_t>(0.5);
+        case GeneratorOperation::IsingYY:
+            applyGateFunctor<generatorIsingYYFunctor, 2>(wires, adjoint,
+                                                         params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::IsingZZ:
+            applyGateFunctor<generatorIsingZZFunctor, 2>(wires, adjoint,
+                                                         params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::SingleExcitation:
+            applyGateFunctor<generatorSingleExcitationFunctor, 2>(
+                wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::SingleExcitationMinus:
+            applyGateFunctor<generatorSingleExcitationMinusFunctor, 2>(
+                wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::SingleExcitationPlus:
+            applyGateFunctor<generatorSingleExcitationPlusFunctor, 2>(
+                wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::DoubleExcitation:
+            applyGateFunctor<generatorDoubleExcitationFunctor, 4>(
+                wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::DoubleExcitationMinus:
+            applyGateFunctor<generatorDoubleExcitationMinusFunctor, 4>(
+                wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::DoubleExcitationPlus:
+            applyGateFunctor<generatorDoubleExcitationPlusFunctor, 4>(
+                wires, adjoint, params);
+            return static_cast<fp_t>(0.5);
+        case GeneratorOperation::ControlledPhaseShift:
+            applyGateFunctor<generatorControlledPhaseShiftFunctor, 2>(
+                wires, adjoint, params);
+            return static_cast<fp_t>(1);
+        case GeneratorOperation::CRX:
+            applyGateFunctor<generatorCRXFunctor, 2>(wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::CRY:
+            applyGateFunctor<generatorCRYFunctor, 2>(wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::CRZ:
+            applyGateFunctor<generatorCRZFunctor, 2>(wires, adjoint, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::MultiRZ:
+            return applyGeneratorMultiRZ(wires, adjoint, params);
+        default:
+            PL_ABORT(std::string("Generator does not exist for ") + opName);
+        }
     }
 
     /**
@@ -1606,11 +1481,7 @@ class StateVectorKokkos final
     // const GateMap gates_;
 
     std::map<std::string, GateOperation> gates_indices_;
-
-    using GeneratorFunc = std::function<fp_t(const std::vector<size_t> &, bool,
-                                             const std::vector<fp_t> &)>;
-    using GeneratorMap = std::unordered_map<std::string, GeneratorFunc>;
-    const GeneratorMap generator_;
+    std::map<std::string, GeneratorOperation> generators_indices_;
 
     size_t num_qubits_;
     size_t length_;
@@ -1657,6 +1528,34 @@ class StateVectorKokkos final
         gates_indices_["MultiRZ"] = GateOperation::MultiRZ;
         gates_indices_["CSWAP"] = GateOperation::CSWAP;
         gates_indices_["Toffoli"] = GateOperation::Toffoli;
+    }
+    void init_generators_indices_() {
+        generators_indices_["RX"] = GeneratorOperation::RX;
+        generators_indices_["RY"] = GeneratorOperation::RY;
+        generators_indices_["RZ"] = GeneratorOperation::RZ;
+        generators_indices_["ControlledPhaseShift"] =
+            GeneratorOperation::ControlledPhaseShift;
+        generators_indices_["CRX"] = GeneratorOperation::CRX;
+        generators_indices_["CRY"] = GeneratorOperation::CRY;
+        generators_indices_["CRZ"] = GeneratorOperation::CRZ;
+        generators_indices_["IsingXX"] = GeneratorOperation::IsingXX;
+        generators_indices_["IsingXY"] = GeneratorOperation::IsingXY;
+        generators_indices_["IsingYY"] = GeneratorOperation::IsingYY;
+        generators_indices_["IsingZZ"] = GeneratorOperation::IsingZZ;
+        generators_indices_["SingleExcitation"] =
+            GeneratorOperation::SingleExcitation;
+        generators_indices_["SingleExcitationMinus"] =
+            GeneratorOperation::SingleExcitationMinus;
+        generators_indices_["SingleExcitationPlus"] =
+            GeneratorOperation::SingleExcitationPlus;
+        generators_indices_["DoubleExcitation"] =
+            GeneratorOperation::DoubleExcitation;
+        generators_indices_["DoubleExcitationMinus"] =
+            GeneratorOperation::DoubleExcitationMinus;
+        generators_indices_["DoubleExcitationPlus"] =
+            GeneratorOperation::DoubleExcitationPlus;
+        generators_indices_["PhaseShift"] = GeneratorOperation::PhaseShift;
+        generators_indices_["MultiRZ"] = GeneratorOperation::MultiRZ;
     }
 };
 
