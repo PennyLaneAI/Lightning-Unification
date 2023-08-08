@@ -87,7 +87,6 @@ class StateVectorKokkos final
                       const Kokkos::InitializationSettings &kokkos_args = {})
         : BaseType{num_qubits} {
         num_qubits_ = num_qubits;
-        length_ = exp2(num_qubits);
 
         {
             const std::lock_guard<std::mutex> lock(init_mutex_);
@@ -153,7 +152,7 @@ class StateVectorKokkos final
      * @param num_qubits Number of qubits
      */
     void resetStateVector() {
-        if (length_ > 0) {
+        if (this->getLength() > 0) {
             setBasisState(0U);
         }
     }
@@ -223,6 +222,192 @@ class StateVectorKokkos final
                 });
             }
         }
+    }
+
+    /**
+     * @brief Apply a single gate to the state vector.
+     *
+     * @param opName Name of gate to apply.
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicates whether to use adjoint of gate.
+     * @param params Optional parameter list for parametric gates.
+     * @param params Optional std gate matrix if opName doesn't exist.
+     */
+    void applyOperation(
+        const std::string &opName, const std::vector<size_t> &wires,
+        bool inverse = false, const std::vector<fp_t> &params = {},
+        [[maybe_unused]] const std::vector<ComplexT> &gate_matrix = {}) {
+
+        if (opName == "Identity") {
+            // No op
+        } else if (gates_indices_.contains(opName)) {
+            applyNamedOperation(opName, wires, inverse, params);
+        } else {
+            KokkosVector matrix("gate_matrix", gate_matrix.size());
+            Kokkos::deep_copy(
+                matrix, UnmanagedConstComplexHostView(gate_matrix.data(),
+                                                      gate_matrix.size()));
+            return applyMultiQubitOp(matrix, wires, inverse);
+        }
+    }
+
+    /**
+     * @brief Apply a single qubit operator to the state vector using a matrix
+     *
+     * @param matrix Kokkos gate matrix in the device space
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicates whether to use adjoint of gate.
+     */
+    void applySingleQubitOp(const KokkosVector &matrix,
+                            const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        auto &&num_qubits = this->getNumQubits();
+        if (!inverse) {
+            Kokkos::parallel_for(
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 1)),
+                singleQubitOpFunctor<fp_t, false>(*data_, num_qubits, matrix,
+                                                  wires));
+        } else {
+            Kokkos::parallel_for(
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 1)),
+                singleQubitOpFunctor<fp_t, true>(*data_, num_qubits, matrix,
+                                                 wires));
+        }
+    }
+
+    /**
+     * @brief Apply a two qubit operator to the state vector using a matrix
+     *
+     * @param matrix Kokkos gate matrix in the device space
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicates whether to use adjoint of gate.
+     */
+    void applyTwoQubitOp(const KokkosVector &matrix,
+                         const std::vector<size_t> &wires,
+                         bool inverse = false) {
+
+        auto &&num_qubits = this->getNumQubits();
+        if (!inverse) {
+            Kokkos::parallel_for(
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 2)),
+                twoQubitOpFunctor<fp_t, false>(*data_, num_qubits, matrix,
+                                               wires));
+        } else {
+            Kokkos::parallel_for(
+                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 2)),
+                twoQubitOpFunctor<fp_t, true>(*data_, num_qubits, matrix,
+                                              wires));
+        }
+    }
+
+    /**
+     * @brief Apply a multi qubit operator to the state vector using a matrix
+     *
+     * @param matrix Kokkos gate matrix in the device space
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicates whether to use adjoint of gate.
+     */
+    void applyMultiQubitOp(const KokkosVector &matrix,
+                           const std::vector<size_t> &wires,
+                           bool inverse = false) {
+        auto &&num_qubits = this->getNumQubits();
+        if (wires.size() == 1) {
+            applySingleQubitOp(matrix, wires, inverse);
+        } else if (wires.size() == 2) {
+            applyTwoQubitOp(matrix, wires, inverse);
+        } else {
+
+            Kokkos::View<const size_t *, Kokkos::HostSpace,
+                         Kokkos::MemoryTraits<Kokkos::Unmanaged>>
+                wires_host(wires.data(), wires.size());
+
+            Kokkos::View<size_t *> wires_view("wires_view", wires.size());
+            Kokkos::deep_copy(wires_view, wires_host);
+
+            if (!inverse) {
+                Kokkos::parallel_for(
+                    Kokkos::RangePolicy<KokkosExecSpace>(
+                        0, exp2(num_qubits_ - wires.size())),
+                    multiQubitOpFunctor<fp_t, false>(*data_, num_qubits, matrix,
+                                                     wires_view));
+            } else {
+                Kokkos::parallel_for(
+                    Kokkos::RangePolicy<KokkosExecSpace>(
+                        0, exp2(num_qubits_ - wires.size())),
+                    multiQubitOpFunctor<fp_t, true>(*data_, num_qubits, matrix,
+                                                    wires_view));
+            }
+        }
+    }
+
+    /**
+     * @brief Apply a given matrix directly to the statevector using a
+     * raw matrix pointer vector.
+     *
+     * @param matrix Pointer to the array data (in row-major format).
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicate whether inverse should be taken.
+     */
+    inline void applyMatrix(ComplexT *matrix, const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
+        size_t n = 1U << wires.size();
+        KokkosVector matrix_(matrix, n * n);
+        applyMultiQubitOp(matrix_, wires, inverse);
+    }
+
+    /**
+     * @brief Apply a given matrix directly to the statevector.
+     *
+     * @param matrix Matrix data (in row-major format).
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicate whether inverse should be taken.
+     */
+    inline void applyMatrix(std::vector<ComplexT> &matrix,
+                            const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
+        PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
+                    "The size of matrix does not match with the given "
+                    "number of wires");
+        applyMatrix(matrix.data(), wires, inverse);
+    }
+
+    /**
+     * @brief Apply a given matrix directly to the statevector using a
+     * raw matrix pointer vector.
+     *
+     * @param matrix Pointer to the array data (in row-major format).
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicate whether inverse should be taken.
+     */
+    inline void applyMatrix(const ComplexT *matrix,
+                            const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
+        size_t n = 1U << wires.size();
+        KokkosVector matrix_("matrix_", n * n);
+        for (size_t i = 0; i < n * n; i++) {
+            matrix_(i) = matrix[i];
+        }
+        applyMultiQubitOp(matrix_, wires, inverse);
+    }
+
+    /**
+     * @brief Apply a given matrix directly to the statevector.
+     *
+     * @param matrix Matrix data (in row-major format).
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicate whether inverse should be taken.
+     */
+    inline void applyMatrix(const std::vector<ComplexT> &matrix,
+                            const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
+        PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
+                    "The size of matrix does not match with the given "
+                    "number of wires");
+        applyMatrix(matrix.data(), wires, inverse);
     }
 
     void applyNamedOperation(const std::string &opName,
@@ -428,192 +613,6 @@ class StateVectorKokkos final
     }
 
     /**
-     * @brief Apply a single gate to the state vector.
-     *
-     * @param opName Name of gate to apply.
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params Optional parameter list for parametric gates.
-     * @param params Optional std gate matrix if opName doesn't exist.
-     */
-    void applyOperation(
-        const std::string &opName, const std::vector<size_t> &wires,
-        bool inverse = false, const std::vector<fp_t> &params = {},
-        [[maybe_unused]] const std::vector<ComplexT> &gate_matrix = {}) {
-
-        if (opName == "Identity") {
-            // No op
-        } else if (gates_indices_.contains(opName)) {
-            applyNamedOperation(opName, wires, inverse, params);
-        } else {
-            KokkosVector matrix("gate_matrix", gate_matrix.size());
-            Kokkos::deep_copy(
-                matrix, UnmanagedConstComplexHostView(gate_matrix.data(),
-                                                      gate_matrix.size()));
-            return applyMultiQubitOp(matrix, wires, inverse);
-        }
-    }
-
-    /**
-     * @brief Apply a single qubit operator to the state vector using a matrix
-     *
-     * @param matrix Kokkos gate matrix in the device space
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     */
-    void applySingleQubitOp(const KokkosVector &matrix,
-                            const std::vector<size_t> &wires,
-                            bool inverse = false) {
-        auto &&num_qubits = this->getNumQubits();
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 1)),
-                singleQubitOpFunctor<fp_t, false>(*data_, num_qubits, matrix,
-                                                  wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 1)),
-                singleQubitOpFunctor<fp_t, true>(*data_, num_qubits, matrix,
-                                                 wires));
-        }
-    }
-
-    /**
-     * @brief Apply a two qubit operator to the state vector using a matrix
-     *
-     * @param matrix Kokkos gate matrix in the device space
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     */
-    void applyTwoQubitOp(const KokkosVector &matrix,
-                         const std::vector<size_t> &wires,
-                         bool inverse = false) {
-
-        auto &&num_qubits = this->getNumQubits();
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 2)),
-                twoQubitOpFunctor<fp_t, false>(*data_, num_qubits, matrix,
-                                               wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits - 2)),
-                twoQubitOpFunctor<fp_t, true>(*data_, num_qubits, matrix,
-                                              wires));
-        }
-    }
-
-    /**
-     * @brief Apply a multi qubit operator to the state vector using a matrix
-     *
-     * @param matrix Kokkos gate matrix in the device space
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     */
-    void applyMultiQubitOp(const KokkosVector &matrix,
-                           const std::vector<size_t> &wires,
-                           bool inverse = false) {
-        auto &&num_qubits = this->getNumQubits();
-        if (wires.size() == 1) {
-            applySingleQubitOp(matrix, wires, inverse);
-        } else if (wires.size() == 2) {
-            applyTwoQubitOp(matrix, wires, inverse);
-        } else {
-
-            Kokkos::View<const std::size_t *, Kokkos::HostSpace,
-                         Kokkos::MemoryTraits<Kokkos::Unmanaged>>
-                wires_host(wires.data(), wires.size());
-
-            Kokkos::View<std::size_t *> wires_view("wires_view", wires.size());
-            Kokkos::deep_copy(wires_view, wires_host);
-
-            if (!inverse) {
-                Kokkos::parallel_for(
-                    Kokkos::RangePolicy<KokkosExecSpace>(
-                        0, exp2(num_qubits_ - wires.size())),
-                    multiQubitOpFunctor<fp_t, false>(*data_, num_qubits, matrix,
-                                                     wires_view));
-            } else {
-                Kokkos::parallel_for(
-                    Kokkos::RangePolicy<KokkosExecSpace>(
-                        0, exp2(num_qubits_ - wires.size())),
-                    multiQubitOpFunctor<fp_t, true>(*data_, num_qubits, matrix,
-                                                    wires_view));
-            }
-        }
-    }
-
-    /**
-     * @brief Apply a given matrix directly to the statevector using a
-     * raw matrix pointer vector.
-     *
-     * @param matrix Pointer to the array data (in row-major format).
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicate whether inverse should be taken.
-     */
-    inline void applyMatrix(ComplexT *matrix, const std::vector<size_t> &wires,
-                            bool inverse = false) {
-        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
-        size_t n = 1U << wires.size();
-        KokkosVector matrix_(matrix, n * n);
-        applyMultiQubitOp(matrix_, wires, inverse);
-    }
-
-    /**
-     * @brief Apply a given matrix directly to the statevector.
-     *
-     * @param matrix Matrix data (in row-major format).
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicate whether inverse should be taken.
-     */
-    inline void applyMatrix(std::vector<ComplexT> &matrix,
-                            const std::vector<size_t> &wires,
-                            bool inverse = false) {
-        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
-        PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
-                    "The size of matrix does not match with the given "
-                    "number of wires");
-        applyMatrix(matrix.data(), wires, inverse);
-    }
-
-    /**
-     * @brief Apply a given matrix directly to the statevector using a
-     * raw matrix pointer vector.
-     *
-     * @param matrix Pointer to the array data (in row-major format).
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicate whether inverse should be taken.
-     */
-    inline void applyMatrix(const ComplexT *matrix,
-                            const std::vector<size_t> &wires,
-                            bool inverse = false) {
-        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
-        size_t n = 1U << wires.size();
-        KokkosVector matrix_("matrix_", n * n);
-        for (size_t i = 0; i < n * n; i++) {
-            matrix_(i) = matrix[i];
-        }
-        applyMultiQubitOp(matrix_, wires, inverse);
-    }
-
-    /**
-     * @brief Apply a given matrix directly to the statevector.
-     *
-     * @param matrix Matrix data (in row-major format).
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicate whether inverse should be taken.
-     */
-    inline void applyMatrix(const std::vector<ComplexT> &matrix,
-                            const std::vector<size_t> &wires,
-                            bool inverse = false) {
-        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
-        PL_ABORT_IF(matrix.size() != exp2(2 * wires.size()),
-                    "The size of matrix does not match with the given "
-                    "number of wires");
-        applyMatrix(matrix.data(), wires, inverse);
-    }
-
-    /**
      * @brief Templated method that applies special n-qubit gates.
      *
      * @tparam functor_t Gate functor class for Kokkos dispatcher.
@@ -689,20 +688,6 @@ class StateVectorKokkos final
     }
 
     /**
-     * @brief Get the number of qubits of the state vector.
-     *
-     * @return The number of qubits of the state vector
-     */
-    size_t getNumQubits() const { return num_qubits_; }
-
-    /**
-     * @brief Get the size of the state vector
-     *
-     * @return The size of the state vector
-     */
-    size_t getLength() const { return length_; }
-
-    /**
      * @brief Update data of the class
      *
      * @param other Kokkos View
@@ -763,12 +748,13 @@ class StateVectorKokkos final
      * @brief Get underlying data vector
      */
     [[nodiscard]] auto getDataVector() -> std::vector<ComplexT> {
-        std::vector<ComplexT> data_(getData(), getData() + getLength());
+        std::vector<ComplexT> data_(getData(), getData() + this->getLength());
         return data_;
     }
 
     [[nodiscard]] auto getDataVector() const -> const std::vector<ComplexT> {
-        const std::vector<ComplexT> data_(getData(), getData() + getLength());
+        const std::vector<ComplexT> data_(getData(),
+                                          getData() + this->getLength());
         return data_;
     }
 
@@ -797,88 +783,71 @@ class StateVectorKokkos final
     }
 
   private:
-    // using GateFunc = std::function<void(const std::vector<size_t> &, bool,
-    //                                     const std::vector<fp_t> &)>;
-    // using GateMap = std::unordered_map<std::string, GateFunc>;
-    // const GateMap gates_;
-
     std::map<std::string, GateOperation> gates_indices_;
     std::map<std::string, GeneratorOperation> generators_indices_;
 
     size_t num_qubits_;
-    size_t length_;
     std::mutex init_mutex_;
     std::unique_ptr<KokkosVector> data_;
     inline static bool is_exit_reg_ = false;
-
+    // clang-format off
     void init_gates_indices_() {
-        gates_indices_["PauliX"] = GateOperation::PauliX;
-        gates_indices_["PauliY"] = GateOperation::PauliY;
-        gates_indices_["PauliZ"] = GateOperation::PauliZ;
-        gates_indices_["Hadamard"] = GateOperation::Hadamard;
-        gates_indices_["S"] = GateOperation::S;
-        gates_indices_["T"] = GateOperation::T;
-        gates_indices_["RX"] = GateOperation::RX;
-        gates_indices_["RY"] = GateOperation::RY;
-        gates_indices_["RZ"] = GateOperation::RZ;
-        gates_indices_["PhaseShift"] = GateOperation::PhaseShift;
-        gates_indices_["Rot"] = GateOperation::Rot;
-        gates_indices_["CY"] = GateOperation::CY;
-        gates_indices_["CZ"] = GateOperation::CZ;
-        gates_indices_["CNOT"] = GateOperation::CNOT;
-        gates_indices_["SWAP"] = GateOperation::SWAP;
-        gates_indices_["ControlledPhaseShift"] =
-            GateOperation::ControlledPhaseShift;
-        gates_indices_["CRX"] = GateOperation::CRX;
-        gates_indices_["CRY"] = GateOperation::CRY;
-        gates_indices_["CRZ"] = GateOperation::CRZ;
-        gates_indices_["CRot"] = GateOperation::CRot;
-        gates_indices_["IsingXX"] = GateOperation::IsingXX;
-        gates_indices_["IsingXY"] = GateOperation::IsingXY;
-        gates_indices_["IsingYY"] = GateOperation::IsingYY;
-        gates_indices_["IsingZZ"] = GateOperation::IsingZZ;
-        gates_indices_["SingleExcitation"] = GateOperation::SingleExcitation;
-        gates_indices_["SingleExcitationMinus"] =
-            GateOperation::SingleExcitationMinus;
-        gates_indices_["SingleExcitationPlus"] =
-            GateOperation::SingleExcitationPlus;
-        gates_indices_["DoubleExcitation"] = GateOperation::DoubleExcitation;
-        gates_indices_["DoubleExcitationMinus"] =
-            GateOperation::DoubleExcitationMinus;
-        gates_indices_["DoubleExcitationPlus"] =
-            GateOperation::DoubleExcitationPlus;
-        gates_indices_["MultiRZ"] = GateOperation::MultiRZ;
-        gates_indices_["CSWAP"] = GateOperation::CSWAP;
-        gates_indices_["Toffoli"] = GateOperation::Toffoli;
+        gates_indices_["PauliX"]                = GateOperation::PauliX;
+        gates_indices_["PauliY"]                = GateOperation::PauliY;
+        gates_indices_["PauliZ"]                = GateOperation::PauliZ;
+        gates_indices_["Hadamard"]              = GateOperation::Hadamard;
+        gates_indices_["S"]                     = GateOperation::S;
+        gates_indices_["T"]                     = GateOperation::T;
+        gates_indices_["RX"]                    = GateOperation::RX;
+        gates_indices_["RY"]                    = GateOperation::RY;
+        gates_indices_["RZ"]                    = GateOperation::RZ;
+        gates_indices_["PhaseShift"]            = GateOperation::PhaseShift;
+        gates_indices_["Rot"]                   = GateOperation::Rot;
+        gates_indices_["CY"]                    = GateOperation::CY;
+        gates_indices_["CZ"]                    = GateOperation::CZ;
+        gates_indices_["CNOT"]                  = GateOperation::CNOT;
+        gates_indices_["SWAP"]                  = GateOperation::SWAP;
+        gates_indices_["ControlledPhaseShift"]  = GateOperation::ControlledPhaseShift;
+        gates_indices_["CRX"]                   = GateOperation::CRX;
+        gates_indices_["CRY"]                   = GateOperation::CRY;
+        gates_indices_["CRZ"]                   = GateOperation::CRZ;
+        gates_indices_["CRot"]                  = GateOperation::CRot;
+        gates_indices_["IsingXX"]               = GateOperation::IsingXX;
+        gates_indices_["IsingXY"]               = GateOperation::IsingXY;
+        gates_indices_["IsingYY"]               = GateOperation::IsingYY;
+        gates_indices_["IsingZZ"]               = GateOperation::IsingZZ;
+        gates_indices_["SingleExcitation"]      = GateOperation::SingleExcitation;
+        gates_indices_["SingleExcitationMinus"] = GateOperation::SingleExcitationMinus;
+        gates_indices_["SingleExcitationPlus"]  = GateOperation::SingleExcitationPlus;
+        gates_indices_["DoubleExcitation"]      = GateOperation::DoubleExcitation;
+        gates_indices_["DoubleExcitationMinus"] = GateOperation::DoubleExcitationMinus;
+        gates_indices_["DoubleExcitationPlus"]  = GateOperation::DoubleExcitationPlus;
+        gates_indices_["MultiRZ"]               = GateOperation::MultiRZ;
+        gates_indices_["CSWAP"]                 = GateOperation::CSWAP;
+        gates_indices_["Toffoli"]               = GateOperation::Toffoli;
     }
     void init_generators_indices_() {
-        generators_indices_["RX"] = GeneratorOperation::RX;
-        generators_indices_["RY"] = GeneratorOperation::RY;
-        generators_indices_["RZ"] = GeneratorOperation::RZ;
-        generators_indices_["ControlledPhaseShift"] =
-            GeneratorOperation::ControlledPhaseShift;
-        generators_indices_["CRX"] = GeneratorOperation::CRX;
-        generators_indices_["CRY"] = GeneratorOperation::CRY;
-        generators_indices_["CRZ"] = GeneratorOperation::CRZ;
-        generators_indices_["IsingXX"] = GeneratorOperation::IsingXX;
-        generators_indices_["IsingXY"] = GeneratorOperation::IsingXY;
-        generators_indices_["IsingYY"] = GeneratorOperation::IsingYY;
-        generators_indices_["IsingZZ"] = GeneratorOperation::IsingZZ;
-        generators_indices_["SingleExcitation"] =
-            GeneratorOperation::SingleExcitation;
-        generators_indices_["SingleExcitationMinus"] =
-            GeneratorOperation::SingleExcitationMinus;
-        generators_indices_["SingleExcitationPlus"] =
-            GeneratorOperation::SingleExcitationPlus;
-        generators_indices_["DoubleExcitation"] =
-            GeneratorOperation::DoubleExcitation;
-        generators_indices_["DoubleExcitationMinus"] =
-            GeneratorOperation::DoubleExcitationMinus;
-        generators_indices_["DoubleExcitationPlus"] =
-            GeneratorOperation::DoubleExcitationPlus;
-        generators_indices_["PhaseShift"] = GeneratorOperation::PhaseShift;
-        generators_indices_["MultiRZ"] = GeneratorOperation::MultiRZ;
+        generators_indices_["RX"]                    = GeneratorOperation::RX;
+        generators_indices_["RY"]                    = GeneratorOperation::RY;
+        generators_indices_["RZ"]                    = GeneratorOperation::RZ;
+        generators_indices_["ControlledPhaseShift"]  = GeneratorOperation::ControlledPhaseShift;
+        generators_indices_["CRX"]                   = GeneratorOperation::CRX;
+        generators_indices_["CRY"]                   = GeneratorOperation::CRY;
+        generators_indices_["CRZ"]                   = GeneratorOperation::CRZ;
+        generators_indices_["IsingXX"]               = GeneratorOperation::IsingXX;
+        generators_indices_["IsingXY"]               = GeneratorOperation::IsingXY;
+        generators_indices_["IsingYY"]               = GeneratorOperation::IsingYY;
+        generators_indices_["IsingZZ"]               = GeneratorOperation::IsingZZ;
+        generators_indices_["SingleExcitation"]      = GeneratorOperation::SingleExcitation;
+        generators_indices_["SingleExcitationMinus"] = GeneratorOperation::SingleExcitationMinus;
+        generators_indices_["SingleExcitationPlus"]  = GeneratorOperation::SingleExcitationPlus;
+        generators_indices_["DoubleExcitation"]      = GeneratorOperation::DoubleExcitation;
+        generators_indices_["DoubleExcitationMinus"] = GeneratorOperation::DoubleExcitationMinus;
+        generators_indices_["DoubleExcitationPlus"]  = GeneratorOperation::DoubleExcitationPlus;
+        generators_indices_["PhaseShift"]            = GeneratorOperation::PhaseShift;
+        generators_indices_["MultiRZ"]               = GeneratorOperation::MultiRZ;
     }
+    // clang-format on
 };
 
 }; // namespace Pennylane::LightningKokkos
