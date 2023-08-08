@@ -87,7 +87,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXY",
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
             kokkos_sv.HostToDevice(ini_st.data(), ini_st.size());
-            kokkos_sv.applyIsingXY({0, 1}, false, {0.312});
+            kokkos_sv.applyOperation("IsingXY", {0, 1}, false, {0.312});
             kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
             for (std::size_t j = 0; j < exp2(num_qubits); j++) {
@@ -139,7 +139,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRX",
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
-                kokkos_sv.applyRX({0}, false, {angles[index]});
+                kokkos_sv.applyOperation("RX", {0}, false, {angles[index]});
                 kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
                 for (std::size_t j = 0; j < exp2(num_qubits); j++) {
@@ -156,7 +156,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRX",
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
-                kokkos_sv.applyRX({0}, true, {angles[index]});
+                kokkos_sv.applyOperation("RX", {0}, true, {angles[index]});
                 kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
                 for (std::size_t j = 0; j < exp2(num_qubits); j++) {
@@ -200,7 +200,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRY",
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
                 kokkos_sv.HostToDevice(ini_st.data(), ini_st.size());
-                kokkos_sv.applyRY({0}, false, {angles[index]});
+                kokkos_sv.applyOperation("RY", {0}, false, {angles[index]});
                 kokkos_sv.DeviceToHost(result_sv.data(), ini_st.size());
 
                 for (std::size_t j = 0; j < exp2(num_qubits); j++) {
@@ -218,7 +218,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRY",
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
                 kokkos_sv.HostToDevice(ini_st.data(), ini_st.size());
-                kokkos_sv.applyRY({0}, true, {angles[index]});
+                kokkos_sv.applyOperation("RY", {0}, true, {angles[index]});
                 kokkos_sv.DeviceToHost(result_sv.data(), ini_st.size());
 
                 for (std::size_t j = 0; j < exp2(num_qubits); j++) {
@@ -269,7 +269,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRZ",
                 kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
-                kokkos_sv.applyRZ({index}, false, {angles[index]});
+                kokkos_sv.applyOperation("RZ", {index}, false, {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -340,7 +340,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyPhaseShift",
             kokkos_sv.applyOperations(
                 {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                 {{false}, {false}, {false}});
-            kokkos_sv.applyPhaseShift({index}, false, {angles[index]});
+            kokkos_sv.applyOperation("PhaseShift", {index}, false,
+                                     {angles[index]});
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
             kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -397,7 +398,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyControlledPhaseShift",
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
         kokkos_sv.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                   {{0}, {1}, {2}}, {{false}, {false}, {false}});
-        kokkos_sv.applyControlledPhaseShift({0, 1}, false, {angles[0]});
+        kokkos_sv.applyOperation("ControlledPhaseShift", {0, 1}, false,
+                                 {angles[0]});
         std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
         kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -451,7 +453,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRot",
         for (size_t index = 0; index < num_qubits; index++) {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
-            kokkos_sv.applyRot({index}, false, angles[index]);
+            kokkos_sv.applyOperation("Rot", {index}, false, angles[index]);
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
             kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -498,7 +500,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyCRot",
         SECTION("CRot0,1 |100> -> |1>(a|0>+b|1>)|0>") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
             kokkos_sv.applyOperation({"PauliX"}, {0}, false);
-            kokkos_sv.applyCRot({0, 1}, false, angles);
+            kokkos_sv.applyOperation("CRot", {0, 1}, false, angles);
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
             kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -574,7 +576,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXX",
         SECTION("IsingXX 0,1") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingXX({0, 1}, false, {angles[index]});
+                kokkos_sv.applyOperation("IsingXX", {0, 1}, false,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -590,7 +593,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXX",
             for (size_t index = 0; index < angles.size(); index++) {
 
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingXX({0, 2}, false, {angles[index]});
+                kokkos_sv.applyOperation("IsingXX", {0, 2}, false,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -609,7 +613,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXX",
         SECTION("IsingXX 0,1") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingXX({0, 1}, true, {angles[index]});
+                kokkos_sv.applyOperation("IsingXX", {0, 1}, true,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -624,7 +629,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXX",
         SECTION("IsingXX 0,2") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingXX({0, 2}, true, {angles[index]});
+                kokkos_sv.applyOperation("IsingXX", {0, 2}, true,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -702,7 +708,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingYY",
         SECTION("IsingYY 0,1") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingYY({0, 1}, false, {angles[index]});
+                kokkos_sv.applyOperation("IsingYY", {0, 1}, false,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -718,7 +725,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingYY",
             for (size_t index = 0; index < angles.size(); index++) {
 
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingYY({0, 2}, false, {angles[index]});
+                kokkos_sv.applyOperation("IsingYY", {0, 2}, false,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -737,7 +745,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingYY",
         SECTION("IsingYY 0,1") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingYY({0, 1}, true, {angles[index]});
+                kokkos_sv.applyOperation("IsingYY", {0, 1}, true,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -752,7 +761,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingYY",
         SECTION("IsingYY 0,2") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingYY({0, 2}, true, {angles[index]});
+                kokkos_sv.applyOperation("IsingYY", {0, 2}, true,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -809,7 +819,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingZZ",
         SECTION("IsingZZ 0,1") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingZZ({0, 1}, false, {angles[index]});
+                kokkos_sv.applyOperation("IsingZZ", {0, 1}, false,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -825,7 +836,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingZZ",
             for (size_t index = 0; index < angles.size(); index++) {
 
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingZZ({0, 2}, false, {angles[index]});
+                kokkos_sv.applyOperation("IsingZZ", {0, 2}, false,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -842,7 +854,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingZZ",
         SECTION("IsingZZ 0,1") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingZZ({0, 1}, true, {angles[index]});
+                kokkos_sv.applyOperation("IsingZZ", {0, 1}, true,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -857,7 +870,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingZZ",
         SECTION("IsingZZ 0,2") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyIsingZZ({0, 2}, true, {angles[index]});
+                kokkos_sv.applyOperation("IsingZZ", {0, 2}, true,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -912,7 +926,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyMultiRZ",
         SECTION("MultiRZ 0,1") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyMultiRZ({0, 1}, false, {angles[index]});
+                kokkos_sv.applyOperation("MultiRZ", {0, 1}, false,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -927,7 +942,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyMultiRZ",
         SECTION("MultiRZ 0,2") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyMultiRZ({0, 2}, false, {angles[index]});
+                kokkos_sv.applyOperation("MultiRZ", {0, 2}, false,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -944,7 +960,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyMultiRZ",
         SECTION("MultiRZ 0,1") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyMultiRZ({0, 1}, true, {angles[index]});
+                kokkos_sv.applyOperation("MultiRZ", {0, 1}, true,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -959,7 +976,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyMultiRZ",
         SECTION("MultiRZ 0,2") {
             for (size_t index = 0; index < angles.size(); index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyMultiRZ({0, 2}, true, {angles[index]});
+                kokkos_sv.applyOperation("MultiRZ", {0, 2}, true,
+                                         {angles[index]});
                 std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
                 kokkos_sv.DeviceToHost(result_sv.data(), kokkos_sv.getLength());
 
@@ -1018,7 +1036,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applySingleExcitation",
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
             kokkos_sv.HostToDevice(ini_st.data(), ini_st.size());
-            kokkos_sv.applySingleExcitation({0, 2}, false, {0.267030328057308});
+            kokkos_sv.applyOperation("SingleExcitation", {0, 2}, false,
+                                     {0.267030328057308});
             kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
             for (std::size_t j = 0; j < exp2(num_qubits); j++) {
@@ -1073,8 +1092,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applySingleExcitationMinus",
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
             kokkos_sv.HostToDevice(ini_st.data(), ini_st.size());
-            kokkos_sv.applySingleExcitationMinus({0, 2}, false,
-                                                 {0.267030328057308});
+            kokkos_sv.applyOperation("SingleExcitationMinus", {0, 2}, false,
+                                     {0.267030328057308});
             kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
             for (std::size_t j = 0; j < exp2(num_qubits); j++) {
@@ -1129,8 +1148,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applySingleExcitationPlus",
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
             kokkos_sv.HostToDevice(ini_st.data(), ini_st.size());
-            kokkos_sv.applySingleExcitationPlus({0, 2}, false,
-                                                {0.267030328057308});
+            kokkos_sv.applyOperation("SingleExcitationPlus", {0, 2}, false,
+                                     {0.267030328057308});
             kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
             for (std::size_t j = 0; j < exp2(num_qubits); j++) {
@@ -1197,8 +1216,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyDoubleExcitation",
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
             kokkos_sv.HostToDevice(ini_st.data(), ini_st.size());
-            kokkos_sv.applyDoubleExcitation({0, 1, 2, 3}, false,
-                                            {0.267030328057308});
+            kokkos_sv.applyOperation("DoubleExcitation", {0, 1, 2, 3}, false,
+                                     {0.267030328057308});
             kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
             for (std::size_t j = 0; j < exp2(num_qubits); j++) {
@@ -1265,8 +1284,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyDoubleExcitationMinus",
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
             kokkos_sv.HostToDevice(ini_st.data(), ini_st.size());
-            kokkos_sv.applyDoubleExcitationMinus({0, 1, 2, 3}, false,
-                                                 {0.267030328057308});
+            kokkos_sv.applyOperation("DoubleExcitationMinus", {0, 1, 2, 3},
+                                     false, {0.267030328057308});
             kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
             for (std::size_t j = 0; j < exp2(num_qubits); j++) {
@@ -1333,8 +1352,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyDoubleExcitationPlus",
             std::vector<ComplexT> result_sv(kokkos_sv.getLength(), {0, 0});
 
             kokkos_sv.HostToDevice(ini_st.data(), ini_st.size());
-            kokkos_sv.applyDoubleExcitationPlus({0, 1, 2, 3}, false,
-                                                {0.267030328057308});
+            kokkos_sv.applyOperation("DoubleExcitationPlus", {0, 1, 2, 3},
+                                     false, {0.267030328057308});
             kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
             for (std::size_t j = 0; j < exp2(num_qubits); j++) {

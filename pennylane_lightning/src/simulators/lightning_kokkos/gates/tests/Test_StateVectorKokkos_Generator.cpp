@@ -77,9 +77,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorPhaseShift",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorPhaseShift({1}, false);
-            kokkos_gate_svp.applyPhaseShift({1}, false, {ep});
-            kokkos_gate_svm.applyPhaseShift({1}, false, {-ep});
+            auto scale =
+                kokkos_gntr_sv.applyGenerator("PhaseShift", {1}, false);
+            kokkos_gate_svp.applyOperation("PhaseShift", {1}, false, {ep});
+            kokkos_gate_svm.applyOperation("PhaseShift", {1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -122,8 +123,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorPhaseShift",
 
             auto scale =
                 kokkos_gntr_sv.applyGenerator("PhaseShift", {1}, false);
-            kokkos_gate_svp.applyPhaseShift({1}, false, {ep});
-            kokkos_gate_svm.applyPhaseShift({1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("PhaseShift", {1}, false, {ep});
+            kokkos_gate_svm.applyOperation("PhaseShift", {1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -193,9 +194,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXX",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorIsingXX({0, 1}, false);
-            kokkos_gate_svp.applyIsingXX({0, 1}, false, {ep});
-            kokkos_gate_svm.applyIsingXX({0, 1}, false, {-ep});
+            auto scale =
+                kokkos_gntr_sv.applyGenerator("IsingXX", {0, 1}, false);
+            kokkos_gate_svp.applyOperation("IsingXX", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("IsingXX", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -238,8 +240,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXX",
 
             auto scale =
                 kokkos_gntr_sv.applyGenerator("IsingXX", {0, 1}, false);
-            kokkos_gate_svp.applyIsingXX({0, 1}, false, {ep});
-            kokkos_gate_svm.applyIsingXX({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("IsingXX", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("IsingXX", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -309,9 +311,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXY",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorIsingXY({0, 1}, false);
-            kokkos_gate_svp.applyIsingXY({0, 1}, false, {ep});
-            kokkos_gate_svm.applyIsingXY({0, 1}, false, {-ep});
+            auto scale =
+                kokkos_gntr_sv.applyGenerator("IsingXY", {0, 1}, false);
+            kokkos_gate_svp.applyOperation("IsingXY", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("IsingXY", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -354,8 +357,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXY",
 
             auto scale =
                 kokkos_gntr_sv.applyGenerator("IsingXY", {0, 1}, false);
-            kokkos_gate_svp.applyIsingXY({0, 1}, false, {ep});
-            kokkos_gate_svm.applyIsingXY({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("IsingXY", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("IsingXY", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -425,9 +428,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingYY",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorIsingYY({0, 1}, false);
-            kokkos_gate_svp.applyIsingYY({0, 1}, false, {ep});
-            kokkos_gate_svm.applyIsingYY({0, 1}, false, {-ep});
+            auto scale =
+                kokkos_gntr_sv.applyGenerator("IsingYY", {0, 1}, false);
+            kokkos_gate_svp.applyOperation("IsingYY", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("IsingYY", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -470,8 +474,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingYY",
 
             auto scale =
                 kokkos_gntr_sv.applyGenerator("IsingYY", {0, 1}, false);
-            kokkos_gate_svp.applyIsingYY({0, 1}, false, {ep});
-            kokkos_gate_svm.applyIsingYY({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("IsingYY", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("IsingYY", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -541,9 +545,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingZZ",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorIsingZZ({0, 1}, false);
-            kokkos_gate_svp.applyIsingZZ({0, 1}, false, {ep});
-            kokkos_gate_svm.applyIsingZZ({0, 1}, false, {-ep});
+            auto scale =
+                kokkos_gntr_sv.applyGenerator("IsingZZ", {0, 1}, false);
+            kokkos_gate_svp.applyOperation("IsingZZ", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("IsingZZ", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -586,8 +591,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingZZ",
 
             auto scale =
                 kokkos_gntr_sv.applyGenerator("IsingZZ", {0, 1}, false);
-            kokkos_gate_svp.applyIsingZZ({0, 1}, false, {ep});
-            kokkos_gate_svm.applyIsingZZ({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("IsingZZ", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("IsingZZ", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -658,10 +663,12 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorControlledPhaseShift(
-                {0, 1}, false);
-            kokkos_gate_svp.applyControlledPhaseShift({0, 1}, false, {ep});
-            kokkos_gate_svm.applyControlledPhaseShift({0, 1}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("ControlledPhaseShift",
+                                                       {0, 1}, false);
+            kokkos_gate_svp.applyOperation("ControlledPhaseShift", {0, 1},
+                                           false, {ep});
+            kokkos_gate_svm.applyOperation("ControlledPhaseShift", {0, 1},
+                                           false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -704,8 +711,10 @@ TEMPLATE_TEST_CASE(
 
             auto scale = kokkos_gntr_sv.applyGenerator("ControlledPhaseShift",
                                                        {0, 1}, false);
-            kokkos_gate_svp.applyControlledPhaseShift({0, 1}, false, {ep});
-            kokkos_gate_svm.applyControlledPhaseShift({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("ControlledPhaseShift", {0, 1},
+                                           false, {ep});
+            kokkos_gate_svm.applyOperation("ControlledPhaseShift", {0, 1},
+                                           false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -775,9 +784,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRX",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorCRX({0, 1}, false);
-            kokkos_gate_svp.applyCRX({0, 1}, false, {ep});
-            kokkos_gate_svm.applyCRX({0, 1}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("CRX", {0, 1}, false);
+            kokkos_gate_svp.applyOperation("CRX", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("CRX", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -819,8 +828,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRX",
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
             auto scale = kokkos_gntr_sv.applyGenerator("CRX", {0, 1}, false);
-            kokkos_gate_svp.applyCRX({0, 1}, false, {ep});
-            kokkos_gate_svm.applyCRX({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("CRX", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("CRX", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -890,9 +899,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRY",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorCRY({0, 1}, false);
-            kokkos_gate_svp.applyCRY({0, 1}, false, {ep});
-            kokkos_gate_svm.applyCRY({0, 1}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("CRY", {0, 1}, false);
+            kokkos_gate_svp.applyOperation("CRY", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("CRY", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -934,8 +943,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRY",
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
             auto scale = kokkos_gntr_sv.applyGenerator("CRY", {0, 1}, false);
-            kokkos_gate_svp.applyCRY({0, 1}, false, {ep});
-            kokkos_gate_svm.applyCRY({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("CRY", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("CRY", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1005,9 +1014,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRZ",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorCRZ({0, 1}, false);
-            kokkos_gate_svp.applyCRZ({0, 1}, false, {ep});
-            kokkos_gate_svm.applyCRZ({0, 1}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("CRZ", {0, 1}, false);
+            kokkos_gate_svp.applyOperation("CRZ", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("CRZ", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1049,8 +1058,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRZ",
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
             auto scale = kokkos_gntr_sv.applyGenerator("CRZ", {0, 1}, false);
-            kokkos_gate_svp.applyCRZ({0, 1}, false, {ep});
-            kokkos_gate_svm.applyCRZ({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("CRZ", {0, 1}, false, {ep});
+            kokkos_gate_svm.applyOperation("CRZ", {0, 1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1120,9 +1129,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorMultiRZ",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorMultiRZ({0}, false);
-            kokkos_gate_svp.applyMultiRZ({0}, false, {ep});
-            kokkos_gate_svm.applyMultiRZ({0}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("MultiRZ", {0}, false);
+            kokkos_gate_svp.applyOperation("MultiRZ", {0}, false, {ep});
+            kokkos_gate_svm.applyOperation("MultiRZ", {0}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1164,8 +1173,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorMultiRZ",
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
             auto scale = kokkos_gntr_sv.applyGenerator("MultiRZ", {0}, false);
-            kokkos_gate_svp.applyMultiRZ({0}, false, {ep});
-            kokkos_gate_svm.applyMultiRZ({0}, false, {-ep});
+            kokkos_gate_svp.applyOperation("MultiRZ", {0}, false, {ep});
+            kokkos_gate_svm.applyOperation("MultiRZ", {0}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1235,9 +1244,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRX",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorRX({1}, false);
-            kokkos_gate_svp.applyRX({1}, false, {ep});
-            kokkos_gate_svm.applyRX({1}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("RX", {1}, false);
+            kokkos_gate_svp.applyOperation("RX", {1}, false, {ep});
+            kokkos_gate_svm.applyOperation("RX", {1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1279,8 +1288,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRX",
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
             auto scale = kokkos_gntr_sv.applyGenerator("RX", {1}, false);
-            kokkos_gate_svp.applyRX({1}, false, {ep});
-            kokkos_gate_svm.applyRX({1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("RX", {1}, false, {ep});
+            kokkos_gate_svm.applyOperation("RX", {1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1351,9 +1360,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRY",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorRY({1}, false);
-            kokkos_gate_svp.applyRY({1}, false, {ep});
-            kokkos_gate_svm.applyRY({1}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("RY", {1}, false);
+            kokkos_gate_svp.applyOperation("RY", {1}, false, {ep});
+            kokkos_gate_svm.applyOperation("RY", {1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1395,8 +1404,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRY",
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
             auto scale = kokkos_gntr_sv.applyGenerator("RY", {1}, false);
-            kokkos_gate_svp.applyRY({1}, false, {ep});
-            kokkos_gate_svm.applyRY({1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("RY", {1}, false, {ep});
+            kokkos_gate_svm.applyOperation("RY", {1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1466,9 +1475,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRZ",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorRZ({1}, false);
-            kokkos_gate_svp.applyRZ({1}, false, {ep});
-            kokkos_gate_svm.applyRZ({1}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("RZ", {1}, false);
+            kokkos_gate_svp.applyOperation("RZ", {1}, false, {ep});
+            kokkos_gate_svm.applyOperation("RZ", {1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1510,8 +1519,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRZ",
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
             auto scale = kokkos_gntr_sv.applyGenerator("RZ", {1}, false);
-            kokkos_gate_svp.applyRZ({1}, false, {ep});
-            kokkos_gate_svm.applyRZ({1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("RZ", {1}, false, {ep});
+            kokkos_gate_svm.applyOperation("RZ", {1}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1581,10 +1590,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorSingleExcitation",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale =
-                kokkos_gntr_sv.applyGeneratorSingleExcitation({0, 1}, false);
-            kokkos_gate_svp.applySingleExcitation({0, 1}, false, {ep});
-            kokkos_gate_svm.applySingleExcitation({0, 1}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("SingleExcitation",
+                                                       {0, 1}, false);
+            kokkos_gate_svp.applyOperation("SingleExcitation", {0, 1}, false,
+                                           {ep});
+            kokkos_gate_svm.applyOperation("SingleExcitation", {0, 1}, false,
+                                           {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1627,8 +1638,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorSingleExcitation",
 
             auto scale = kokkos_gntr_sv.applyGenerator("SingleExcitation",
                                                        {0, 1}, false);
-            kokkos_gate_svp.applySingleExcitation({0, 1}, false, {ep});
-            kokkos_gate_svm.applySingleExcitation({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("SingleExcitation", {0, 1}, false,
+                                           {ep});
+            kokkos_gate_svm.applyOperation("SingleExcitation", {0, 1}, false,
+                                           {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1699,10 +1712,12 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorSingleExcitationMinus(
-                {0, 1}, false);
-            kokkos_gate_svp.applySingleExcitationMinus({0, 1}, false, {ep});
-            kokkos_gate_svm.applySingleExcitationMinus({0, 1}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("SingleExcitationMinus",
+                                                       {0, 1}, false);
+            kokkos_gate_svp.applyOperation("SingleExcitationMinus", {0, 1},
+                                           false, {ep});
+            kokkos_gate_svm.applyOperation("SingleExcitationMinus", {0, 1},
+                                           false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1745,8 +1760,10 @@ TEMPLATE_TEST_CASE(
 
             auto scale = kokkos_gntr_sv.applyGenerator("SingleExcitationMinus",
                                                        {0, 1}, false);
-            kokkos_gate_svp.applySingleExcitationMinus({0, 1}, false, {ep});
-            kokkos_gate_svm.applySingleExcitationMinus({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("SingleExcitationMinus", {0, 1},
+                                           false, {ep});
+            kokkos_gate_svm.applyOperation("SingleExcitationMinus", {0, 1},
+                                           false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1817,10 +1834,12 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorSingleExcitationPlus(
-                {0, 1}, false);
-            kokkos_gate_svp.applySingleExcitationPlus({0, 1}, false, {ep});
-            kokkos_gate_svm.applySingleExcitationPlus({0, 1}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("SingleExcitationPlus",
+                                                       {0, 1}, false);
+            kokkos_gate_svp.applyOperation("SingleExcitationPlus", {0, 1},
+                                           false, {ep});
+            kokkos_gate_svm.applyOperation("SingleExcitationPlus", {0, 1},
+                                           false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1863,8 +1882,10 @@ TEMPLATE_TEST_CASE(
 
             auto scale = kokkos_gntr_sv.applyGenerator("SingleExcitationPlus",
                                                        {0, 1}, false);
-            kokkos_gate_svp.applySingleExcitationPlus({0, 1}, false, {ep});
-            kokkos_gate_svm.applySingleExcitationPlus({0, 1}, false, {-ep});
+            kokkos_gate_svp.applyOperation("SingleExcitationPlus", {0, 1},
+                                           false, {ep});
+            kokkos_gate_svm.applyOperation("SingleExcitationPlus", {0, 1},
+                                           false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1933,10 +1954,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorDoubleExcitation",
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorDoubleExcitation(
-                {0, 1, 2, 3}, false);
-            kokkos_gate_svp.applyDoubleExcitation({0, 1, 2, 3}, false, {ep});
-            kokkos_gate_svm.applyDoubleExcitation({0, 1, 2, 3}, false, {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("DoubleExcitation",
+                                                       {0, 1, 2, 3}, false);
+            kokkos_gate_svp.applyOperation("DoubleExcitation", {0, 1, 2, 3},
+                                           false, {ep});
+            kokkos_gate_svm.applyOperation("DoubleExcitation", {0, 1, 2, 3},
+                                           false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -1979,8 +2002,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorDoubleExcitation",
 
             auto scale = kokkos_gntr_sv.applyGenerator("DoubleExcitation",
                                                        {0, 1, 2, 3}, false);
-            kokkos_gate_svp.applyDoubleExcitation({0, 1, 2, 3}, false, {ep});
-            kokkos_gate_svm.applyDoubleExcitation({0, 1, 2, 3}, false, {-ep});
+            kokkos_gate_svp.applyOperation("DoubleExcitation", {0, 1, 2, 3},
+                                           false, {ep});
+            kokkos_gate_svm.applyOperation("DoubleExcitation", {0, 1, 2, 3},
+                                           false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -2051,12 +2076,12 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorDoubleExcitationMinus(
-                {0, 1, 2, 3}, false);
-            kokkos_gate_svp.applyDoubleExcitationMinus({0, 1, 2, 3}, false,
-                                                       {ep});
-            kokkos_gate_svm.applyDoubleExcitationMinus({0, 1, 2, 3}, false,
-                                                       {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("DoubleExcitationMinus",
+                                                       {0, 1, 2, 3}, false);
+            kokkos_gate_svp.applyOperation("DoubleExcitationMinus",
+                                           {0, 1, 2, 3}, false, {ep});
+            kokkos_gate_svm.applyOperation("DoubleExcitationMinus",
+                                           {0, 1, 2, 3}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -2099,10 +2124,10 @@ TEMPLATE_TEST_CASE(
 
             auto scale = kokkos_gntr_sv.applyGenerator("DoubleExcitationMinus",
                                                        {0, 1, 2, 3}, false);
-            kokkos_gate_svp.applyDoubleExcitationMinus({0, 1, 2, 3}, false,
-                                                       {ep});
-            kokkos_gate_svm.applyDoubleExcitationMinus({0, 1, 2, 3}, false,
-                                                       {-ep});
+            kokkos_gate_svp.applyOperation("DoubleExcitationMinus",
+                                           {0, 1, 2, 3}, false, {ep});
+            kokkos_gate_svm.applyOperation("DoubleExcitationMinus",
+                                           {0, 1, 2, 3}, false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -2173,12 +2198,12 @@ TEMPLATE_TEST_CASE(
             kokkos_gate_svp.HostToDevice(ini_st.data(), ini_st.size());
             kokkos_gate_svm.HostToDevice(ini_st.data(), ini_st.size());
 
-            auto scale = kokkos_gntr_sv.applyGeneratorDoubleExcitationPlus(
-                {0, 1, 2, 3}, false);
-            kokkos_gate_svp.applyDoubleExcitationPlus({0, 1, 2, 3}, false,
-                                                      {ep});
-            kokkos_gate_svm.applyDoubleExcitationPlus({0, 1, 2, 3}, false,
-                                                      {-ep});
+            auto scale = kokkos_gntr_sv.applyGenerator("DoubleExcitationPlus",
+                                                       {0, 1, 2, 3}, false);
+            kokkos_gate_svp.applyOperation("DoubleExcitationPlus", {0, 1, 2, 3},
+                                           false, {ep});
+            kokkos_gate_svm.applyOperation("DoubleExcitationPlus", {0, 1, 2, 3},
+                                           false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
@@ -2221,10 +2246,10 @@ TEMPLATE_TEST_CASE(
 
             auto scale = kokkos_gntr_sv.applyGenerator("DoubleExcitationPlus",
                                                        {0, 1, 2, 3}, false);
-            kokkos_gate_svp.applyDoubleExcitationPlus({0, 1, 2, 3}, false,
-                                                      {ep});
-            kokkos_gate_svm.applyDoubleExcitationPlus({0, 1, 2, 3}, false,
-                                                      {-ep});
+            kokkos_gate_svp.applyOperation("DoubleExcitationPlus", {0, 1, 2, 3},
+                                           false, {ep});
+            kokkos_gate_svm.applyOperation("DoubleExcitationPlus", {0, 1, 2, 3},
+                                           false, {-ep});
 
             kokkos_gntr_sv.DeviceToHost(result_gntr_sv.data(),
                                         result_gntr_sv.size());
