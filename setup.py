@@ -24,6 +24,7 @@ default_backend = "lightning_qubit"
 supported_backends = {"lightning_kokkos", "lightning_qubit"}
 supported_backends.update({sb.replace("_", ".") for sb in supported_backends})
 
+
 def get_backend():
     """Return backend.
 
@@ -171,19 +172,17 @@ with open("README.md", encoding="utf-8") as f:
     readme = f.read()
 
 requirements = [
-    "pennylane>=0.30",
-    "jax<=0.4.13",
-    "jaxlib<=0.4.13",
+    "pennylane @ git+https://github.com/PennyLaneAI/pennylane.git@feature/lightning_ready#egg=pennylane",
 ]
 
 suffix = backend.replace("lightning_", "")
 suffix = suffix[0].upper() + suffix[1:]
-pennylane_plugins = [f"lightning.qubit = pennylane_lightning:LightningQubit",
-                     f"lightning.kokkos = pennylane_lightning:LightningKokkos"]
-# info = {
-#     "name": f"PennyLane-Lightning-{suffix}",
+pennylane_plugins = [
+    f"lightning.qubit = pennylane_lightning:LightningQubit",
+    f"lightning.kokkos = pennylane_lightning:LightningKokkos",
+]
 info = {
-    "name": f"PennyLane-Lightning",
+    "name": f"PennyLane-Lightning-{suffix}",
     "version": version,
     "maintainer": "Xanadu Inc.",
     "maintainer_email": "software@xanadu.ai",
