@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+#include <span>
+
 #include "AdjointJacobianBase.hpp"
 #include "ObservablesKokkos.hpp"
 
@@ -48,16 +50,14 @@ class AdjointJacobian final
      * @param sv2 Statevector |sv2>
      * @param jac Jacobian receiving the values.
      * @param scaling_coeff Generator coefficient for given gate derivative.
-     * @param obs_index Observable index position of Jacobian to update.
-     * @param param_index Parameter index position of Jacobian to update.
+     * @param idx Linear Jacobian index.
      */
     inline void updateJacobian(StateVectorT &sv1, StateVectorT &sv2,
-                               std::vector<std::vector<PrecisionT>> &jac,
-                               PrecisionT scaling_coeff, size_t obs_index,
-                               size_t param_index) {
-        jac[obs_index][param_index] = -2 * scaling_coeff *
-                                      getImagOfComplexInnerProduct<PrecisionT>(
-                                          sv1.getView(), sv2.getView());
+                               std::span<PrecisionT> &jac,
+                               PrecisionT scaling_coeff, size_t idx) {
+        jac[idx] = -2 * scaling_coeff *
+                   getImagOfComplexInnerProduct<PrecisionT>(sv1.getView(),
+                                                            sv2.getView());
     }
 
   public:
@@ -86,6 +86,7 @@ class AdjointJacobian final
                          const JacobianData<StateVectorT> &jd,
                          bool apply_operations = false) {
         const OpsData<StateVectorT> &ops = jd.getOperations();
+        const std::vector<std::string> &ops_name = ops.getOpsName();
 
         const auto &obs = jd.getObservables();
         const size_t num_observables = obs.size();
@@ -93,13 +94,11 @@ class AdjointJacobian final
         // We can assume the trainable params are sorted (from Python)
         const std::vector<size_t> &tp = jd.getTrainableParams();
         const size_t tp_size = tp.size();
+        const size_t num_param_ops = ops.getNumParOps();
 
         if (!jd.hasTrainableParams()) {
             return;
         }
-
-        StateVectorKokkos<PrecisionT> ref_data(jd.getPtrStateVec(),
-                                               jd.getSizeStateVec());
 
         PL_ABORT_IF_NOT(
             jac.size() == tp_size * num_observables,
@@ -107,62 +106,15 @@ class AdjointJacobian final
             "the number of trainable parameters times the number of "
             "observables provided.");
 
-        std::vector<std::vector<PrecisionT>> jac_data(
-            num_observables, std::vector<PrecisionT>(tp_size, 0.0));
-
-        adjointJacobian(ref_data, jac_data, obs, ops, tp, apply_operations);
-
-        for (size_t obs_idx = 0; obs_idx < num_observables; obs_idx++) {
-            const size_t mat_row_idx = obs_idx * tp_size;
-            for (size_t op_idx = 0; op_idx < tp_size; op_idx++) {
-                jac[mat_row_idx + op_idx] = jac_data[obs_idx][op_idx];
-            }
-        }
-    }
-    /**
-     * @brief Calculates the Jacobian for the statevector for the selected set
-     * of parametric gates.
-     *
-     * For the statevector data associated with `psi` of length `num_elements`,
-     * we make internal copies to a `%StateVectorT` object, with
-     * one per required observable. The `operations` will be applied to the
-     * internal statevector copies, with the operation indices participating in
-     * the gradient calculations given in `trainableParams`, and the overall
-     * number of parameters for the gradient calculation provided within
-     * `num_params`. The resulting row-major ordered `jac` matrix representation
-     * will be of size `trainableParams.size() * observables.size()`.
-     *
-     * @param ref_data Pointer to the statevector data.
-     * @param length Length of the statevector data.
-     * @param jac Preallocated vector for Jacobian data results.
-     * @param obs ObservableKokkos for which to calculate Jacobian.
-     * @param ops Operations used to create given state.
-     * @param trainableParams List of parameters participating in Jacobian
-     * calculation.
-     * @param apply_operations Indicate whether to apply operations to psi prior
-     * to calculation.
-     */
-    void adjointJacobian(
-        const StateVectorT &ref_data, std::vector<std::vector<PrecisionT>> &jac,
-        const std::vector<std::shared_ptr<Observable<StateVectorT>>> &obs,
-        const OpsData<StateVectorT> &ops,
-        const std::vector<size_t> &trainableParams,
-        bool apply_operations = false) {
-        PL_ABORT_IF(trainableParams.empty(),
-                    "No trainable parameters provided.");
-
-        const std::vector<std::string> &ops_name = ops.getOpsName();
-        const size_t num_observables = obs.size();
-
-        const size_t tp_size = trainableParams.size();
-        const size_t num_param_ops = ops.getNumParOps();
-
         // Track positions within par and non-par operations
         size_t trainableParamNumber = tp_size - 1;
         size_t current_param_idx =
             num_param_ops - 1; // total number of parametric ops
-        auto tp_it = trainableParams.rbegin();
-        const auto tp_rend = trainableParams.rend();
+        auto tp_it = tp.rbegin();
+        const auto tp_rend = tp.rend();
+
+        StateVectorKokkos<PrecisionT> ref_data(jd.getPtrStateVec(),
+                                               jd.getSizeStateVec());
 
         // Create $U_{1:p}\vert \lambda \rangle$
         StateVectorT lambda(ref_data.getNumQubits());
@@ -202,12 +154,13 @@ class AdjointJacobian final
                                              ops.getOpsWires()[op_idx],
                                              !ops.getOpsInverses()[op_idx]) *
                         (ops.getOpsInverses()[op_idx] ? -1 : 1);
-
                     for (size_t obs_idx = 0; obs_idx < num_observables;
                          obs_idx++) {
+                        const size_t idx =
+                            trainableParamNumber + obs_idx * tp_size;
+                        // trainableParamNumber * num_observables + obs_idx;
                         updateJacobian(H_lambda[obs_idx], mu, jac,
-                                       scalingFactor, obs_idx,
-                                       trainableParamNumber);
+                                       scalingFactor, idx);
                     }
                     trainableParamNumber--;
                     ++tp_it;
