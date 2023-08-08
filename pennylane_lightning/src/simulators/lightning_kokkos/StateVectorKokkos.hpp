@@ -18,7 +18,6 @@
 
 #pragma once
 #include <cstdlib>
-#include <map>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -783,14 +782,18 @@ class StateVectorKokkos final
     }
 
   private:
-    std::map<std::string, GateOperation> gates_indices_;
-    std::map<std::string, GeneratorOperation> generators_indices_;
+    std::unordered_map<std::string, GateOperation> gates_indices_;
+    std::unordered_map<std::string, GeneratorOperation> generators_indices_;
 
     size_t num_qubits_;
     std::mutex init_mutex_;
     std::unique_ptr<KokkosVector> data_;
     inline static bool is_exit_reg_ = false;
     // clang-format off
+    /**
+    * @brief Register gate operations in the gates_indices_ attribute: 
+    *        an unordered_map mapping strings to GateOperation enumeration keywords.
+    */
     void init_gates_indices_() {
         gates_indices_["PauliX"]                = GateOperation::PauliX;
         gates_indices_["PauliY"]                = GateOperation::PauliY;
@@ -826,6 +829,10 @@ class StateVectorKokkos final
         gates_indices_["CSWAP"]                 = GateOperation::CSWAP;
         gates_indices_["Toffoli"]               = GateOperation::Toffoli;
     }
+    /**
+    * @brief Register generator operations in the generators_indices_ attribute:
+    *        an unordered_map mapping strings to GateOperation enumeration keywords.
+    */
     void init_generators_indices_() {
         generators_indices_["RX"]                    = GeneratorOperation::RX;
         generators_indices_["RY"]                    = GeneratorOperation::RY;
