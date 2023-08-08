@@ -100,6 +100,7 @@ jobs:
       - name: Install backend device
         run: |
           cd main
+          pip uninstall -y pennylane_lightning
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
 
@@ -201,6 +202,7 @@ jobs:
       - name: Install backend device
         run: |
           cd main
+          pip uninstall -y pennylane_lightning
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_KOKKOS=OFF -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
 
@@ -346,6 +348,7 @@ jobs:
         if: ${{ matrix.pl_backend != 'all'}}
         run: |
           cd main
+          pip uninstall -y pennylane_lightning
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
 
@@ -363,9 +366,11 @@ jobs:
         if: ${{ matrix.pl_backend == 'all' }}
         run: |
           cd main
+          pip uninstall -y pennylane_lightning
           CMAKE_ARGS="-DPL_BACKEND="lightning_qubit" -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
           rm -rf build
+          pip uninstall -y pennylane_lightning
           CMAKE_ARGS="-DPL_BACKEND="lightning_kokkos" -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
 
@@ -505,6 +510,7 @@ jobs:
       - name: Install backend device
         run: |
           cd main
+          pip uninstall -y pennylane_lightning
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_BLAS=ON -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
           pip install -e . -vv
 
