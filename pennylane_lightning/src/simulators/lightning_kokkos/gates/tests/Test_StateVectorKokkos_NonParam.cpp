@@ -13,6 +13,7 @@
 // limitations under the License.
 #include <algorithm>
 #include <complex>
+#include <cstddef>
 #include <limits>
 #include <type_traits>
 #include <utility>
@@ -35,6 +36,7 @@ using namespace Pennylane::LightningKokkos;
 using namespace Pennylane::Gates; // getHadamard, getCNOT,
                                   // getToffoli
 using namespace Pennylane::Util;
+using std::size_t;
 } // namespace
 /// @endcond
 

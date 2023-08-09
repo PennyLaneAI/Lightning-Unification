@@ -13,6 +13,7 @@
 // limitations under the License.
 #include <algorithm>
 #include <complex>
+#include <cstddef>
 #include <limits>
 #include <type_traits>
 #include <utility>
@@ -35,6 +36,7 @@ namespace {
 using namespace Pennylane::LightningKokkos;
 using namespace Pennylane::Gates;
 using Pennylane::Util::exp2;
+using std::size_t;
 } // namespace
 /// @endcond
 

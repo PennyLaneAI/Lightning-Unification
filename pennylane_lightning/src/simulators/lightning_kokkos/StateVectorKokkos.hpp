@@ -17,6 +17,7 @@
  */
 
 #pragma once
+#include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <unordered_map>
@@ -41,6 +42,7 @@ using Pennylane::Util::exp2;
 using Pennylane::Util::isPerfectPowerOf2;
 using Pennylane::Util::log2;
 using namespace Pennylane::LightningKokkos::Functors;
+using std::size_t;
 } // namespace
 /// @endcond
 

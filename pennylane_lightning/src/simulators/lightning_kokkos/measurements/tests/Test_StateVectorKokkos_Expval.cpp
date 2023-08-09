@@ -13,6 +13,7 @@
 // limitations under the License.
 #include <algorithm>
 #include <complex>
+#include <cstddef>
 #include <limits>
 #include <type_traits>
 #include <utility>
@@ -36,12 +37,13 @@ using namespace Pennylane::LightningKokkos::Measures;
 using namespace Pennylane::LightningKokkos::Observables;
 using Pennylane::Util::createNonTrivialState;
 using Pennylane::Util::write_CSR_vectors;
+using std::size_t;
 } // namespace
 /// @endcond
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueIdentity",
                    "[StateVectorKokkosManaged_Expval]", float, double) {
-    const std::size_t num_qubits = 3;
+    const size_t num_qubits = 3;
     auto ONE = TestType(1);
     StateVectorKokkos<TestType> kokkos_sv{num_qubits};
     auto m = Measurements(kokkos_sv);
@@ -67,7 +69,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueIdentity",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliX",
                    "[StateVectorKokkosManaged_Expval]", float, double) {
     {
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         auto ZERO = TestType(0);
         auto ONE = TestType(1);
@@ -141,7 +143,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliX",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliY",
                    "[StateVectorKokkosManaged_Expval]", float, double) {
     {
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         auto ZERO = TestType(0);
         auto ONE = TestType(1);
@@ -237,7 +239,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliZ",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueHadamard",
                    "[StateVectorKokkosManaged_Expval]", float, double) {
     {
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
         auto INVSQRT2 = TestType(0.707106781186547524401);
 
         SECTION("Apply directly") {
@@ -268,7 +270,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueSingleQubitOp",
                    "[StateVectorKokkosManaged_Expval]", float, double) {
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         auto INVSQRT2 = TestType(0.707106781186547524401);
 
@@ -311,7 +313,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
                    "[StateVectorKokkosManaged_Expval]", float, double) {
     using ComplexT = StateVectorKokkos<TestType>::ComplexT;
     {
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
         auto INVSQRT2 = TestType(0.707106781186547524401);
 
         SECTION("Apply directly") {
@@ -361,7 +363,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
 TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
                    "[StateVectorKokkos_Expval]", float, double) {
     using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-    const std::size_t num_qubits = 3;
+    const size_t num_qubits = 3;
     SECTION("GetExpectationIdentity") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
         auto m = Measurements(kokkos_sv);
