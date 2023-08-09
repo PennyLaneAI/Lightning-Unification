@@ -18,23 +18,11 @@ set(LQUBIT_FILES    StateVectorLQubitManaged.cpp
 
 add_library(lightning_qubit STATIC ${LQUBIT_FILES})
 
-option(ENABLE_KOKKOS "Enable Kokkos" ON)
 option(ENABLE_BLAS "Enable BLAS" OFF)
 option(ENABLE_GATE_DISPATCHER "Enable gate kernel dispatching on AVX/AVX2/AVX512" ON)
 
 # Inform the compiler that this device is enabled.
 target_compile_options(lightning_compile_options INTERFACE "-D_ENABLE_PLQUBIT=1")
-
-if(ENABLE_KOKKOS)
-    # Include macro and functions supporting Kokkos libraries.
-    include("${CMAKE_SOURCE_DIR}/cmake/support_kokkos.cmake")
-
-    message(STATUS "ENABLE_KOKKOS is ON.")
-    target_compile_options(lightning_compile_options INTERFACE "-D_ENABLE_KOKKOS=1")
-    FindKokkosAndKokkosKernels(lightning_external_libs)
-else()
-    message(STATUS "ENABLE_KOKKOS is OFF.")
-endif()
 
 if(ENABLE_BLAS)
     message(STATUS "ENABLE_BLAS is ON.")

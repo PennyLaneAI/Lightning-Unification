@@ -29,10 +29,10 @@
 #include <unordered_map>
 #include <vector>
 
-#include "KokkosSparse.hpp"
 #include "LinearAlgebra.hpp"
 #include "MeasurementsBase.hpp"
 #include "Observables.hpp"
+#include "SparseLinAlg.hpp"
 #include "StateVectorLQubitManaged.hpp"
 #include "StateVectorLQubitRaw.hpp"
 #include "TransitionKernels.hpp"
