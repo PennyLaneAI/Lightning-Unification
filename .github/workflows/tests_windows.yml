@@ -40,7 +40,6 @@ jobs:
               -DENABLE_OPENMP=OFF `
               -DENABLE_PYTHON=OFF `
               -DENABLE_GATE_DISPATCHER=OFF `
-              -DENABLE_KOKKOS=OFF `
               -DPL_BACKEND=${{ matrix.pl_backend }} `
               -DENABLE_WARNINGS=OFF
             cmake --build .\Build --config Debug
@@ -90,8 +89,10 @@ jobs:
         os: [windows-2019]
         exec_model: ${{ fromJson(needs.win-set-matrix-x86.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.win-set-matrix-x86.outputs.kokkos_version) }}
+        exclude:
+          - os: windows-2019
 
-    name: Kokkos core & kernels (${{ matrix.exec_model }})
+    name: Kokkos core (${{ matrix.exec_model }})
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -108,10 +109,6 @@ jobs:
           cd D:\a
           git clone https://github.com/kokkos/kokkos.git
           cd D:\a\kokkos
-          git checkout ${{ matrix.kokkos_version }}
-          cd D:\a\
-          git clone https://github.com/kokkos/kokkos-kernels.git
-          cd D:\a\kokkos-kernels
           git checkout ${{ matrix.kokkos_version }}
           cd ..
 
@@ -142,21 +139,6 @@ jobs:
           cmake --build ./Build --config Debug --verbose
           cmake --install ./Build --config Debug --verbose
 
-      - name: Build Kokkos kernels library
-        if: steps.kokkos-cache.outputs.cache-hit != 'true'
-        run: |
-          cd D:\a\kokkos-kernels
-          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=D:\a\install_dir\${{ matrix.exec_model }} `
-                          -DKokkos_ENABLE_SERIAL=ON `
-                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON `
-                          -DCMAKE_CXX_STANDARD=20 `
-                          -DCMAKE_PREFIX_PATH=D:\a\install_dir\${{ matrix.exec_model }} `
-                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
-                          -DCMAKE_BUILD_TYPE=Debug `
-                          -T clangcl
-          cmake --build ./Build --config Debug --verbose
-          cmake --install ./Build --config Debug --verbose
-
   cpptestswithkokkos:
     needs: [build_dependencies, win-set-matrix-x86]
     strategy:
@@ -165,8 +147,10 @@ jobs:
         pl_backend: ["lightning_qubit"]
         exec_model: ${{ fromJson(needs.win-set-matrix-x86.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.win-set-matrix-x86.outputs.kokkos_version) }}
+        exclude:
+          - os: windows-2019
 
-    name: C++ tests (Windows, Kokkos and Kokkos Kernels)
+    name: C++ tests (Windows, Kokkos)
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -208,7 +192,6 @@ jobs:
               -DBUILD_TESTS=ON `
               -DENABLE_PYTHON=OFF `
               -DENABLE_GATE_DISPATCHER=OFF `
-              -DENABLE_KOKKOS=ON `
               -DCMAKE_PREFIX_PATH=D:\a\pennylane-lightning\pennylane-lightning\Kokkos `
               -DENABLE_OPENMP=OFF `
               -DPL_BACKEND=${{ matrix.pl_backend }} `

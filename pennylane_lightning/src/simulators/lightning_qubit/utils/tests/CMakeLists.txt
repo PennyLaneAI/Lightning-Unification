@@ -27,7 +27,7 @@ target_sources(lightning_qubit_utils_tests INTERFACE runner_lightning_qubit_util
 ################################################################################
 # Define targets
 ################################################################################
-set(TEST_SOURCES    Test_KokkosSparse.cpp
+set(TEST_SOURCES    Test_SparseLinAlg.cpp
                     Test_LinearAlgebra.cpp
                     )
 

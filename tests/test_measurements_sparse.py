@@ -32,28 +32,6 @@ class TestSparseExpval:
     def dev(self, request):
         return qml.device(device_name, wires=2, c_dtype=request.param)
 
-    @pytest.mark.skipif(
-        ld._backend_info()["USE_SPMV"],
-        reason="Sparse matrix-vector product unavailable.",
-    )
-    def test_create_device_with_unsupported_dtype(self, dev):
-        @qml.qnode(dev, diff_method="parameter-shift")
-        def circuit():
-            qml.RX(0.4, wires=[0])
-            qml.RY(-0.2, wires=[1])
-            return qml.expval(
-                qml.SparseHamiltonian(
-                    qml.Hamiltonian([1], [qml.PauliX(0) @ qml.Identity(1)]).sparse_matrix(),
-                    wires=[0, 1],
-                )
-            )
-
-        with pytest.raises(
-            NotImplementedError,
-            match="The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels.",
-        ):
-            circuit()
-
     @pytest.mark.parametrize(
         "cases",
         [
@@ -64,10 +42,6 @@ class TestSparseExpval:
             [qml.PauliZ(0) @ qml.Identity(1), 0.92106099400288520, 0.151646673679351807],
             [qml.Identity(0) @ qml.PauliZ(1), 0.98006657784124170, 0.039469480514526367],
         ],
-    )
-    @pytest.mark.skipif(
-        not ld._backend_info()["USE_SPMV"],
-        reason="Sparse matrix-vector product available.",
     )
     def test_sparse_Pauli_words(self, cases, tol, dev):
         """Test expval of some simple sparse Hamiltonian"""
@@ -132,10 +106,6 @@ class TestSparseExpvalQChem:
                 excitations,
             ],
         ],
-    )
-    @pytest.mark.skipif(
-        not ld._backend_info()["USE_SPMV"],
-        reason="Sparse matrix-vector product unavailable.",
     )
     def test_sparse_Pauli_words(self, qubits, wires, H_sparse, hf_state, excitations, tol, dev):
         """Test expval of some simple sparse Hamiltonian"""
