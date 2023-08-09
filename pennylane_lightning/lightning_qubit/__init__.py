@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Top level PennyLane-Lightning module."""
+"""PennyLane lightning qubit module."""
 
-from ._version import __version__
-
-from .lightning_kokkos import LightningKokkos
 from .lightning_qubit import LightningQubit

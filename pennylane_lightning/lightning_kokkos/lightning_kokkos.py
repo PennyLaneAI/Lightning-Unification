@@ -19,7 +19,7 @@ interfaces with C++ for fast linear algebra calculations.
 from warnings import warn
 import numpy as np
 
-from .lightning_base import LightningBase, LightningBaseFallBack, _chunk_iterable
+from ..lightning_base import LightningBase, LightningBaseFallBack, _chunk_iterable
 
 try:
     # pylint: disable=import-error, no-name-in-module
@@ -60,7 +60,7 @@ if LK_CPP_BINARY_AVAILABLE:
 
     import pennylane as qml
 
-    from ._version import __version__
+    from .._version import __version__
 
     # pylint: disable=import-error, no-name-in-module
     from .lightning_kokkos_ops.algorithms import (
