@@ -178,8 +178,8 @@ requirements = [
 suffix = backend.replace("lightning_", "")
 suffix = suffix[0].upper() + suffix[1:]
 pennylane_plugins = [
-    f"lightning.qubit = pennylane_lightning:LightningQubit",
-    f"lightning.kokkos = pennylane_lightning:LightningKokkos",
+    "lightning.qubit = pennylane_lightning:LightningQubit",
+    "lightning.kokkos = pennylane_lightning:LightningKokkos",
 ]
 info = {
     "name": f"PennyLane-Lightning-{suffix}",
@@ -204,7 +204,7 @@ info = {
     "install_requires": requirements,
     "ext_modules": []
     if os.environ.get("SKIP_COMPILATION", False)
-    else [CMakeExtension(backend + "_ops")],
+    else [CMakeExtension(f"{backend}_ops")],
     "cmdclass": {"build_ext": CMakeBuild},
     "ext_package": "pennylane_lightning",
 }
