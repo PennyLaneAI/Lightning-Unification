@@ -19,7 +19,7 @@ interfaces with C++ for fast linear algebra calculations.
 from warnings import warn
 import numpy as np
 
-from ..core.lightning_base import LightningBase, LightningBaseFallBack, _chunk_iterable
+from ..lightning_core.lightning_base import LightningBase, LightningBaseFallBack, _chunk_iterable
 
 try:
     # pylint: disable=import-error, no-name-in-module
@@ -57,7 +57,7 @@ if LQ_CPP_BINARY_AVAILABLE:
 
     import pennylane as qml
 
-    from ..core._version import __version__
+    from ..lightning_core._version import __version__
 
     # pylint: disable=import-error, no-name-in-module
     from ..lightning_qubit_ops.algorithms import (
@@ -69,7 +69,7 @@ if LQ_CPP_BINARY_AVAILABLE:
         VectorJacobianProductC128,
     )
 
-    from ..core._serialize import QuantumScriptSerializer
+    from ..lightning_core._serialize import QuantumScriptSerializer
 
     allowed_operations = {
         "Identity",
@@ -430,19 +430,11 @@ if LQ_CPP_BINARY_AVAILABLE:
                 else MeasurementsC128(state_vector)
             )
             if observable.name == "SparseHamiltonian":
-                if self._backend_info()["USE_KOKKOS"]:
-                    # ensuring CSR sparse representation.
-
-                    csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
-                        copy=False
-                    )
-                    return measurements.expval(
-                        csr_hamiltonian.indptr,
-                        csr_hamiltonian.indices,
-                        csr_hamiltonian.data,
-                    )
-                raise NotImplementedError(
-                    "The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels."
+                csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
+                return measurements.expval(
+                    csr_hamiltonian.indptr,
+                    csr_hamiltonian.indices,
+                    csr_hamiltonian.data,
                 )
 
             if (
@@ -497,19 +489,11 @@ if LQ_CPP_BINARY_AVAILABLE:
             )
 
             if observable.name == "SparseHamiltonian":
-                if self._backend_info()["USE_KOKKOS"]:
-                    # ensuring CSR sparse representation.
-
-                    csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(
-                        copy=False
-                    )
-                    return measurements.var(
-                        csr_hamiltonian.indptr,
-                        csr_hamiltonian.indices,
-                        csr_hamiltonian.data,
-                    )
-                raise NotImplementedError(
-                    "The expval of a SparseHamiltonian requires Kokkos and Kokkos Kernels."
+                csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
+                return measurements.var(
+                    csr_hamiltonian.indptr,
+                    csr_hamiltonian.indices,
+                    csr_hamiltonian.data,
                 )
 
             if (
