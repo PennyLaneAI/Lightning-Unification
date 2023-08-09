@@ -29,7 +29,7 @@ function(set_pennylane_lightning_version VERSION_FILE_PATH)
     set(VERSION_STRING ${VERSION_STRING} PARENT_SCOPE)
 endfunction()
 
-set_pennylane_lightning_version(${PROJECT_SOURCE_DIR}/pennylane_lightning/_version.py)
+set_pennylane_lightning_version(${PROJECT_SOURCE_DIR}/pennylane_lightning/lightning_base/pennylane_lightning/lightning_base/_version.py)
 
 message(STATUS "pennylane_lightning version ${VERSION_STRING}")
 set(PROJECT_VERSION ${VERSION_STRING})
@@ -82,18 +82,20 @@ endif()
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # All CMakeLists.txt in subdirectories use pennylane_lightning_compile_options and pennylane_lightning_external_libs
-add_subdirectory(pennylane_lightning/src)
+add_subdirectory(pennylane_lightning/lightning_base/cpp/src)
+add_subdirectory(pennylane_lightning/lightning_qubit/cpp)
+#add_subdirectory(pennylane_lightning/lightning_kokkos/cpp)
 
 #####################################################
 # Maintain for dependent external package development
 #####################################################
 add_library(pennylane_lightning INTERFACE)
 
-target_include_directories(pennylane_lightning  INTERFACE "$<INSTALL_INTERFACE:${PROJECT_SOURCE_DIR}/pennylane_lightning/src;include>")
+target_include_directories(pennylane_lightning  INTERFACE "$<INSTALL_INTERFACE:${PROJECT_SOURCE_DIR}/pennylane_lightning/lightning_base/cpp/src;include;${PROJECT_SOURCE_DIR}/pennylane_lightning/lightning_lightning/cpp>")
 
 if(ENABLE_PYTHON)
     message(STATUS "ENABLE_PYTHON is ON.")
-    pybind11_add_module("${PL_BACKEND}_ops" "pennylane_lightning/src/bindings/Bindings.cpp")
+    pybind11_add_module("${PL_BACKEND}_ops" "pennylane_lightning/lightning_base/cpp/src/bindings/Bindings.cpp")
 
     target_link_libraries("${PL_BACKEND}_ops" PRIVATE   lightning_compile_options
                                                             lightning_external_libs
@@ -125,7 +127,7 @@ install(TARGETS pennylane_lightning
 )
 
 install(DIRECTORY
-    ${PROJECT_SOURCE_DIR}/pennylane_lightning/src
+    ${PROJECT_SOURCE_DIR}/pennylane_lightning/lightning_qubit/cpp
     DESTINATION include/pennylane_lightning
 )
 
