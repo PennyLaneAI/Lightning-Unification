@@ -22,6 +22,10 @@
 
 #include "Error.hpp"
 
+namespace {
+using KokkosExecSpace = Kokkos::DefaultExecutionSpace;
+}
+
 namespace Pennylane::LightningKokkos::Util {
 
 /**
@@ -176,15 +180,49 @@ template <class PrecisionT> struct getRealOfComplexInnerProductFunctor {
  * @return :math:`real(conj(x)*y)`
  */
 template <class PrecisionT>
-inline auto
-getRealOfComplexInnerProduct(Kokkos::View<Kokkos::complex<PrecisionT> *> x,
-                             Kokkos::View<Kokkos::complex<PrecisionT> *> y)
-    -> PrecisionT {
-
+PrecisionT getRealOfComplexInnerProduct(Kokkos::View<Kokkos::complex<PrecisionT> *> x,
+                                  Kokkos::View<Kokkos::complex<PrecisionT> *> y){
+    // printf("\nCall PL_ASSERT(%ld == %ld)\n", x.size(), y.size());
     PL_ASSERT(x.size() == y.size());
-    PrecisionT inner = 0;
+    // printf("\nCall PrecisionT\n");
+    PrecisionT inner = 0.0;
+    // printf("\nCall parallel_reduce\n");
     Kokkos::parallel_reduce(
         x.size(), getRealOfComplexInnerProductFunctor<PrecisionT>(x, y), inner);
+    // printf("\nReturn inner\n");
+    return inner;
+}
+
+template <class PrecisionT> struct getRealOfComplexInnerProductFunctorMember {
+
+    Kokkos::View<Kokkos::complex<PrecisionT> *> x;
+    Kokkos::View<Kokkos::complex<PrecisionT> *> y;
+
+    getRealOfComplexInnerProductFunctorMember(
+        Kokkos::View<Kokkos::complex<PrecisionT> *> x_,
+        Kokkos::View<Kokkos::complex<PrecisionT> *> y_) {
+        x = x_;
+        y = y_;
+    }
+
+    KOKKOS_INLINE_FUNCTION
+    void operator()(const Kokkos::TeamPolicy<>::member_type &teamMember, PrecisionT &inner) const {
+        const size_t k = teamMember.league_rank();
+        inner += real(x[k]) * real(y[k]) + imag(x[k]) * imag(y[k]);
+    }
+};
+
+template <class PrecisionT>
+PrecisionT getRealOfComplexInnerProductMember(Kokkos::View<Kokkos::complex<PrecisionT> *> x,
+                                  Kokkos::View<Kokkos::complex<PrecisionT> *> y){
+    // printf("\nCall PL_ASSERT(%ld == %ld)\n", x.size(), y.size());
+    PL_ASSERT(x.size() == y.size());
+    // printf("\nCall PrecisionT\n");
+    PrecisionT inner = 0.0;
+    // printf("\nCall parallel_reduce\n");
+    Kokkos::parallel_reduce(
+        Kokkos::TeamPolicy<>(x.size(), Kokkos::AUTO), getRealOfComplexInnerProductFunctorMember<PrecisionT>(x, y), inner);
+    // printf("\nReturn inner\n");
     return inner;
 }
 

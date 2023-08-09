@@ -226,6 +226,8 @@ auto getBackendInfo() -> py::dict {
  */
 void registerBackendSpecificInfo(py::module_ &m) {
     m.def("backend_info", &getBackendInfo, "Backend-specific information.");
+    m.def("kokkos_initialize", []() { Kokkos::initialize(); });
+    m.def("kokkos_finalize", []() { Kokkos::finalize(); });
     m.def(
         "print_configuration",
         []() {

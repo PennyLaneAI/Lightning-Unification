@@ -30,6 +30,7 @@ using namespace Pennylane::Measures;
 using namespace Pennylane::Observables;
 using Pennylane::LightningKokkos::StateVectorKokkos;
 using Pennylane::LightningKokkos::Util::getRealOfComplexInnerProduct;
+using Pennylane::LightningKokkos::Util::getRealOfComplexInnerProductMember;
 using Pennylane::LightningKokkos::Util::SparseMV_Kokkos;
 using Pennylane::Util::exp2;
 } // namespace
@@ -136,12 +137,12 @@ class Measurements final
      * @param params Not used.
      * @return Squared norm of state.
      */
-    auto getExpectationValueIdentity(
+    PrecisionT getExpectationValueIdentity(
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
         const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
-        PrecisionT expval = 0;
+        PrecisionT expval = 0.0;
         Kokkos::parallel_reduce(
             exp2(num_qubits),
             getExpectationValueIdentityFunctor(arr_data, num_qubits, wires),
@@ -158,12 +159,15 @@ class Measurements final
      * @return Expectation value with respect to Pauli X applied to specified
      * wire.
      */
-    auto getExpectationValuePauliX(
+    PrecisionT getExpectationValuePauliX(
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
         const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
-        PrecisionT expval = 0;
+        PrecisionT expval = 0.0;
+        printf("Call TeamPolicy\n");
+        Kokkos::TeamPolicy<> policy(exp2(num_qubits - 1), Kokkos::AUTO);
+        printf("Call getExpectationValuePauliXFunctor\n");
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
             getExpectationValuePauliXFunctor(arr_data, num_qubits, wires),
@@ -180,12 +184,12 @@ class Measurements final
      * @return Expectation value with respect to Pauli Y applied to specified
      * wire.
      */
-    auto getExpectationValuePauliY(
+    PrecisionT getExpectationValuePauliY(
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
         const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
-        PrecisionT expval = 0;
+        PrecisionT expval = 0.0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
             getExpectationValuePauliYFunctor(arr_data, num_qubits, wires),
@@ -202,12 +206,12 @@ class Measurements final
      * @return Expectation value with respect to Pauli Z applied to specified
      * wire.
      */
-    auto getExpectationValuePauliZ(
+    PrecisionT getExpectationValuePauliZ(
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
         const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
-        PrecisionT expval = 0;
+        PrecisionT expval = 0.0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
             getExpectationValuePauliZFunctor(arr_data, num_qubits, wires),
@@ -224,12 +228,12 @@ class Measurements final
      * @return Expectation value with respect to Hadamard applied to specified
      * wire.
      */
-    auto getExpectationValueHadamard(
+    PrecisionT getExpectationValueHadamard(
         const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
         const Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
-        PrecisionT expval = 0;
+        PrecisionT expval = 0.0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
             getExpectationValueHadamardFunctor(arr_data, num_qubits, wires),
@@ -247,12 +251,12 @@ class Measurements final
      * @return Expectation value with respect to observable applied to specified
      * wire.
      */
-    auto getExpectationValueSingleQubitOp(
+    PrecisionT getExpectationValueSingleQubitOp(
         const KokkosVector &matrix, const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
         Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
-        PrecisionT expval = 0;
+        PrecisionT expval = 0.0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 1),
             getExpectationValueSingleQubitOpFunctor<PrecisionT>(
@@ -271,12 +275,12 @@ class Measurements final
      * @return Expectation value with respect to observable applied to specified
      * wires.
      */
-    auto getExpectationValueTwoQubitOp(
+    PrecisionT getExpectationValueTwoQubitOp(
         const KokkosVector &matrix, const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         const size_t num_qubits = this->_statevector.getNumQubits();
         Kokkos::View<ComplexT *> arr_data = this->_statevector.getView();
-        PrecisionT expval = 0;
+        PrecisionT expval = 0.0;
         Kokkos::parallel_reduce(
             exp2(num_qubits - 2),
             getExpectationValueTwoQubitOpFunctor<PrecisionT>(
@@ -295,7 +299,7 @@ class Measurements final
      * @return Expectation value with respect to observable applied to specified
      * wires.
      */
-    auto getExpectationValueMultiQubitOp(
+    PrecisionT getExpectationValueMultiQubitOp(
         const KokkosVector &matrix, const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<PrecisionT> &params = {0.0}) {
         if (wires.size() == 1) {
@@ -312,7 +316,7 @@ class Measurements final
 
             Kokkos::View<size_t *> wires_view("wires_view", wires.size());
             Kokkos::deep_copy(wires_view, wires_host);
-            PrecisionT expval = 0;
+            PrecisionT expval = 0.0;
             Kokkos::parallel_reduce(
                 Kokkos::RangePolicy<KokkosExecSpace>(
                     0, exp2(num_qubits - wires.size())),
@@ -330,9 +334,14 @@ class Measurements final
      * @return Expectation value with respect to the given observable.
      */
     PrecisionT expval(const Observable<StateVectorT> &ob) {
+        // printf("\nCall expval(const Observable<StateVectorT> &ob)\n");
+        // printf("\nCall StateVectorT\n");
         StateVectorT ob_sv(this->_statevector.getNumQubits());
+        // printf("\nCall ob_sv\n");
         ob_sv.DeviceToDevice(this->_statevector.getView());
+        // printf("\nCall ob\n");
         ob.applyInPlace(ob_sv);
+        // printf("\nCall getRealOfComplexInnerProduct\n");
         return getRealOfComplexInnerProduct(this->_statevector.getView(),
                                             ob_sv.getView());
     }
@@ -346,6 +355,7 @@ class Measurements final
      */
     PrecisionT expval(const std::vector<ComplexT> &matrix,
                       const std::vector<size_t> &wires) {
+        // printf("\nCall expval(const std::vector<ComplexT> &matrix\n");
         StateVectorT ob_sv(this->_statevector.getNumQubits());
         ob_sv.DeviceToDevice(this->_statevector.getView());
         ob_sv.applyMatrix(matrix, wires);
@@ -362,10 +372,35 @@ class Measurements final
      */
     PrecisionT expval(const std::string &operation,
                       const std::vector<size_t> &wires) {
+        printf("\nCall expval(const std::string &operation\n");
+        // if (operation == "Identity"){
+        //     printf("Call getExpectationValueIdentity\n");
+        //     return getExpectationValueIdentity(wires);
+        // }
+        // if (operation == "PauliX"){
+        //     printf("Call getExpectationValuePauliX\n");
+        //     return getExpectationValuePauliX(wires);
+        // }
+        // if (operation == "PauliY"){
+        //     printf("Call getExpectationValuePauliY\n");
+        //     return getExpectationValuePauliY(wires);
+        // }
+        // if (operation == "PauliZ"){
+        //     printf("Call getExpectationValuePauliZ\n");
+        //     return getExpectationValuePauliZ(wires);
+        // }
+        // if (operation == "Hadamard"){
+        //     printf("Call getExpectationValueHadamard\n");
+        //     return getExpectationValueHadamard(wires);
+        // }
+        // printf("\nStateVectorT\n");
         StateVectorT ob_sv(this->_statevector.getNumQubits());
+        // printf("\nob_sv\n");
         ob_sv.DeviceToDevice(this->_statevector.getView());
+        // printf("\nob_sv\n");
         ob_sv.applyOperation(operation, wires);
-        return getRealOfComplexInnerProduct(this->_statevector.getView(),
+        // printf("\ngetRealOfComplexInnerProduct\n");
+        return getRealOfComplexInnerProductMember(this->_statevector.getView(),
                                             ob_sv.getView());
     };
 
@@ -382,6 +417,8 @@ class Measurements final
     std::vector<PrecisionT>
     expval(const std::vector<op_type> &operations_list,
            const std::vector<std::vector<size_t>> &wires_list) {
+        // printf("\nCall expval(const std::vector<op_type>
+        // &operations_list\n");
         PL_ABORT_IF(
             (operations_list.size() != wires_list.size()),
             "The lengths of the list of operations and wires do not match.");
@@ -600,7 +637,7 @@ class Measurements final
      * @return Floating point std::vector with probabilities.
      * The basis columns are rearranged according to wires.
      */
-    auto probs(const std::vector<size_t> &wires) {
+    auto probs(const std::vector<size_t> &wires) -> std::vector<PrecisionT> {
         using MDPolicyType_2D =
             Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left>>;
 
