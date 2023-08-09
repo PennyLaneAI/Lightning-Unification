@@ -17,7 +17,7 @@ import subprocess
 import shutil
 import sys
 from pathlib import Path
-from setuptools import setup, Extension, find_packages
+from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
 default_backend = "lightning_qubit"
@@ -164,8 +164,7 @@ class CMakeBuild(build_ext):
             env=os.environ,
         )
 
-
-with open(os.path.join("pennylane_lightning", "_version.py"), encoding="utf-8") as f:
+with open(os.path.join("pennylane_lightning", "lightning_core", "_version.py"), encoding="utf-8") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 with open("README.md", encoding="utf-8") as f:
@@ -177,10 +176,9 @@ requirements = [
 
 suffix = backend.replace("lightning_", "")
 suffix = suffix[0].upper() + suffix[1:]
-pennylane_plugins = [
-    "lightning.qubit = pennylane_lightning:LightningQubit",
-    "lightning.kokkos = pennylane_lightning:LightningKokkos",
-]
+
+pennylane_plugins = [device_name + " = pennylane_lightning." + backend + ":Lightning" + suffix]
+
 info = {
     "name": f"PennyLane-Lightning-{suffix}",
     "version": version,
@@ -188,9 +186,9 @@ info = {
     "maintainer_email": "software@xanadu.ai",
     "url": "https://github.com/XanaduAI/pennylane-lightning",
     "license": "Apache License 2.0",
-    "packages": find_packages(where="."),
+    "packages": ['pennylane_lightning.lightning_core', 'pennylane_lightning.'+backend],
     "package_data": {
-        "pennylane_lightning": [
+        'pennylane_lightning.lightning_core': [
             os.path.join("src", "*"),
             os.path.join("src", "**", "*"),
         ]
