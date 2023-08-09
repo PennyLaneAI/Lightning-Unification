@@ -89,12 +89,12 @@ def n_subsystems(request):
 # The device name will be provided by the binaries.
 # Checking binaries:
 if hasattr(pennylane_lightning, "lightning_qubit_ops"):
-    LightningDevice = pennylane_lightning.LightningQubit
+    from pennylane_lightning.lightning_qubit import LightningQubit as LightningDevice
 elif hasattr(pennylane_lightning, "lightning_kokkos_ops"):
-    LightningDevice = pennylane_lightning.LightningKokkos
+    from pennylane_lightning.lightning_kokkos import LightningKokkos as LightningDevice
 else:
     # with no binaries we fallback to LightningQubit, and this one will fallback to default.
-    LightningDevice = pennylane_lightning.LightningQubit
+    from pennylane_lightning.lightning_qubit import LightningQubit as LightningDevice
 
 device_name = LightningDevice.short_name
 

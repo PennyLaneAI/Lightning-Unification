@@ -19,7 +19,7 @@ from conftest import device_name
 
 import numpy as np
 import pennylane as qml
-from pennylane_lightning._serialize import QuantumScriptSerializer
+from pennylane_lightning.lightning_core._serialize import QuantumScriptSerializer
 
 try:
     from pennylane_lightning.lightning_qubit_ops.observables import (
