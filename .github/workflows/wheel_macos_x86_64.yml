@@ -36,7 +36,7 @@ jobs:
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
 
-    name: Kokkos core & kernels (${{ matrix.exec_model }}::${{ matrix.arch }} )
+    name: Kokkos (${{ matrix.exec_model }}::${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -59,10 +59,6 @@ jobs:
           git checkout ${{ matrix.kokkos_version }}
           cd -
           pushd . &> /dev/null
-          git clone https://github.com/kokkos/kokkos-kernels.git
-          cd kokkos-kernels
-          git checkout ${{ matrix.kokkos_version }}
-          cd -
 
       - uses: actions/setup-python@v4
         name: Install Python
@@ -90,26 +86,6 @@ jobs:
           cmake --install ./Build
           cd -
 
-      - name: Build Kokkos kernels library
-        if: steps.kokkos-cache.outputs.cache-hit != 'true'
-        run: |
-          cd kokkos-kernels
-          python -m pip install cmake ninja
-
-          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
-                          -DKokkos_ENABLE_SERIAL=ON \
-                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
-                          -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
-                          -DCMAKE_CXX_STANDARD=20 \
-                          -DCMAKE_PREFIX_PATH=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
-                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                          -DCMAKE_CXX_COMPILER=g++ \
-                          -DOpenMP_ROOT=$(brew --prefix libomp) \
-                          -G Ninja
-          cmake --build ./Build --verbose
-          cmake --install ./Build
-          cd -
-
   mac-wheels-x86:
     needs: [set_wheel_build_matrix, build_dependencies]
     strategy:
@@ -121,9 +97,6 @@ jobs:
         cibw_build: ${{fromJson(needs.set_wheel_build_matrix.outputs.python_version)}}
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
-        exclude:
-          - pl_backend: lightning_qubit
-            exec_model: OPENMP
 
     name: ${{ matrix.os }} - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
     runs-on: ${{ matrix.os }}

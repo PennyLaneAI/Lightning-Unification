@@ -44,7 +44,7 @@ jobs:
         run: ./bin/format --check --cfversion 14 ./pennylane_lightning/src
 
   build_and_cache_Kokkos:
-    name: "Build and cache Kokkos and Kokkos Kernels"
+    name: "Build and cache Kokkos"
     uses: ./.github/workflows/build_and_cache_Kokkos_linux.yml
     with:
       os: ubuntu-22.04

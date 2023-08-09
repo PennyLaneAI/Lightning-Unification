@@ -32,10 +32,8 @@ jobs:
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
         container_img: ["quay.io/pypa/manylinux2014_aarch64"]
-        exclude:
-          - exec_model: OPENMP
 
-    name: Kokkos core & kernels (${{ matrix.exec_model }}::${{ matrix.arch }} )
+    name: Kokkos core (${{ matrix.exec_model }}::${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -54,10 +52,6 @@ jobs:
           git checkout ${{ matrix.kokkos_version }}
           cd -
           pushd . &> /dev/null
-          git clone https://github.com/kokkos/kokkos-kernels.git
-          cd kokkos-kernels
-          git checkout ${{ matrix.kokkos_version }}
-          cd -
 
       - uses: docker/setup-qemu-action@v2
         name: Set up QEMU
@@ -87,30 +81,6 @@ jobs:
             cmake --build ./Build --verbose && \
             cmake --install ./Build; "
           cd -
-      - name: Build Kokkos kernels library
-        if: steps.kokkos-cache.outputs.cache-hit != 'true'
-        run: |
-          cd kokkos-kernels
-          docker run --platform linux/aarch64 \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v `pwd`:/io \
-            -v ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}:/install \
-            -i ${{ matrix.container_img }} \
-            bash -c "git config --global --add safe.directory /io && \
-            cd /io && \
-            python3.9 -m pip install ninja && \
-            ln -s /opt/python/cp39-cp39/bin/ninja /usr/bin/ninja && \
-            cmake -BBuild . -DCMAKE_INSTALL_PREFIX=/install \
-                            -DKokkos_ENABLE_SERIAL=ON \
-                            -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
-                            -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
-                            -DCMAKE_CXX_STANDARD=20 \
-                            -DCMAKE_PREFIX_PATH=/install \
-                            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                            -G Ninja && \
-            cmake --build ./Build --verbose && \
-            cmake --install ./Build; "
-          cd -
 
   linux-wheels-aarch64:
     needs: [set_wheel_build_matrix, build_dependencies]
@@ -123,8 +93,6 @@ jobs:
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
         container_img: ["quay.io/pypa/manylinux2014_aarch64"]
-        exclude:
-          - exec_model: OPENMP
 
     name: ${{ matrix.os }}::${{ matrix.arch }} - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
     runs-on: ${{ matrix.os }}

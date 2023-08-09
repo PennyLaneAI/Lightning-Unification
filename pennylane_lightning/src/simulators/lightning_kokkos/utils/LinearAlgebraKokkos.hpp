@@ -13,7 +13,7 @@
 // limitations under the License.
 /**
  * @file LinearAlgebraKokkos.hpp
- * Contains uncategorised utility functions.
+ * Contains linear algebra utility functions.
  */
 
 #pragma once
