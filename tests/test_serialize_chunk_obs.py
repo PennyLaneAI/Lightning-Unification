@@ -21,7 +21,7 @@ import pennylane as qml
 import numpy as np
 import pennylane_lightning
 
-from pennylane_lightning.lightning_core._serialize import QuantumScriptSerializer
+from pennylane_lightning.core._serialize import QuantumScriptSerializer
 
 if not ld._CPP_BINARY_AVAILABLE:
     pytest.skip("No binary module found. Skipping.", allow_module_level=True)
@@ -44,7 +44,5 @@ class TestSerializeObs:
         s = QuantumScriptSerializer(device_name, use_csingle).serialize_observables(
             tape, self.wires_dict
         )
-        obtained_chunks = pennylane_lightning.lightning_core.lightning_base._chunk_iterable(
-            s, obs_chunk
-        )
+        obtained_chunks = pennylane_lightning.core.lightning_base._chunk_iterable(s, obs_chunk)
         assert len(list(obtained_chunks)) == int(np.ceil(len(s) / obs_chunk))

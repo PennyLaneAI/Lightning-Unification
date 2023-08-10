@@ -164,7 +164,7 @@ class CMakeBuild(build_ext):
             env=os.environ,
         )
 
-with open(os.path.join("pennylane_lightning", "lightning_core", "_version.py"), encoding="utf-8") as f:
+with open(os.path.join("pennylane_lightning", "core", "_version.py"), encoding="utf-8") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 with open("README.md", encoding="utf-8") as f:
@@ -186,9 +186,9 @@ info = {
     "maintainer_email": "software@xanadu.ai",
     "url": "https://github.com/XanaduAI/pennylane-lightning",
     "license": "Apache License 2.0",
-    "packages": ['pennylane_lightning.lightning_core', 'pennylane_lightning.'+backend],
+    "packages": ['pennylane_lightning.core', 'pennylane_lightning.'+backend],
     "package_data": {
-        'pennylane_lightning.lightning_core': [
+        'pennylane_lightning.core': [
             os.path.join("src", "*"),
             os.path.join("src", "**", "*"),
         ]
