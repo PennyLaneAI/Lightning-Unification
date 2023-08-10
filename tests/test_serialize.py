@@ -22,7 +22,7 @@ import pennylane as qml
 from pennylane_lightning.core._serialize import QuantumScriptSerializer
 
 try:
-    from pennylane_lightning.lightning_qubit_ops.observables import (
+    from pennylane_lightning.lightning_kokkos_ops.observables import (
         NamedObsC64,
         NamedObsC128,
         HermitianObsC64,
@@ -34,7 +34,7 @@ try:
     )
 except ImportError:
     try:
-        from .lightning_kokkos_ops.observables import (
+        from pennylane_lightning.lightning_qubit_ops.observables import (
             NamedObsC64,
             NamedObsC128,
             HermitianObsC64,
