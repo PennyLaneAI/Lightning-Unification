@@ -17,7 +17,7 @@ import subprocess
 import shutil
 import sys
 from pathlib import Path
-from setuptools import setup, Extension
+from setuptools import setup, Extension, find_namespace_packages
 from setuptools.command.build_ext import build_ext
 
 default_backend = "lightning_qubit"
@@ -186,7 +186,8 @@ info = {
     "maintainer_email": "software@xanadu.ai",
     "url": "https://github.com/XanaduAI/pennylane-lightning",
     "license": "Apache License 2.0",
-    "packages": ['pennylane_lightning.core', 'pennylane_lightning.'+backend],
+    "packages": find_namespace_packages(include=['pennylane_lightning.core',
+                                                 'pennylane_lightning.'+backend]),
     "package_data": {
         'pennylane_lightning.core': [
             os.path.join("src", "*"),
