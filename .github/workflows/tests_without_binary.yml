@@ -34,13 +34,12 @@ jobs:
       - name: Get required Python packages
         run: |
           cd main
-          python -m pip install pip==23.0
-          pip install -r requirements-dev.txt
+          python -m pip install -r requirements-dev.txt
 
       - name: Install lightning.qubit device
         run: |
           cd main
-          pip install -e . -vv
+          python -m pip install -e . -vv
         env:
           SKIP_COMPILATION: True
 

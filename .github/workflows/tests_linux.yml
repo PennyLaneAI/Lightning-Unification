@@ -87,21 +87,20 @@ jobs:
       - name: Get required Python packages
         run: |
           cd main
-          pip install --upgrade pip
-          pip install -r requirements-dev.txt
+          python -m pip install -r requirements-dev.txt
 
       - name: Install ML libraries for interfaces
         run: |
-          pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
-          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-          pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
+          python -m pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          python -m pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          python -m pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
         run: |
           cd main
-          pip uninstall -y pennylane-lightning
+          python -m pip uninstall -y pennylane-lightning
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
-          pip install -e . -vv
+          python -m pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -188,21 +187,20 @@ jobs:
       - name: Get required Python packages
         run: |
           cd main
-          pip install --upgrade pip
-          pip install -r requirements-dev.txt
+          python -m pip install -r requirements-dev.txt
 
       - name: Install ML libraries for interfaces
         run: |
-          pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
-          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-          pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
+          python -m pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          python -m pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          python -m pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
         run: |
           cd main
-          pip uninstall -y pennylane-lightning
+          python -m pip uninstall -y pennylane-lightning
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
-          pip install -e . -vv
+          python -m pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -330,22 +328,21 @@ jobs:
       - name: Get required Python packages
         run: |
           cd main
-          pip install --upgrade pip
-          pip install -r requirements-dev.txt
+          python -m pip install -r requirements-dev.txt
 
       - name: Install ML libraries for interfaces
         run: |
-          pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
-          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-          pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
+          python -m pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          python -m pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          python -m pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
         if: ${{ matrix.pl_backend != 'all'}}
         run: |
           cd main
-          pip uninstall -y pennylane-lightning
+          python -m pip uninstall -y pennylane-lightning
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
-          pip install -e . -vv
+          python -m pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         if: ${{ matrix.pl_backend != 'all'}}
@@ -361,12 +358,12 @@ jobs:
         if: ${{ matrix.pl_backend == 'all' }}
         run: |
           cd main
-          pip uninstall -y pennylane-lightning
+          python -m pip uninstall -y pennylane-lightning
           CMAKE_ARGS="-DPL_BACKEND="lightning_qubit" -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
-          pip install -e . -vv
+          python -m pip install -e . -vv
           rm -rf build
           CMAKE_ARGS="-DPL_BACKEND="lightning_kokkos" -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
-          pip install -e . -vv
+          python -m pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests for lightning.qubit with all devices installed
         if: ${{ matrix.pl_backend == 'all' }}
