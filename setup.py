@@ -180,7 +180,7 @@ suffix = suffix[0].upper() + suffix[1:]
 pennylane_plugins = [device_name + " = pennylane_lightning." + backend + ":Lightning" + suffix]
 
 info = {
-    "name": f"PennyLane-Lightning-{suffix}",
+    "name": f"PennyLane_Lightning_{suffix}",
     "version": version,
     "maintainer": "Xanadu Inc.",
     "maintainer_email": "software@xanadu.ai",
@@ -199,7 +199,6 @@ info = {
     "description": "PennyLane-Lightning plugin",
     "long_description": readme,
     "long_description_content_type": "text/markdown",
-    "provides": ["pennylane_lightning"],
     "install_requires": requirements,
     "ext_modules": []
     if os.environ.get("SKIP_COMPILATION", False)
