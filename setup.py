@@ -17,7 +17,7 @@ import subprocess
 import shutil
 import sys
 from pathlib import Path
-from setuptools import setup, Extension, find_packages
+from setuptools import setup, Extension, find_namespace_packages
 from setuptools.command.build_ext import build_ext
 
 default_backend = "lightning_qubit"
@@ -164,31 +164,32 @@ class CMakeBuild(build_ext):
             env=os.environ,
         )
 
-
-with open(os.path.join("pennylane_lightning", "_version.py"), encoding="utf-8") as f:
+with open(os.path.join("pennylane_lightning", "core", "_version.py"), encoding="utf-8") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 with open("README.md", encoding="utf-8") as f:
     readme = f.read()
 
 requirements = [
-    "pennylane>=0.30",
+    "pennylane @ git+https://github.com/PennyLaneAI/pennylane.git@feature/lightning_ready#egg=pennylane",
 ]
 
 suffix = backend.replace("lightning_", "")
 suffix = suffix[0].upper() + suffix[1:]
-pennylane_plugins = [f"{device_name} = pennylane_lightning:Lightning{suffix}"]
+
+pennylane_plugins = [device_name + " = pennylane_lightning." + backend + ":Lightning" + suffix]
 
 info = {
-    "name": "PennyLane-Lightning",
+    "name": f"PennyLane_Lightning_{suffix}",
     "version": version,
     "maintainer": "Xanadu Inc.",
     "maintainer_email": "software@xanadu.ai",
     "url": "https://github.com/XanaduAI/pennylane-lightning",
     "license": "Apache License 2.0",
-    "packages": find_packages(where="."),
+    "packages": find_namespace_packages(include=['pennylane_lightning.core',
+                                                 'pennylane_lightning.'+backend]),
     "package_data": {
-        "pennylane_lightning": [
+        'pennylane_lightning.core': [
             os.path.join("src", "*"),
             os.path.join("src", "**", "*"),
         ]
@@ -198,11 +199,10 @@ info = {
     "description": "PennyLane-Lightning plugin",
     "long_description": readme,
     "long_description_content_type": "text/markdown",
-    "provides": ["pennylane_lightning"],
     "install_requires": requirements,
     "ext_modules": []
     if os.environ.get("SKIP_COMPILATION", False)
-    else [CMakeExtension(backend + "_ops")],
+    else [CMakeExtension(f"{backend}_ops")],
     "cmdclass": {"build_ext": CMakeBuild},
     "ext_package": "pennylane_lightning",
 }

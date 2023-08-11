@@ -29,7 +29,7 @@ function(set_pennylane_lightning_version VERSION_FILE_PATH)
     set(VERSION_STRING ${VERSION_STRING} PARENT_SCOPE)
 endfunction()
 
-set_pennylane_lightning_version(${PROJECT_SOURCE_DIR}/pennylane_lightning/_version.py)
+set_pennylane_lightning_version(${PROJECT_SOURCE_DIR}/pennylane_lightning/core/_version.py)
 
 message(STATUS "pennylane_lightning version ${VERSION_STRING}")
 set(PROJECT_VERSION ${VERSION_STRING})
@@ -82,7 +82,7 @@ endif()
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # All CMakeLists.txt in subdirectories use pennylane_lightning_compile_options and pennylane_lightning_external_libs
-add_subdirectory(pennylane_lightning/src)
+add_subdirectory(pennylane_lightning/core/src)
 
 #####################################################
 # Maintain for dependent external package development
@@ -93,23 +93,23 @@ target_include_directories(pennylane_lightning  INTERFACE "$<INSTALL_INTERFACE:$
 
 if(ENABLE_PYTHON)
     message(STATUS "ENABLE_PYTHON is ON.")
-    pybind11_add_module("${PL_BACKEND}_ops" "pennylane_lightning/src/bindings/Bindings.cpp")
+    pybind11_add_module("${PL_BACKEND}_ops" "pennylane_lightning/core/src/bindings/Bindings.cpp")
 
     target_link_libraries("${PL_BACKEND}_ops" PRIVATE   lightning_compile_options
-                                                            lightning_external_libs
-                                                            )
+                                                        lightning_external_libs
+                                                        )
 
     target_link_libraries("${PL_BACKEND}_ops" PRIVATE   lightning_observables
-                                                            lightning_utils
-                                                            lightning_algorithms
-                                                            )
+                                                        lightning_utils
+                                                        lightning_algorithms
+                                                        )
 
     target_link_libraries("${PL_BACKEND}_ops" PRIVATE   ${PL_BACKEND} #simulator
-                                                            "${PL_BACKEND}_algorithms"
-                                                            "${PL_BACKEND}_observables"
-                                                            "${PL_BACKEND}_bindings"
-                                                            "${PL_BACKEND}_measurements"
-                                                            )
+                                                        "${PL_BACKEND}_algorithms"
+                                                        "${PL_BACKEND}_observables"
+                                                        "${PL_BACKEND}_bindings"
+                                                        "${PL_BACKEND}_measurements"
+                                                        )
 
     set_target_properties("${PL_BACKEND}_ops" PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
@@ -125,8 +125,8 @@ install(TARGETS pennylane_lightning
 )
 
 install(DIRECTORY
-    ${PROJECT_SOURCE_DIR}/pennylane_lightning/src
-    DESTINATION include/pennylane_lightning
+    ${PROJECT_SOURCE_DIR}/pennylane_lightning/core/src
+    DESTINATION include/pennylane_lightning/core/
 )
 
 if (BUILD_TESTS)
