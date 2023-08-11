@@ -1,3 +1,4 @@
+pip==23.0
 git+https://github.com/PennyLaneAI/pennylane.git@feature/lightning_ready
 ninja
 flaky
