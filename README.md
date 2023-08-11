@@ -12,7 +12,7 @@ Combine PennyLane-Lightning's high-performance simulators with PennyLane's
 
 ## Installation
 
-PennyLane-Lightning requires Python version 3.8 and above. It can be installed using ``pip``:
+PennyLane-Lightning requires Python version 3.9 and above. It can be installed using ``pip``:
 
 ```console
 pip install pennylane-lightning
@@ -45,7 +45,7 @@ Alternatively, for development and testing, you can install by cloning the repos
 ```console
 git clone https://github.com/PennyLaneAI/pennylane-lightning.git
 cd pennylane-lightning
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pip install -e .
 ```
 
@@ -134,7 +134,7 @@ python --version
 Then a common command will work.
 
 ```console
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pip install -e .
 ```
 
