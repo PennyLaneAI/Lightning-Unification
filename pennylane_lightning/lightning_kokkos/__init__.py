@@ -13,4 +13,5 @@
 # limitations under the License.
 """PennyLane lightning kokkos module."""
 
+from pennylane_lightning.core import __version__
 from .lightning_kokkos import LightningKokkos

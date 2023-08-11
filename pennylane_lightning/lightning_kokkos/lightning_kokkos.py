@@ -19,7 +19,7 @@ interfaces with C++ for fast linear algebra calculations.
 from warnings import warn
 import numpy as np
 
-from ..core.lightning_base import LightningBase, LightningBaseFallBack, _chunk_iterable
+from pennylane_lightning.core.lightning_base import LightningBase, LightningBaseFallBack, _chunk_iterable
 
 try:
     # pylint: disable=import-error, no-name-in-module
@@ -60,7 +60,7 @@ if LK_CPP_BINARY_AVAILABLE:
 
     import pennylane as qml
 
-    from ..core._version import __version__
+    from pennylane_lightning.core._version import __version__
 
     # pylint: disable=import-error, no-name-in-module
     from ..lightning_kokkos_ops.algorithms import (
@@ -70,7 +70,7 @@ if LK_CPP_BINARY_AVAILABLE:
         create_ops_listC128,
     )
 
-    from ..core._serialize import QuantumScriptSerializer
+    from pennylane_lightning.core._serialize import QuantumScriptSerializer
 
     def _kokkos_dtype(dtype):
         if dtype not in [np.complex128, np.complex64]:
