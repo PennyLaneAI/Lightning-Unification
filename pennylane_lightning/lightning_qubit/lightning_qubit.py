@@ -19,7 +19,11 @@ interfaces with C++ for fast linear algebra calculations.
 from warnings import warn
 import numpy as np
 
-from pennylane_lightning.core.lightning_base import LightningBase, LightningBaseFallBack, _chunk_iterable
+from pennylane_lightning.core.lightning_base import (
+    LightningBase,
+    LightningBaseFallBack,
+    _chunk_iterable,
+)
 
 try:
     # pylint: disable=import-error, no-name-in-module
