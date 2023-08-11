@@ -20,6 +20,7 @@ import pytest
 import numpy as np
 
 import pennylane as qml
+import pennylane_lightning
 
 # defaults
 TOL = 1e-6
@@ -85,21 +86,13 @@ def n_subsystems(request):
 
 
 # Device specification
-# The device name will be provided by the binaries.
-# Checking binaries:
+# Here we'll check for lightning.kokkos binaries and proceed with this device if found.
 try:
-    from pennylane_lightning.lightning_qubit_ops import backend_info
-except ModuleNotFoundError:
-    try:
-        from pennylane_lightning.lightning_kokkos_ops import backend_info
-    except ModuleNotFoundError:
-        # with no binaries we fallback to LightningQubit, and this one will fallback to default.
-        from pennylane_lightning import LightningQubit as LightningDevice
-    else:
-        from pennylane_lightning import LightningKokkos as LightningDevice
+    from pennylane_lightning import lightning_kokkos_ops
+    from pennylane_lightning.lightning_kokkos import LightningKokkos as LightningDevice
+except:
+    from pennylane_lightning.lightning_qubit import LightningQubit as LightningDevice
 
-else:
-    from pennylane_lightning import LightningQubit as LightningDevice
 
 device_name = LightningDevice.short_name
 
