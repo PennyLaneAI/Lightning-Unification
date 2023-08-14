@@ -158,7 +158,6 @@ class AdjointJacobian final
                          obs_idx++) {
                         const size_t idx =
                             trainableParamNumber + obs_idx * tp_size;
-                        // trainableParamNumber * num_observables + obs_idx;
                         updateJacobian(H_lambda[obs_idx], mu, jac,
                                        scalingFactor, idx);
                     }
