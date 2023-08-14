@@ -161,7 +161,7 @@ jobs:
           python -m pip install twine
           python -m twine check ./wheelhouse/*.whl
 
-      - uses: actions-ecosystem/action-regex-match@v3
+      - uses: KyoriPowered/action-regex-match@v3
         id: rc_build
         with:
           text: ${{ github.event.pull_request.head.ref }}
