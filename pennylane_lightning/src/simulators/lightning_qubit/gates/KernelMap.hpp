@@ -20,6 +20,14 @@
 // Ignore invalid warnings for compile-time checks without kernel specifics
 // NOLINTBEGIN
 
+#include <cstdint>
+#include <deque>
+#include <functional>
+#include <mutex>
+#include <tuple>
+#include <unordered_map>
+#include <utility>
+
 #include "CPUMemoryModel.hpp"
 #include "DynamicDispatcher.hpp"
 #include "Error.hpp"
@@ -28,14 +36,6 @@
 #include "KernelType.hpp"
 #include "Threading.hpp"
 #include "Util.hpp" // PairHash, for_each_enum
-
-#include <cstdint>
-#include <deque>
-#include <functional>
-#include <mutex>
-#include <tuple>
-#include <unordered_map>
-#include <utility>
 
 /// @cond DEV
 namespace {

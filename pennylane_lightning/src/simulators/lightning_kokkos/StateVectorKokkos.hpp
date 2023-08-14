@@ -17,7 +17,9 @@
  */
 
 #pragma once
+#include <cstddef>
 #include <cstdlib>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -28,15 +30,19 @@
 #include "BitUtil.hpp" // isPerfectPowerOf2
 #include "Error.hpp"
 #include "GateFunctors.hpp"
+#include "GateOperation.hpp"
 #include "StateVectorBase.hpp"
 #include "Util.hpp"
 
 /// @cond DEV
 namespace {
+using Pennylane::Gates::GateOperation;
+using Pennylane::Gates::GeneratorOperation;
 using Pennylane::Util::exp2;
 using Pennylane::Util::isPerfectPowerOf2;
 using Pennylane::Util::log2;
 using namespace Pennylane::LightningKokkos::Functors;
+using std::size_t;
 } // namespace
 /// @endcond
 
@@ -80,351 +86,8 @@ class StateVectorKokkos final
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits,
                       const Kokkos::InitializationSettings &kokkos_args = {})
-        : BaseType{num_qubits},
-          gates_{{"PauliX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPauliX(std::forward<decltype(wires)>(wires),
-                                  std::forward<decltype(adjoint)>(adjoint),
-                                  std::forward<decltype(params)>(params));
-                  }},
-                 {"PauliY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPauliY(std::forward<decltype(wires)>(wires),
-                                  std::forward<decltype(adjoint)>(adjoint),
-                                  std::forward<decltype(params)>(params));
-                  }},
-                 {"PauliZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPauliZ(std::forward<decltype(wires)>(wires),
-                                  std::forward<decltype(adjoint)>(adjoint),
-                                  std::forward<decltype(params)>(params));
-                  }},
-                 {"Hadamard",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyHadamard(std::forward<decltype(wires)>(wires),
-                                    std::forward<decltype(adjoint)>(adjoint),
-                                    std::forward<decltype(params)>(params));
-                  }},
-                 {"S",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyS(std::forward<decltype(wires)>(wires),
-                             std::forward<decltype(adjoint)>(adjoint),
-                             std::forward<decltype(params)>(params));
-                  }},
-                 {"T",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyT(std::forward<decltype(wires)>(wires),
-                             std::forward<decltype(adjoint)>(adjoint),
-                             std::forward<decltype(params)>(params));
-                  }},
-                 {"RX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRX(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"RY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"RZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"PhaseShift",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPhaseShift(std::forward<decltype(wires)>(wires),
-                                      std::forward<decltype(adjoint)>(adjoint),
-                                      std::forward<decltype(params)>(params));
-                  }},
-                 {"Rot",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRot(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"CZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"CNOT",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCNOT(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                  }},
-                 {"SWAP",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySWAP(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                  }},
-                 {"ControlledPhaseShift",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyControlledPhaseShift(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"CRX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRX(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CRY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRY(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CRZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRZ(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CRot",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRot(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                  }},
-                 {"IsingXX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingXX(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"IsingXY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingXY(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-
-                 {"IsingYY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingYY(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-
-                 {"IsingZZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingZZ(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"SingleExcitation",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitation(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"SingleExcitationMinus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitationMinus(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"SingleExcitationPlus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitationPlus(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"DoubleExcitation",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitation(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"DoubleExcitationMinus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitationMinus(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"DoubleExcitationPlus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitationPlus(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"MultiRZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyMultiRZ(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"CSWAP",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCSWAP(std::forward<decltype(wires)>(wires),
-                                 std::forward<decltype(adjoint)>(adjoint),
-                                 std::forward<decltype(params)>(params));
-                  }},
-                 {"Toffoli",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyToffoli(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }}},
-          generator_{
-              {"RX",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorRX(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"RY",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorRY(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"RZ",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorRZ(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"ControlledPhaseShift",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorControlledPhaseShift(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"CRX",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorCRX(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"CRY",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorCRY(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"CRZ",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorCRZ(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"IsingXX",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorIsingXX(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"IsingXY",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorIsingXY(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"IsingYY",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorIsingYY(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"IsingZZ",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorIsingZZ(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"SingleExcitation",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorSingleExcitation(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"SingleExcitationMinus",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorSingleExcitationMinus(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"SingleExcitationPlus",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorSingleExcitationPlus(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"DoubleExcitation",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorDoubleExcitation(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"DoubleExcitationMinus",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorDoubleExcitationMinus(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"DoubleExcitationPlus",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorDoubleExcitationPlus(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"PhaseShift",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorPhaseShift(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-              {"MultiRZ",
-               [&](auto &&wires, auto &&adjoint, auto &&params) {
-                   return applyGeneratorMultiRZ(
-                       std::forward<decltype(wires)>(wires),
-                       std::forward<decltype(adjoint)>(adjoint),
-                       std::forward<decltype(params)>(params));
-               }},
-          } {
+        : BaseType{num_qubits} {
         num_qubits_ = num_qubits;
-        length_ = exp2(num_qubits);
 
         {
             const std::lock_guard<std::mutex> lock(init_mutex_);
@@ -436,6 +99,9 @@ class StateVectorKokkos final
             data_ = std::make_unique<KokkosVector>("data_", exp2(num_qubits));
             setBasisState(0U);
         }
+
+        init_gates_indices_();
+        init_generators_indices_();
     };
 
     /**
@@ -487,7 +153,7 @@ class StateVectorKokkos final
      * @param num_qubits Number of qubits
      */
     void resetStateVector() {
-        if (length_ > 0) {
+        if (this->getLength() > 0) {
             setBasisState(0U);
         }
     }
@@ -564,44 +230,26 @@ class StateVectorKokkos final
      *
      * @param opName Name of gate to apply.
      * @param wires Wires to apply gate to.
-     * @param adjoint Indicates whether to use adjoint of gate.
+     * @param inverse Indicates whether to use adjoint of gate.
      * @param params Optional parameter list for parametric gates.
      * @param params Optional std gate matrix if opName doesn't exist.
      */
     void applyOperation(
         const std::string &opName, const std::vector<size_t> &wires,
-        bool adjoint = false, const std::vector<fp_t> &params = {0.0},
+        bool inverse = false, const std::vector<fp_t> &params = {},
         [[maybe_unused]] const std::vector<ComplexT> &gate_matrix = {}) {
 
         if (opName == "Identity") {
             // No op
-        } else if (gates_.find(opName) != gates_.end()) {
-            gates_.at(opName)(wires, adjoint, params);
+        } else if (gates_indices_.contains(opName)) {
+            applyNamedOperation(opName, wires, inverse, params);
         } else {
             KokkosVector matrix("gate_matrix", gate_matrix.size());
             Kokkos::deep_copy(
                 matrix, UnmanagedConstComplexHostView(gate_matrix.data(),
                                                       gate_matrix.size()));
-            return applyMultiQubitOp(matrix, wires, adjoint);
+            return applyMultiQubitOp(matrix, wires, inverse);
         }
-    }
-
-    /**
-     * @brief Apply a single generator to the state vector using the given
-     * kernel.
-     *
-     * @param opName Name of gate to apply.
-     * @param wires Wires to apply gate to.
-     * @param adjoint Indicates whether to use adjoint of gate.
-     * @param params Optional parameter list for parametric gates.
-     */
-    auto applyGenerator(const std::string &opName,
-                        const std::vector<size_t> &wires, bool adjoint = false,
-                        const std::vector<fp_t> &params = {0.0}) -> fp_t {
-        const auto it = generator_.find(opName);
-        PL_ABORT_IF(it == generator_.end(),
-                    std::string("Generator does not exist for ") + opName);
-        return (it->second)(wires, adjoint, params);
     }
 
     /**
@@ -670,11 +318,11 @@ class StateVectorKokkos final
             applyTwoQubitOp(matrix, wires, inverse);
         } else {
 
-            Kokkos::View<const std::size_t *, Kokkos::HostSpace,
+            Kokkos::View<const size_t *, Kokkos::HostSpace,
                          Kokkos::MemoryTraits<Kokkos::Unmanaged>>
                 wires_host(wires.data(), wires.size());
 
-            Kokkos::View<std::size_t *> wires_view("wires_view", wires.size());
+            Kokkos::View<size_t *> wires_view("wires_view", wires.size());
             Kokkos::deep_copy(wires_view, wires_host);
 
             if (!inverse) {
@@ -763,6 +411,208 @@ class StateVectorKokkos final
         applyMatrix(matrix.data(), wires, inverse);
     }
 
+    void applyNamedOperation(const std::string &opName,
+                             const std::vector<size_t> &wires,
+                             bool inverse = false,
+                             const std::vector<fp_t> &params = {}) {
+        switch (gates_indices_[opName]) {
+        case GateOperation::PauliX:
+            applyGateFunctor<pauliXFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::PauliY:
+            applyGateFunctor<pauliYFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::PauliZ:
+            applyGateFunctor<pauliZFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::Hadamard:
+            applyGateFunctor<hadamardFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::S:
+            applyGateFunctor<sFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::T:
+            applyGateFunctor<tFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::RX:
+            applyGateFunctor<rxFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::RY:
+            applyGateFunctor<ryFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::RZ:
+            applyGateFunctor<rzFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::PhaseShift:
+            applyGateFunctor<phaseShiftFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::Rot:
+            applyGateFunctor<rotFunctor, 1>(wires, inverse, params);
+            return;
+        case GateOperation::CY:
+            applyGateFunctor<cyFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::CZ:
+            applyGateFunctor<czFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::CNOT:
+            applyGateFunctor<cnotFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::SWAP:
+            applyGateFunctor<swapFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::ControlledPhaseShift:
+            applyGateFunctor<controlledPhaseShiftFunctor, 2>(wires, inverse,
+                                                             params);
+            return;
+        case GateOperation::CRX:
+            applyGateFunctor<crxFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::CRY:
+            applyGateFunctor<cryFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::CRZ:
+            applyGateFunctor<crzFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::CRot:
+            applyGateFunctor<cRotFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::IsingXX:
+            applyGateFunctor<isingXXFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::IsingXY:
+            applyGateFunctor<isingXYFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::IsingYY:
+            applyGateFunctor<isingYYFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::IsingZZ:
+            applyGateFunctor<isingZZFunctor, 2>(wires, inverse, params);
+            return;
+        case GateOperation::SingleExcitation:
+            applyGateFunctor<singleExcitationFunctor, 2>(wires, inverse,
+                                                         params);
+            return;
+        case GateOperation::SingleExcitationMinus:
+            applyGateFunctor<singleExcitationMinusFunctor, 2>(wires, inverse,
+                                                              params);
+            return;
+        case GateOperation::SingleExcitationPlus:
+            applyGateFunctor<singleExcitationPlusFunctor, 2>(wires, inverse,
+                                                             params);
+            return;
+        case GateOperation::DoubleExcitation:
+            applyGateFunctor<doubleExcitationFunctor, 4>(wires, inverse,
+                                                         params);
+            return;
+        case GateOperation::DoubleExcitationMinus:
+            applyGateFunctor<doubleExcitationMinusFunctor, 4>(wires, inverse,
+                                                              params);
+            return;
+        case GateOperation::DoubleExcitationPlus:
+            applyGateFunctor<doubleExcitationPlusFunctor, 4>(wires, inverse,
+                                                             params);
+            return;
+        case GateOperation::MultiRZ:
+            applyMultiRZ(wires, inverse, params);
+            return;
+        case GateOperation::CSWAP:
+            applyGateFunctor<cSWAPFunctor, 3>(wires, inverse, params);
+            return;
+        case GateOperation::Toffoli:
+            applyGateFunctor<toffoliFunctor, 3>(wires, inverse, params);
+            return;
+        default:
+            PL_ABORT(std::string("Generator does not exist for ") + opName);
+        }
+    }
+
+    /**
+     * @brief Apply a single generator to the state vector using the given
+     * kernel.
+     *
+     * @param opName Name of gate to apply.
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicates whether to use adjoint of gate.
+     * @param params Optional parameter list for parametric gates.
+     */
+    auto applyGenerator(const std::string &opName,
+                        const std::vector<size_t> &wires, bool inverse = false,
+                        const std::vector<fp_t> &params = {}) -> fp_t {
+        switch (generators_indices_[opName]) {
+        case GeneratorOperation::RX:
+            applyGateFunctor<pauliXFunctor, 1>(wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::RY:
+            applyGateFunctor<pauliYFunctor, 1>(wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::RZ:
+            applyGateFunctor<pauliZFunctor, 1>(wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::PhaseShift:
+            applyGateFunctor<generatorPhaseShiftFunctor, 1>(wires, inverse,
+                                                            params);
+            return static_cast<fp_t>(1.0);
+        case GeneratorOperation::IsingXX:
+            applyGateFunctor<generatorIsingXXFunctor, 2>(wires, inverse,
+                                                         params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::IsingXY:
+            applyGateFunctor<generatorIsingXYFunctor, 2>(wires, inverse,
+                                                         params);
+            return static_cast<fp_t>(0.5);
+        case GeneratorOperation::IsingYY:
+            applyGateFunctor<generatorIsingYYFunctor, 2>(wires, inverse,
+                                                         params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::IsingZZ:
+            applyGateFunctor<generatorIsingZZFunctor, 2>(wires, inverse,
+                                                         params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::SingleExcitation:
+            applyGateFunctor<generatorSingleExcitationFunctor, 2>(
+                wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::SingleExcitationMinus:
+            applyGateFunctor<generatorSingleExcitationMinusFunctor, 2>(
+                wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::SingleExcitationPlus:
+            applyGateFunctor<generatorSingleExcitationPlusFunctor, 2>(
+                wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::DoubleExcitation:
+            applyGateFunctor<generatorDoubleExcitationFunctor, 4>(
+                wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::DoubleExcitationMinus:
+            applyGateFunctor<generatorDoubleExcitationMinusFunctor, 4>(
+                wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::DoubleExcitationPlus:
+            applyGateFunctor<generatorDoubleExcitationPlusFunctor, 4>(
+                wires, inverse, params);
+            return static_cast<fp_t>(0.5);
+        case GeneratorOperation::ControlledPhaseShift:
+            applyGateFunctor<generatorControlledPhaseShiftFunctor, 2>(
+                wires, inverse, params);
+            return static_cast<fp_t>(1);
+        case GeneratorOperation::CRX:
+            applyGateFunctor<generatorCRXFunctor, 2>(wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::CRY:
+            applyGateFunctor<generatorCRYFunctor, 2>(wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::CRZ:
+            applyGateFunctor<generatorCRZFunctor, 2>(wires, inverse, params);
+            return -static_cast<fp_t>(0.5);
+        case GeneratorOperation::MultiRZ:
+            return applyGeneratorMultiRZ(wires, inverse, params);
+        default:
+            PL_ABORT(std::string("Generator does not exist for ") + opName);
+        }
+    }
+
     /**
      * @brief Templated method that applies special n-qubit gates.
      *
@@ -792,387 +642,6 @@ class StateVectorKokkos final
     }
 
     /**
-     * @brief Apply a PauliX operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params Parameters for this gate
-     */
-    void applyPauliX(const std::vector<size_t> &wires, bool inverse = false,
-                     [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<pauliXFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a PauliY operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params Parameters for this gate
-     */
-    void applyPauliY(const std::vector<size_t> &wires, bool inverse = false,
-                     [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<pauliYFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a PauliZ operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params Parameters for this gate
-     */
-
-    void applyPauliZ(const std::vector<size_t> &wires, bool inverse = false,
-                     [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<pauliZFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a Hadamard operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyHadamard(const std::vector<size_t> &wires, bool inverse = false,
-                       [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<hadamardFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a S operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyS(const std::vector<size_t> &wires, bool inverse = false,
-                [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<sFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a T operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyT(const std::vector<size_t> &wires, bool inverse = false,
-                [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<tFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a RX operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyRX(const std::vector<size_t> &wires, bool inverse,
-                 [[maybe_unused]] const std::vector<fp_t> &params) {
-        applyGateFunctor<rxFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a RY operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyRY(const std::vector<size_t> &wires, bool inverse,
-                 [[maybe_unused]] const std::vector<fp_t> &params) {
-        applyGateFunctor<ryFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a RZ operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyRZ(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<rzFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a PhaseShift operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void
-    applyPhaseShift(const std::vector<size_t> &wires, bool inverse = false,
-                    [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<phaseShiftFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a Rot operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyRot(const std::vector<size_t> &wires, bool inverse,
-                  const std::vector<fp_t> &params) {
-        applyGateFunctor<rotFunctor, 1>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a CY operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyCY(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<cyFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a CZ operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyCZ(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<czFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a CNOT operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyCNOT(const std::vector<size_t> &wires, bool inverse = false,
-                   [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<cnotFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a SWAP operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applySWAP(const std::vector<size_t> &wires, bool inverse = false,
-                   [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<swapFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a ControlledPhaseShift operator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyControlledPhaseShift(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<controlledPhaseShiftFunctor, 2>(wires, inverse,
-                                                         params);
-    }
-
-    /**
-     * @brief Apply a CRX operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyCRX(const std::vector<size_t> &wires, bool inverse = false,
-                  [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<crxFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a CRY operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyCRY(const std::vector<size_t> &wires, bool inverse = false,
-                  [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<cryFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a CRZ operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyCRZ(const std::vector<size_t> &wires, bool inverse = false,
-                  [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<crzFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a CRot operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyCRot(const std::vector<size_t> &wires, bool inverse,
-                   [[maybe_unused]] const std::vector<fp_t> &params) {
-        applyGateFunctor<cRotFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a IsingXX operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyIsingXX(const std::vector<size_t> &wires, bool inverse = false,
-                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<isingXXFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a IsingXY operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyIsingXY(const std::vector<size_t> &wires, bool inverse = false,
-                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<isingXYFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a IsingYY operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyIsingYY(const std::vector<size_t> &wires, bool inverse = false,
-                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<isingYYFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a IsingZZ operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyIsingZZ(const std::vector<size_t> &wires, bool inverse = false,
-                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<isingZZFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a SingleExcitation operator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applySingleExcitation(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<singleExcitationFunctor, 2>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a SingleExcitationMinus operator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applySingleExcitationMinus(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<singleExcitationMinusFunctor, 2>(wires, inverse,
-                                                          params);
-    }
-
-    /**
-     * @brief Apply a SingleExcitationPlus operator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applySingleExcitationPlus(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<singleExcitationPlusFunctor, 2>(wires, inverse,
-                                                         params);
-    }
-
-    /**
-     * @brief Apply a DoubleExcitation operator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyDoubleExcitation(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<doubleExcitationFunctor, 4>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a DoubleExcitationMinus operator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyDoubleExcitationMinus(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<doubleExcitationMinusFunctor, 4>(wires, inverse,
-                                                          params);
-    }
-
-    /**
-     * @brief Apply a DoubleExcitationPlus operator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyDoubleExcitationPlus(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<doubleExcitationPlusFunctor, 4>(wires, inverse,
-                                                         params);
-    }
-
-    /**
      * @brief Apply a MultiRZ operator to the state vector using a matrix
      *
      * @param wires Wires to apply gate to.
@@ -1192,303 +661,6 @@ class StateVectorKokkos final
                 Kokkos::RangePolicy<KokkosExecSpace>(0, exp2(num_qubits)),
                 multiRZFunctor<fp_t, true>(*data_, num_qubits, wires, params));
         }
-    }
-
-    /**
-     * @brief Apply a CSWAP operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyCSWAP(const std::vector<size_t> &wires, bool inverse = false,
-                    [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<cSWAPFunctor, 3>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a Toffoli operator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    void applyToffoli(const std::vector<size_t> &wires, bool inverse = false,
-                      [[maybe_unused]] const std::vector<fp_t> &params = {}) {
-        applyGateFunctor<toffoliFunctor, 3>(wires, inverse, params);
-    }
-
-    /**
-     * @brief Apply a PhaseShift generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorPhaseShift(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorPhaseShiftFunctor, 1>(wires, inverse, params);
-        return static_cast<fp_t>(1.0);
-    }
-
-    /**
-     * @brief Apply a IsingXX generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorIsingXX(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorIsingXXFunctor, 2>(wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a IsingXY generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorIsingXY(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorIsingXYFunctor, 2>(wires, inverse, params);
-        return static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a IsingYY generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorIsingYY(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorIsingYYFunctor, 2>(wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a IsingZZ generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorIsingZZ(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorIsingZZFunctor, 2>(wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a SingleExcitation generator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorSingleExcitation(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorSingleExcitationFunctor, 2>(wires, inverse,
-                                                              params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a SingleExcitationMinus generator to the state vector using
-     * a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorSingleExcitationMinus(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorSingleExcitationMinusFunctor, 2>(
-            wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a SingleExcitationPlus generator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorSingleExcitationPlus(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorSingleExcitationPlusFunctor, 2>(
-            wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a DoubleExcitation generator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorDoubleExcitation(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorDoubleExcitationFunctor, 4>(wires, inverse,
-                                                              params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a DoubleExcitationMinus generator to the state vector using
-     * a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorDoubleExcitationMinus(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorDoubleExcitationMinusFunctor, 4>(
-            wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a DoubleExcitationPlus generator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorDoubleExcitationPlus(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorDoubleExcitationPlusFunctor, 4>(
-            wires, inverse, params);
-        return static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a RX generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorRX(const std::vector<size_t> &wires,
-                          bool inverse = false,
-                          [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
-        applyPauliX(wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a RY generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorRY(const std::vector<size_t> &wires,
-                          bool inverse = false,
-                          [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
-        applyPauliY(wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a RZ generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorRZ(const std::vector<size_t> &wires,
-                          bool inverse = false,
-                          [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
-        applyPauliZ(wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a ControlledPhaseShift generator to the state vector using a
-     * matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto applyGeneratorControlledPhaseShift(
-        const std::vector<size_t> &wires, bool inverse = false,
-        [[maybe_unused]] const std::vector<fp_t> &params = {}) -> fp_t {
-        applyGateFunctor<generatorControlledPhaseShiftFunctor, 2>(
-            wires, inverse, params);
-        return static_cast<fp_t>(1);
-    }
-
-    /**
-     * @brief Apply a CRX generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto
-    applyGeneratorCRX(const std::vector<size_t> &wires, bool inverse = false,
-                      [[maybe_unused]] const std::vector<fp_t> &params = {})
-
-        -> fp_t {
-        applyGateFunctor<generatorCRXFunctor, 2>(wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a CRY generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto
-    applyGeneratorCRY(const std::vector<size_t> &wires, bool inverse = false,
-                      [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
-        applyGateFunctor<generatorCRYFunctor, 2>(wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
-    }
-
-    /**
-     * @brief Apply a CRZ generator to the state vector using a matrix
-     *
-     * @param wires Wires to apply gate to.
-     * @param inverse Indicates whether to use adjoint of gate.
-     * @param params parameters for this gate
-     */
-    auto
-    applyGeneratorCRZ(const std::vector<size_t> &wires, bool inverse = false,
-                      [[maybe_unused]] const std::vector<fp_t> &params = {})
-        -> fp_t {
-        applyGateFunctor<generatorCRZFunctor, 2>(wires, inverse, params);
-        return -static_cast<fp_t>(0.5);
     }
 
     /**
@@ -1515,20 +687,6 @@ class StateVectorKokkos final
         }
         return -static_cast<fp_t>(0.5);
     }
-
-    /**
-     * @brief Get the number of qubits of the state vector.
-     *
-     * @return The number of qubits of the state vector
-     */
-    size_t getNumQubits() const { return num_qubits_; }
-
-    /**
-     * @brief Get the size of the state vector
-     *
-     * @return The size of the state vector
-     */
-    size_t getLength() const { return length_; }
 
     /**
      * @brief Update data of the class
@@ -1591,12 +749,13 @@ class StateVectorKokkos final
      * @brief Get underlying data vector
      */
     [[nodiscard]] auto getDataVector() -> std::vector<ComplexT> {
-        std::vector<ComplexT> data_(getData(), getData() + getLength());
+        std::vector<ComplexT> data_(getData(), getData() + this->getLength());
         return data_;
     }
 
     [[nodiscard]] auto getDataVector() const -> const std::vector<ComplexT> {
-        const std::vector<ComplexT> data_(getData(), getData() + getLength());
+        const std::vector<ComplexT> data_(getData(),
+                                          getData() + this->getLength());
         return data_;
     }
 
@@ -1625,21 +784,79 @@ class StateVectorKokkos final
     }
 
   private:
-    using GateFunc = std::function<void(const std::vector<size_t> &, bool,
-                                        const std::vector<fp_t> &)>;
-    using GateMap = std::unordered_map<std::string, GateFunc>;
-    const GateMap gates_;
-
-    using GeneratorFunc = std::function<fp_t(const std::vector<size_t> &, bool,
-                                             const std::vector<fp_t> &)>;
-    using GeneratorMap = std::unordered_map<std::string, GeneratorFunc>;
-    const GeneratorMap generator_;
+    std::unordered_map<std::string, GateOperation> gates_indices_;
+    std::unordered_map<std::string, GeneratorOperation> generators_indices_;
 
     size_t num_qubits_;
-    size_t length_;
     std::mutex init_mutex_;
     std::unique_ptr<KokkosVector> data_;
     inline static bool is_exit_reg_ = false;
+    // clang-format off
+    /**
+    * @brief Register gate operations in the gates_indices_ attribute: 
+    *        an unordered_map mapping strings to GateOperation enumeration keywords.
+    */
+    void init_gates_indices_() {
+        gates_indices_["PauliX"]                = GateOperation::PauliX;
+        gates_indices_["PauliY"]                = GateOperation::PauliY;
+        gates_indices_["PauliZ"]                = GateOperation::PauliZ;
+        gates_indices_["Hadamard"]              = GateOperation::Hadamard;
+        gates_indices_["S"]                     = GateOperation::S;
+        gates_indices_["T"]                     = GateOperation::T;
+        gates_indices_["RX"]                    = GateOperation::RX;
+        gates_indices_["RY"]                    = GateOperation::RY;
+        gates_indices_["RZ"]                    = GateOperation::RZ;
+        gates_indices_["PhaseShift"]            = GateOperation::PhaseShift;
+        gates_indices_["Rot"]                   = GateOperation::Rot;
+        gates_indices_["CY"]                    = GateOperation::CY;
+        gates_indices_["CZ"]                    = GateOperation::CZ;
+        gates_indices_["CNOT"]                  = GateOperation::CNOT;
+        gates_indices_["SWAP"]                  = GateOperation::SWAP;
+        gates_indices_["ControlledPhaseShift"]  = GateOperation::ControlledPhaseShift;
+        gates_indices_["CRX"]                   = GateOperation::CRX;
+        gates_indices_["CRY"]                   = GateOperation::CRY;
+        gates_indices_["CRZ"]                   = GateOperation::CRZ;
+        gates_indices_["CRot"]                  = GateOperation::CRot;
+        gates_indices_["IsingXX"]               = GateOperation::IsingXX;
+        gates_indices_["IsingXY"]               = GateOperation::IsingXY;
+        gates_indices_["IsingYY"]               = GateOperation::IsingYY;
+        gates_indices_["IsingZZ"]               = GateOperation::IsingZZ;
+        gates_indices_["SingleExcitation"]      = GateOperation::SingleExcitation;
+        gates_indices_["SingleExcitationMinus"] = GateOperation::SingleExcitationMinus;
+        gates_indices_["SingleExcitationPlus"]  = GateOperation::SingleExcitationPlus;
+        gates_indices_["DoubleExcitation"]      = GateOperation::DoubleExcitation;
+        gates_indices_["DoubleExcitationMinus"] = GateOperation::DoubleExcitationMinus;
+        gates_indices_["DoubleExcitationPlus"]  = GateOperation::DoubleExcitationPlus;
+        gates_indices_["MultiRZ"]               = GateOperation::MultiRZ;
+        gates_indices_["CSWAP"]                 = GateOperation::CSWAP;
+        gates_indices_["Toffoli"]               = GateOperation::Toffoli;
+    }
+    /**
+    * @brief Register generator operations in the generators_indices_ attribute:
+    *        an unordered_map mapping strings to GateOperation enumeration keywords.
+    */
+    void init_generators_indices_() {
+        generators_indices_["RX"]                    = GeneratorOperation::RX;
+        generators_indices_["RY"]                    = GeneratorOperation::RY;
+        generators_indices_["RZ"]                    = GeneratorOperation::RZ;
+        generators_indices_["ControlledPhaseShift"]  = GeneratorOperation::ControlledPhaseShift;
+        generators_indices_["CRX"]                   = GeneratorOperation::CRX;
+        generators_indices_["CRY"]                   = GeneratorOperation::CRY;
+        generators_indices_["CRZ"]                   = GeneratorOperation::CRZ;
+        generators_indices_["IsingXX"]               = GeneratorOperation::IsingXX;
+        generators_indices_["IsingXY"]               = GeneratorOperation::IsingXY;
+        generators_indices_["IsingYY"]               = GeneratorOperation::IsingYY;
+        generators_indices_["IsingZZ"]               = GeneratorOperation::IsingZZ;
+        generators_indices_["SingleExcitation"]      = GeneratorOperation::SingleExcitation;
+        generators_indices_["SingleExcitationMinus"] = GeneratorOperation::SingleExcitationMinus;
+        generators_indices_["SingleExcitationPlus"]  = GeneratorOperation::SingleExcitationPlus;
+        generators_indices_["DoubleExcitation"]      = GeneratorOperation::DoubleExcitation;
+        generators_indices_["DoubleExcitationMinus"] = GeneratorOperation::DoubleExcitationMinus;
+        generators_indices_["DoubleExcitationPlus"]  = GeneratorOperation::DoubleExcitationPlus;
+        generators_indices_["PhaseShift"]            = GeneratorOperation::PhaseShift;
+        generators_indices_["MultiRZ"]               = GeneratorOperation::MultiRZ;
+    }
+    // clang-format on
 };
 
 }; // namespace Pennylane::LightningKokkos
