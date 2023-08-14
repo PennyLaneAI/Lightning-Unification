@@ -202,4 +202,33 @@ class Hamiltonian final : public HamiltonianBase<StateVectorT> {
     }
 };
 
+/// @cond DEV
+namespace detail {
+using Pennylane::LightningKokkos::Util::axpy_Kokkos;
+// Default implementation
+template <class StateVectorT, bool use_openmp> struct HamiltonianApplyInPlace {
+    using PrecisionT = typename StateVectorT::PrecisionT;
+    using ComplexT = typename StateVectorT::ComplexT;
+    using KokkosVector = typename StateVectorT::KokkosVector;
+    static void
+    run(const std::vector<PrecisionT> &coeffs,
+        const std::vector<std::shared_ptr<Observable<StateVectorT>>> &terms,
+        StateVectorT &sv) {
+        KokkosVector res("results", sv.getLength());
+        Kokkos::deep_copy(res, ComplexT{0.0, 0.0});
+        for (size_t term_idx = 0; term_idx < coeffs.size(); term_idx++) {
+            StateVectorT tmp(sv.getNumQubits());
+            tmp.DeviceToDevice(sv.getView());
+            terms[term_idx]->applyInPlace(tmp);
+            LightningKokkos::Util::axpy_Kokkos<PrecisionT>(
+                ComplexT{coeffs[term_idx], 0.0}, tmp.getView(), res,
+                tmp.getLength());
+        }
+        sv.updateData(res);
+    }
+};
+
+} // namespace detail
+/// @endcond
+
 } // namespace Pennylane::LightningKokkos::Observables
