@@ -54,7 +54,7 @@ jobs:
       matrix:
         os: [macos-11]
         arch: [arm64]
-        pl_backend: ["lightning_qubit"]
+        pl_backend: ["lightning_kokkos", "lightning_qubit"]
         cibw_build: ${{fromJson(needs.mac-set-matrix-arm.outputs.python_version)}}
 
     name: macos-latest::arm64 - ${{ matrix.pl_backend }} (Python ${{ fromJson('{ "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }})
@@ -85,7 +85,8 @@ jobs:
             python -m pip install pybind11 ninja cmake~=3.24.0 setuptools
 
           CIBW_ENVIRONMENT: |
-            CMAKE_ARGS="-DCMAKE_CXX_COMPILER_TARGET=arm64-apple-macos11 -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_SYSTEM_PROCESSOR=ARM64 -DENABLE_OPENMP=OFF"
+            CMAKE_ARGS="-DCMAKE_CXX_COMPILER_TARGET=arm64-apple-macos11 -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_SYSTEM_PROCESSOR=ARM64 -DENABLE_OPENMP=OFF" \
+            PL_BACKEND="${{ matrix.pl_backend }}"
 
           # Testing of built wheels
           CIBW_TEST_REQUIRES: pytest pytest-cov pytest-mock flaky
@@ -93,9 +94,10 @@ jobs:
           CIBW_BEFORE_TEST: python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
 
           CIBW_TEST_COMMAND: |
-            pl-device-test --device=lightning.qubit --skip-ops -x --tb=short --no-flaky-report
+            DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
+            pl-device-test --device=${DEVICENAME} --skip-ops -x --tb=short --no-flaky-report
 
-          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BUILD_VERBOSITY: 3
 
           CIBW_ARCHS_MACOS: ${{ matrix.arch }}
 
