@@ -19,26 +19,32 @@ interfaces with C++ for fast linear algebra calculations.
 from warnings import warn
 import numpy as np
 
-from .lightning_base import LightningBase, LightningBaseFallBack, _chunk_iterable
+from pennylane_lightning.core.lightning_base import (
+    LightningBase,
+    LightningBaseFallBack,
+    _chunk_iterable,
+)
 
 try:
     # pylint: disable=import-error, no-name-in-module
-    from .lightning_qubit_ops import (
+    from ..lightning_kokkos_ops import (
         allocate_aligned_array,
-        get_alignment,
-        best_alignment,
-        MeasurementsC64,
-        StateVectorC64,
-        MeasurementsC128,
-        StateVectorC128,
         backend_info,
+        best_alignment,
+        get_alignment,
+        InitializationSettings,
+        MeasurementsC128,
+        MeasurementsC64,
+        print_configuration,
+        StateVectorC128,
+        StateVectorC64,
     )
 
-    LQ_CPP_BINARY_AVAILABLE = True
+    LK_CPP_BINARY_AVAILABLE = True
 except ImportError:
-    LQ_CPP_BINARY_AVAILABLE = False
+    LK_CPP_BINARY_AVAILABLE = False
 
-if LQ_CPP_BINARY_AVAILABLE:
+if LK_CPP_BINARY_AVAILABLE:
     from typing import List
     from os import getenv
 
@@ -52,24 +58,31 @@ if LQ_CPP_BINARY_AVAILABLE:
         QuantumFunctionError,
     )
     from pennylane.operation import Tensor
+    from pennylane.ops.op_math import Adjoint
     from pennylane.measurements import MeasurementProcess, Expectation, State
     from pennylane.wires import Wires
 
     import pennylane as qml
 
-    from ._version import __version__
+    from pennylane_lightning.core._version import __version__
 
     # pylint: disable=import-error, no-name-in-module
-    from .lightning_qubit_ops.algorithms import (
+    from ..lightning_kokkos_ops.algorithms import (
         AdjointJacobianC64,
         create_ops_listC64,
-        VectorJacobianProductC64,
         AdjointJacobianC128,
         create_ops_listC128,
-        VectorJacobianProductC128,
     )
 
-    from ._serialize import QuantumScriptSerializer
+    from pennylane_lightning.core._serialize import QuantumScriptSerializer
+
+    def _kokkos_dtype(dtype):
+        if dtype not in [np.complex128, np.complex64]:
+            raise ValueError(f"Data type is not supported for state-vector computation: {dtype}")
+        return StateVectorC128 if dtype == np.complex128 else StateVectorC64
+
+    def _kokkos_configuration():
+        return print_configuration()
 
     allowed_operations = {
         "Identity",
@@ -137,7 +150,6 @@ if LQ_CPP_BINARY_AVAILABLE:
         "Hadamard",
         "Hermitian",
         "Identity",
-        "Projector",
         "SparseHamiltonian",
         "Hamiltonian",
         "Sum",
@@ -146,8 +158,8 @@ if LQ_CPP_BINARY_AVAILABLE:
         "Exp",
     }
 
-    class LightningQubit(LightningBase):
-        """PennyLane Lightning Qubit device.
+    class LightningKokkos(LightningBase):
+        """PennyLane Lightning Kokkos device.
 
         A device that interfaces with C++ to perform fast linear algebra calculations.
 
@@ -156,29 +168,20 @@ if LQ_CPP_BINARY_AVAILABLE:
 
         Args:
             wires (int): the number of wires to initialize the device with
+            sync (bool): immediately sync with host-sv after applying operations
             c_dtype: Datatypes for statevector representation. Must be one of
                 ``np.complex64`` or ``np.complex128``.
+            kokkos_args (InitializationSettings): binding for Kokkos::InitializationSettings
+                (threading parameters).
             shots (int): How many times the circuit should be evaluated (or sampled) to estimate
                 the expectation values. Defaults to ``None`` if not specified. Setting
                 to ``None`` results in computing statistics like expectation values and
                 variances analytically.
-            mcmc (bool): Determine whether to use the approximate Markov Chain Monte Carlo
-                sampling method when generating samples.
-            kernel_name (str): name of transition kernel. The current version supports
-                two kernels: ``"Local"`` and ``"NonZeroRandom"``.
-                The local kernel conducts a bit-flip local transition between states.
-                The local kernel generates a random qubit site and then generates a random
-                number to determine the new bit at that qubit site. The ``"NonZeroRandom"`` kernel
-                randomly transits between states that have nonzero probability.
-            num_burnin (int): number of steps that will be dropped. Increasing this value will
-                result in a closer approximation but increased runtime.
-            batch_obs (bool): Determine whether we process observables in parallel when
-                computing the jacobian. This value is only relevant when the lightning
-                qubit is built with OpenMP.
         """
 
-        name = "Lightning Qubit PennyLane plugin"
-        short_name = "lightning.qubit"
+        name = "Lightning Kokkos PennyLane plugin"
+        short_name = "lightning.kokkos"
+        kokkos_config = {}
         operations = allowed_operations
         observables = allowed_observables
         _backend_info = backend_info
@@ -187,34 +190,31 @@ if LQ_CPP_BINARY_AVAILABLE:
             self,
             wires,
             *,
+            sync=True,
             c_dtype=np.complex128,
             shots=None,
-            mcmc=False,
-            kernel_name="Local",
-            num_burnin=100,
             batch_obs=False,
+            kokkos_args=None,
         ):
             super().__init__(wires, shots=shots, c_dtype=c_dtype)
 
+            if kokkos_args is None:
+                self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires)
+            elif isinstance(kokkos_args, InitializationSettings):
+                self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires, kokkos_args)
+            else:
+                type0 = type(InitializationSettings())
+                raise TypeError(
+                    f"Argument kokkos_args must be of {type0} but it is of {type(kokkos_args)}."
+                )
+            self._sync = sync
+
+            if not LightningKokkos.kokkos_config:
+                LightningKokkos.kokkos_config = _kokkos_configuration()
+
             # Create the initial state. Internally, we store the
             # state as an array of dimension [2]*wires.
-            self._state = self._create_basis_state(0)
-            self._pre_rotated_state = self._state
-
-            self._mcmc = mcmc
-            if self._mcmc:
-                if kernel_name not in [
-                    "Local",
-                    "NonZeroRandom",
-                ]:
-                    raise NotImplementedError(
-                        f"The {kernel_name} is not supported and currently "
-                        "only 'Local' and 'NonZeroRandom' kernels are supported."
-                    )
-                if num_burnin >= shots:
-                    raise ValueError("Shots should be greater than num_burnin.")
-                self._kernel_name = kernel_name
-                self._num_burnin = num_burnin
+            self._pre_rotated_state = _kokkos_dtype(c_dtype)(self.num_wires)
 
         @staticmethod
         def _asarray(arr, dtype=None):
@@ -226,9 +226,9 @@ if LQ_CPP_BINARY_AVAILABLE:
             if not dtype:
                 dtype = arr.dtype
 
-            # We allocate a new aligned memory and copy data to there if alignment or dtype
-            # mismatches
-            # Note that get_alignment does not necessarily return CPUMemoryModel(Unaligned)
+            # We allocate a new aligned memory and copy data to there if alignment
+            # or dtype mismatches
+            # Note that get_alignment does not necessarily return CPUMemoryModel(Unaligned) even for
             # numpy allocated memory as the memory location happens to be aligned.
             if int(get_alignment(arr)) < int(best_alignment()) or arr.dtype != dtype:
                 new_arr = allocate_aligned_array(arr.size, np.dtype(dtype)).reshape(arr.shape)
@@ -245,30 +245,64 @@ if LQ_CPP_BINARY_AVAILABLE:
                 representing the statevector of the basis state
             Note: This function does not support broadcasted inputs yet.
             """
-            state = np.zeros(2**self.num_wires, dtype=np.complex128)
-            state[index] = 1
-            state = self._asarray(state, dtype=self.C_DTYPE)
-            return self._reshape(state, [2] * self.num_wires)
+            self._kokkos_state.setBasisState(index)
 
         def reset(self):
             """Reset the device"""
             super().reset()
 
             # init the state vector to |00..0>
-            self._state = self._create_basis_state(0)
-            self._pre_rotated_state = self._state
+            self._kokkos_state.resetStateVector()  # Sync reset
+
+        def sync_h2d(self, state_vector):
+            """Copy the state vector data on host provided by the user to the state
+            vector on the device
+
+            Args:
+                state_vector(array[complex]): the state vector array on host.
+
+
+            **Example**
+            >>> dev = qml.device('lightning.kokkos', wires=3)
+            >>> obs = qml.Identity(0) @ qml.PauliX(1) @ qml.PauliY(2)
+            >>> obs1 = qml.Identity(1)
+            >>> H = qml.Hamiltonian([1.0, 1.0], [obs1, obs])
+            >>> state_vector = np.array([0.0 + 0.0j, 0.0 + 0.1j, 0.1 + 0.1j, 0.1 + 0.2j,
+                0.2 + 0.2j, 0.3 + 0.3j, 0.3 + 0.4j, 0.4 + 0.5j,], dtype=np.complex64,)
+            >>> dev.sync_h2d(state_vector)
+            >>> res = dev.expval(H)
+            >>> print(res)
+            1.0
+            """
+            self._kokkos_state.HostToDevice(state_vector.ravel(order="C"))
+
+        def sync_d2h(self, state_vector):
+            """Copy the state vector data on device to a state vector on the host provided
+            by the user
+
+            Args:
+                state_vector(array[complex]): the state vector array on host
+
+
+            **Example**
+            >>> dev = qml.device('lightning.kokkos', wires=1)
+            >>> dev.apply([qml.PauliX(wires=[0])])
+            >>> state_vector = np.zeros(2**dev.num_wires).astype(dev.C_DTYPE)
+            >>> dev.sync_d2h(state_vector)
+            >>> print(state_vector)
+            [0.+0.j 1.+0.j]
+            """
+            self._kokkos_state.DeviceToHost(state_vector.ravel(order="C"))
 
         @property
         def create_ops_list(self):
-            """Returns create_ops_list function matching ``use_csingle`` precision."""
+            """Returns create_ops_list function of the matching precision."""
             return create_ops_listC64 if self.use_csingle else create_ops_listC128
 
         @property
         def measurements(self):
-            """Returns a Measurements object matching ``use_csingle`` precision."""
-            ket = np.ravel(self._state)
-            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
-            # state_vector = self.state_vector
+            """Returns Measurements constructor of the matching precision."""
+            state_vector = self.state_vector
             return (
                 MeasurementsC64(state_vector)
                 if self.use_csingle
@@ -277,23 +311,42 @@ if LQ_CPP_BINARY_AVAILABLE:
 
         @property
         def state(self):
-            # Flattening the state.
-            shape = (1 << self.num_wires,)
-            return self._reshape(self._pre_rotated_state, shape)
+            """Copy the state vector data from the device to the host.
+
+            A state vector Numpy array is explicitly allocated on the host to store and return
+            the data.
+
+            **Example**
+            >>> dev = qml.device('lightning.kokkos', wires=1)
+            >>> dev.apply([qml.PauliX(wires=[0])])
+            >>> print(dev.state)
+            [0.+0.j 1.+0.j]
+            """
+            state = np.zeros(2**self.num_wires, dtype=self.C_DTYPE)
+            state = self._asarray(state, dtype=self.C_DTYPE)
+            self.sync_d2h(state)
+            return state
 
         @property
         def state_vector(self):
-            """Returns a handle to a StateVector object matching ``use_csingle`` precision."""
-            ket = np.ravel(self._state)
-            return StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
+            """Returns a handle to the statevector."""
+            return self._kokkos_state
 
         def _apply_state_vector(self, state, device_wires):
             """Initialize the internal state vector in a specified state.
+
             Args:
                 state (array[complex]): normalized input state of length ``2**len(wires)``
                     or broadcasted state of shape ``(batch_size, 2**len(wires))``
                 device_wires (Wires): wires that get initialized in the state
             """
+
+            if isinstance(state, self._kokkos_state.__class__):
+                state_data = np.zeros(state.size, dtype=self.C_DTYPE)
+                state_data = self._asarray(state_data, dtype=self.C_DTYPE)
+                state.DeviceToHost(state_data.ravel(order="C"))
+                state = state_data
+
             ravelled_indices, state = self._preprocess_state_vector(state, device_wires)
 
             # translate to wire labels used by device
@@ -302,12 +355,10 @@ if LQ_CPP_BINARY_AVAILABLE:
 
             if len(device_wires) == self.num_wires and Wires(sorted(device_wires)) == device_wires:
                 # Initialize the entire device state with the input state
-                self._state = self._reshape(state, output_shape)
+                self.sync_h2d(self._reshape(state, output_shape))
                 return
 
-            state = self._scatter(ravelled_indices, state, [2**self.num_wires])
-            state = self._reshape(state, output_shape)
-            self._state = self._asarray(state, dtype=self.C_DTYPE)
+            self._kokkos_state.setStateVector(ravelled_indices, state)  # this operation on device
 
         def _apply_basis_state(self, state, wires):
             """Initialize the state vector in a specified computational basis state.
@@ -315,19 +366,17 @@ if LQ_CPP_BINARY_AVAILABLE:
             Args:
                 state (array[int]): computational basis state of shape ``(wires,)``
                     consisting of 0s and 1s.
-                wires (Wires): wires that the provided computational state should be
-                    initialized on
+                wires (Wires): wires that the provided computational state should be initialized on
 
             Note: This function does not support broadcasted inputs yet.
             """
             num = self._get_basis_state_index(state, wires)
-            self._state = self._create_basis_state(num)
+            self._create_basis_state(num)
 
-        def apply_lightning(self, state, operations):
+        def apply_lightning(self, operations):
             """Apply a list of operations to the state tensor.
 
             Args:
-                state (array[complex]): the input state tensor
                 operations (list[~pennylane.operation.Operation]): operations to apply
                 dtype (type): Type of numpy ``complex`` to be used. Can be important
                 to specify for large systems for memory allocation purposes.
@@ -335,35 +384,45 @@ if LQ_CPP_BINARY_AVAILABLE:
             Returns:
                 array[complex]: the output state tensor
             """
-            state_vector = np.ravel(state)
-            sim = (
-                StateVectorC64(state_vector) if self.use_csingle else StateVectorC128(state_vector)
-            )
-
             # Skip over identity operations instead of performing
-            # matrix multiplication with it.
-            for operation in operations:
-                if operation.name == "Identity":
-                    continue
-                method = getattr(sim, operation.name, None)
+            # matrix multiplication with the identity.
+            invert_param = False
+            state = self.state_vector
 
-                wires = self.wires.indices(operation.wires)
+            for ops in operations:
+                if str(ops.name) == "Identity":
+                    continue
+                name = ops.name
+                if isinstance(ops, Adjoint):
+                    name = ops.base.name
+                    invert_param = True
+                method = getattr(state, name, None)
+
+                wires = self.wires.indices(ops.wires)
+
                 if method is None:
-                    # Inverse can be set to False since qml.matrix(operation) is already in
-                    # inverted form
-                    method = getattr(sim, "applyMatrix")
+                    # Inverse can be set to False since qml.matrix(ops) is already in inverted form
                     try:
-                        method(qml.matrix(operation), wires, False)
+                        mat = qml.matrix(ops)
                     except AttributeError:  # pragma: no cover
                         # To support older versions of PL
-                        method(operation.matrix, wires, False)
+                        mat = ops.matrix
+
+                    if len(mat) == 0:
+                        raise ValueError("Unsupported operation")
+                    state.apply(
+                        name,
+                        wires,
+                        False,
+                        [],
+                        mat.ravel(order="C"),  # inv = False: Matrix already in correct form;
+                    )  # Parameters can be ignored for explicit matrices; F-order for cuQuantum
+
                 else:
-                    inv = False
-                    param = operation.parameters
-                    method(wires, inv, param)
+                    param = ops.parameters
+                    method(wires, invert_param, param)
 
-            return np.reshape(state_vector, state.shape)
-
+        # pylint: disable=unused-argument
         def apply(self, operations, rotations=None, **kwargs):
             # State preparation is currently done in Python
             if operations:  # make sure operations[0] exists
@@ -380,18 +439,10 @@ if LQ_CPP_BINARY_AVAILABLE:
                 if isinstance(operation, (QubitStateVector, BasisState)):
                     raise DeviceError(
                         f"Operation {operation.name} cannot be used after other "
-                        f"Operations have already been applied on a {self.short_name} device."
+                        + f"Operations have already been applied on a {self.short_name} device."
                     )
 
-            if operations:
-                self._pre_rotated_state = self.apply_lightning(self._state, operations)
-            else:
-                self._pre_rotated_state = self._state
-
-            if rotations:
-                self._state = self.apply_lightning(np.copy(self._pre_rotated_state), rotations)
-            else:
-                self._state = self._pre_rotated_state
+            self.apply_lightning(operations)
 
         # pylint: disable=protected-access
         def expval(self, observable, shot_range=None, bin_size=None):
@@ -409,7 +460,6 @@ if LQ_CPP_BINARY_AVAILABLE:
                 Expectation value of the observable
             """
             if observable.name in [
-                "Identity",
                 "Projector",
             ]:
                 return super().expval(observable, shot_range=shot_range, bin_size=bin_size)
@@ -421,17 +471,14 @@ if LQ_CPP_BINARY_AVAILABLE:
                 return np.squeeze(np.mean(samples, axis=0))
 
             # Initialization of state
-            ket = np.ravel(self._pre_rotated_state)
-
-            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
-            measurements = (
-                MeasurementsC64(state_vector)
+            measure = (
+                MeasurementsC64(self.state_vector)
                 if self.use_csingle
-                else MeasurementsC128(state_vector)
+                else MeasurementsC128(self.state_vector)
             )
             if observable.name == "SparseHamiltonian":
                 csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
-                return measurements.expval(
+                return measure.expval(
                     csr_hamiltonian.indptr,
                     csr_hamiltonian.indices,
                     csr_hamiltonian.data,
@@ -445,12 +492,12 @@ if LQ_CPP_BINARY_AVAILABLE:
                 ob_serialized = QuantumScriptSerializer(self.short_name, self.use_csingle)._ob(
                     observable, self.wire_map
                 )
-                return measurements.expval(ob_serialized)
+                return measure.expval(ob_serialized)
 
             # translate to wire labels used by device
             observable_wires = self.map_wires(observable.wires)
 
-            return measurements.expval(observable.name, observable_wires)
+            return measure.expval(observable.name, observable_wires)
 
         def var(self, observable, shot_range=None, bin_size=None):
             """Variance of the supplied observable.
@@ -467,30 +514,26 @@ if LQ_CPP_BINARY_AVAILABLE:
                 Variance of the observable
             """
             if observable.name in [
-                "Identity",
                 "Projector",
             ]:
                 return super().var(observable, shot_range=shot_range, bin_size=bin_size)
 
             if self.shots is not None:
                 # estimate the var
-                # LightningQubit doesn't support sampling yet
+                # LightningKokkos doesn't support sampling yet
                 samples = self.sample(observable, shot_range=shot_range, bin_size=bin_size)
                 return np.squeeze(np.var(samples, axis=0))
 
             # Initialization of state
-            ket = np.ravel(self._pre_rotated_state)
-
-            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
-            measurements = (
-                MeasurementsC64(state_vector)
+            measure = (
+                MeasurementsC64(self.state_vector)
                 if self.use_csingle
-                else MeasurementsC128(state_vector)
+                else MeasurementsC128(self.state_vector)
             )
 
             if observable.name == "SparseHamiltonian":
                 csr_hamiltonian = observable.sparse_matrix(wire_order=self.wires).tocsr(copy=False)
-                return measurements.var(
+                return measure.var(
                     csr_hamiltonian.indptr,
                     csr_hamiltonian.indices,
                     csr_hamiltonian.data,
@@ -504,36 +547,26 @@ if LQ_CPP_BINARY_AVAILABLE:
                 ob_serialized = QuantumScriptSerializer(self.short_name, self.use_csingle)._ob(
                     observable, self.wire_map
                 )
-                return measurements.var(ob_serialized)
+                return measure.var(ob_serialized)
 
             # translate to wire labels used by device
             observable_wires = self.map_wires(observable.wires)
 
-            return measurements.var(observable.name, observable_wires)
+            return measure.var(observable.name, observable_wires)
 
         def generate_samples(self):
             """Generate samples
 
             Returns:
                 array[int]: array of samples in binary representation with shape
-                    ``(dev.shots, dev.num_wires)``
+                ``(dev.shots, dev.num_wires)``
             """
-            # Initialization of state
-            ket = np.ravel(self._state)
-
-            state_vector = StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
-            measurements = (
-                MeasurementsC64(state_vector)
+            measure = (
+                MeasurementsC64(self._kokkos_state)
                 if self.use_csingle
-                else MeasurementsC128(state_vector)
+                else MeasurementsC128(self._kokkos_state)
             )
-            if self._mcmc:
-                return measurements.generate_mcmc_samples(
-                    len(self.wires), self._kernel_name, self._num_burnin, self.shots
-                ).astype(int, copy=False)
-            return measurements.generate_samples(len(self.wires), self.shots).astype(
-                int, copy=False
-            )
+            return measure.generate_samples(len(self.wires), self.shots).astype(int, copy=False)
 
         def probability_lightning(self, wires):
             """Return the probability of each computational basis state.
@@ -545,12 +578,15 @@ if LQ_CPP_BINARY_AVAILABLE:
             Returns:
                 array[float]: list of the probabilities
             """
-            state_vector = self.state_vector
-            return (
-                MeasurementsC64(state_vector)
-                if self.use_csingle
-                else MeasurementsC128(state_vector)
-            ).probs(wires)
+            return self.measurements.probs(wires)
+
+        def sample(self, observable, shot_range=None, bin_size=None, counts=False):
+            if observable.name != "PauliZ":
+                self.apply_lightning(observable.diagonalizing_gates())
+                self._samples = self.generate_samples()
+            return super().sample(
+                observable, shot_range=shot_range, bin_size=bin_size, counts=counts
+            )
 
         @staticmethod
         def _check_adjdiff_supported_measurements(
@@ -568,10 +604,11 @@ if LQ_CPP_BINARY_AVAILABLE:
                 return None
 
             if len(measurements) == 1 and measurements[0].return_type is State:
-                return State
+                # return State
+                raise QuantumFunctionError("Not supported")
 
             # Now the return_type of measurement processes must be expectation
-            if any(measurement.return_type is not Expectation for measurement in measurements):
+            if any(m.return_type is not Expectation for m in measurements):
                 raise QuantumFunctionError(
                     "Adjoint differentiation method does not support expectation return type "
                     "mixed with other return types"
@@ -579,10 +616,10 @@ if LQ_CPP_BINARY_AVAILABLE:
 
             for measurement in measurements:
                 if isinstance(measurement.obs, Tensor):
-                    if any(isinstance(obs, Projector) for obs in measurement.obs.non_identity_obs):
+                    if any(isinstance(o, Projector) for o in measurement.obs.non_identity_obs):
                         raise QuantumFunctionError(
-                            "Adjoint differentiation method does "
-                            "not support the Projector observable"
+                            "Adjoint differentiation method does not support the "
+                            "Projector observable"
                         )
                 elif isinstance(measurement.obs, Projector):
                     raise QuantumFunctionError(
@@ -615,20 +652,17 @@ if LQ_CPP_BINARY_AVAILABLE:
                         "The number of qubits of starting_state must be the same as "
                         "that of the device."
                     )
-                ket = self._asarray(starting_state, dtype=self.C_DTYPE)
-            else:
-                if not use_device_state:
-                    self.reset()
-                    self.apply(tape.operations)
-                ket = self._pre_rotated_state
-            ket = ket.reshape(-1)
-            return StateVectorC64(ket) if self.use_csingle else StateVectorC128(ket)
+                self._apply_state_vector(starting_state, self.wires)
+            elif not use_device_state:
+                self.reset()
+                self.apply(tape.operations)
+            return self.state_vector
 
         def adjoint_jacobian(self, tape, starting_state=None, use_device_state=False):
             if self.shots is not None:
                 warn(
-                    "Requested adjoint differentiation to be computed with finite shots. "
-                    "The derivative is always exact when using the adjoint "
+                    "Requested adjoint differentiation to be computed with finite shots."
+                    " The derivative is always exact when using the adjoint "
                     "differentiation method.",
                     UserWarning,
                 )
@@ -686,7 +720,7 @@ if LQ_CPP_BINARY_AVAILABLE:
             jac_r[:, processed_data["record_tp_rows"]] = jac
             return self._adjoint_jacobian_processing(jac_r) if qml.active_return() else jac_r
 
-        # pylint: disable=line-too-long, inconsistent-return-statements
+        # pylint: disable=inconsistent-return-statements, line-too-long
         def vjp(self, measurements, grad_vec, starting_state=None, use_device_state=False):
             """Generate the processing function required to compute the vector-Jacobian products
             of a tape.
@@ -705,31 +739,30 @@ if LQ_CPP_BINARY_AVAILABLE:
 
                 w_k = \\langle v| \\frac{\\partial}{\\partial \\theta_k} | \\psi_{\\pmb{\\theta}} \\rangle.
 
-            Here, :math:`m` is the total number of trainable parameters, :math:`\\pmb{\\theta}`
-            is the vector of trainable parameters and :math:`\\psi_{\\pmb{\\theta}}`
-            is the output quantum state.
+            Here, :math:`m` is the total number of trainable parameters,
+            :math:`\\pmb{\\theta}` is the vector of trainable parameters and
+            :math:`\\psi_{\\pmb{\\theta}}` is the output quantum state.
 
             Args:
                 measurements (list): List of measurement processes for vector-Jacobian product.
                     Now it must be expectation values or a quantum state.
                 grad_vec (tensor_like): Gradient-output vector. Must have shape matching the output
-                    shape of the corresponding tape, i.e. number of measurements if
-                    the return type is expectation or :math:`2^N` if the return type is statevector
+                    shape of the corresponding tape, i.e. number of measurements if the return
+                    type is expectation or :math:`2^N` if the return type is statevector
                 starting_state (tensor_like): post-forward pass state to start execution with.
                     It should be complex-valued. Takes precedence over ``use_device_state``.
                 use_device_state (bool): use current device state to initialize.
-                    A forward pass of the same circuit should be the last thing
-                    the device has executed. If a ``starting_state`` is provided,
-                    that takes precedence.
+                    A forward pass of the same circuit should be the last thing the device
+                    has executed. If a ``starting_state`` is provided, that takes precedence.
 
             Returns:
                 The processing function required to compute the vector-Jacobian products of a tape.
             """
             if self.shots is not None:
                 warn(
-                    "Requested adjoint differentiation to be computed with finite shots. "
-                    "The derivative is always exact when using the adjoint differentiation "
-                    "method.",
+                    "Requested adjoint differentiation to be computed with finite shots."
+                    " The derivative is always exact when using the adjoint "
+                    "differentiation method.",
                     UserWarning,
                 )
 
@@ -749,13 +782,14 @@ if LQ_CPP_BINARY_AVAILABLE:
 
                 if np.iscomplexobj(grad_vec):
                     raise ValueError(
-                        "The vjp method only works with a real-valued grad_vec when the "
-                        "tape is returning an expectation value"
+                        "The vjp method only works with a real-valued grad_vec when "
+                        "the tape is returning an expectation value"
                     )
 
                 ham = qml.Hamiltonian(grad_vec, [m.obs for m in measurements])
 
-                def processing_fn_expval(tape):
+                # pylint: disable=protected-access
+                def processing_fn(tape):
                     nonlocal ham
                     num_params = len(tape.trainable_params)
 
@@ -767,52 +801,18 @@ if LQ_CPP_BINARY_AVAILABLE:
 
                     return self.adjoint_jacobian(new_tape, starting_state, use_device_state)
 
-                return processing_fn_expval
-
-            if tape_return_type is State:
-                if len(grad_vec) != 2 ** len(self.wires):
-                    raise ValueError(
-                        "Size of the provided vector grad_vec must be the same as "
-                        "the size of the statevector"
-                    )
-                if np.isrealobj(grad_vec):
-                    warn(
-                        "The vjp method only works with complex-valued grad_vec when "
-                        "the tape is returning a statevector. Upcasting grad_vec."
-                    )
-
-                grad_vec = grad_vec.astype(self.C_DTYPE)
-
-                def processing_fn_state(tape):
-                    nonlocal grad_vec
-                    processed_data = self._process_jacobian_tape(
-                        tape, starting_state, use_device_state
-                    )
-                    calculate_vjp = (
-                        VectorJacobianProductC64()
-                        if self.use_csingle
-                        else VectorJacobianProductC128()
-                    )
-
-                    return calculate_vjp(
-                        processed_data["state_vector"],
-                        processed_data["ops_serialized"],
-                        grad_vec,
-                        processed_data["tp_shift"],
-                    )
-
-                return processing_fn_state
+                return processing_fn
 
 else:
 
-    class LightningQubit(LightningBaseFallBack):  # pragma: no cover
+    class LightningKokkos(LightningBaseFallBack):  # pragma: no cover
         # pylint: disable=missing-class-docstring
-        name = "Lightning qubit PennyLane plugin [No binaries found - Fallback: default.qubit]"
-        short_name = "lightning.qubit"
+        name = "Lightning Kokkos PennyLane plugin [No binaries found - Fallback: default.qubit]"
+        short_name = "lightning.kokkos"
 
         def __init__(self, wires, *, c_dtype=np.complex128, **kwargs):
             warn(
-                "Pre-compiled binaries for lightning.qubit are not available. Falling back to "
+                "Pre-compiled binaries for lightning.kokkos are not available. Falling back to "
                 "using the Python-based default.qubit implementation. To manually compile from "
                 "source, follow the instructions at "
                 "https://pennylane-lightning.readthedocs.io/en/latest/installation.html.",

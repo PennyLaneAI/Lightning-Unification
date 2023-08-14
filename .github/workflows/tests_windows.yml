@@ -86,11 +86,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019]
+        os: [windows-latest]
         exec_model: ${{ fromJson(needs.win-set-matrix-x86.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.win-set-matrix-x86.outputs.kokkos_version) }}
-        exclude:
-          - os: windows-2019
 
     name: Kokkos core (${{ matrix.exec_model }})
     runs-on: ${{ matrix.os }}
@@ -143,12 +141,10 @@ jobs:
     needs: [build_dependencies, win-set-matrix-x86]
     strategy:
       matrix:
-        os: [windows-2019]
+        os: [windows-latest]
         pl_backend: ["lightning_qubit"]
         exec_model: ${{ fromJson(needs.win-set-matrix-x86.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.win-set-matrix-x86.outputs.kokkos_version) }}
-        exclude:
-          - os: windows-2019
 
     name: C++ tests (Windows, Kokkos)
     runs-on: ${{ matrix.os }}

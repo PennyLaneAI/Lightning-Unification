@@ -87,20 +87,20 @@ jobs:
       - name: Get required Python packages
         run: |
           cd main
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
+          python -m pip install -r requirements-dev.txt
 
       - name: Install ML libraries for interfaces
         run: |
-          pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
-          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-          pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
+          python -m pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          python -m pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          python -m pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
         run: |
           cd main
+          python -m pip uninstall -y pennylane-lightning
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
-          pip install -e . -vv
+          python -m pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -187,20 +187,20 @@ jobs:
       - name: Get required Python packages
         run: |
           cd main
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
+          python -m pip install -r requirements-dev.txt
 
       - name: Install ML libraries for interfaces
         run: |
-          pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
-          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-          pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
+          python -m pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          python -m pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          python -m pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
         run: |
           cd main
+          python -m pip uninstall -y pennylane-lightning
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DENABLE_BLAS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
-          pip install -e . -vv
+          python -m pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
         run: |
@@ -287,9 +287,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        pl_backend: ["lightning_kokkos"]
+        pl_backend: ["lightning_kokkos", "all"]
         exec_model: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.build_and_cache_Kokkos.outputs.kokkos_version) }}
+        exclude:
+          - pl_backend: ["all"]
+            exec_model: OPENMP
 
     name: Python tests with Kokkos
     runs-on: ${{ matrix.os }}
@@ -325,28 +328,52 @@ jobs:
       - name: Get required Python packages
         run: |
           cd main
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
+          python -m pip install -r requirements-dev.txt
 
       - name: Install ML libraries for interfaces
         run: |
-          pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
-          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-          pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
+          python -m pip install --upgrade torch==$TORCH_VERSION -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          python -m pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          python -m pip install --upgrade tensorflow~=$TF_VERSION keras~=$TF_VERSION
 
       - name: Install backend device
+        if: ${{ matrix.pl_backend != 'all'}}
         run: |
           cd main
+          python -m pip uninstall -y pennylane-lightning
           CMAKE_ARGS="-DPL_BACKEND=${{ matrix.pl_backend }} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
-          pip install -e . -vv
+          python -m pip install -e . -vv
 
       - name: Run PennyLane-Lightning unit tests
+        if: ${{ matrix.pl_backend != 'all'}}
         run: |
           cd main/
           DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
           pytest tests/ $COVERAGE_FLAGS
           pl-device-test --device ${DEVICENAME} --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
           pl-device-test --device ${DEVICENAME} --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
+          mv coverage.xml coverage-${{ github.job }}.xml
+
+      - name: Install all backend devices
+        if: ${{ matrix.pl_backend == 'all' }}
+        run: |
+          cd main
+          python -m pip uninstall -y pennylane-lightning
+          CMAKE_ARGS="-DPL_BACKEND="lightning_qubit" -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
+          python -m pip install -e . -vv
+          rm -rf build
+          CMAKE_ARGS="-DPL_BACKEND="lightning_kokkos" -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Kokkos -DENABLE_KOKKOS=ON -DENABLE_PYTHON=ON -DCMAKE_CXX_COMPILER=$(which g++-$GCC_VERSION)" \
+          python -m pip install -e . -vv
+
+      - name: Run PennyLane-Lightning unit tests for lightning.qubit with all devices installed
+        if: ${{ matrix.pl_backend == 'all' }}
+        run: |
+          cd main/
+          pytest tests/ $COVERAGE_FLAGS
+          pl-device-test --device lightning.kokkos --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
+          pl-device-test --device lightning.kokkos --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
+          pl-device-test --device lightning.qubit --skip-ops --shots=20000 $COVERAGE_FLAGS --cov-append
+          pl-device-test --device lightning.qubit --shots=None --skip-ops $COVERAGE_FLAGS --cov-append
           mv coverage.xml coverage-${{ github.job }}.xml
 
       - name: Upload code coverage results

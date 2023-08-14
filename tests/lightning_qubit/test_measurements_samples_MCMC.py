@@ -22,7 +22,7 @@ import pennylane as qml
 
 import pytest
 
-from pennylane_lightning import LightningQubit
+from pennylane_lightning.lightning_qubit import LightningQubit
 
 
 if not LightningQubit._CPP_BINARY_AVAILABLE:
