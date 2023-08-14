@@ -82,6 +82,15 @@ class StateVectorKokkos final
     using UnmanagedPrecisionHostView =
         Kokkos::View<PrecisionT *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using ScratchViewComplex =
+        Kokkos::View<ComplexT *,
+                     Kokkos::DefaultExecutionSpace::scratch_memory_space,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using ScratchViewSizeT =
+        Kokkos::View<size_t *,
+                     Kokkos::DefaultExecutionSpace::scratch_memory_space,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using TeamPolicy = Kokkos::TeamPolicy<>;
 
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits,
@@ -325,18 +334,25 @@ class StateVectorKokkos final
             Kokkos::View<size_t *> wires_view("wires_view", wires.size());
             Kokkos::deep_copy(wires_view, wires_host);
 
+            std::size_t two2N = std::exp2(num_qubits_ - wires.size());
+            std::size_t dim = std::exp2(wires.size());
+            std::size_t scratch_size = ScratchViewComplex::shmem_size(dim) +
+                                       ScratchViewSizeT::shmem_size(dim);
+
             if (!inverse) {
                 Kokkos::parallel_for(
-                    Kokkos::RangePolicy<KokkosExecSpace>(
-                        0, exp2(num_qubits_ - wires.size())),
-                    multiQubitOpFunctor<fp_t, false>(*data_, num_qubits, matrix,
-                                                     wires_view));
+                    "multiQubitOpFunctor",
+                    TeamPolicy(two2N, Kokkos::AUTO, dim)
+                        .set_scratch_size(0, Kokkos::PerTeam(scratch_size)),
+                    multiQubitOpFunctor<PrecisionT, false>(*data_, num_qubits,
+                                                           matrix, wires_view));
             } else {
                 Kokkos::parallel_for(
-                    Kokkos::RangePolicy<KokkosExecSpace>(
-                        0, exp2(num_qubits_ - wires.size())),
-                    multiQubitOpFunctor<fp_t, true>(*data_, num_qubits, matrix,
-                                                    wires_view));
+                    "multiQubitOpFunctor",
+                    TeamPolicy(two2N, Kokkos::AUTO, dim)
+                        .set_scratch_size(0, Kokkos::PerTeam(scratch_size)),
+                    multiQubitOpFunctor<PrecisionT, true>(*data_, num_qubits,
+                                                          matrix, wires_view));
             }
         }
     }
