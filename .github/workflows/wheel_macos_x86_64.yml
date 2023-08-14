@@ -161,13 +161,13 @@ jobs:
           python -m pip install twine
           python -m twine check ./wheelhouse/*.whl
 
-      - uses: actions-ecosystem/action-regex-match@v2
+      - uses: actions-ecosystem/action-regex-match@v3
         id: rc_build
         with:
           text: ${{ github.event.pull_request.head.ref }}
           regex: '.*[0-9]+.[0-9]+.[0-9]+[-_]?rc[0-9]+'
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
         with:
           name: ${{ runner.os }}-wheels-${{ matrix.pl_backend }}-${{ matrix.arch }}.zip
@@ -179,7 +179,7 @@ jobs:
   #   runs-on: ubuntu-latest
   #   if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' }}
   #   steps:
-  #     - uses: actions/download-artifact@v2
+  #     - uses: actions/download-artifact@v3
   #       with:
   #         name: macOS-wheels-x86_64.zip
   #         path: dist
