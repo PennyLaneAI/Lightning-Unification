@@ -97,8 +97,6 @@ jobs:
             DEVICENAME=`echo ${{ matrix.pl_backend }} | sed "s/_/./g"`
             pl-device-test --device=${DEVICENAME} --skip-ops -x --tb=short --no-flaky-report
 
-          CIBW_TEST_SKIP: *-macosx_arm64
-
           CIBW_BUILD_VERBOSITY: 3
 
           CIBW_ARCHS_MACOS: ${{ matrix.arch }}
