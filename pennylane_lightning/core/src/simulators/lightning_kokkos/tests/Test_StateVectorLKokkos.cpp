@@ -135,8 +135,7 @@ TEMPLATE_PRODUCT_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
     SECTION("Test with different number of wires") {
         using KokkosVector = typename StateVectorT::KokkosVector;
         const size_t num_qubits = 5;
-        const size_t max_wires = 2; // TODO: bring up to num_qubits - 1
-        for (size_t num_wires = 1; num_wires <= max_wires; num_wires++) {
+        for (size_t num_wires = 1; num_wires < num_qubits; num_wires++) {
 
             VectorT st_data_1 =
                 createRandomStateVectorData<PrecisionT>(re, num_qubits);
