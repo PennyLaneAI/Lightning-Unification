@@ -13,6 +13,7 @@
 // limitations under the License.
 #include <algorithm>
 #include <complex>
+#include <cstddef>
 #include <limits>
 #include <type_traits>
 #include <utility>
@@ -35,6 +36,7 @@ using namespace Pennylane::LightningKokkos;
 using namespace Pennylane::Gates; // getHadamard, getCNOT,
                                   // getToffoli
 using namespace Pennylane::Util;
+using std::size_t;
 } // namespace
 /// @endcond
 
@@ -42,7 +44,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::CopyConstructor",
                    "[StateVectorKokkos_Nonparam]", float, double) {
 
     {
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
         StateVectorKokkos<TestType> kokkos_sv_1{num_qubits};
         kokkos_sv_1.applyOperations({{"Hadamard"}, {"Hadamard"}, {"Hadamard"}},
                                     {{0}, {1}, {2}},
@@ -71,20 +73,9 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyHadamard",
                    "[StateVectorKokkos_Nonparam]", float, double) {
 
     {
-        const std::size_t num_qubits = 3;
-        SECTION("Apply directly") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
-                StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyHadamard({index}, false);
-                Kokkos::complex<TestType> expected(1.0 / std::sqrt(2), 0);
-                auto result_subview = Kokkos::subview(kokkos_sv.getView(), 0);
-                Kokkos::complex<TestType> result;
-                Kokkos::deep_copy(result, result_subview);
-                CHECK(expected.real() == Approx(result.real()));
-            }
-        }
+        const size_t num_qubits = 3;
         SECTION("Apply using dispatcher") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
+            for (size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv(num_qubits);
                 kokkos_sv.applyOperation("Hadamard", {index}, false);
                 Kokkos::complex<TestType> expected(1.0 / std::sqrt(2), 0);
@@ -101,27 +92,10 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliX",
                    "[StateVectorKokkos_Nonparam]", float, double) {
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
-        SECTION("Apply directly") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
-                StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyPauliX({index}, false);
-
-                auto result_subview_0 = Kokkos::subview(kokkos_sv.getView(), 0);
-                auto result_subview_1 = Kokkos::subview(
-                    kokkos_sv.getView(),
-                    0b1 << (kokkos_sv.getNumQubits() - index - 1));
-                Kokkos::complex<TestType> result_0, result_1;
-                Kokkos::deep_copy(result_0, result_subview_0);
-                Kokkos::deep_copy(result_1, result_subview_1);
-
-                CHECK(result_0 == ComplexT{ZERO<TestType>()});
-                CHECK(result_1 == ComplexT{ONE<TestType>()});
-            }
-        }
         SECTION("Apply using dispatcher") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
+            for (size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
                 kokkos_sv.applyOperation("PauliX", {index}, false);
                 auto result_subview_0 = Kokkos::subview(kokkos_sv.getView(), 0);
@@ -143,7 +117,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliY",
                    "[StateVectorKokkos_Nonparam]", float, double) {
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
@@ -160,37 +134,15 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliY",
             {m, m, p, p, m, m, p, p},
             {m, p, m, p, m, p, m, p}};
 
-        SECTION("Apply directly") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
-                StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperations(
-                    {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
-                    {{false}, {false}, {false}});
-
-                kokkos_sv.applyPauliY({index}, false);
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    auto result_subview =
-                        Kokkos::subview(kokkos_sv.getView(), j);
-                    Kokkos::complex<TestType> result;
-                    Kokkos::deep_copy(result, result_subview);
-
-                    CHECK(imag(expected_results[index][j]) ==
-                          Approx(imag(result)));
-                    CHECK(real(expected_results[index][j]) ==
-                          Approx(real(result)));
-                }
-            }
-        }
         SECTION("Apply using dispatcher") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
+            for (size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
                 kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
 
                 kokkos_sv.applyOperation("PauliY", {index}, false);
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     auto result_subview =
                         Kokkos::subview(kokkos_sv.getView(), j);
                     Kokkos::complex<TestType> result;
@@ -210,7 +162,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliZ",
                    "[StateVectorKokkos_Nonparam]", float, double) {
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
@@ -226,36 +178,15 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyPauliZ",
             {p, p, m, m, p, p, m, m},
             {p, m, p, m, p, m, p, m}};
 
-        SECTION("Apply directly") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
-                StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperations(
-                    {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
-                    {{false}, {false}, {false}});
-
-                kokkos_sv.applyPauliZ({index}, false);
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    auto result_subview =
-                        Kokkos::subview(kokkos_sv.getView(), j);
-                    Kokkos::complex<TestType> result;
-                    Kokkos::deep_copy(result, result_subview);
-
-                    CHECK(imag(expected_results[index][j]) ==
-                          Approx(imag(result)));
-                    CHECK(real(expected_results[index][j]) ==
-                          Approx(real(result)));
-                }
-            }
-        }
         SECTION("Apply using dispatcher") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
+            for (size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
                 kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
 
                 kokkos_sv.applyOperation("PauliZ", {index}, false);
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     auto result_subview =
                         Kokkos::subview(kokkos_sv.getView(), j);
                     Kokkos::complex<TestType> result;
@@ -275,7 +206,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyS", "[StateVectorKokkos_Nonparam]",
                    float, double) {
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
@@ -290,34 +221,14 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyS", "[StateVectorKokkos_Nonparam]",
             {r, r, i, i, r, r, i, i},
             {r, i, r, i, r, i, r, i}};
 
-        SECTION("Apply directly") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
-                StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperations(
-                    {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
-                    {{false}, {false}, {false}});
-                kokkos_sv.applyS({index}, false);
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    auto result_subview =
-                        Kokkos::subview(kokkos_sv.getView(), j);
-                    Kokkos::complex<TestType> result;
-                    Kokkos::deep_copy(result, result_subview);
-
-                    CHECK(imag(expected_results[index][j]) ==
-                          Approx(imag(result)));
-                    CHECK(real(expected_results[index][j]) ==
-                          Approx(real(result)));
-                }
-            }
-        }
         SECTION("Apply using dispatcher") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
+            for (size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
                 kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
                 kokkos_sv.applyOperation("S", {index}, false);
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     auto result_subview =
                         Kokkos::subview(kokkos_sv.getView(), j);
                     Kokkos::complex<TestType> result;
@@ -337,7 +248,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyT", "[StateVectorKokkos_Nonparam]",
 
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
@@ -353,34 +264,15 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyT", "[StateVectorKokkos_Nonparam]",
             {r, r, i, i, r, r, i, i},
             {r, i, r, i, r, i, r, i}};
 
-        SECTION("Apply directly") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
-                StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-                kokkos_sv.applyOperations(
-                    {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
-                    {{false}, {false}, {false}});
-                kokkos_sv.applyT({index}, false);
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    auto result_subview =
-                        Kokkos::subview(kokkos_sv.getView(), j);
-                    Kokkos::complex<TestType> result;
-                    Kokkos::deep_copy(result, result_subview);
-                    CHECK(imag(expected_results[index][j]) ==
-                          Approx(imag(result)));
-                    CHECK(real(expected_results[index][j]) ==
-                          Approx(real(result)));
-                }
-            }
-        }
         SECTION("Apply using dispatcher") {
-            for (std::size_t index = 0; index < num_qubits; index++) {
+            for (size_t index = 0; index < num_qubits; index++) {
                 StateVectorKokkos<TestType> kokkos_sv{num_qubits};
                 kokkos_sv.applyOperations(
                     {{"Hadamard"}, {"Hadamard"}, {"Hadamard"}}, {{0}, {1}, {2}},
                     {{false}, {false}, {false}});
                 kokkos_sv.applyOperation("T", {index}, false);
 
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     auto result_subview =
                         Kokkos::subview(kokkos_sv.getView(), j);
                     Kokkos::complex<TestType> result;
@@ -399,7 +291,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCNOT",
                    "[StateVectorKokkos_Nonparam]", float, double) {
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
@@ -408,35 +300,13 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCNOT",
         auto ini_sv = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{},
                                                           kokkos_sv.getView());
 
-        SECTION("Apply directly") {
-
-            StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            Kokkos::deep_copy(kokkos_sv.getView(), ini_sv);
-
-            auto result = Kokkos::create_mirror_view_and_copy(
-                Kokkos::HostSpace{}, kokkos_sv.getView());
-
-            for (std::size_t index = 1; index < num_qubits; index++) {
-                kokkos_sv.applyCNOT({index - 1, index}, false);
-            }
-
-            Kokkos::deep_copy(result, kokkos_sv.getView());
-            CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
-                  Approx(imag(result[0])));
-            CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
-                  Approx(real(result[0])));
-            CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
-                  Approx(imag(result[7])));
-            CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
-                  Approx(real(result[7])));
-        }
         SECTION("Apply using dispatcher") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
             Kokkos::deep_copy(kokkos_sv.getView(), ini_sv);
             auto result = Kokkos::create_mirror_view_and_copy(
                 Kokkos::HostSpace{}, kokkos_sv.getView());
-            for (std::size_t index = 1; index < num_qubits; index++) {
-                kokkos_sv.applyCNOT({index - 1, index}, false);
+            for (size_t index = 1; index < num_qubits; index++) {
+                kokkos_sv.applyOperation("CNOT", {index - 1, index}, false);
             }
             Kokkos::deep_copy(result, kokkos_sv.getView());
             CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
@@ -456,7 +326,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applySWAP",
 
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
@@ -469,103 +339,6 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applySWAP",
         auto z = ComplexT{ZERO<TestType>()};
         auto i = ComplexT{INVSQRT2<TestType>()};
 
-        SECTION("Apply directly") {
-            SECTION("Check Initial value") {
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    if (j == 2) {
-                        CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
-                              Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
-                              Approx(real(ini_sv[j])));
-                    } else if (j == 6) {
-                        CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
-                              Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
-                              Approx(real(ini_sv[j])));
-                    } else {
-                        CHECK(imag(ComplexT{ZERO<TestType>()}) ==
-                              Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT{ZERO<TestType>()}) ==
-                              Approx(real(ini_sv[j])));
-                    }
-                }
-            }
-
-            SECTION("SWAP0,1 |+10> -> 1+0>") {
-                const std::vector<ComplexT> expected_results = {z, z, z, z,
-                                                                i, z, i, z};
-
-                StateVectorKokkos<TestType> svdat01{num_qubits};
-                StateVectorKokkos<TestType> svdat10{num_qubits};
-
-                Kokkos::deep_copy(svdat01.getView(), ini_sv);
-                Kokkos::deep_copy(svdat10.getView(), ini_sv);
-
-                svdat01.applySWAP({0, 1}, false);
-                svdat10.applySWAP({1, 0}, false);
-
-                auto sv01 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat01.getView());
-                auto sv10 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat10.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv01[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv01[j])));
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv10[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv10[j])));
-                }
-            }
-            SECTION("SWAP0,2 |+10> -> |01+>") {
-                const std::vector<ComplexT> expected_results = {z, z, i, i,
-                                                                z, z, z, z};
-
-                StateVectorKokkos<TestType> svdat02{num_qubits};
-                StateVectorKokkos<TestType> svdat20{num_qubits};
-                Kokkos::deep_copy(svdat02.getView(), ini_sv);
-                Kokkos::deep_copy(svdat20.getView(), ini_sv);
-
-                svdat02.applySWAP({0, 2}, false);
-                svdat20.applySWAP({2, 0}, false);
-
-                auto sv02 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat02.getView());
-                auto sv20 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat20.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv02[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv02[j])));
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv20[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv20[j])));
-                }
-            }
-            SECTION("SWAP1,2 |+10> -> |+01>") {
-                const std::vector<ComplexT> expected_results = {z, i, z, z,
-                                                                z, i, z, z};
-
-                StateVectorKokkos<TestType> svdat12{num_qubits};
-                StateVectorKokkos<TestType> svdat21{num_qubits};
-                Kokkos::deep_copy(svdat12.getView(), ini_sv);
-                Kokkos::deep_copy(svdat21.getView(), ini_sv);
-
-                svdat12.applySWAP({1, 2}, false);
-                svdat21.applySWAP({2, 1}, false);
-
-                auto sv12 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat12.getView());
-                auto sv21 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat21.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv12[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv12[j])));
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv21[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv21[j])));
-                }
-            }
-        }
         SECTION("Apply using dispatcher") {
             SECTION("SWAP0,1 |+10> -> 1+0>") {
                 const std::vector<ComplexT> expected_results = {z, z, z, z,
@@ -584,7 +357,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applySWAP",
                 auto sv10 = Kokkos::create_mirror_view_and_copy(
                     Kokkos::HostSpace{}, svdat10.getView());
 
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     CHECK(imag(expected_results[j]) == Approx(imag(sv01[j])));
                     CHECK(real(expected_results[j]) == Approx(real(sv01[j])));
                     CHECK(imag(expected_results[j]) == Approx(imag(sv10[j])));
@@ -608,7 +381,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applySWAP",
                 auto sv20 = Kokkos::create_mirror_view_and_copy(
                     Kokkos::HostSpace{}, svdat20.getView());
 
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     CHECK(imag(expected_results[j]) == Approx(imag(sv02[j])));
                     CHECK(real(expected_results[j]) == Approx(real(sv02[j])));
                     CHECK(imag(expected_results[j]) == Approx(imag(sv20[j])));
@@ -632,7 +405,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applySWAP",
                 auto sv21 = Kokkos::create_mirror_view_and_copy(
                     Kokkos::HostSpace{}, svdat21.getView());
 
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     CHECK(imag(expected_results[j]) == Approx(imag(sv12[j])));
                     CHECK(real(expected_results[j]) == Approx(real(sv12[j])));
                     CHECK(imag(expected_results[j]) == Approx(imag(sv21[j])));
@@ -648,7 +421,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCZ", "[StateVectorKokkos_Nonparam]",
 
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
@@ -661,102 +434,6 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCZ", "[StateVectorKokkos_Nonparam]",
         auto z = ComplexT{ZERO<TestType>()};
         auto i = ComplexT{INVSQRT2<TestType>()};
 
-        SECTION("Apply directly") {
-            SECTION("Check Initial value") {
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    if (j == 2) {
-                        CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
-                              Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
-                              Approx(real(ini_sv[j])));
-                    } else if (j == 6) {
-                        CHECK(imag(ComplexT{INVSQRT2<TestType>()}) ==
-                              Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT{INVSQRT2<TestType>()}) ==
-                              Approx(real(ini_sv[j])));
-                    } else {
-                        CHECK(imag(ComplexT{ZERO<TestType>()}) ==
-                              Approx(imag(ini_sv[j])));
-                        CHECK(real(ComplexT{ZERO<TestType>()}) ==
-                              Approx(real(ini_sv[j])));
-                    }
-                }
-            }
-
-            SECTION("CZ0,1 |+10> -> 1+0>") {
-                const std::vector<ComplexT> expected_results = {z, z, i,  z,
-                                                                z, z, -i, z};
-
-                StateVectorKokkos<TestType> svdat01{num_qubits};
-                StateVectorKokkos<TestType> svdat10{num_qubits};
-
-                Kokkos::deep_copy(svdat01.getView(), ini_sv);
-                Kokkos::deep_copy(svdat10.getView(), ini_sv);
-
-                svdat01.applyCZ({0, 1}, false);
-                svdat10.applyCZ({1, 0}, false);
-
-                auto sv01 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat01.getView());
-                auto sv10 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat10.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv01[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv01[j])));
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv10[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv10[j])));
-                }
-            }
-            SECTION("CZ0,2 |+10> -> |01+>") {
-                const std::vector<ComplexT> expected_results = {z, z, i, z,
-                                                                z, z, i, z};
-
-                StateVectorKokkos<TestType> svdat02{num_qubits};
-                StateVectorKokkos<TestType> svdat20{num_qubits};
-                Kokkos::deep_copy(svdat02.getView(), ini_sv);
-                Kokkos::deep_copy(svdat20.getView(), ini_sv);
-
-                svdat02.applyCZ({0, 2}, false);
-                svdat20.applyCZ({2, 0}, false);
-
-                auto sv02 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat02.getView());
-                auto sv20 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat20.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv02[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv02[j])));
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv20[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv20[j])));
-                }
-            }
-            SECTION("CZ1,2 |+10> -> |+01>") {
-                const std::vector<ComplexT> expected_results = {z, z, i, z,
-                                                                z, z, i, z};
-
-                StateVectorKokkos<TestType> svdat12{num_qubits};
-                StateVectorKokkos<TestType> svdat21{num_qubits};
-                Kokkos::deep_copy(svdat12.getView(), ini_sv);
-                Kokkos::deep_copy(svdat21.getView(), ini_sv);
-
-                svdat12.applyCZ({1, 2}, false);
-                svdat21.applyCZ({2, 1}, false);
-
-                auto sv12 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat12.getView());
-                auto sv21 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat21.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv12[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv12[j])));
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv21[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv21[j])));
-                }
-            }
-        }
         SECTION("Apply using dispatcher") {
             SECTION("CZ0,1 |+10> -> 1+0>") {
                 const std::vector<ComplexT> expected_results = {z, z, i,  z,
@@ -775,7 +452,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCZ", "[StateVectorKokkos_Nonparam]",
                 auto sv10 = Kokkos::create_mirror_view_and_copy(
                     Kokkos::HostSpace{}, svdat10.getView());
 
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     CHECK(imag(expected_results[j]) == Approx(imag(sv01[j])));
                     CHECK(real(expected_results[j]) == Approx(real(sv01[j])));
                     CHECK(imag(expected_results[j]) == Approx(imag(sv10[j])));
@@ -799,7 +476,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCZ", "[StateVectorKokkos_Nonparam]",
                 auto sv20 = Kokkos::create_mirror_view_and_copy(
                     Kokkos::HostSpace{}, svdat20.getView());
 
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     CHECK(imag(expected_results[j]) == Approx(imag(sv02[j])));
                     CHECK(real(expected_results[j]) == Approx(real(sv02[j])));
                     CHECK(imag(expected_results[j]) == Approx(imag(sv20[j])));
@@ -823,7 +500,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCZ", "[StateVectorKokkos_Nonparam]",
                 auto sv21 = Kokkos::create_mirror_view_and_copy(
                     Kokkos::HostSpace{}, svdat21.getView());
 
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     CHECK(imag(expected_results[j]) == Approx(imag(sv12[j])));
                     CHECK(real(expected_results[j]) == Approx(real(sv12[j])));
                     CHECK(imag(expected_results[j]) == Approx(imag(sv21[j])));
@@ -838,7 +515,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyToffoli",
                    "[StateVectorKokkos_Nonparam]", float, double) {
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
@@ -851,61 +528,6 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyToffoli",
         auto z = ComplexT{ZERO<TestType>()};
         auto i = ComplexT{INVSQRT2<TestType>()};
 
-        SECTION("Apply directly") {
-
-            SECTION("Toffoli 0,1,2 |+10> -> 010> + 111>") {
-                const std::vector<ComplexT> expected_results = {z, z, i, z,
-                                                                z, z, z, i};
-
-                StateVectorKokkos<TestType> svdat012{num_qubits};
-
-                Kokkos::deep_copy(svdat012.getView(), ini_sv);
-
-                svdat012.applyToffoli({0, 1, 2}, false);
-
-                auto sv012 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat012.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv012[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv012[j])));
-                }
-            }
-            SECTION("Toffoli 1,0,2 |+10> -> |010> + |111>") {
-                const std::vector<ComplexT> expected_results = {z, z, i, z,
-                                                                z, z, z, i};
-
-                StateVectorKokkos<TestType> svdat102{num_qubits};
-                Kokkos::deep_copy(svdat102.getView(), ini_sv);
-
-                svdat102.applyToffoli({1, 0, 2}, false);
-
-                auto sv102 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat102.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv102[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv102[j])));
-                }
-            }
-            SECTION("Toffoli 1,2,0 |+10> -> |+10>") {
-                const std::vector<ComplexT> expected_results = {z, z, i, z,
-                                                                z, z, i, z};
-
-                StateVectorKokkos<TestType> svdat120{num_qubits};
-                Kokkos::deep_copy(svdat120.getView(), ini_sv);
-
-                svdat120.applyToffoli({1, 2, 0}, false);
-
-                auto sv120 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat120.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv120[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv120[j])));
-                }
-            }
-        }
         SECTION("Apply using dispatcher") {
             SECTION("Toffoli [0,1,2],[1,0,2] |+10> -> +1+>") {
                 const std::vector<ComplexT> expected_results = {z, z, i, z,
@@ -924,7 +546,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyToffoli",
                 auto sv102 = Kokkos::create_mirror_view_and_copy(
                     Kokkos::HostSpace{}, svdat102.getView());
 
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     CHECK(imag(expected_results[j]) == Approx(imag(sv012[j])));
                     CHECK(real(expected_results[j]) == Approx(real(sv012[j])));
                     CHECK(imag(expected_results[j]) == Approx(imag(sv102[j])));
@@ -959,7 +581,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyMultiQubitOp",
         auto sv_mq_host = Kokkos::create_mirror_view_and_copy(
             Kokkos::HostSpace{}, sv_mq.getView());
 
-        for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+        for (size_t j = 0; j < exp2(num_qubits); j++) {
             CHECK(imag(sv_normal_host[j]) == Approx(imag(sv_mq_host[j])));
             CHECK(real(sv_normal_host[j]) == Approx(real(sv_mq_host[j])));
         }
@@ -980,7 +602,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyMultiQubitOp",
         auto sv_mq_host = Kokkos::create_mirror_view_and_copy(
             Kokkos::HostSpace{}, sv_mq.getView());
 
-        for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+        for (size_t j = 0; j < exp2(num_qubits); j++) {
             CHECK(imag(sv_normal_host[j]) == Approx(imag(sv_mq_host[j])));
             CHECK(real(sv_normal_host[j]) == Approx(real(sv_mq_host[j])));
         }
@@ -1001,7 +623,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyMultiQubitOp",
         auto sv_mq_host = Kokkos::create_mirror_view_and_copy(
             Kokkos::HostSpace{}, sv_mq.getView());
 
-        for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+        for (size_t j = 0; j < exp2(num_qubits); j++) {
             CHECK(imag(sv_normal_host[j]) == Approx(imag(sv_mq_host[j])));
             CHECK(real(sv_normal_host[j]) == Approx(real(sv_mq_host[j])));
         }
@@ -1013,7 +635,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCSWAP",
 
     {
         using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-        const std::size_t num_qubits = 3;
+        const size_t num_qubits = 3;
 
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
@@ -1026,61 +648,6 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCSWAP",
         auto z = ComplexT{ZERO<TestType>()};
         auto i = ComplexT{INVSQRT2<TestType>()};
 
-        SECTION("Apply directly") {
-
-            SECTION("CSWAP 0,1,2 |+10> -> 010> + 111>") {
-                const std::vector<ComplexT> expected_results = {z, z, i, z,
-                                                                z, i, z, z};
-
-                StateVectorKokkos<TestType> svdat012{num_qubits};
-
-                Kokkos::deep_copy(svdat012.getView(), ini_sv);
-
-                svdat012.applyCSWAP({0, 1, 2}, false);
-
-                auto sv012 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat012.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv012[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv012[j])));
-                }
-            }
-            SECTION("CSWAP 1,0,2 |+10> -> |010> + |111>") {
-                const std::vector<ComplexT> expected_results = {z, z, i, i,
-                                                                z, z, z, z};
-
-                StateVectorKokkos<TestType> svdat102{num_qubits};
-                Kokkos::deep_copy(svdat102.getView(), ini_sv);
-
-                svdat102.applyCSWAP({1, 0, 2}, false);
-
-                auto sv102 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat102.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv102[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv102[j])));
-                }
-            }
-            SECTION("CSWAP 2,1,0 |+10> -> |+10>") {
-                const std::vector<ComplexT> expected_results = {z, z, i, z,
-                                                                z, z, i, z};
-
-                StateVectorKokkos<TestType> svdat210{num_qubits};
-                Kokkos::deep_copy(svdat210.getView(), ini_sv);
-
-                svdat210.applyCSWAP({2, 1, 0}, false);
-
-                auto sv210 = Kokkos::create_mirror_view_and_copy(
-                    Kokkos::HostSpace{}, svdat210.getView());
-
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
-                    CHECK(imag(expected_results[j]) == Approx(imag(sv210[j])));
-                    CHECK(real(expected_results[j]) == Approx(real(sv210[j])));
-                }
-            }
-        }
         SECTION("Apply using dispatcher") {
             SECTION("CSWAP [0,1,2]|+10> -> |010> + |101>") {
                 const std::vector<ComplexT> expected_results = {z, z, i, z,
@@ -1094,7 +661,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCSWAP",
                 auto sv012 = Kokkos::create_mirror_view_and_copy(
                     Kokkos::HostSpace{}, svdat012.getView());
 
-                for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+                for (size_t j = 0; j < exp2(num_qubits); j++) {
                     CHECK(imag(expected_results[j]) == Approx(imag(sv012[j])));
                     CHECK(real(expected_results[j]) == Approx(real(sv012[j])));
                 }
@@ -1107,7 +674,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::SetStateVector",
                    "[StateVectorKokkos_Nonparam]", float, double) {
     using PrecisionT = TestType;
     using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-    const std::size_t num_qubits = 3;
+    const size_t num_qubits = 3;
 
     //`values[i]` on the host will be copy the `indices[i]`th element of the
     // state vector on the device.
@@ -1138,7 +705,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::SetStateVector",
         // values[i] is used to set the indices[i] th element of state vector on
         // the device. For example, values[2] (init_state[5]) will be copied to
         // indices[2]th or (4th) element of the state vector.
-        std::vector<std::size_t> indices = {0, 2, 4, 6, 1, 3, 5, 7};
+        std::vector<size_t> indices = {0, 2, 4, 6, 1, 3, 5, 7};
 
         std::vector<Kokkos::complex<PrecisionT>> values = {
             init_state[1], init_state[3], init_state[5], init_state[7],
@@ -1148,7 +715,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::SetStateVector",
 
         kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
-        for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+        for (size_t j = 0; j < exp2(num_qubits); j++) {
             CHECK(imag(expected_state[j]) == Approx(imag(result_sv[j])));
             CHECK(real(expected_state[j]) == Approx(real(result_sv[j])));
         }
@@ -1159,7 +726,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::SetIthStates",
                    "[StateVectorKokkos_Nonparam]", float, double) {
     using PrecisionT = TestType;
     using ComplexT = StateVectorKokkos<TestType>::ComplexT;
-    const std::size_t num_qubits = 3;
+    const size_t num_qubits = 3;
 
     SECTION(
         "Set Ith element of the state state on device with data on the host") {
@@ -1190,7 +757,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::SetIthStates",
 
         kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
 
-        for (std::size_t j = 0; j < exp2(num_qubits); j++) {
+        for (size_t j = 0; j < exp2(num_qubits); j++) {
             CHECK(imag(expected_state[j]) == Approx(imag(result_sv[j])));
             CHECK(real(expected_state[j]) == Approx(real(result_sv[j])));
         }

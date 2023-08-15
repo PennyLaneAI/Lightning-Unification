@@ -15,9 +15,8 @@ FetchAndIncludeCatch()
 ################################################################################
 
 add_library(${PL_BACKEND}_tests INTERFACE)
-target_link_libraries(${PL_BACKEND}_tests INTERFACE  Catch2::Catch2
-                                                ${PL_BACKEND}
-                                                )
+target_link_libraries(${PL_BACKEND}_tests INTERFACE Catch2::Catch2
+                                                    ${PL_BACKEND})
 
 ProcessTestOptions(${PL_BACKEND}_tests)
 
@@ -30,7 +29,7 @@ target_sources(${PL_BACKEND}_tests INTERFACE runner_${PL_BACKEND}.cpp)
 set(TEST_SOURCES Test_StateVectorLKokkos.cpp)
 
 add_executable(${PL_BACKEND}_test_runner ${TEST_SOURCES})
-target_link_libraries(${PL_BACKEND}_test_runner PRIVATE  ${PL_BACKEND}_tests)
+target_link_libraries(${PL_BACKEND}_test_runner PRIVATE ${PL_BACKEND}_tests)
 
 catch_discover_tests(${PL_BACKEND}_test_runner)
 
